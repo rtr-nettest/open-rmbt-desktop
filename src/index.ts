@@ -1,11 +1,18 @@
 import { config } from "dotenv"
+import { ControlServerService } from "./services/control-server.service"
 
-export function main() {
-  config({
-    path: process.env.DOTENV_CONFIG_PATH || ".env",
-  })
+export async function main() {
+    config({
+        path: process.env.DOTENV_CONFIG_PATH || ".env",
+    })
 
-  console.log(process.env)
+    const controlServer = new ControlServerService()
+    try {
+        const measurementServer = await controlServer.getTestServerFromApi()
+        const settings = await controlServer.getUserSettings()
+    } catch (err) {
+        console.error(err)
+    }
 }
 
 main()

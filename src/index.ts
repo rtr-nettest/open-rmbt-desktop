@@ -1,4 +1,6 @@
 import { config } from "dotenv"
+import { MeasurementRegistrationRequest } from "./dto/measurement-registration-request.dto"
+import { UserSettingsRequest } from "./dto/user-settings-request.dto"
 import { ControlServerService } from "./services/control-server.service"
 
 export async function main() {
@@ -9,7 +11,15 @@ export async function main() {
     const controlServer = new ControlServerService()
     try {
         const measurementServer = await controlServer.getTestServerFromApi()
-        const settings = await controlServer.getUserSettings()
+        const settingsRequest = new UserSettingsRequest()
+        const settings = await controlServer.getUserSettings(settingsRequest)
+        const measurementRegistration = await controlServer.registerMeasurement(
+            new MeasurementRegistrationRequest(
+                settings.uuid,
+                measurementServer.id,
+                settingsRequest
+            )
+        )
     } catch (err) {
         console.error(err)
     }

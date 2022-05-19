@@ -1,6 +1,8 @@
 import axios from "axios"
-import { UserSettingsRequest } from "../dto/user-settings-request.dto"
+import { IMeasurementRegistrationRequest } from "../interfaces/measurement-registration-request.interface"
+import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import { ITestServerResponse } from "../interfaces/test-server-response.interface"
+import { IUserSettingsRequest } from "../interfaces/user-settings-request.interface"
 import { IUserSetingsResponse } from "../interfaces/user-settings-response.interface"
 
 export class ControlServerService {
@@ -16,36 +18,54 @@ export class ControlServerService {
 
     async getTestServerFromApi(): Promise<ITestServerResponse> {
         console.log(`GET: ${process.env.MEASUREMENT_SERVERS_PATH}`)
-        const response = await axios.get(
-            `${process.env.CONTROL_SERVER_URL}${process.env.MEASUREMENT_SERVERS_PATH}`,
-            { headers: this.headers }
-        )
-        const servers = response.data as ITestServerResponse[]
+        const servers = (
+            await axios.get(
+                `${process.env.CONTROL_SERVER_URL}${process.env.MEASUREMENT_SERVERS_PATH}`,
+                { headers: this.headers }
+            )
+        ).data as ITestServerResponse[]
         if (servers?.length) {
-            const server = servers[0]
-            console.log(`Using server:`, server)
+            console.log(`Using server:`, servers[0])
             return servers[0]
         }
         throw Error("Did not receive any measurement server")
     }
 
-    async getUserSettings() {
+    async getUserSettings(request: IUserSettingsRequest) {
         console.log(`POST: ${process.env.SETTINGS_PATH}`)
-        const body = new UserSettingsRequest()
-        const response = await axios.post(
-            `${process.env.CONTROL_SERVER_URL}${process.env.SETTINGS_PATH}`,
-            body,
-            { headers: this.headers }
-        )
-        const settings = response.data as IUserSetingsResponse
-        if (settings?.settings?.length) {
-            const currentSettings = settings.settings[0]
-            console.log(`Using settings:`, currentSettings)
-            return currentSettings
+        const response = (
+            await axios.post(
+                `${process.env.CONTROL_SERVER_URL}${process.env.SETTINGS_PATH}`,
+                request,
+                { headers: this.headers }
+            )
+        ).data as IUserSetingsResponse
+        if (response?.settings?.length) {
+            console.log(`Using settings:`, response.settings[0])
+            return response.settings[0]
         }
-        if (settings?.error) {
-            throw settings?.error
+        if (response?.error?.length) {
+            throw new Error(response.error.join(" "))
         }
         throw new Error("Did not receive any settings")
+    }
+
+    async registerMeasurement(request: IMeasurementRegistrationRequest) {
+        console.log(`POST: ${process.env.MESUREMENT_REGISTRATION_PATH}`)
+        const response = (
+            await axios.post(
+                `${process.env.CONTROL_SERVER_URL}${process.env.MESUREMENT_REGISTRATION_PATH}`,
+                request,
+                { headers: this.headers }
+            )
+        ).data as IMeasurementRegistrationResponse
+        if (response?.test_token && response?.test_uuid) {
+            console.log(`Registered measurement:`, response)
+            return response
+        }
+        if (response?.error?.length) {
+            throw new Error(response.error.join(" "))
+        }
+        throw new Error("Measurement was not registered")
     }
 }

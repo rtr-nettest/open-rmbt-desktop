@@ -1,6 +1,6 @@
 import { EMeasurementServerType } from "../enums/measurement-server-type.enum"
 
-export interface ITestServerTypeDetails {
+export interface IMeasurementServerTypeDetails {
     port: number
     portSsl: number
     encrypted: boolean

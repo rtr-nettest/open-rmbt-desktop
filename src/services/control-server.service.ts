@@ -1,7 +1,7 @@
 import axios from "axios"
 import { IMeasurementRegistrationRequest } from "../interfaces/measurement-registration-request.interface"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
-import { ITestServerResponse } from "../interfaces/test-server-response.interface"
+import { IMeasurementServerResponse } from "../interfaces/measurement-server-response.interface"
 import { IUserSettingsRequest } from "../interfaces/user-settings-request.interface"
 import { IUserSetingsResponse } from "../interfaces/user-settings-response.interface"
 
@@ -16,19 +16,25 @@ export class ControlServerService {
         return headers
     }
 
-    async getTestServerFromApi(): Promise<ITestServerResponse> {
+    async getMeasurementServerFromApi(
+        request: IUserSettingsRequest
+    ): Promise<IMeasurementServerResponse | undefined> {
         console.log(`GET: ${process.env.MEASUREMENT_SERVERS_PATH}`)
         const servers = (
             await axios.get(
                 `${process.env.CONTROL_SERVER_URL}${process.env.MEASUREMENT_SERVERS_PATH}`,
                 { headers: this.headers }
             )
-        ).data as ITestServerResponse[]
+        ).data as IMeasurementServerResponse[]
         if (servers?.length) {
-            console.log(`Using server:`, servers[0])
-            return servers[0]
+            const filteredServer = servers.find((s) =>
+                s.serverTypeDetails.some(
+                    (std) => std.serverType === request.name
+                )
+            )
+            console.log(`Using server:`, filteredServer)
+            return filteredServer
         }
-        throw Error("Did not receive any measurement server")
     }
 
     async getUserSettings(request: IUserSettingsRequest) {

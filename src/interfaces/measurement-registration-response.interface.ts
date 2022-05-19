@@ -3,7 +3,7 @@ import { EMeasurementServerType } from "../enums/measurement-server-type.enum"
 export interface IMeasurementRegistrationResponse {
     client_remote_ip: string
     provider?: string
-    test_server_encryption: string
+    test_server_encryption: boolean
     test_numthreads: number
     test_numpings?: number
     test_server_name?: string

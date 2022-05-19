@@ -1,6 +1,6 @@
-import { ITestServerTypeDetails } from "./test-server-type-details-response.interface"
+import { IMeasurementServerTypeDetails } from "./measurement-server-type-details-response.interface"
 
-export interface ITestServerResponse {
+export interface IMeasurementServerResponse {
     city: string
     company: string
     email: string
@@ -10,5 +10,5 @@ export interface ITestServerResponse {
     provider: { id: number; name: string; createdDate: string }
     webAddress: string
     distance: number
-    serverTypeDetails: ITestServerTypeDetails[]
+    serverTypeDetails: IMeasurementServerTypeDetails[]
 }

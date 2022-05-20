@@ -32,6 +32,12 @@ export class ControlServerService {
                     (std) => std.serverType === request.name
                 )
             )
+            if (filteredServer) {
+                filteredServer.serverTypeDetails =
+                    filteredServer.serverTypeDetails.filter(
+                        (std) => std.serverType === request.name
+                    )
+            }
             console.log(`Using server:`, filteredServer)
             return filteredServer
         }

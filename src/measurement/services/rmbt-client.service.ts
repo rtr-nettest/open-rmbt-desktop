@@ -1,11 +1,11 @@
 import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
-import { RMBTTestService } from "./rmbt-test.service"
+import { RMBTThreadService } from "./rmbt-thread.service"
 
 export class RMBTClientService {
     measurementLastUpdate?: number
     measurementStatus: EMeasurementStatus = EMeasurementStatus.WAIT
-    measurementTasks: RMBTTestService[] = []
+    measurementTasks: RMBTThreadService[] = []
     params: IMeasurementRegistrationResponse
 
     constructor(params: IMeasurementRegistrationResponse) {
@@ -31,7 +31,7 @@ export class RMBTClientService {
         this.measurementStatus = EMeasurementStatus.INIT
         const numThreads = this.params.test_numthreads
         for (let i = 0; i < numThreads; i++) {
-            this.measurementTasks.push(new RMBTTestService(this.params, i))
+            this.measurementTasks.push(new RMBTThreadService(this.params, i))
         }
 
         const connectedThreads = await Promise.all(

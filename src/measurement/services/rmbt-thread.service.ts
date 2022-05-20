@@ -5,19 +5,24 @@ import { IMeasurementRegistrationResponse } from "../interfaces/measurement-regi
 import { IMeasurementResult } from "../interfaces/measurement-result.interface"
 
 export class RMBTThreadService {
-    private client: Socket = new Socket()
     currentTransfer: number = -1
     currentTime: number = -1
-    index: number
-    isConnected = false
-    params: IMeasurementRegistrationResponse
-    result?: IMeasurementResult;
-    in = 0
-    out = 0
-    totalDown = 0
-    totalUp = 0
-    buf?: Buffer
-    private onInit?: (isInitialized: boolean) => void
+    private client: Socket = new Socket()
+    private index: number
+    private params: IMeasurementRegistrationResponse
+    private result?: IMeasurementResult
+    private in = 0
+    private out = 0
+    private totalDown = 0
+    private totalUp = 0
+    private chunksize: number = 0
+    private onInitEnd?: (isInitialized: boolean) => void
+    private onPreDownloadEnd?: (chunks: number) => void
+    private preDownloadChunks = 1
+    private preDownloadEndTime = process.hrtime.bigint()
+    private preDownloadDuration = 2000000000n
+    private preDownloadBytesRead = Buffer.alloc(0)
+    private phase: "predownload" | "preupload" | undefined
 
     constructor(params: IMeasurementRegistrationResponse, index: number) {
         this.params = params
@@ -34,7 +39,7 @@ export class RMBTThreadService {
         console.log(
             `Thread ${this.index} is connecting on host ${this.params.test_server_address}, port ${this.params.test_server_port}...`
         )
-        this.isConnected = await new Promise((resolve) => {
+        await new Promise((resolve) => {
             this.client.connect(
                 this.params.test_server_port,
                 this.params.test_server_address,
@@ -61,9 +66,19 @@ export class RMBTThreadService {
         return this
     }
 
-    dataListener(data: Buffer) {
-        const dataString = data.toString().trim()
-        console.log(`Thread ${this.index} received data:`, dataString)
+    disconnect() {
+        this.client.end()
+    }
+
+    private dataListener(data: Buffer) {
+        let dataString = data.length < 256 ? data.toString().trim() : ""
+        if (dataString.length) {
+            console.log(`Thread ${this.index} received string:`, dataString)
+        } else {
+            console.log(
+                `Thread ${this.index} received bytes of length ${data.length}`
+            )
+        }
         switch (true) {
             case dataString.includes(ESocketMessage.GREETING):
                 const versionMatches = new RegExp(/RMBTv([0-9.]+)/).exec(
@@ -84,40 +99,96 @@ export class RMBTThreadService {
                 break
             case dataString.includes(ESocketMessage.CHUNKSIZE):
                 const chunksize = Number(dataString.split(" ")[1])
-                if (
-                    this.buf === null ||
-                    (this.buf != null && this.buf?.length != chunksize)
-                ) {
-                    this.buf = Buffer.alloc(chunksize)
+                if (!this.chunksize) {
+                    this.chunksize = chunksize
                     console.log(
                         `Setting chunksize ${chunksize} for the thread ${this.index}.`
                     )
                 }
-                this.onInit?.(true)
+                this.onInitEnd?.(true)
                 break
+            case this.phase === "predownload":
+                if (dataString.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
+                    if (process.hrtime.bigint() < this.preDownloadEndTime) {
+                        this.preDownloadChunks *= 2
+                        console.log(
+                            `Thread ${this.index} getting ${this.preDownloadChunks} chunks.`
+                        )
+                        this.client.write(
+                            `${ESocketMessage.GETCHUNKS} ${this.preDownloadChunks}\n`,
+                            "ascii"
+                        )
+                    } else {
+                        console.log(
+                            `Predownload is finished for thread ${this.index}`
+                        )
+                        this.phase = undefined
+                        this.onPreDownloadEnd?.(this.preDownloadChunks)
+                    }
+                    break
+                }
+                if (dataString.includes(ESocketMessage.TIME)) {
+                    break
+                }
+                let lastByte = 0
+                let isFullChunk = false
+                if (data.length > 0) {
+                    this.preDownloadBytesRead = Buffer.alloc(
+                        this.preDownloadBytesRead.byteLength + data.byteLength
+                    )
+                    isFullChunk =
+                        this.preDownloadBytesRead.byteLength %
+                            this.chunksize ===
+                        0
+                    lastByte = data[data.length - 1]
+                }
+                if (isFullChunk && lastByte === 0xff) {
+                    console.log(
+                        `Thread ${this.index} is ${ESocketMessage.OK}Continuing.`
+                    )
+                    this.client.write(ESocketMessage.OK)
+                }
             default:
                 break
         }
     }
 
-    errorListener(err: Error) {
+    private errorListener(err: Error) {
         console.error(`Thread ${this.index} reported an error:`, err.message)
     }
 
-    endListener() {
+    private endListener() {
         console.log(`Transmission was ended on the thread ${this.index}.`)
     }
 
-    closeListener(hadError: boolean) {
+    private closeListener(hadError: boolean) {
         console.log(
             `Connection was closed for the thread ${this.index}`,
             hadError ? "with error." : "."
         )
     }
 
-    async waitForInit() {
+    async waitForInit(): Promise<boolean> {
         return new Promise((resolve) => {
-            this.onInit = resolve
+            this.onInitEnd = resolve
+        })
+    }
+
+    async waitForPreDownload(): Promise<number> {
+        return new Promise((resolve) => {
+            this.onPreDownloadEnd = resolve
+            this.preDownloadBytesRead = Buffer.alloc(0)
+            this.preDownloadChunks = 1
+            this.preDownloadEndTime =
+                process.hrtime.bigint() + this.preDownloadDuration
+            this.phase = "predownload"
+            console.log(
+                `Thread ${this.index} getting ${this.preDownloadChunks} chunks.`
+            )
+            this.client.write(
+                `${ESocketMessage.GETCHUNKS} ${this.preDownloadChunks}\n`,
+                "ascii"
+            )
         })
     }
 }

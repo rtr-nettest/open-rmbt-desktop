@@ -7,6 +7,11 @@ export enum ESocketMessage {
     GREETING = "RMBT",
     ACCEPT_TOKEN = "ACCEPT TOKEN",
     TOKEN = "TOKEN",
-    OK = "OK",
+    OK = "OK\n",
     CHUNKSIZE = "CHUNKSIZE",
+    GETCHUNKS = "GETCHUNKS",
+    TIME = "TIME",
+    ACCEPT_GETCHUNKS = "ACCEPT GETCHUNKS",
+    PING = "PING",
+    PONG = "PONG",
 }

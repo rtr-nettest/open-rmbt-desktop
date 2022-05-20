@@ -37,6 +37,33 @@ export class RMBTClientService {
         await Promise.all(this.measurementTasks.map((t) => t.connect()))
         await Promise.all(this.measurementTasks.map((t) => t.waitForInit()))
         console.log("All threads are ready!")
+        const chunkNumbers = await Promise.all(
+            this.measurementTasks.map((t) => t.waitForPreDownload())
+        )
+        this.checkIfShouldUseOneThread(chunkNumbers)
+    }
+
+    private checkIfShouldUseOneThread(chunkNumbers: number[]) {
+        console.log(
+            `Predownload was finished with chunk numbers:`,
+            chunkNumbers
+        )
+        const threadWithLowestChunkNumber = chunkNumbers.findIndex(
+            (c) => c <= 4
+        )
+        if (threadWithLowestChunkNumber >= 0) {
+            console.log("Switching to one thread.")
+            this.measurementTasks = this.measurementTasks.reduce(
+                (acc, mt, index) => {
+                    if (index === 0) {
+                        return [mt]
+                    }
+                    mt.disconnect()
+                    return acc
+                },
+                [] as RMBTThreadService[]
+            )
+        }
     }
 
     private getTotalSpeed() {

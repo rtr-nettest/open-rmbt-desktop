@@ -34,9 +34,9 @@ export class RMBTClientService {
             this.measurementTasks.push(new RMBTThreadService(this.params, i))
         }
 
-        const connectedThreads = await Promise.all(
-            this.measurementTasks.map((t) => t.connect())
-        )
+        await Promise.all(this.measurementTasks.map((t) => t.connect()))
+        await Promise.all(this.measurementTasks.map((t) => t.waitForInit()))
+        console.log("All threads are ready!")
     }
 
     private getTotalSpeed() {

@@ -35,12 +35,14 @@ export class RMBTClientService {
         }
 
         await Promise.all(this.measurementTasks.map((t) => t.connect()))
-        await Promise.all(this.measurementTasks.map((t) => t.waitForInit()))
+        await Promise.all(this.measurementTasks.map((t) => t.manageInit()))
         console.log("All threads are ready!")
         const chunkNumbers = await Promise.all(
-            this.measurementTasks.map((t) => t.waitForPreDownload())
+            this.measurementTasks.map((t) => t.managePreDownload())
         )
         this.checkIfShouldUseOneThread(chunkNumbers)
+        const ping = await this.measurementTasks[0].managePing()
+        console.log("The ping is:", ping)
     }
 
     private checkIfShouldUseOneThread(chunkNumbers: number[]) {

@@ -6,8 +6,8 @@ export interface IMeasurementResult {
     jitterMeanNanos?: number
     num_threads?: number
     packetLossPercent?: number
-    ping_median?: number
-    ping_shortest?: number
+    ping_median?: bigint
+    ping_shortest?: bigint
     pings: IPing[]
     port_remote?: number
     speedItems: ISpeedItem[]
@@ -23,13 +23,13 @@ export interface IMeasurementThreadResult extends IMeasurementResult {
 
 export interface IMeasurementThreadResultList {
     bytes: number[]
-    nsec: number[]
+    nsec: bigint[]
 }
 
 export interface IPing {
-    client: number
-    server: number
-    timeNs: number
+    client: bigint
+    server: bigint
+    timeNs: bigint
 }
 
 export interface ISpeedItem {

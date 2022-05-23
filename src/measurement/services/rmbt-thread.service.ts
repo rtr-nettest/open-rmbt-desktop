@@ -1,33 +1,43 @@
 import { Socket } from "net"
-import { MeasurementResult } from "../dto/measurement-result.dto"
+import { MeasurementThreadResult } from "../dto/measurement-result.dto"
 import { ESocketMessage } from "../enums/socket-message.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
-import { IMeasurementResult } from "../interfaces/measurement-result.interface"
+import {
+    IMeasurementThreadResult,
+    IMeasurementThreadResultList,
+} from "../interfaces/measurement-result.interface"
+import { DownloadMessageHandler } from "./download-message-handler.service"
+import { PingMessageHandler } from "./ping-message-handler.service"
+import { PreDownloadMessageHandler } from "./pre-download-message-handler.service"
 
 export class RMBTThreadService {
     currentTransfer: number = -1
-    currentTime: number = -1
+    currentTime: bigint = -1n
     private client: Socket = new Socket()
     private index: number
     private params: IMeasurementRegistrationResponse
-    private result?: IMeasurementResult
+    private result: IMeasurementThreadResult = new MeasurementThreadResult()
     private in = 0
     private out = 0
     private totalDown = 0
     private totalUp = 0
     private chunksize: number = 0
     private onInitEnd?: (isInitialized: boolean) => void
-    private onPreDownloadEnd?: (chunks: number) => void
-    private preDownloadChunks = 1
-    private preDownloadEndTime = process.hrtime.bigint()
-    private preDownloadDuration = 2000000000n
-    private preDownloadBytesRead = Buffer.alloc(0)
-    private phase: "predownload" | "preupload" | undefined
+    private phase: "predownload" | "ping" | "download" | undefined
+    private pingMessageHandler?: PingMessageHandler
+    private preDownloadMessageHandler?: PreDownloadMessageHandler
+    private downloadMessageHandler?: DownloadMessageHandler
 
     constructor(params: IMeasurementRegistrationResponse, index: number) {
         this.params = params
         this.index = index
 
+        this.initClient()
+    }
+
+    initClient() {
+        // TODO: implement secure connection
+        // this.client = new TLSSocket(this.socket)
         this.client.on("data", this.dataListener.bind(this))
         this.client.on("error", this.errorListener.bind(this))
         this.client.on("end", this.endListener.bind(this))
@@ -35,7 +45,7 @@ export class RMBTThreadService {
     }
 
     async connect() {
-        this.result = new MeasurementResult()
+        this.result = new MeasurementThreadResult()
         console.log(
             `Thread ${this.index} is connecting on host ${this.params.test_server_address}, port ${this.params.test_server_port}...`
         )
@@ -71,7 +81,7 @@ export class RMBTThreadService {
     }
 
     private dataListener(data: Buffer) {
-        let dataString = data.length < 256 ? data.toString().trim() : ""
+        let dataString = data.length < 128 ? data.toString().trim() : ""
         if (dataString.length) {
             console.log(`Thread ${this.index} received string:`, dataString)
         } else {
@@ -80,74 +90,37 @@ export class RMBTThreadService {
             )
         }
         switch (true) {
+            // TODO: InitMessageHandler
             case dataString.includes(ESocketMessage.GREETING):
                 const versionMatches = new RegExp(/RMBTv([0-9.]+)/).exec(
                     dataString
                 )
                 if (this.result && versionMatches?.[1])
                     this.result.client_version = versionMatches[1]
-                break
             case dataString.includes(ESocketMessage.ACCEPT_TOKEN):
                 console.log(
                     `Thread ${this.index} sends token:`,
                     this.params.test_token
                 )
                 this.client.write(
-                    `${ESocketMessage.TOKEN} ${this.params.test_token}`,
+                    `${ESocketMessage.TOKEN} ${this.params.test_token}\n`,
                     "ascii"
                 )
                 break
             case dataString.includes(ESocketMessage.CHUNKSIZE):
-                const chunksize = Number(dataString.split(" ")[1])
-                if (!this.chunksize) {
-                    this.chunksize = chunksize
-                    console.log(
-                        `Setting chunksize ${chunksize} for the thread ${this.index}.`
-                    )
-                }
-                this.onInitEnd?.(true)
+                this.setChunkSize(dataString)
                 break
+            // END TODO
+
             case this.phase === "predownload":
-                if (dataString.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
-                    if (process.hrtime.bigint() < this.preDownloadEndTime) {
-                        this.preDownloadChunks *= 2
-                        console.log(
-                            `Thread ${this.index} getting ${this.preDownloadChunks} chunks.`
-                        )
-                        this.client.write(
-                            `${ESocketMessage.GETCHUNKS} ${this.preDownloadChunks}\n`,
-                            "ascii"
-                        )
-                    } else {
-                        console.log(
-                            `Predownload is finished for thread ${this.index}`
-                        )
-                        this.phase = undefined
-                        this.onPreDownloadEnd?.(this.preDownloadChunks)
-                    }
-                    break
-                }
-                if (dataString.includes(ESocketMessage.TIME)) {
-                    break
-                }
-                let lastByte = 0
-                let isFullChunk = false
-                if (data.length > 0) {
-                    this.preDownloadBytesRead = Buffer.alloc(
-                        this.preDownloadBytesRead.byteLength + data.byteLength
-                    )
-                    isFullChunk =
-                        this.preDownloadBytesRead.byteLength %
-                            this.chunksize ===
-                        0
-                    lastByte = data[data.length - 1]
-                }
-                if (isFullChunk && lastByte === 0xff) {
-                    console.log(
-                        `Thread ${this.index} is ${ESocketMessage.OK}Continuing.`
-                    )
-                    this.client.write(ESocketMessage.OK)
-                }
+                this.preDownloadMessageHandler?.readData(data)
+                break
+            case this.phase === "ping":
+                this.pingMessageHandler?.readData(data)
+                break
+            case this.phase === "download":
+                this.downloadMessageHandler?.readData(data)
+                break
             default:
                 break
         }
@@ -168,27 +141,67 @@ export class RMBTThreadService {
         )
     }
 
-    async waitForInit(): Promise<boolean> {
+    async manageInit(): Promise<boolean> {
         return new Promise((resolve) => {
             this.onInitEnd = resolve
         })
     }
 
-    async waitForPreDownload(): Promise<number> {
+    async managePreDownload(): Promise<number> {
         return new Promise((resolve) => {
-            this.onPreDownloadEnd = resolve
-            this.preDownloadBytesRead = Buffer.alloc(0)
-            this.preDownloadChunks = 1
-            this.preDownloadEndTime =
-                process.hrtime.bigint() + this.preDownloadDuration
             this.phase = "predownload"
-            console.log(
-                `Thread ${this.index} getting ${this.preDownloadChunks} chunks.`
+            this.preDownloadMessageHandler = new PreDownloadMessageHandler(
+                resolve,
+                this.client,
+                this.index,
+                this.chunksize,
+                (input) => (this.in = input)
             )
-            this.client.write(
-                `${ESocketMessage.GETCHUNKS} ${this.preDownloadChunks}\n`,
-                "ascii"
-            )
+            this.preDownloadMessageHandler.writeData()
         })
+    }
+
+    async managePing(): Promise<bigint> {
+        return new Promise((resolve) => {
+            this.phase = "ping"
+            this.pingMessageHandler = new PingMessageHandler(
+                resolve,
+                this.client,
+                this.index,
+                this.params,
+                this.result
+            )
+            this.pingMessageHandler.writeData()
+        })
+    }
+
+    async manageDownload(): Promise<IMeasurementThreadResultList> {
+        return new Promise((resolve) => {
+            this.phase = "download"
+            this.downloadMessageHandler = new DownloadMessageHandler(
+                resolve,
+                this.client,
+                this.index,
+                this.chunksize,
+                this.params,
+                (currentTransfer, currentTime) => {
+                    this.in += currentTransfer
+                    this.currentTransfer = currentTransfer
+                    this.currentTime = currentTime
+                }
+            )
+            this.downloadMessageHandler.writeData()
+        })
+    }
+
+    private setChunkSize(dataString: string) {
+        const chunksize = Number(dataString.split(" ")[1])
+        if (!this.chunksize) {
+            this.chunksize = chunksize
+            console.log(
+                `Setting chunksize ${chunksize} for the thread ${this.index}.`
+            )
+        }
+        this.onInitEnd?.(true)
     }
 }

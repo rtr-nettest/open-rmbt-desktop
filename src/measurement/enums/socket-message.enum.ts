@@ -12,6 +12,7 @@ export enum ESocketMessage {
     GETCHUNKS = "GETCHUNKS",
     TIME = "TIME",
     ACCEPT_GETCHUNKS = "ACCEPT GETCHUNKS",
-    PING = "PING",
+    PING = "PING\n",
     PONG = "PONG",
+    GETTIME = "GETTIME",
 }

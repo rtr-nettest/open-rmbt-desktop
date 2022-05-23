@@ -15,7 +15,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
         private client: Socket,
         private index: number,
         private chunksize: number,
-        private input: number
+        private setInput: (input: number) => void
     ) {}
 
     writeData(): void {
@@ -49,7 +49,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
             isFullChunk =
                 this.preDownloadBytesRead.byteLength % this.chunksize === 0
             lastByte = data[data.length - 1]
-            this.input = this.preDownloadBytesRead.byteLength
+            this.setInput?.(this.preDownloadBytesRead.byteLength)
         }
         if (isFullChunk && lastByte === 0xff) {
             this.finishChunkPortion()
@@ -60,7 +60,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
         clearInterval(this.activityInterval)
         this.activityInterval = setInterval(() => {
             console.log(`Checking activity on hread ${this.index}...`)
-            if (hrtime.bigint() >= this.preDownloadEndTime) {
+            if (hrtime.bigint() > this.preDownloadEndTime) {
                 console.log(`Thread ${this.index} timed out.`)
                 this.finishChunkPortion()
             }

@@ -1,27 +1,32 @@
 import { Socket } from "net"
-import { MeasurementResult } from "../dto/measurement-result.dto"
+import { MeasurementThreadResult } from "../dto/measurement-result.dto"
 import { ESocketMessage } from "../enums/socket-message.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
-import { IMeasurementResult } from "../interfaces/measurement-result.interface"
+import {
+    IMeasurementThreadResult,
+    IMeasurementThreadResultList,
+} from "../interfaces/measurement-result.interface"
+import { DownloadMessageHandler } from "./download-message-handler.service"
 import { PingMessageHandler } from "./ping-message-handler.service"
 import { PreDownloadMessageHandler } from "./pre-download-message-handler.service"
 
 export class RMBTThreadService {
     currentTransfer: number = -1
-    currentTime: number = -1
+    currentTime: bigint = -1n
     private client: Socket = new Socket()
     private index: number
     private params: IMeasurementRegistrationResponse
-    private result: IMeasurementResult = new MeasurementResult()
+    private result: IMeasurementThreadResult = new MeasurementThreadResult()
     private in = 0
     private out = 0
     private totalDown = 0
     private totalUp = 0
     private chunksize: number = 0
     private onInitEnd?: (isInitialized: boolean) => void
-    private phase: "predownload" | "ping" | "preupload" | undefined
+    private phase: "predownload" | "ping" | "download" | undefined
     private pingMessageHandler?: PingMessageHandler
     private preDownloadMessageHandler?: PreDownloadMessageHandler
+    private downloadMessageHandler?: DownloadMessageHandler
 
     constructor(params: IMeasurementRegistrationResponse, index: number) {
         this.params = params
@@ -40,7 +45,7 @@ export class RMBTThreadService {
     }
 
     async connect() {
-        this.result = new MeasurementResult()
+        this.result = new MeasurementThreadResult()
         console.log(
             `Thread ${this.index} is connecting on host ${this.params.test_server_address}, port ${this.params.test_server_port}...`
         )
@@ -85,6 +90,7 @@ export class RMBTThreadService {
             )
         }
         switch (true) {
+            // TODO: InitMessageHandler
             case dataString.includes(ESocketMessage.GREETING):
                 const versionMatches = new RegExp(/RMBTv([0-9.]+)/).exec(
                     dataString
@@ -104,11 +110,16 @@ export class RMBTThreadService {
             case dataString.includes(ESocketMessage.CHUNKSIZE):
                 this.setChunkSize(dataString)
                 break
+            // END TODO
+
             case this.phase === "predownload":
                 this.preDownloadMessageHandler?.readData(data)
                 break
             case this.phase === "ping":
                 this.pingMessageHandler?.readData(data)
+                break
+            case this.phase === "download":
+                this.downloadMessageHandler?.readData(data)
                 break
             default:
                 break
@@ -144,7 +155,7 @@ export class RMBTThreadService {
                 this.client,
                 this.index,
                 this.chunksize,
-                this.in
+                (input) => (this.in = input)
             )
             this.preDownloadMessageHandler.writeData()
         })
@@ -161,6 +172,25 @@ export class RMBTThreadService {
                 this.result
             )
             this.pingMessageHandler.writeData()
+        })
+    }
+
+    async manageDownload(): Promise<IMeasurementThreadResultList> {
+        return new Promise((resolve) => {
+            this.phase = "download"
+            this.downloadMessageHandler = new DownloadMessageHandler(
+                resolve,
+                this.client,
+                this.index,
+                this.chunksize,
+                this.params,
+                (currentTransfer, currentTime) => {
+                    this.in += currentTransfer
+                    this.currentTransfer = currentTransfer
+                    this.currentTime = currentTime
+                }
+            )
+            this.downloadMessageHandler.writeData()
         })
     }
 

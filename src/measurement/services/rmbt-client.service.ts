@@ -42,7 +42,10 @@ export class RMBTClientService {
         )
         this.checkIfShouldUseOneThread(chunkNumbers)
         const ping = await this.measurementTasks[0].managePing()
-        console.log("The ping is:", ping)
+        await Promise.all(this.measurementTasks.map((t) => t.manageDownload()))
+        console.log(`The ping median is ${ping / 1000000n} ms`)
+        console.log(`The total speed is ${this.getTotalSpeed() / 1000000} Mbps`)
+        await Promise.all(this.measurementTasks.map((t) => t.disconnect()))
     }
 
     private checkIfShouldUseOneThread(chunkNumbers: number[]) {
@@ -68,9 +71,10 @@ export class RMBTClientService {
         }
     }
 
+    // in bytes
     private getTotalSpeed() {
         let sumTrans = 0
-        let maxTime = 0
+        let maxTime = 0n
 
         for (const task of this.measurementTasks) {
             if (task.currentTime > maxTime) {
@@ -79,6 +83,6 @@ export class RMBTClientService {
             sumTrans += task.currentTransfer
         }
 
-        return maxTime === 0 ? 0 : (sumTrans / maxTime) * 1e9 * 8.0
+        return maxTime === 0n ? 0 : (sumTrans / Number(maxTime)) * 1e9 * 8.0
     }
 }

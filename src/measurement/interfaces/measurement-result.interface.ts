@@ -23,7 +23,7 @@ export interface IMeasurementThreadResult extends IMeasurementResult {
 
 export interface IMeasurementThreadResultList {
     bytes: number[]
-    nsec: number[]
+    nsec: bigint[]
 }
 
 export interface IPing {

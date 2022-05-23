@@ -40,6 +40,7 @@ export class RMBTThreadService {
     }
 
     async connect() {
+        this.result = new MeasurementResult()
         console.log(
             `Thread ${this.index} is connecting on host ${this.params.test_server_address}, port ${this.params.test_server_port}...`
         )

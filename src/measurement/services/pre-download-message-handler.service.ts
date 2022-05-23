@@ -8,6 +8,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     private preDownloadEndTime = hrtime.bigint()
     private preDownloadDuration = 2000000000n
     private preDownloadBytesRead = Buffer.alloc(0)
+    private activityInterval?: NodeJS.Timer
 
     constructor(
         public onFinish: (chunks: number) => void,
@@ -21,27 +22,17 @@ export class PreDownloadMessageHandler implements IMessageHandler {
         this.preDownloadBytesRead = Buffer.alloc(0)
         this.preDownloadChunks = 1
         this.preDownloadEndTime = hrtime.bigint() + this.preDownloadDuration
-        console.log(
-            `Thread ${this.index} getting ${this.preDownloadChunks} chunks.`
-        )
-        this.client.write(
-            `${ESocketMessage.GETCHUNKS} ${this.preDownloadChunks}\n`,
-            "ascii"
-        )
+        this.getChunks()
     }
+
     readData(data: Buffer): void {
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
             if (hrtime.bigint() < this.preDownloadEndTime) {
                 this.preDownloadChunks *= 2
-                console.log(
-                    `Thread ${this.index} getting ${this.preDownloadChunks} chunks.`
-                )
-                this.client.write(
-                    `${ESocketMessage.GETCHUNKS} ${this.preDownloadChunks}\n`,
-                    "ascii"
-                )
+                this.getChunks()
             } else {
                 console.log(`Predownload is finished for thread ${this.index}`)
+                clearInterval(this.activityInterval)
                 this.onFinish?.(this.preDownloadChunks)
             }
             return
@@ -61,10 +52,31 @@ export class PreDownloadMessageHandler implements IMessageHandler {
             this.input = this.preDownloadBytesRead.byteLength
         }
         if (isFullChunk && lastByte === 0xff) {
-            console.log(
-                `Thread ${this.index} is ${ESocketMessage.OK}Continuing.`
-            )
-            this.client.write(ESocketMessage.OK)
+            this.finishChunkPortion()
         }
+    }
+
+    private getChunks() {
+        clearInterval(this.activityInterval)
+        this.activityInterval = setInterval(() => {
+            console.log(`Checking activity on hread ${this.index}...`)
+            if (hrtime.bigint() >= this.preDownloadEndTime) {
+                console.log(`Thread ${this.index} timed out.`)
+                this.finishChunkPortion()
+            }
+        }, 1000)
+        console.log(
+            `Thread ${this.index} getting ${this.preDownloadChunks} chunks.`
+        )
+        this.client.write(
+            `${ESocketMessage.GETCHUNKS} ${this.preDownloadChunks}\n`,
+            "ascii"
+        )
+    }
+
+    private finishChunkPortion() {
+        clearInterval(this.activityInterval)
+        console.log(`Thread ${this.index} is ${ESocketMessage.OK}Continuing.`)
+        this.client.write(ESocketMessage.OK)
     }
 }

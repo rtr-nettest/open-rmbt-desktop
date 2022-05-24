@@ -7,7 +7,7 @@ import { RMBTClientService } from "./services/rmbt-client.service"
 
 export async function runMeasurement() {
     config({
-        path: process.env.DOTENV_CONFIG_PATH || ".env",
+        path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
     })
 
     const controlServer = new ControlServerService()

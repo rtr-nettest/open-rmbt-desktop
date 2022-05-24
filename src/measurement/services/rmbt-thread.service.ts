@@ -1,4 +1,6 @@
 import net from "net"
+import tls from "tls"
+import fs from "fs"
 import { MeasurementThreadResult } from "../dto/measurement-result.dto"
 import { ESocketMessage } from "../enums/socket-message.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
@@ -40,11 +42,19 @@ export class RMBTThreadService {
             Logger.I.info(
                 `Thread ${this.index} is connecting on host ${this.params.test_server_address}, port ${this.params.test_server_port}...`
             )
-            // TODO: implement secure connection
-            this.client = net.createConnection({
+            const options: net.NetConnectOpts & tls.ConnectionOptions = {
                 host: this.params.test_server_address,
                 port: this.params.test_server_port,
-            })
+            }
+            if (process.env.SSL_KEY_PATH && process.env.SSL_CERT_PATH) {
+                options.key = fs.readFileSync(process.env.SSL_KEY_PATH)
+                options.cert = fs.readFileSync(process.env.SSL_CERT_PATH)
+            }
+            if (this.params.test_server_encryption) {
+                this.client = tls.connect(options)
+            } else {
+                this.client = net.createConnection(options)
+            }
             this.client.on("data", this.dataListener.bind(this))
             this.client.on("error", this.errorListener.bind(this))
             this.client.on("end", this.endListener.bind(this))

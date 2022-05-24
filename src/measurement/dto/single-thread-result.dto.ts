@@ -1,5 +1,6 @@
 import { IMeasurementThreadResultList } from "../interfaces/measurement-result.interface"
 import { DownloadMessageHandler } from "../services/download-message-handler.service"
+import { Logger } from "../services/logger.service"
 
 export class SingleThreadResult {
     private coarse: IMeasurementThreadResultList = { bytes: [], nsec: [] }
@@ -19,7 +20,7 @@ export class SingleThreadResult {
     }
 
     addResult(newBytes: number, newNsec: bigint) {
-        console.log(newBytes, newNsec)
+        Logger.I.info("New bytes: %d. New nsec: %d.", newBytes, newNsec)
         let addToCoarse = this.coarseResults === 0
         if (!addToCoarse) {
             const diffTime =

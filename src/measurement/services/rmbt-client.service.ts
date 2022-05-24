@@ -1,5 +1,6 @@
 import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
+import { Logger } from "./logger.service"
 import { RMBTThreadService } from "./rmbt-thread.service"
 
 export class RMBTClientService {
@@ -13,7 +14,7 @@ export class RMBTClientService {
     }
 
     scheduleMeasurement() {
-        console.log("Scheduling measurement...")
+        Logger.I.info("Scheduling measurement...")
         this.measurementLastUpdate = new Date().getTime()
         if (this.params.test_wait > 0) {
             this.measurementStatus = EMeasurementStatus.WAIT
@@ -27,7 +28,7 @@ export class RMBTClientService {
     }
 
     private async runMeasurement() {
-        console.log("Running measurement...")
+        Logger.I.info("Running measurement...")
         this.measurementStatus = EMeasurementStatus.INIT
         const numThreads = this.params.test_numthreads
         for (let i = 0; i < numThreads; i++) {
@@ -36,20 +37,22 @@ export class RMBTClientService {
 
         await Promise.all(this.measurementTasks.map((t) => t.connect()))
         await Promise.all(this.measurementTasks.map((t) => t.manageInit()))
-        console.log("All threads are ready!")
+        Logger.I.info("All threads are ready!")
         const chunkNumbers = await Promise.all(
             this.measurementTasks.map((t) => t.managePreDownload())
         )
         this.checkIfShouldUseOneThread(chunkNumbers)
         const ping = await this.measurementTasks[0].managePing()
         await Promise.all(this.measurementTasks.map((t) => t.manageDownload()))
-        console.log(`The ping median is ${ping / 1000000n} ms`)
-        console.log(`The total speed is ${this.getTotalSpeed() / 1000000} Mbps`)
+        Logger.I.info(`The ping median is ${ping / 1000000n} ms`)
+        Logger.I.info(
+            `The total speed is ${this.getTotalSpeed() / 1000000} Mbps`
+        )
         await Promise.all(this.measurementTasks.map((t) => t.disconnect()))
     }
 
     private checkIfShouldUseOneThread(chunkNumbers: number[]) {
-        console.log(
+        Logger.I.info(
             `Predownload was finished with chunk numbers:`,
             chunkNumbers
         )
@@ -57,7 +60,7 @@ export class RMBTClientService {
             (c) => c <= 4
         )
         if (threadWithLowestChunkNumber >= 0) {
-            console.log("Switching to one thread.")
+            Logger.I.info("Switching to one thread.")
             this.measurementTasks = this.measurementTasks.reduce(
                 (acc, mt, index) => {
                     if (index === 0) {

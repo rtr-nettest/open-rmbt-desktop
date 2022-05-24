@@ -2,6 +2,7 @@ import { Socket } from "net"
 import { hrtime } from "process"
 import { ESocketMessage } from "../enums/socket-message.enum"
 import { IMessageHandler } from "../interfaces/message-handler.interface"
+import { Logger } from "./logger.service"
 
 export class PreDownloadMessageHandler implements IMessageHandler {
     private preDownloadChunks = 1
@@ -31,7 +32,9 @@ export class PreDownloadMessageHandler implements IMessageHandler {
                 this.preDownloadChunks *= 2
                 this.getChunks()
             } else {
-                console.log(`Predownload is finished for thread ${this.index}`)
+                Logger.I.info(
+                    `Predownload is finished for thread ${this.index}`
+                )
                 clearInterval(this.activityInterval)
                 this.onFinish?.(this.preDownloadChunks)
             }
@@ -59,13 +62,13 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     private getChunks() {
         clearInterval(this.activityInterval)
         this.activityInterval = setInterval(() => {
-            console.log(`Checking activity on hread ${this.index}...`)
+            Logger.I.info(`Checking activity on thread ${this.index}...`)
             if (hrtime.bigint() > this.preDownloadEndTime) {
-                console.log(`Thread ${this.index} timed out.`)
+                Logger.I.info(`Thread ${this.index} timed out.`)
                 this.finishChunkPortion()
             }
         }, 1000)
-        console.log(
+        Logger.I.info(
             `Thread ${this.index} getting ${this.preDownloadChunks} chunks.`
         )
         this.client.write(
@@ -76,7 +79,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
 
     private finishChunkPortion() {
         clearInterval(this.activityInterval)
-        console.log(`Thread ${this.index} is ${ESocketMessage.OK}Continuing.`)
+        Logger.I.info(`Thread ${this.index} is ${ESocketMessage.OK}Continuing.`)
         this.client.write(ESocketMessage.OK)
     }
 }

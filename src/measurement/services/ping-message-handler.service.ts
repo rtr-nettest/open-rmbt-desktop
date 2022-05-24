@@ -7,6 +7,7 @@ import {
     IPing,
 } from "../interfaces/measurement-result.interface"
 import { IMessageHandler } from "../interfaces/message-handler.interface"
+import { Logger } from "./logger.service"
 
 export class PingMessageHandler implements IMessageHandler {
     private serverPings: bigint[] = []
@@ -25,7 +26,7 @@ export class PingMessageHandler implements IMessageHandler {
     writeData() {
         this.pingCurrentStartTime = hrtime.bigint()
         this.client.write(Buffer.from(ESocketMessage.PING, "ascii"))
-        console.log(
+        Logger.I.info(
             `Thread ${this.index} sent ${ESocketMessage.PING.replace(
                 "\n",
                 ""
@@ -37,7 +38,7 @@ export class PingMessageHandler implements IMessageHandler {
     readData(data: Buffer) {
         if (data.includes(ESocketMessage.PONG)) {
             this.pingCurrentEndTime = hrtime.bigint()
-            console.log(
+            Logger.I.info(
                 `Thread ${this.index} is ${ESocketMessage.OK}Continuing.`
             )
             this.client.write(ESocketMessage.OK)

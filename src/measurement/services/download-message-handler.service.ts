@@ -5,6 +5,7 @@ import { ESocketMessage } from "../enums/socket-message.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import { IMeasurementThreadResultList } from "../interfaces/measurement-result.interface"
 import { IMessageHandler } from "../interfaces/message-handler.interface"
+import { Logger } from "./logger.service"
 
 export class DownloadMessageHandler implements IMessageHandler {
     static minDiffTime = 100000000n
@@ -36,13 +37,13 @@ export class DownloadMessageHandler implements IMessageHandler {
             this.downloadStartTime +
             BigInt(this.params.test_duration) * this.downloadDuration
         this.activityInterval = setInterval(() => {
-            console.log(`Checking activity on hread ${this.index}...`)
+            Logger.I.info(`Checking activity on thread ${this.index}...`)
             if (hrtime.bigint() > this.downloadEndTime) {
-                console.log(`Thread ${this.index} timed out.`)
+                Logger.I.info(`Thread ${this.index} timed out.`)
                 this.finishDownload()
             }
         }, 1000)
-        console.log(
+        Logger.I.info(
             `Thread ${this.index} will run download for ${this.params.test_duration} seconds.`
         )
         this.client.write(
@@ -52,7 +53,7 @@ export class DownloadMessageHandler implements IMessageHandler {
     }
     readData(data: Buffer): void {
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
-            console.log(`Download is finished for thread ${this.index}`)
+            Logger.I.info(`Download is finished for thread ${this.index}`)
             clearInterval(this.activityInterval)
             this.onFinish?.(this.result.getAllResults())
             return

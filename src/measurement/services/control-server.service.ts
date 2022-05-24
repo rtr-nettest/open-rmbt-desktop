@@ -4,6 +4,7 @@ import { IMeasurementRegistrationResponse } from "../interfaces/measurement-regi
 import { IMeasurementServerResponse } from "../interfaces/measurement-server-response.interface"
 import { IUserSettingsRequest } from "../interfaces/user-settings-request.interface"
 import { IUserSetingsResponse } from "../interfaces/user-settings-response.interface"
+import { Logger } from "./logger.service"
 
 export class ControlServerService {
     private get headers() {
@@ -19,7 +20,10 @@ export class ControlServerService {
     async getMeasurementServerFromApi(
         request: IUserSettingsRequest
     ): Promise<IMeasurementServerResponse | undefined> {
-        console.log(`GET: ${process.env.MEASUREMENT_SERVERS_PATH}`)
+        if (!process.env.MEASUREMENT_SERVERS_PATH) {
+            return undefined
+        }
+        Logger.I.info(`GET: ${process.env.MEASUREMENT_SERVERS_PATH}`)
         const servers = (
             await axios.get(
                 `${process.env.CONTROL_SERVER_URL}${process.env.MEASUREMENT_SERVERS_PATH}`,
@@ -38,13 +42,13 @@ export class ControlServerService {
                         (std) => std.serverType === request.name
                     )
             }
-            console.log(`Using server:`, filteredServer)
+            Logger.I.info(`Using server: %o`, filteredServer)
             return filteredServer
         }
     }
 
     async getUserSettings(request: IUserSettingsRequest) {
-        console.log(`POST: ${process.env.SETTINGS_PATH}`)
+        Logger.I.info(`POST: ${process.env.SETTINGS_PATH}`)
         const response = (
             await axios.post(
                 `${process.env.CONTROL_SERVER_URL}${process.env.SETTINGS_PATH}`,
@@ -53,7 +57,7 @@ export class ControlServerService {
             )
         ).data as IUserSetingsResponse
         if (response?.settings?.length) {
-            console.log(`Using settings:`, response.settings[0])
+            Logger.I.info(`Using settings: %o`, response.settings[0])
             return response.settings[0]
         }
         if (response?.error?.length) {
@@ -63,7 +67,7 @@ export class ControlServerService {
     }
 
     async registerMeasurement(request: IMeasurementRegistrationRequest) {
-        console.log(`POST: ${process.env.MESUREMENT_REGISTRATION_PATH}`)
+        Logger.I.info(`POST: ${process.env.MESUREMENT_REGISTRATION_PATH}`)
         const response = (
             await axios.post(
                 `${process.env.CONTROL_SERVER_URL}${process.env.MESUREMENT_REGISTRATION_PATH}`,
@@ -72,7 +76,7 @@ export class ControlServerService {
             )
         ).data as IMeasurementRegistrationResponse
         if (response?.test_token && response?.test_uuid) {
-            console.log(`Registered measurement:`, response)
+            Logger.I.info(`Registered measurement: %o`, response)
             return response
         }
         if (response?.error?.length) {

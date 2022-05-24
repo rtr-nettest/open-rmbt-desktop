@@ -62,7 +62,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     private getChunks() {
         clearInterval(this.activityInterval)
         this.activityInterval = setInterval(() => {
-            Logger.I.info(`Checking activity on hread ${this.index}...`)
+            Logger.I.info(`Checking activity on thread ${this.index}...`)
             if (hrtime.bigint() > this.preDownloadEndTime) {
                 Logger.I.info(`Thread ${this.index} timed out.`)
                 this.finishChunkPortion()

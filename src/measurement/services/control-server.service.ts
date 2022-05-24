@@ -20,6 +20,9 @@ export class ControlServerService {
     async getMeasurementServerFromApi(
         request: IUserSettingsRequest
     ): Promise<IMeasurementServerResponse | undefined> {
+        if (!process.env.MEASUREMENT_SERVERS_PATH) {
+            return undefined
+        }
         Logger.I.info(`GET: ${process.env.MEASUREMENT_SERVERS_PATH}`)
         const servers = (
             await axios.get(

@@ -2,6 +2,7 @@ import { config } from "dotenv"
 import { MeasurementRegistrationRequest } from "./dto/measurement-registration-request.dto"
 import { UserSettingsRequest } from "./dto/user-settings-request.dto"
 import { ControlServerService } from "./services/control-server.service"
+import { Logger } from "./services/logger.service"
 import { RMBTClientService } from "./services/rmbt-client.service"
 
 export async function runMeasurement() {
@@ -25,6 +26,6 @@ export async function runMeasurement() {
         const rmbClient = new RMBTClientService(measurementRegistration)
         rmbClient.scheduleMeasurement()
     } catch (err) {
-        console.error(err)
+        Logger.I.error(err)
     }
 }

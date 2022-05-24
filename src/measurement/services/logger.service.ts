@@ -10,7 +10,12 @@ export class Logger {
 
     static get I(): pino.Logger {
         if (!this.instance) {
-            const streams: pino.StreamEntry[] = [{ stream: pretty() }]
+            const streams: pino.StreamEntry[] = []
+            if (process.env.LOG_TO_CONSOLE === "true") {
+                streams.push({ stream: pretty() })
+            } else {
+                console.log("Logging to console is disabled.")
+            }
             if (process.env.LOG_TO_FILE === "true") {
                 const logDir = path.join(__dirname, "..", "..", "..", "log")
                 if (!fs.existsSync(logDir)) {
@@ -21,8 +26,17 @@ export class Logger {
                         path.join(logDir, `${new Date().getTime()}.log`)
                     ),
                 })
+            } else {
+                console.log("Logging to file is disabled.")
             }
-            this.instance = pino({ level: "info" }, pino.multistream(streams))
+            if (streams.length) {
+                this.instance = pino(
+                    { level: "info" },
+                    pino.multistream(streams)
+                )
+            } else {
+                this.instance = pino({ enabled: false })
+            }
         }
         return this.instance
     }

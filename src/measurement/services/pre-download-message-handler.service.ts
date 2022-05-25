@@ -12,11 +12,13 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     private activityInterval?: NodeJS.Timer
 
     constructor(
-        public onFinish: (chunks: number) => void,
         private client: Socket,
         private index: number,
         private chunksize: number,
-        private setInput: (input: number) => void
+        public onFinish: (result: {
+            chunks: number
+            totalDownload: number
+        }) => void
     ) {}
 
     writeData(): void {
@@ -36,7 +38,10 @@ export class PreDownloadMessageHandler implements IMessageHandler {
                     `Predownload is finished for thread ${this.index}`
                 )
                 clearInterval(this.activityInterval)
-                this.onFinish?.(this.preDownloadChunks)
+                this.onFinish?.({
+                    chunks: this.preDownloadChunks,
+                    totalDownload: this.preDownloadBytesRead.byteLength,
+                })
             }
             return
         }
@@ -52,7 +57,6 @@ export class PreDownloadMessageHandler implements IMessageHandler {
             isFullChunk =
                 this.preDownloadBytesRead.byteLength % this.chunksize === 0
             lastByte = data[data.length - 1]
-            this.setInput?.(this.preDownloadBytesRead.byteLength)
         }
         if (isFullChunk && lastByte === 0xff) {
             this.finishChunkPortion()

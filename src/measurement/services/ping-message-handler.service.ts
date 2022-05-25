@@ -16,11 +16,11 @@ export class PingMessageHandler implements IMessageHandler {
     private pingCounter = 0
 
     constructor(
-        public onFinish: (result: IMeasurementThreadResult) => void,
         private client: Socket,
         private index: number,
         private params: IMeasurementRegistrationResponse,
-        private result: IMeasurementThreadResult
+        private result: IMeasurementThreadResult,
+        public onFinish: (result: IMeasurementThreadResult) => void
     ) {}
 
     writeData() {

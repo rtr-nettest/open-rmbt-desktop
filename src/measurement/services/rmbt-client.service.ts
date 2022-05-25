@@ -36,6 +36,7 @@ export class RMBTClientService {
             this.measurementTasks.push(new RMBTThreadService(this.params, i))
         }
 
+        // Init
         await Promise.all(
             this.measurementTasks.map((t) =>
                 t.connect(new MeasurementThreadResult())
@@ -43,31 +44,53 @@ export class RMBTClientService {
         )
         await Promise.all(this.measurementTasks.map((t) => t.manageInit()))
         Logger.I.info("All threads are ready!")
-        const chunkNumbers = await Promise.all(
+
+        // Pre-download
+        let chunkNumbers = await Promise.all(
             this.measurementTasks.map((t) => t.managePreDownload())
         )
+        Logger.I.info(
+            `Pre-download was finished with chunk numbers: %o`,
+            chunkNumbers
+        )
         this.checkIfShouldUseOneThread(chunkNumbers)
+
+        // Ping
         const pingResults = await this.measurementTasks[0].managePing()
+
+        Logger.I.info(
+            `The ping median is ${
+                (pingResults.ping_median || 0n) / 1000000n
+            } ms`
+        )
+
+        // Download
         const threadResults = await Promise.all(
             this.measurementTasks.map((t) => t.manageDownload())
         )
         await Promise.all(this.measurementTasks.map((t) => t.disconnect()))
-        Logger.I.info(
-            `The ping median is ${pingResults.ping_median! / 1000000n} ms`
-        )
+
         Logger.I.info(
             `The total speed is ${this.getTotalSpeed() / 1000000} Mbps`
         )
-        // await Promise.all(
-        //     this.measurementTasks.map((t, i) => t.connect(threadResults[i]))
-        // )
+
+        // Pre-upload
+        await Promise.all(
+            this.measurementTasks.map((t, i) => t.connect(threadResults[i]))
+        )
+        await Promise.all(this.measurementTasks.map((t) => t.manageInit()))
+        Logger.I.info("All threads are ready!")
+        chunkNumbers = await Promise.all(
+            this.measurementTasks.map((t) => t.managePreUpload())
+        )
+        Logger.I.info(
+            `Pre-upload was finished with chunk numbers: %o`,
+            chunkNumbers
+        )
+        await Promise.all(this.measurementTasks.map((t) => t.disconnect()))
     }
 
     private checkIfShouldUseOneThread(chunkNumbers: number[]) {
-        Logger.I.info(
-            `Predownload was finished with chunk numbers:`,
-            chunkNumbers
-        )
         const threadWithLowestChunkNumber = chunkNumbers.findIndex(
             (c) => c <= 4
         )

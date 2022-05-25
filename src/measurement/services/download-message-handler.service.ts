@@ -18,13 +18,16 @@ export class DownloadMessageHandler implements IMessageHandler {
     private nsec = 0n
 
     constructor(
-        public onFinish: (result: IMeasurementThreadResult) => void,
         private client: Socket,
         private index: number,
         private chunksize: number,
         private params: IMeasurementRegistrationResponse,
         private threadResult: IMeasurementThreadResult,
-        private setInput: (currentTransfer: number, currentTime: bigint) => void
+        private setIntermidiateResults: (
+            currentTransfer: number,
+            currentTime: bigint
+        ) => void,
+        public onFinish: (result: IMeasurementThreadResult) => void
     ) {
         const maxStoredResults =
             (BigInt(this.params.test_duration) * 1000000000n) /
@@ -83,7 +86,10 @@ export class DownloadMessageHandler implements IMessageHandler {
 
             lastByte = data[data.length - 1]
 
-            this.setInput?.(this.downloadBytesRead.byteLength, this.nsec)
+            this.setIntermidiateResults?.(
+                this.downloadBytesRead.byteLength,
+                this.nsec
+            )
         }
         if (isFullChunk && lastByte === 0xff) {
             this.finishDownload()

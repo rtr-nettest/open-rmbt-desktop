@@ -35,7 +35,7 @@ export interface IPing {
 export interface ISpeedItem {
     upload: boolean
     thread: number
-    time: number
+    time: bigint
     bytes: number
 }
 

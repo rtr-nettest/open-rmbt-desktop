@@ -4,10 +4,7 @@ import fs from "fs"
 import { MeasurementThreadResult } from "../dto/measurement-result.dto"
 import { ESocketMessage } from "../enums/socket-message.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
-import {
-    IMeasurementThreadResult,
-    IMeasurementThreadResultList,
-} from "../interfaces/measurement-result.interface"
+import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
 import { DownloadMessageHandler } from "./download-message-handler.service"
 import { Logger } from "./logger.service"
 import { PingMessageHandler } from "./ping-message-handler.service"
@@ -36,9 +33,11 @@ export class RMBTThreadService {
         this.index = index
     }
 
-    async connect() {
+    async connect(
+        result: IMeasurementThreadResult
+    ): Promise<RMBTThreadService> {
         return new Promise((resolve) => {
-            this.result = new MeasurementThreadResult()
+            this.result = result
             Logger.I.info(
                 `Thread ${this.index} is connecting on host ${this.params.test_server_address}, port ${this.params.test_server_port}...`
             )
@@ -66,8 +65,9 @@ export class RMBTThreadService {
         })
     }
 
-    disconnect() {
+    disconnect(): RMBTThreadService {
         this.client.end()
+        return this
     }
 
     private connectionListener =
@@ -177,7 +177,7 @@ export class RMBTThreadService {
         })
     }
 
-    async managePing(): Promise<bigint> {
+    async managePing(): Promise<IMeasurementThreadResult> {
         return new Promise((resolve) => {
             this.phase = "ping"
             this.pingMessageHandler = new PingMessageHandler(
@@ -191,7 +191,7 @@ export class RMBTThreadService {
         })
     }
 
-    async manageDownload(): Promise<IMeasurementThreadResultList> {
+    async manageDownload(): Promise<IMeasurementThreadResult> {
         return new Promise((resolve) => {
             this.phase = "download"
             this.downloadMessageHandler = new DownloadMessageHandler(
@@ -200,6 +200,7 @@ export class RMBTThreadService {
                 this.index,
                 this.chunksize,
                 this.params,
+                this.result,
                 (currentTransfer, currentTime) => {
                     this.in += currentTransfer
                     this.currentTransfer = currentTransfer

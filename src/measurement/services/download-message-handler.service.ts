@@ -3,7 +3,7 @@ import { hrtime } from "process"
 import { SingleThreadResult } from "../dto/single-thread-result.dto"
 import { ESocketMessage } from "../enums/socket-message.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
-import { IMeasurementThreadResultList } from "../interfaces/measurement-result.interface"
+import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
 import { IMessageHandler } from "../interfaces/message-handler.interface"
 import { Logger } from "./logger.service"
 
@@ -18,11 +18,12 @@ export class DownloadMessageHandler implements IMessageHandler {
     private nsec = 0n
 
     constructor(
-        public onFinish: (result: IMeasurementThreadResultList) => void,
+        public onFinish: (result: IMeasurementThreadResult) => void,
         private client: Socket,
         private index: number,
         private chunksize: number,
         private params: IMeasurementRegistrationResponse,
+        private threadResult: IMeasurementThreadResult,
         private setInput: (currentTransfer: number, currentTime: bigint) => void
     ) {
         const maxStoredResults =
@@ -55,7 +56,12 @@ export class DownloadMessageHandler implements IMessageHandler {
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
             Logger.I.info(`Download is finished for thread ${this.index}`)
             clearInterval(this.activityInterval)
-            this.onFinish?.(this.result.getAllResults())
+            this.threadResult.down = this.result.getAllResults()
+            this.threadResult.speedItems = this.result.getSpeedItems(
+                false,
+                this.index
+            )
+            this.onFinish?.(this.threadResult)
             return
         }
         if (data.includes(ESocketMessage.TIME)) {

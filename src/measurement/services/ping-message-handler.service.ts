@@ -3,7 +3,7 @@ import { hrtime } from "process"
 import { ESocketMessage } from "../enums/socket-message.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import {
-    IMeasurementResult,
+    IMeasurementThreadResult,
     IPing,
 } from "../interfaces/measurement-result.interface"
 import { IMessageHandler } from "../interfaces/message-handler.interface"
@@ -16,11 +16,11 @@ export class PingMessageHandler implements IMessageHandler {
     private pingCounter = 0
 
     constructor(
-        public onFinish: (medianPing: bigint) => void,
+        public onFinish: (result: IMeasurementThreadResult) => void,
         private client: Socket,
         private index: number,
         private params: IMeasurementRegistrationResponse,
-        private result: IMeasurementResult
+        private result: IMeasurementThreadResult
     ) {}
 
     writeData() {
@@ -74,7 +74,7 @@ export class PingMessageHandler implements IMessageHandler {
                     this.result.ping_median =
                         this.serverPings[Math.floor(middle)]
                 }
-                this.onFinish?.(this.result.ping_median)
+                this.onFinish?.(this.result)
             }
             return
         }

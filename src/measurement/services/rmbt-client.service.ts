@@ -1,3 +1,4 @@
+import { MeasurementThreadResult } from "../dto/measurement-result.dto"
 import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import { Logger } from "./logger.service"
@@ -35,20 +36,31 @@ export class RMBTClientService {
             this.measurementTasks.push(new RMBTThreadService(this.params, i))
         }
 
-        await Promise.all(this.measurementTasks.map((t) => t.connect()))
+        await Promise.all(
+            this.measurementTasks.map((t) =>
+                t.connect(new MeasurementThreadResult())
+            )
+        )
         await Promise.all(this.measurementTasks.map((t) => t.manageInit()))
         Logger.I.info("All threads are ready!")
         const chunkNumbers = await Promise.all(
             this.measurementTasks.map((t) => t.managePreDownload())
         )
         this.checkIfShouldUseOneThread(chunkNumbers)
-        const ping = await this.measurementTasks[0].managePing()
-        await Promise.all(this.measurementTasks.map((t) => t.manageDownload()))
-        Logger.I.info(`The ping median is ${ping / 1000000n} ms`)
+        const pingResults = await this.measurementTasks[0].managePing()
+        const threadResults = await Promise.all(
+            this.measurementTasks.map((t) => t.manageDownload())
+        )
+        await Promise.all(this.measurementTasks.map((t) => t.disconnect()))
+        Logger.I.info(
+            `The ping median is ${pingResults.ping_median! / 1000000n} ms`
+        )
         Logger.I.info(
             `The total speed is ${this.getTotalSpeed() / 1000000} Mbps`
         )
-        await Promise.all(this.measurementTasks.map((t) => t.disconnect()))
+        // await Promise.all(
+        //     this.measurementTasks.map((t, i) => t.connect(threadResults[i]))
+        // )
     }
 
     private checkIfShouldUseOneThread(chunkNumbers: number[]) {

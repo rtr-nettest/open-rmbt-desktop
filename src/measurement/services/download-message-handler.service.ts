@@ -3,7 +3,7 @@ import { hrtime } from "process"
 import { SingleThreadResult } from "../dto/single-thread-result.dto"
 import { ESocketMessage } from "../enums/socket-message.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
-import { IMeasurementThreadResultList } from "../interfaces/measurement-result.interface"
+import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
 import { IMessageHandler } from "../interfaces/message-handler.interface"
 import { Logger } from "./logger.service"
 
@@ -18,12 +18,16 @@ export class DownloadMessageHandler implements IMessageHandler {
     private nsec = 0n
 
     constructor(
-        public onFinish: (result: IMeasurementThreadResultList) => void,
         private client: Socket,
         private index: number,
         private chunksize: number,
         private params: IMeasurementRegistrationResponse,
-        private setInput: (currentTransfer: number, currentTime: bigint) => void
+        private threadResult: IMeasurementThreadResult,
+        private setIntermidiateResults: (
+            currentTransfer: number,
+            currentTime: bigint
+        ) => void,
+        public onFinish: (result: IMeasurementThreadResult) => void
     ) {
         const maxStoredResults =
             (BigInt(this.params.test_duration) * 1000000000n) /
@@ -55,7 +59,12 @@ export class DownloadMessageHandler implements IMessageHandler {
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
             Logger.I.info(`Download is finished for thread ${this.index}`)
             clearInterval(this.activityInterval)
-            this.onFinish?.(this.result.getAllResults())
+            this.threadResult.down = this.result.getAllResults()
+            this.threadResult.speedItems = this.result.getSpeedItems(
+                false,
+                this.index
+            )
+            this.onFinish?.(this.threadResult)
             return
         }
         if (data.includes(ESocketMessage.TIME)) {
@@ -77,7 +86,10 @@ export class DownloadMessageHandler implements IMessageHandler {
 
             lastByte = data[data.length - 1]
 
-            this.setInput?.(this.downloadBytesRead.byteLength, this.nsec)
+            this.setIntermidiateResults?.(
+                this.downloadBytesRead.byteLength,
+                this.nsec
+            )
         }
         if (isFullChunk && lastByte === 0xff) {
             this.finishDownload()

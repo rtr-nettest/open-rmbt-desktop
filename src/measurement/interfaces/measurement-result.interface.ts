@@ -19,6 +19,7 @@ export interface IMeasurementThreadResult extends IMeasurementResult {
     up: IMeasurementThreadResultList
     totalDownBytes: number
     totalUpBytes: number
+    chunksize?: number
 }
 
 export interface IMeasurementThreadResultList {
@@ -35,7 +36,7 @@ export interface IPing {
 export interface ISpeedItem {
     upload: boolean
     thread: number
-    time: number
+    time: bigint
     bytes: number
 }
 

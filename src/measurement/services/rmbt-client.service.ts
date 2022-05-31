@@ -65,7 +65,7 @@ export class RMBTClientService {
         )
 
         // Download
-        const threadResults = await Promise.all(
+        let threadResults = await Promise.all(
             this.measurementTasks.map((t) => t.manageDownload())
         )
         await Promise.all(this.measurementTasks.map((t) => t.disconnect()))
@@ -87,6 +87,13 @@ export class RMBTClientService {
             `Pre-upload was finished with chunk numbers: %o`,
             chunkNumbers
         )
+        this.checkIfShouldUseOneThread(chunkNumbers)
+
+        // Upload
+        threadResults = await Promise.all(
+            this.measurementTasks.map((t) => t.manageUpload())
+        )
+
         await Promise.all(this.measurementTasks.map((t) => t.disconnect()))
     }
 

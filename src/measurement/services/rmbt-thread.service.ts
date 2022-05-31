@@ -11,6 +11,7 @@ import { PingMessageHandler } from "./ping-message-handler.service"
 import { PreDownloadMessageHandler } from "./pre-download-message-handler.service"
 import { PreUploadMessageHandler } from "./pre-upload-message-handler.service"
 import { InitMessageHandler } from "./init-message-handler.service"
+import { UploadMessageHandler } from "./upload-message-handler.service"
 
 export class RMBTThreadService {
     currentTransfer: number = -1
@@ -24,18 +25,19 @@ export class RMBTThreadService {
     private totalPreUpload = 0
     private totalUpload = 0
     private chunksize: number = 0
-    private phase:
+    private phase?:
         | "init"
         | "predownload"
         | "ping"
         | "download"
         | "preupload"
-        | undefined
+        | "upload"
     private initMessageHandler?: InitMessageHandler
     private pingMessageHandler?: PingMessageHandler
     private preDownloadMessageHandler?: PreDownloadMessageHandler
     private downloadMessageHandler?: DownloadMessageHandler
     private preUploadMessageHandler?: PreUploadMessageHandler
+    private uploadMessageHandler?: UploadMessageHandler
     private onDisconnect?: (thread: RMBTThreadService) => void
     private hadError = false
     private isConnected = false
@@ -128,6 +130,9 @@ export class RMBTThreadService {
                 break
             case this.phase === "preupload":
                 this.preUploadMessageHandler?.readData(data)
+                break
+            case this.phase === "upload":
+                this.uploadMessageHandler?.readData(data)
                 break
             default:
                 break
@@ -244,6 +249,29 @@ export class RMBTThreadService {
                 }
             )
             this.preUploadMessageHandler.writeData()
+        })
+    }
+
+    async manageUpload(): Promise<IMeasurementThreadResult> {
+        return new Promise((resolve) => {
+            this.phase = "upload"
+            this.uploadMessageHandler = new UploadMessageHandler(
+                this.client,
+                this.index,
+                this.chunksize,
+                this.params,
+                this.result,
+                (total, currentTime) => {
+                    this.totalUpload = this.totalPreUpload + total
+                    this.currentTransfer = total
+                    this.currentTime = currentTime
+                },
+                (result) => {
+                    this.uploadMessageHandler = undefined
+                    this.disconnect().then(() => resolve(result))
+                }
+            )
+            this.uploadMessageHandler.writeData()
         })
     }
 }

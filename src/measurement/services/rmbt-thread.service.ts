@@ -278,7 +278,9 @@ export class RMBTThreadService {
         })
     }
 
-    async manageUpload(): Promise<IMeasurementThreadResult> {
+    async manageUpload(
+        commonStartTime: bigint
+    ): Promise<IMeasurementThreadResult> {
         return new Promise((resolve) => {
             this.phase = "upload"
             this.uploadMessageHandler = new UploadMessageHandler(
@@ -287,6 +289,7 @@ export class RMBTThreadService {
                 this.chunksize,
                 this.params,
                 this.result,
+                commonStartTime,
                 (total, currentTime) => {
                     this.totalUpload = total
                     this.currentTransfer = total

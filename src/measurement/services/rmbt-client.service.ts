@@ -1,3 +1,4 @@
+import { hrtime } from "process"
 import { MeasurementThreadResult } from "../dto/measurement-result.dto"
 import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
@@ -93,8 +94,9 @@ export class RMBTClientService {
             this.measurementTasks.map((t, i) => t.connect(threadResults[i]))
         )
         await Promise.all(this.measurementTasks.map((t) => t.manageInit()))
+        const startTime = hrtime.bigint()
         threadResults = await Promise.all(
-            this.measurementTasks.map((t) => t.manageUpload())
+            this.measurementTasks.map((t) => t.manageUpload(startTime))
         )
 
         Logger.I.info(

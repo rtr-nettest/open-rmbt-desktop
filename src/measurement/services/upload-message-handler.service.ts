@@ -14,7 +14,6 @@ export class UploadMessageHandler implements IMessageHandler {
     private result = new SingleThreadResult(0)
     private activityInterval?: NodeJS.Timer
     private inactivityTimeout = 0
-    private threadStartTimeOffSet = 0n
 
     constructor(
         private client: Socket,
@@ -22,7 +21,6 @@ export class UploadMessageHandler implements IMessageHandler {
         private chunksize: number,
         private params: IMeasurementRegistrationResponse,
         private threadResult: IMeasurementThreadResult,
-        private commonStartTime: bigint,
         private setIntermidiateResults: (
             currentTransfer: number,
             currentTime: bigint
@@ -49,7 +47,6 @@ export class UploadMessageHandler implements IMessageHandler {
     }
 
     writeData(): void {
-        this.threadStartTimeOffSet = hrtime.bigint() - this.commonStartTime
         Logger.I.info(`Thread ${this.index} sending PUT.`)
         this.setActivityInterval()
         this.client.write(ESocketMessage.PUT)
@@ -64,8 +61,7 @@ export class UploadMessageHandler implements IMessageHandler {
         if (data.includes(ESocketMessage.TIME)) {
             const dataArr = data.toString().trim().split(" ")
             if (dataArr.length === 4) {
-                const nanos =
-                    BigInt(Number(dataArr[1])) - this.threadStartTimeOffSet
+                const nanos = BigInt(Number(dataArr[1]))
                 const bytes = Number(dataArr[3])
                 if (bytes > 0 && nanos > 0n) {
                     this.result.addResult(bytes, nanos)

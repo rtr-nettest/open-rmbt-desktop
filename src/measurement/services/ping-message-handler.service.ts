@@ -23,6 +23,19 @@ export class PingMessageHandler implements IMessageHandler {
         public onFinish: (result: IMeasurementThreadResult) => void
     ) {}
 
+    stopMessaging(): void {
+        this.serverPings.sort()
+        const middle = this.serverPings.length / 2
+        if (this.serverPings.length % 2 === 0) {
+            const medianA = this.serverPings[middle]
+            const medianB = this.serverPings[middle - 1]
+            this.result.ping_median = (medianA + medianB) / 2n
+        } else {
+            this.result.ping_median = this.serverPings[Math.floor(middle)]
+        }
+        this.onFinish?.(this.result)
+    }
+
     writeData() {
         this.pingCurrentStartTime = hrtime.bigint()
         this.client.write(Buffer.from(ESocketMessage.PING, "ascii"))
@@ -64,17 +77,7 @@ export class PingMessageHandler implements IMessageHandler {
             if (this.pingCounter < (this.params.test_numpings ?? 0)) {
                 this.writeData()
             } else {
-                this.serverPings.sort()
-                const middle = this.serverPings.length / 2
-                if (this.serverPings.length % 2 === 0) {
-                    const medianA = this.serverPings[middle]
-                    const medianB = this.serverPings[middle - 1]
-                    this.result.ping_median = (medianA + medianB) / 2n
-                } else {
-                    this.result.ping_median =
-                        this.serverPings[Math.floor(middle)]
-                }
-                this.onFinish?.(this.result)
+                this.stopMessaging()
             }
             return
         }

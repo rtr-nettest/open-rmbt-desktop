@@ -21,6 +21,15 @@ export class PreDownloadMessageHandler implements IMessageHandler {
         }) => void
     ) {}
 
+    stopMessaging(): void {
+        Logger.I.info(`Predownload is finished for thread ${this.index}`)
+        clearInterval(this.activityInterval)
+        this.onFinish?.({
+            chunks: this.preDownloadChunks,
+            totalDownload: this.preDownloadBytesRead.byteLength,
+        })
+    }
+
     writeData(): void {
         this.preDownloadBytesRead = Buffer.alloc(0)
         this.preDownloadChunks = 1
@@ -34,14 +43,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
                 this.preDownloadChunks *= 2
                 this.getChunks()
             } else {
-                Logger.I.info(
-                    `Predownload is finished for thread ${this.index}`
-                )
-                clearInterval(this.activityInterval)
-                this.onFinish?.({
-                    chunks: this.preDownloadChunks,
-                    totalDownload: this.preDownloadBytesRead.byteLength,
-                })
+                this.stopMessaging()
             }
             return
         }

@@ -14,6 +14,11 @@ export class InitMessageHandler implements IMessageHandler {
         public onFinish: (result: IMeasurementThreadResult) => void
     ) {}
 
+    stopMessaging(): void {
+        Logger.I.info(`Thread ${this.index} finished initialization.`)
+        this.onFinish?.(this.result)
+    }
+
     writeData(): void {
         if (this.params.test_server_type === "RMBThttp") {
             Logger.I.info(`Thread ${this.index} is requesting HTTP upgrade...`)
@@ -47,8 +52,7 @@ export class InitMessageHandler implements IMessageHandler {
             return
         }
         if (dataString.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
-            Logger.I.info(`Thread ${this.index} finished initialization.`)
-            this.onFinish?.(this.result)
+            this.stopMessaging()
             return
         }
     }

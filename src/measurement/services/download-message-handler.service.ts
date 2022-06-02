@@ -11,9 +11,9 @@ export class DownloadMessageHandler implements IMessageHandler {
     static minDiffTime = 100000000n
     private downloadStartTime = hrtime.bigint()
     private downloadEndTime = hrtime.bigint()
-    private downloadDuration = 1000000000n
     private downloadBytesRead = Buffer.alloc(0)
     private activityInterval?: NodeJS.Timer
+    private inactivityTimeout = 0
     private result = new SingleThreadResult(0)
     private nsec = 0n
 
@@ -30,45 +30,49 @@ export class DownloadMessageHandler implements IMessageHandler {
         public onFinish: (result: IMeasurementThreadResult) => void
     ) {
         const maxStoredResults =
-            (BigInt(this.params.test_duration) * 1000000000n) /
+            (BigInt(this.params.test_duration) * BigInt(1e9)) /
             DownloadMessageHandler.minDiffTime
         this.result = new SingleThreadResult(Number(maxStoredResults))
+        this.inactivityTimeout = Number(this.params.test_duration) * 1000
+    }
+
+    stopMessaging() {
+        clearInterval(this.activityInterval)
+        Logger.I.info(`Download is stoped for thread ${this.index}`)
+        this.threadResult.down = this.result.getAllResults()
+        this.threadResult.speedItems = this.result.addSpeedItems(
+            this.threadResult.speedItems,
+            false,
+            this.index
+        )
+        this.onFinish?.(this.threadResult)
     }
 
     writeData(): void {
         this.downloadStartTime = hrtime.bigint()
         this.downloadEndTime =
             this.downloadStartTime +
-            BigInt(this.params.test_duration) * this.downloadDuration
+            BigInt(this.params.test_duration) * BigInt(1e9)
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.index}...`)
             if (hrtime.bigint() > this.downloadEndTime) {
                 Logger.I.info(`Thread ${this.index} timed out.`)
-                this.finishDownload()
+                this.requestFinish()
             }
-        }, 1000)
+        }, this.inactivityTimeout)
         Logger.I.info(
             `Thread ${this.index} will run download for ${this.params.test_duration} seconds.`
         )
         this.client.write(
-            `${ESocketMessage.GETTIME} ${this.params.test_duration}\n`,
-            "ascii"
+            `${ESocketMessage.GETTIME} ${this.params.test_duration}\n`
         )
     }
     readData(data: Buffer): void {
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
-            Logger.I.info(`Download is finished for thread ${this.index}`)
-            clearInterval(this.activityInterval)
-            this.threadResult.down = this.result.getAllResults()
-            this.threadResult.speedItems = this.result.getSpeedItems(
-                false,
-                this.index
-            )
-            this.onFinish?.(this.threadResult)
+            this.stopMessaging()
             return
         }
         if (data.includes(ESocketMessage.TIME)) {
-            this.client.end()
             return
         }
         let lastByte = 0
@@ -92,11 +96,16 @@ export class DownloadMessageHandler implements IMessageHandler {
             )
         }
         if (isFullChunk && lastByte === 0xff) {
-            this.finishDownload()
+            this.requestFinish()
         }
     }
-    private finishDownload() {
+
+    private requestFinish() {
         clearInterval(this.activityInterval)
+        this.activityInterval = setInterval(
+            this.stopMessaging.bind(this),
+            this.inactivityTimeout
+        )
         this.client.write(ESocketMessage.OK)
     }
 }

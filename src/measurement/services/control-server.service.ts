@@ -42,7 +42,7 @@ export class ControlServerService {
                         (std) => std.serverType === request.name
                     )
             }
-            Logger.I.info(`Using server: %o`, filteredServer)
+            Logger.I.info("Using server: %o", filteredServer)
             return filteredServer
         }
     }

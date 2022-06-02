@@ -103,8 +103,7 @@ export class SingleThreadResult {
         return { bytes: resultBytes, nsec: resultNsec }
     }
 
-    getSpeedItems(upload: boolean, thread: number) {
-        const list: ISpeedItem[] = []
+    addSpeedItems(list: ISpeedItem[] = [], upload: boolean, thread: number) {
         let coarsNsec = 0n
         const numResultsCoarse = Math.min(
             this.coarseResults,

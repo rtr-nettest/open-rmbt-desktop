@@ -68,10 +68,9 @@ export class RMBTClientService {
         let threadResults = await Promise.all(
             this.measurementTasks.map((t) => t.manageDownload())
         )
-        await Promise.all(this.measurementTasks.map((t) => t.disconnect()))
 
         Logger.I.info(
-            `The total speed is ${this.getTotalSpeed() / 1000000} Mbps`
+            `The total download speed is ${this.getTotalSpeed() / 1000000} Mbps`
         )
 
         // Pre-upload
@@ -90,14 +89,21 @@ export class RMBTClientService {
         this.checkIfShouldUseOneThread(chunkNumbers)
 
         // Upload
+        await Promise.all(
+            this.measurementTasks.map((t, i) => t.connect(threadResults[i]))
+        )
+        await Promise.all(this.measurementTasks.map((t) => t.manageInit()))
         threadResults = await Promise.all(
             this.measurementTasks.map((t) => t.manageUpload())
         )
 
-        await Promise.all(this.measurementTasks.map((t) => t.disconnect()))
+        Logger.I.info(
+            `The total upload speed is ${this.getTotalSpeed() / 1000000} Mbps`
+        )
     }
 
     private checkIfShouldUseOneThread(chunkNumbers: number[]) {
+        Logger.I.info("Checking if should use one thread.")
         const threadWithLowestChunkNumber = chunkNumbers.findIndex(
             (c) => c <= 4
         )

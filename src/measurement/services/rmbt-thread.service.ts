@@ -84,6 +84,8 @@ export class RMBTThreadService {
             if (!this.isConnected) {
                 resolve(this)
             }
+            Logger.I.info(`Thread ${this.index} is disconnecting.`)
+            this.isConnected = false
             this.onDisconnect = resolve
             this.client.end()
         })
@@ -157,6 +159,15 @@ export class RMBTThreadService {
         )
         this.isConnected = false
         this.onDisconnect?.(this)
+
+        switch (this.phase) {
+            case "preupload":
+                this.preUploadMessageHandler?.stopMessaging()
+                break
+            case "upload":
+                this.uploadMessageHandler?.stopMessaging()
+                break
+        }
     }
 
     async manageInit(): Promise<IMeasurementThreadResult> {
@@ -171,6 +182,7 @@ export class RMBTThreadService {
                     this.initMessageHandler = undefined
                     this.chunksize = this.result.chunksize || 0
                     delete this.result.chunksize
+                    Logger.I.info(`Resolving thread ${this.index} init.`)
                     resolve(result)
                 }
             )
@@ -188,6 +200,9 @@ export class RMBTThreadService {
                 (result) => {
                     this.preDownloadMessageHandler = undefined
                     this.totalPreDownload = result.totalDownload
+                    Logger.I.info(
+                        `Resolving thread ${this.index} pre-download.`
+                    )
                     resolve(result.chunks)
                 }
             )
@@ -205,6 +220,7 @@ export class RMBTThreadService {
                 this.result,
                 (result) => {
                     this.pingMessageHandler = undefined
+                    Logger.I.info(`Resolving thread ${this.index} ping.`)
                     resolve(result)
                 }
             )
@@ -222,13 +238,18 @@ export class RMBTThreadService {
                 this.params,
                 this.result,
                 (total, currentTime) => {
-                    this.totalDownload = this.totalPreDownload + total
+                    this.totalDownload = total
                     this.currentTransfer = total
                     this.currentTime = currentTime
                 },
                 (result) => {
                     this.downloadMessageHandler = undefined
-                    this.disconnect().then(() => resolve(result))
+                    this.disconnect().then(() => {
+                        Logger.I.info(
+                            `Resolving thread ${this.index} download.`
+                        )
+                        resolve(result)
+                    })
                 }
             )
             this.downloadMessageHandler.writeData()
@@ -245,7 +266,12 @@ export class RMBTThreadService {
                 (result) => {
                     this.preUploadMessageHandler = undefined
                     this.totalPreUpload = result.totalUpload
-                    resolve(result.chunks)
+                    this.disconnect().then(() => {
+                        Logger.I.info(
+                            `Resolving thread ${this.index} pre-upload.`
+                        )
+                        resolve(result.chunks)
+                    })
                 }
             )
             this.preUploadMessageHandler.writeData()
@@ -262,13 +288,16 @@ export class RMBTThreadService {
                 this.params,
                 this.result,
                 (total, currentTime) => {
-                    this.totalUpload = this.totalPreUpload + total
+                    this.totalUpload = total
                     this.currentTransfer = total
                     this.currentTime = currentTime
                 },
                 (result) => {
                     this.uploadMessageHandler = undefined
-                    this.disconnect().then(() => resolve(result))
+                    this.disconnect().then(() => {
+                        Logger.I.info(`Resolving thread ${this.index} upload.`)
+                        resolve(result)
+                    })
                 }
             )
             this.uploadMessageHandler.writeData()

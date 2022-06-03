@@ -5,5 +5,5 @@
         "resolveJsonModule": true,
         "rootDir": "src"
     },
-    "exclude": ["node_modules", "dist"]
+    "files": ["./src/measurement/services/worker.service.ts"]
 }

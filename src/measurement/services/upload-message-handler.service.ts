@@ -26,9 +26,7 @@ export class UploadMessageHandler implements IMessageHandler {
         ) => void,
         public onFinish: (result: IMeasurementThreadResult) => void
     ) {
-        const maxStoredResults =
-            (BigInt(this.ctx.params.test_duration) * BigInt(1e9)) /
-            DownloadMessageHandler.minDiffTime
+        const maxStoredResults = 280
         this.result = new SingleThreadResult(Number(maxStoredResults))
         this.inactivityTimeout = Number(this.ctx.params.test_duration) * 1000
     }

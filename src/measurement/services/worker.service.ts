@@ -1,10 +1,34 @@
 import { parentPort, workerData } from "worker_threads"
-import { Logger } from "./logger.service"
+import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
 import { RMBTThreadService } from "./rmbt-thread.service"
 
 let thread: RMBTThreadService | undefined
 
-parentPort?.on("message", async (message) => {
+export type IncomingMessage =
+    | "connect"
+    | "download"
+    | "ping"
+    | "preDownload"
+    | "preUpload"
+    | "upload"
+export type OutgoingMessage =
+    | "connected"
+    | "downloadFinished"
+    | "pingFinished"
+    | "preDownloadFinished"
+    | "preUploadFinished"
+    | "uploadFinished"
+export class OutgoingMessageWithData {
+    constructor(
+        public message: OutgoingMessage,
+        public result?: IMeasurementThreadResult,
+        public chunks: number = 0
+    ) {}
+}
+
+parentPort?.on("message", async (message: IncomingMessage) => {
+    let result: IMeasurementThreadResult | undefined
+    let chunks: number | undefined
     switch (message) {
         case "connect":
             if (!thread) {
@@ -17,16 +41,55 @@ parentPort?.on("message", async (message) => {
             await thread.manageInit()
             parentPort?.postMessage({ message: "connected" })
             break
-        case "upload":
-            const result = await thread?.manageDownload()
+        case "preDownload":
+            chunks = await thread?.managePreDownload()
+            parentPort?.postMessage(
+                new OutgoingMessageWithData(
+                    "preDownloadFinished",
+                    undefined,
+                    chunks
+                )
+            )
+            break
+        case "ping":
+            result = await thread?.managePing()
+            parentPort?.postMessage(
+                new OutgoingMessageWithData("pingFinished", result)
+            )
+            break
+        case "download":
+            result = await thread?.manageDownload()
             if (result) {
-                result!.currentTime = thread?.currentTime
-                result!.currentTransfer = thread?.currentTransfer
-                parentPort?.postMessage({
-                    message: "uploadFinished",
-                    result,
-                })
+                result.currentTime = thread?.currentTime || 0n
+                result.currentTransfer = thread?.currentTransfer || 0
             }
+            parentPort?.postMessage(
+                new OutgoingMessageWithData("downloadFinished", result)
+            )
+            break
+        case "preUpload":
+            await thread?.connect(workerData.result)
+            await thread?.manageInit()
+            chunks = await thread?.managePreUpload()
+            parentPort?.postMessage(
+                new OutgoingMessageWithData(
+                    "preUploadFinished",
+                    undefined,
+                    chunks
+                )
+            )
+            break
+        case "upload":
+            await thread?.connect(workerData.result)
+            await thread?.manageInit()
+            result = await thread?.manageUpload()
+            if (result) {
+                result.currentTime = thread?.currentTime || 0n
+                result.currentTransfer = thread?.currentTransfer || 0
+            }
+            parentPort?.postMessage(
+                new OutgoingMessageWithData("uploadFinished", result)
+            )
             break
     }
 })

@@ -1,3 +1,4 @@
+import { Worker } from "worker_threads"
 import { MeasurementThreadResult } from "../dto/measurement-result.dto"
 import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
@@ -7,8 +8,9 @@ import { RMBTThreadService } from "./rmbt-thread.service"
 export class RMBTClientService {
     measurementLastUpdate?: number
     measurementStatus: EMeasurementStatus = EMeasurementStatus.WAIT
-    measurementTasks: RMBTThreadService[] = []
+    measurementTasks: Worker[] = []
     params: IMeasurementRegistrationResponse
+    threadResults: MeasurementThreadResult[] = []
 
     constructor(params: IMeasurementRegistrationResponse) {
         this.params = params
@@ -31,75 +33,53 @@ export class RMBTClientService {
     private async runMeasurement() {
         Logger.I.info("Running measurement...")
         this.measurementStatus = EMeasurementStatus.INIT
-        const numThreads = this.params.test_numthreads
-        for (let i = 0; i < numThreads; i++) {
-            this.measurementTasks.push(new RMBTThreadService(this.params, i))
+        for (let i = 0; i < this.params.test_numthreads; i++) {
+            this.measurementTasks.push(
+                new Worker("./worker.js", {
+                    workerData: {
+                        path: "./src/measurement/services/worker.service.ts",
+                        params: this.params,
+                        index: i,
+                        result: new MeasurementThreadResult(),
+                    },
+                })
+            )
         }
 
-        // Init
-        await Promise.all(
-            this.measurementTasks.map((t) =>
-                t.connect(new MeasurementThreadResult())
-            )
-        )
-        await Promise.all(this.measurementTasks.map((t) => t.manageInit()))
-        Logger.I.info("All threads are ready!")
-
-        // Pre-download
-        let chunkNumbers = await Promise.all(
-            this.measurementTasks.map((t) => t.managePreDownload())
-        )
-        Logger.I.info(
-            `Pre-download was finished with chunk numbers: %o`,
-            chunkNumbers
-        )
-        this.checkIfShouldUseOneThread(chunkNumbers)
-
-        // Ping
-        const pingResults = await this.measurementTasks[0].managePing()
-
-        Logger.I.info(
-            `The ping median is ${
-                (pingResults.ping_median || 0n) / 1000000n
-            } ms`
-        )
-
-        // Download
-        let threadResults = await Promise.all(
-            this.measurementTasks.map((t) => t.manageDownload())
-        )
-
-        Logger.I.info(
-            `The total download speed is ${this.getTotalSpeed() / 1000000} Mbps`
-        )
-
-        // Pre-upload
-        await Promise.all(
-            this.measurementTasks.map((t, i) => t.connect(threadResults[i]))
-        )
-        await Promise.all(this.measurementTasks.map((t) => t.manageInit()))
-        Logger.I.info("All threads are ready!")
-        chunkNumbers = await Promise.all(
-            this.measurementTasks.map((t) => t.managePreUpload())
-        )
-        Logger.I.info(
-            `Pre-upload was finished with chunk numbers: %o`,
-            chunkNumbers
-        )
-        this.checkIfShouldUseOneThread(chunkNumbers)
-
-        // Upload
-        await Promise.all(
-            this.measurementTasks.map((t, i) => t.connect(threadResults[i]))
-        )
-        await Promise.all(this.measurementTasks.map((t) => t.manageInit()))
-        threadResults = await Promise.all(
-            this.measurementTasks.map((t) => t.manageUpload())
-        )
-
-        Logger.I.info(
-            `The total upload speed is ${this.getTotalSpeed() / 1000000} Mbps`
-        )
+        for (const [index, worker] of this.measurementTasks.entries()) {
+            worker.postMessage("connect")
+            worker.on("message", (message) => {
+                switch (message.message) {
+                    case "connected":
+                        Logger.I.debug(`Worker ${index} is connected`)
+                        this.threadResults.push(new MeasurementThreadResult())
+                        if (
+                            this.threadResults.length ===
+                            this.measurementTasks.length
+                        ) {
+                            for (const w of this.measurementTasks) {
+                                w.postMessage("upload")
+                            }
+                            this.threadResults = []
+                        }
+                        break
+                    case "uploadFinished":
+                        this.threadResults.push(message.result)
+                        if (
+                            this.threadResults.length ===
+                            this.measurementTasks.length
+                        ) {
+                            Logger.I.info(
+                                `The total upload speed is ${
+                                    this.getTotalSpeed() / 1000000
+                                }Mbps`
+                            )
+                            this.threadResults = []
+                        }
+                        break
+                }
+            })
+        }
     }
 
     private checkIfShouldUseOneThread(chunkNumbers: number[]) {
@@ -109,16 +89,16 @@ export class RMBTClientService {
         )
         if (threadWithLowestChunkNumber >= 0) {
             Logger.I.info("Switching to one thread.")
-            this.measurementTasks = this.measurementTasks.reduce(
-                (acc, mt, index) => {
-                    if (index === 0) {
-                        return [mt]
-                    }
-                    mt.disconnect()
-                    return acc
-                },
-                [] as RMBTThreadService[]
-            )
+            // this.measurementTasks = this.measurementTasks.reduce(
+            //     (acc, mt, index) => {
+            //         if (index === 0) {
+            //             return [mt]
+            //         }
+            //         mt.disconnect()
+            //         return acc
+            //     },
+            //     [] as RMBTThreadService[]
+            // )
         }
     }
 
@@ -127,7 +107,7 @@ export class RMBTClientService {
         let sumTrans = 0
         let maxTime = 0n
 
-        for (const task of this.measurementTasks) {
+        for (const task of this.threadResults) {
             if (task.currentTime > maxTime) {
                 maxTime = task.currentTime
             }

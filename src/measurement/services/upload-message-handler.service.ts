@@ -75,15 +75,25 @@ export class UploadMessageHandler implements IMessageHandler {
     }
 
     private putChunks() {
-        const buffer = randomBytes(this.ctx.chunksize)
-        if (hrtime.bigint() >= this.uploadEndTime) {
-            buffer[buffer.length - 1] = 0xff
-            Logger.I.info(`Thread ${this.ctx.index} sending the last chunk.`)
-        } else {
-            buffer[buffer.length - 1] = 0x00
-            Logger.I.info(`Thread ${this.ctx.index} sending a chunk.`)
+        let chunkCounter = Math.max(
+            this.ctx.preUploadChunks || 1,
+            this.ctx.preDownloadChunks || 1
+        )
+        while (chunkCounter > 0) {
+            const buffer = randomBytes(this.ctx.chunksize)
+            if (chunkCounter === 1 || hrtime.bigint() >= this.uploadEndTime) {
+                buffer[buffer.length - 1] = 0xff
+                chunkCounter = 0
+                Logger.I.info(
+                    `Thread ${this.ctx.index} sending the last chunk.`
+                )
+            } else {
+                buffer[buffer.length - 1] = 0x00
+                chunkCounter -= 1
+                Logger.I.info(`Thread ${this.ctx.index} sending a chunk.`)
+            }
+            this.ctx.client.write(buffer)
         }
-        this.ctx.client.write(buffer)
     }
 
     private setActivityInterval() {

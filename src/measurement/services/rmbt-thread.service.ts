@@ -22,6 +22,8 @@ export class RMBTThreadService implements IMessageHandlerContext {
     index: number
     params: IMeasurementRegistrationResponse
     threadResult: IMeasurementThreadResult = new MeasurementThreadResult()
+    preDownloadChunks?: number | undefined
+    preUploadChunks?: number | undefined
     private totalPreDownload = 0
     private totalDownload = 0
     private totalPreUpload = 0
@@ -193,6 +195,7 @@ export class RMBTThreadService implements IMessageHandlerContext {
                 (result) => {
                     this.preDownloadMessageHandler = undefined
                     this.totalPreDownload = result.totalDownload
+                    this.preDownloadChunks = result.chunks
                     Logger.I.info(
                         `Resolving thread ${this.index} pre-download.`
                     )
@@ -247,6 +250,7 @@ export class RMBTThreadService implements IMessageHandlerContext {
                 (result) => {
                     this.preUploadMessageHandler = undefined
                     this.totalPreUpload = result.totalUpload
+                    this.preUploadChunks = result.chunks
                     this.disconnect().then(() => {
                         Logger.I.info(
                             `Resolving thread ${this.index} pre-upload.`

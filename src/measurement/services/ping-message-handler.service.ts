@@ -6,7 +6,10 @@ import {
     IMeasurementThreadResult,
     IPing,
 } from "../interfaces/measurement-result.interface"
-import { IMessageHandler } from "../interfaces/message-handler.interface"
+import {
+    IMessageHandler,
+    IMessageHandlerContext,
+} from "../interfaces/message-handler.interface"
 import { Logger } from "./logger.service"
 
 export class PingMessageHandler implements IMessageHandler {
@@ -16,10 +19,7 @@ export class PingMessageHandler implements IMessageHandler {
     private pingCounter = 0
 
     constructor(
-        private client: Socket,
-        private index: number,
-        private params: IMeasurementRegistrationResponse,
-        private result: IMeasurementThreadResult,
+        private ctx: IMessageHandlerContext,
         public onFinish: (result: IMeasurementThreadResult) => void
     ) {}
 
@@ -29,18 +29,19 @@ export class PingMessageHandler implements IMessageHandler {
         if (this.serverPings.length % 2 === 0) {
             const medianA = this.serverPings[middle]
             const medianB = this.serverPings[middle - 1]
-            this.result.ping_median = (medianA + medianB) / 2n
+            this.ctx.threadResult.ping_median = (medianA + medianB) / 2n
         } else {
-            this.result.ping_median = this.serverPings[Math.floor(middle)]
+            this.ctx.threadResult.ping_median =
+                this.serverPings[Math.floor(middle)]
         }
-        this.onFinish?.(this.result)
+        this.onFinish?.(this.ctx.threadResult)
     }
 
     writeData() {
         this.pingCurrentStartTime = hrtime.bigint()
-        this.client.write(Buffer.from(ESocketMessage.PING, "ascii"))
+        this.ctx.client.write(Buffer.from(ESocketMessage.PING, "ascii"))
         Logger.I.info(
-            `Thread ${this.index} sent ${ESocketMessage.PING.replace(
+            `Thread ${this.ctx.index} sent ${ESocketMessage.PING.replace(
                 "\n",
                 ""
             )} #${this.pingCounter + 1}`
@@ -52,9 +53,9 @@ export class PingMessageHandler implements IMessageHandler {
         if (data.includes(ESocketMessage.PONG)) {
             this.pingCurrentEndTime = hrtime.bigint()
             Logger.I.info(
-                `Thread ${this.index} is ${ESocketMessage.OK}Continuing.`
+                `Thread ${this.ctx.index} is ${ESocketMessage.OK}Continuing.`
             )
-            this.client.write(ESocketMessage.OK)
+            this.ctx.client.write(ESocketMessage.OK)
             return
         }
         if (data.includes(ESocketMessage.TIME)) {
@@ -68,13 +69,15 @@ export class PingMessageHandler implements IMessageHandler {
                 timeNs: this.pingCurrentStartTime,
             }
 
-            if (ping.client < (this.result.ping_shortest || Infinity)) {
-                this.result.ping_shortest = ping.client
+            if (
+                ping.client < (this.ctx.threadResult.ping_shortest || Infinity)
+            ) {
+                this.ctx.threadResult.ping_shortest = ping.client
             }
             this.serverPings.push(ping.server)
         }
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
-            if (this.pingCounter < (this.params.test_numpings ?? 0)) {
+            if (this.pingCounter < (this.ctx.params.test_numpings ?? 0)) {
                 this.writeData()
             } else {
                 this.stopMessaging()

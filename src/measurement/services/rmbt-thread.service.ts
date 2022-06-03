@@ -12,19 +12,20 @@ import { PreDownloadMessageHandler } from "./pre-download-message-handler.servic
 import { PreUploadMessageHandler } from "./pre-upload-message-handler.service"
 import { InitMessageHandler } from "./init-message-handler.service"
 import { UploadMessageHandler } from "./upload-message-handler.service"
+import { IMessageHandlerContext } from "../interfaces/message-handler.interface"
 
-export class RMBTThreadService {
-    currentTransfer: number = -1
+export class RMBTThreadService implements IMessageHandlerContext {
+    chunksize: number = 0
+    client: net.Socket = new net.Socket()
     currentTime: bigint = -1n
-    private client: net.Socket = new net.Socket()
-    private index: number
-    private params: IMeasurementRegistrationResponse
-    private result: IMeasurementThreadResult = new MeasurementThreadResult()
+    currentTransfer: number = -1
+    index: number
+    params: IMeasurementRegistrationResponse
+    threadResult: IMeasurementThreadResult = new MeasurementThreadResult()
     private totalPreDownload = 0
     private totalDownload = 0
     private totalPreUpload = 0
     private totalUpload = 0
-    private chunksize: number = 0
     private phase?:
         | "init"
         | "predownload"
@@ -51,7 +52,7 @@ export class RMBTThreadService {
         result: IMeasurementThreadResult
     ): Promise<RMBTThreadService> {
         return new Promise((resolve) => {
-            this.result = result
+            this.threadResult = result
             Logger.I.info(
                 `Thread ${this.index} is connecting on host ${this.params.test_server_address}, port ${this.params.test_server_port}...`
             )
@@ -96,9 +97,9 @@ export class RMBTThreadService {
             Logger.I.info(`Thread ${this.index} is connected.`)
             this.isConnected = true
             this.hadError = false
-            this.result.ip_local = this.client.localAddress
-            this.result.ip_server = this.client.remoteAddress
-            this.result.port_remote = this.client.remotePort
+            this.threadResult.ip_local = this.client.localAddress
+            this.threadResult.ip_server = this.client.remoteAddress
+            this.threadResult.port_remote = this.client.remotePort
             resolve(this)
         }
 
@@ -173,19 +174,13 @@ export class RMBTThreadService {
     async manageInit(): Promise<IMeasurementThreadResult> {
         return new Promise((resolve) => {
             this.phase = "init"
-            this.initMessageHandler = new InitMessageHandler(
-                this.client,
-                this.index,
-                this.params,
-                this.result,
-                (result) => {
-                    this.initMessageHandler = undefined
-                    this.chunksize = this.result.chunksize || 0
-                    delete this.result.chunksize
-                    Logger.I.info(`Resolving thread ${this.index} init.`)
-                    resolve(result)
-                }
-            )
+            this.initMessageHandler = new InitMessageHandler(this, (result) => {
+                this.initMessageHandler = undefined
+                this.chunksize = this.threadResult.chunksize || 0
+                delete this.threadResult.chunksize
+                Logger.I.info(`Resolving thread ${this.index} init.`)
+                resolve(result)
+            })
             this.initMessageHandler.writeData()
         })
     }
@@ -194,9 +189,7 @@ export class RMBTThreadService {
         return new Promise((resolve) => {
             this.phase = "predownload"
             this.preDownloadMessageHandler = new PreDownloadMessageHandler(
-                this.client,
-                this.index,
-                this.chunksize,
+                this,
                 (result) => {
                     this.preDownloadMessageHandler = undefined
                     this.totalPreDownload = result.totalDownload
@@ -213,17 +206,11 @@ export class RMBTThreadService {
     async managePing(): Promise<IMeasurementThreadResult> {
         return new Promise((resolve) => {
             this.phase = "ping"
-            this.pingMessageHandler = new PingMessageHandler(
-                this.client,
-                this.index,
-                this.params,
-                this.result,
-                (result) => {
-                    this.pingMessageHandler = undefined
-                    Logger.I.info(`Resolving thread ${this.index} ping.`)
-                    resolve(result)
-                }
-            )
+            this.pingMessageHandler = new PingMessageHandler(this, (result) => {
+                this.pingMessageHandler = undefined
+                Logger.I.info(`Resolving thread ${this.index} ping.`)
+                resolve(result)
+            })
             this.pingMessageHandler.writeData()
         })
     }
@@ -232,11 +219,7 @@ export class RMBTThreadService {
         return new Promise((resolve) => {
             this.phase = "download"
             this.downloadMessageHandler = new DownloadMessageHandler(
-                this.client,
-                this.index,
-                this.chunksize,
-                this.params,
-                this.result,
+                this,
                 (total, currentTime) => {
                     this.totalDownload = total
                     this.currentTransfer = total
@@ -260,9 +243,7 @@ export class RMBTThreadService {
         return new Promise((resolve) => {
             this.phase = "preupload"
             this.preUploadMessageHandler = new PreUploadMessageHandler(
-                this.client,
-                this.index,
-                this.chunksize,
+                this,
                 (result) => {
                     this.preUploadMessageHandler = undefined
                     this.totalPreUpload = result.totalUpload
@@ -282,11 +263,7 @@ export class RMBTThreadService {
         return new Promise((resolve) => {
             this.phase = "upload"
             this.uploadMessageHandler = new UploadMessageHandler(
-                this.client,
-                this.index,
-                this.chunksize,
-                this.params,
-                this.result,
+                this,
                 (total, currentTime) => {
                     this.totalUpload = total
                     this.currentTransfer = total

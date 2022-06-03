@@ -1,7 +1,10 @@
 import { Socket } from "net"
 import { hrtime } from "process"
 import { ESocketMessage } from "../enums/socket-message.enum"
-import { IMessageHandler } from "../interfaces/message-handler.interface"
+import {
+    IMessageHandler,
+    IMessageHandlerContext,
+} from "../interfaces/message-handler.interface"
 import { Logger } from "./logger.service"
 
 export class PreDownloadMessageHandler implements IMessageHandler {
@@ -12,9 +15,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     private activityInterval?: NodeJS.Timer
 
     constructor(
-        private client: Socket,
-        private index: number,
-        private chunksize: number,
+        private ctx: IMessageHandlerContext,
         public onFinish: (result: {
             chunks: number
             totalDownload: number
@@ -22,7 +23,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     ) {}
 
     stopMessaging(): void {
-        Logger.I.info(`Predownload is finished for thread ${this.index}`)
+        Logger.I.info(`Predownload is finished for thread ${this.ctx.index}`)
         clearInterval(this.activityInterval)
         this.onFinish?.({
             chunks: this.preDownloadChunks,
@@ -57,7 +58,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
                 this.preDownloadBytesRead.byteLength + data.byteLength
             )
             isFullChunk =
-                this.preDownloadBytesRead.byteLength % this.chunksize === 0
+                this.preDownloadBytesRead.byteLength % this.ctx.chunksize === 0
             lastByte = data[data.length - 1]
         }
         if (isFullChunk && lastByte === 0xff) {
@@ -68,16 +69,16 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     private getChunks() {
         clearInterval(this.activityInterval)
         this.activityInterval = setInterval(() => {
-            Logger.I.info(`Checking activity on thread ${this.index}...`)
+            Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
             if (hrtime.bigint() > this.preDownloadEndTime) {
-                Logger.I.info(`Thread ${this.index} timed out.`)
+                Logger.I.info(`Thread ${this.ctx.index} timed out.`)
                 this.finishChunkPortion()
             }
         }, 1000)
         Logger.I.info(
-            `Thread ${this.index} getting ${this.preDownloadChunks} chunks.`
+            `Thread ${this.ctx.index} getting ${this.preDownloadChunks} chunks.`
         )
-        this.client.write(
+        this.ctx.client.write(
             `${ESocketMessage.GETCHUNKS} ${this.preDownloadChunks}\n`,
             "ascii"
         )
@@ -85,7 +86,9 @@ export class PreDownloadMessageHandler implements IMessageHandler {
 
     private finishChunkPortion() {
         clearInterval(this.activityInterval)
-        Logger.I.info(`Thread ${this.index} is ${ESocketMessage.OK}Continuing.`)
-        this.client.write(ESocketMessage.OK)
+        Logger.I.info(
+            `Thread ${this.ctx.index} is ${ESocketMessage.OK}Continuing.`
+        )
+        this.ctx.client.write(ESocketMessage.OK)
     }
 }

@@ -2,7 +2,10 @@ import { Socket } from "net"
 import { hrtime } from "process"
 import { randomBytes } from "crypto"
 import { ESocketMessage } from "../enums/socket-message.enum"
-import { IMessageHandler } from "../interfaces/message-handler.interface"
+import {
+    IMessageHandler,
+    IMessageHandlerContext,
+} from "../interfaces/message-handler.interface"
 import { Logger } from "./logger.service"
 
 export class PreUploadMessageHandler implements IMessageHandler {
@@ -12,9 +15,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
     private preUploadDuration = 2000000000n
 
     constructor(
-        private client: Socket,
-        private index: number,
-        private chunksize: number,
+        private ctx: IMessageHandlerContext,
         public onFinish: (result: {
             chunks: number
             totalUpload: number
@@ -30,7 +31,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
 
     writeData(): void {
         this.preUploadEndTime = hrtime.bigint() + this.preUploadDuration
-        Logger.I.info(`Thread ${this.index} starts sending chunks.`)
+        Logger.I.info(`Thread ${this.ctx.index} starts sending chunks.`)
         this.putNoResult()
     }
 
@@ -50,8 +51,8 @@ export class PreUploadMessageHandler implements IMessageHandler {
     }
 
     private putNoResult() {
-        Logger.I.info(`Thread ${this.index} sending PUTNORESULT.`)
-        this.client.write(ESocketMessage.PUTNORESULT)
+        Logger.I.info(`Thread ${this.ctx.index} sending PUTNORESULT.`)
+        this.ctx.client.write(ESocketMessage.PUTNORESULT)
     }
 
     private putChunks() {
@@ -59,17 +60,17 @@ export class PreUploadMessageHandler implements IMessageHandler {
             ? 1
             : this.preUploadChunks * 2
         Logger.I.info(
-            `Thread ${this.index} sending ${this.preUploadChunks} chunks.`
+            `Thread ${this.ctx.index} sending ${this.preUploadChunks} chunks.`
         )
         for (let i = 0; i < this.preUploadChunks; i++) {
-            const buffer = randomBytes(this.chunksize)
+            const buffer = randomBytes(this.ctx.chunksize)
             if (i == this.preUploadChunks - 1) {
                 buffer[buffer.length - 1] = 0xff
             }
-            this.client.write(buffer)
+            this.ctx.client.write(buffer)
             this.totalUpload += buffer.byteLength
             Logger.I.info(
-                `Thread ${this.index} has sent ${this.totalUpload} bytes.`
+                `Thread ${this.ctx.index} has sent ${this.totalUpload} bytes.`
             )
         }
     }

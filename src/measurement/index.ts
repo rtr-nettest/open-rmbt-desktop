@@ -1,16 +1,16 @@
 import { config } from "dotenv"
 import { MeasurementRegistrationRequest } from "./dto/measurement-registration-request.dto"
 import { UserSettingsRequest } from "./dto/user-settings-request.dto"
-import { ControlServerService } from "./services/control-server.service"
+import { ControlServer } from "./services/control-server.service"
 import { Logger } from "./services/logger.service"
-import { RMBTClientService } from "./services/rmbt-client.service"
+import { RMBTClient } from "./services/rmbt-client.service"
 
 export async function runMeasurement() {
     config({
         path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
     })
 
-    const controlServer = new ControlServerService()
+    const controlServer = new ControlServer()
     const settingsRequest = new UserSettingsRequest()
     try {
         const measurementServer =
@@ -23,7 +23,7 @@ export async function runMeasurement() {
                 settingsRequest
             )
         )
-        const rmbClient = new RMBTClientService(measurementRegistration)
+        const rmbClient = new RMBTClient(measurementRegistration)
         rmbClient.scheduleMeasurement()
     } catch (err) {
         Logger.I.error(err)

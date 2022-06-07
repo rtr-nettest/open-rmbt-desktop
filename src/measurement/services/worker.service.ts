@@ -1,8 +1,8 @@
 import { parentPort, workerData } from "worker_threads"
 import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
-import { RMBTThreadService } from "./rmbt-thread.service"
+import { RMBTThread } from "./rmbt-thread.service"
 
-let thread: RMBTThreadService | undefined
+let thread: RMBTThread | undefined
 
 export type IncomingMessage =
     | "connect"
@@ -36,10 +36,7 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
     switch (message.message) {
         case "connect":
             if (!thread) {
-                thread = new RMBTThreadService(
-                    workerData.params,
-                    workerData.index
-                )
+                thread = new RMBTThread(workerData.params, workerData.index)
             }
             await thread.connect(workerData.result)
             await thread.manageInit()

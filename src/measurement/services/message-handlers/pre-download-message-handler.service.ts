@@ -1,14 +1,14 @@
-import { hrtime } from "process"
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import {
     IMessageHandler,
     IMessageHandlerContext,
 } from "../../interfaces/message-handler.interface"
 import { Logger } from "../logger.service"
+import { Time } from "../time.service"
 
 export class PreDownloadMessageHandler implements IMessageHandler {
     private preDownloadChunks = 1
-    private preDownloadEndTime = hrtime.bigint()
+    private preDownloadEndTime = Time.nowNs()
     private preDownloadDuration = 2000000000n
     private preDownloadBytesRead = Buffer.alloc(0)
     private activityInterval?: NodeJS.Timer
@@ -33,13 +33,13 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     writeData(): void {
         this.preDownloadBytesRead = Buffer.alloc(0)
         this.preDownloadChunks = 1
-        this.preDownloadEndTime = hrtime.bigint() + this.preDownloadDuration
+        this.preDownloadEndTime = Time.nowNs() + this.preDownloadDuration
         this.getChunks()
     }
 
     readData(data: Buffer): void {
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
-            if (hrtime.bigint() < this.preDownloadEndTime) {
+            if (Time.nowNs() < this.preDownloadEndTime) {
                 this.preDownloadChunks *= 2
                 this.getChunks()
             } else {
@@ -69,7 +69,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
         clearInterval(this.activityInterval)
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
-            if (hrtime.bigint() > this.preDownloadEndTime) {
+            if (Time.nowNs() > this.preDownloadEndTime) {
                 Logger.I.info(`Thread ${this.ctx.index} timed out.`)
                 this.finishChunkPortion()
             }

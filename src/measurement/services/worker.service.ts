@@ -23,15 +23,17 @@ export type OutgoingMessage =
 export class OutgoingMessageWithData {
     constructor(
         public message: OutgoingMessage,
-        public result?: IMeasurementThreadResult,
-        public chunks: number = 0
+        public data?: IMeasurementThreadResult | number | bigint
     ) {}
 }
+export class IncomingMessageWithData {
+    constructor(public message: IncomingMessage, public data?: bigint) {}
+}
 
-parentPort?.on("message", async (message: IncomingMessage) => {
+parentPort?.on("message", async (message: IncomingMessageWithData) => {
     let result: IMeasurementThreadResult | undefined
     let chunks: number | undefined
-    switch (message) {
+    switch (message.message) {
         case "connect":
             if (!thread) {
                 thread = new RMBTThreadService(
@@ -41,16 +43,14 @@ parentPort?.on("message", async (message: IncomingMessage) => {
             }
             await thread.connect(workerData.result)
             await thread.manageInit()
-            parentPort?.postMessage({ message: "connected" })
+            parentPort?.postMessage(
+                new OutgoingMessageWithData("connected", workerData.result)
+            )
             break
         case "preDownload":
             chunks = await thread?.managePreDownload()
             parentPort?.postMessage(
-                new OutgoingMessageWithData(
-                    "preDownloadFinished",
-                    undefined,
-                    chunks
-                )
+                new OutgoingMessageWithData("preDownloadFinished", chunks)
             )
             break
         case "ping":
@@ -74,11 +74,7 @@ parentPort?.on("message", async (message: IncomingMessage) => {
             await thread?.manageInit()
             chunks = await thread?.managePreUpload()
             parentPort?.postMessage(
-                new OutgoingMessageWithData(
-                    "preUploadFinished",
-                    undefined,
-                    chunks
-                )
+                new OutgoingMessageWithData("preUploadFinished", chunks)
             )
             break
         case "reconnectForUpload":

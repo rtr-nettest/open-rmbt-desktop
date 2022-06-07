@@ -4,11 +4,14 @@ import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
 import { Logger } from "./logger.service"
-import { IncomingMessage, OutgoingMessageWithData } from "./worker.service"
+import {
+    IncomingMessageWithData,
+    OutgoingMessageWithData,
+} from "./worker.service"
 
 export class RMBTWorker extends Worker {
     postMessage(
-        value: IncomingMessage,
+        value: IncomingMessageWithData,
         transferList?: readonly TransferListItem[]
     ): void {
         super.postMessage(value, transferList)
@@ -22,6 +25,7 @@ export class RMBTClientService {
     params: IMeasurementRegistrationResponse
     threadResults: IMeasurementThreadResult[] = []
     chunks: number[] = []
+    timestamps: { index: number; time: bigint }[] = []
 
     constructor(params: IMeasurementRegistrationResponse) {
         this.params = params
@@ -57,24 +61,28 @@ export class RMBTClientService {
         }
 
         for (const [index, worker] of this.measurementTasks.entries()) {
-            worker.postMessage("connect")
+            worker.postMessage(new IncomingMessageWithData("connect"))
             worker.on("message", (message: OutgoingMessageWithData) => {
                 switch (message.message) {
                     case "connected":
                         Logger.I.warn(`Worker ${index} is connected`)
-                        this.threadResults.push(new MeasurementThreadResult())
+                        this.threadResults.push(
+                            message.data! as IMeasurementThreadResult
+                        )
                         if (
                             this.threadResults.length ===
                             this.measurementTasks.length
                         ) {
                             for (const w of this.measurementTasks) {
-                                w.postMessage("preDownload")
+                                w.postMessage(
+                                    new IncomingMessageWithData("preDownload")
+                                )
                             }
                             this.threadResults = []
                         }
                         break
                     case "preDownloadFinished":
-                        this.chunks.push(message.chunks)
+                        this.chunks.push(message.data as number)
                         Logger.I.warn(
                             `Worker ${index} finished pre-download with ${this.chunks} chunks.`
                         )
@@ -82,22 +90,29 @@ export class RMBTClientService {
                             this.chunks.length === this.measurementTasks.length
                         ) {
                             this.checkIfShouldUseOneThread(this.chunks)
-                            this.measurementTasks[0].postMessage("ping")
+                            this.measurementTasks[0].postMessage(
+                                new IncomingMessageWithData("ping")
+                            )
                             this.chunks = []
                         }
                         break
                     case "pingFinished":
                         Logger.I.info(
                             `The ping median is ${
-                                (message.result?.ping_median || 0n) / 1000000n
+                                ((message.data! as IMeasurementThreadResult)
+                                    .ping_median || 0n) / 1000000n
                             }ms.`
                         )
                         for (const w of this.measurementTasks) {
-                            w.postMessage("download")
+                            w.postMessage(
+                                new IncomingMessageWithData("download")
+                            )
                         }
                         break
                     case "downloadFinished":
-                        this.threadResults.push(message.result!)
+                        this.threadResults.push(
+                            message.data! as IMeasurementThreadResult
+                        )
                         if (
                             this.threadResults.length ===
                             this.measurementTasks.length
@@ -109,12 +124,14 @@ export class RMBTClientService {
                             )
                             this.threadResults = []
                             for (const w of this.measurementTasks) {
-                                w.postMessage("preUpload")
+                                w.postMessage(
+                                    new IncomingMessageWithData("preUpload")
+                                )
                             }
                         }
                         break
                     case "preUploadFinished":
-                        this.chunks.push(message.chunks)
+                        this.chunks.push(message.data as number)
                         Logger.I.warn(
                             `Worker ${index} finished pre-upload with ${this.chunks} chunks.`
                         )
@@ -122,13 +139,19 @@ export class RMBTClientService {
                             this.chunks.length === this.measurementTasks.length
                         ) {
                             for (const w of this.measurementTasks) {
-                                w.postMessage("reconnectForUpload")
+                                w.postMessage(
+                                    new IncomingMessageWithData(
+                                        "reconnectForUpload"
+                                    )
+                                )
                             }
                             this.chunks = []
                         }
                         break
                     case "reconnectedForUpload":
-                        this.threadResults.push(message.result!)
+                        this.threadResults.push(
+                            message.data! as IMeasurementThreadResult
+                        )
                         if (
                             this.threadResults.length ===
                             this.measurementTasks.length
@@ -138,12 +161,16 @@ export class RMBTClientService {
                             )
                             this.threadResults = []
                             for (const w of this.measurementTasks) {
-                                w.postMessage("upload")
+                                w.postMessage(
+                                    new IncomingMessageWithData("upload")
+                                )
                             }
                         }
                         break
                     case "uploadFinished":
-                        this.threadResults.push(message.result!)
+                        this.threadResults.push(
+                            message.data! as IMeasurementThreadResult
+                        )
                         if (
                             this.threadResults.length ===
                             this.measurementTasks.length

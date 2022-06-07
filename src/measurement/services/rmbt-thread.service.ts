@@ -19,8 +19,6 @@ export class RMBTThreadService implements IMessageHandlerContext {
     client: net.Socket = new net.Socket()
     currentTime: bigint = -1n
     currentTransfer: number = -1
-    index: number
-    params: IMeasurementRegistrationResponse
     threadResult: IMeasurementThreadResult = new MeasurementThreadResult()
     preDownloadChunks?: number | undefined
     preUploadChunks?: number | undefined
@@ -45,10 +43,10 @@ export class RMBTThreadService implements IMessageHandlerContext {
     private hadError = false
     private isConnected = false
 
-    constructor(params: IMeasurementRegistrationResponse, index: number) {
-        this.params = params
-        this.index = index
-    }
+    constructor(
+        public params: IMeasurementRegistrationResponse,
+        public index: number
+    ) {}
 
     async connect(
         result: IMeasurementThreadResult

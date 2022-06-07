@@ -14,7 +14,7 @@ import { InitMessageHandler } from "./message-handlers/init-message-handler.serv
 import { UploadMessageHandler } from "./message-handlers/upload-message-handler.service"
 import { IMessageHandlerContext } from "../interfaces/message-handler.interface"
 
-export class RMBTThreadService implements IMessageHandlerContext {
+export class RMBTThread implements IMessageHandlerContext {
     chunksize: number = 0
     client: net.Socket = new net.Socket()
     currentTime: bigint = -1n
@@ -39,7 +39,6 @@ export class RMBTThreadService implements IMessageHandlerContext {
     private downloadMessageHandler?: DownloadMessageHandler
     private preUploadMessageHandler?: PreUploadMessageHandler
     private uploadMessageHandler?: UploadMessageHandler
-    private onDisconnect?: (thread: RMBTThreadService) => void
     private hadError = false
     private isConnected = false
 
@@ -48,9 +47,7 @@ export class RMBTThreadService implements IMessageHandlerContext {
         public index: number
     ) {}
 
-    async connect(
-        result: IMeasurementThreadResult
-    ): Promise<RMBTThreadService> {
+    async connect(result: IMeasurementThreadResult): Promise<RMBTThread> {
         return new Promise((resolve) => {
             this.threadResult = result
             Logger.I.info(
@@ -80,7 +77,7 @@ export class RMBTThreadService implements IMessageHandlerContext {
         })
     }
 
-    async disconnect(): Promise<RMBTThreadService> {
+    async disconnect(): Promise<RMBTThread> {
         return new Promise((resolve) => {
             if (!this.isConnected) {
                 resolve(this)
@@ -93,7 +90,7 @@ export class RMBTThreadService implements IMessageHandlerContext {
     }
 
     private connectionListener =
-        (resolve: (thread: RMBTThreadService) => void) => () => {
+        (resolve: (thread: RMBTThread) => void) => () => {
             Logger.I.info(`Thread ${this.index} is connected.`)
             this.isConnected = true
             this.hadError = false

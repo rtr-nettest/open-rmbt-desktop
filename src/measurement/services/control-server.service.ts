@@ -6,7 +6,7 @@ import { IUserSettingsRequest } from "../interfaces/user-settings-request.interf
 import { IUserSetingsResponse } from "../interfaces/user-settings-response.interface"
 import { Logger } from "./logger.service"
 
-export class ControlServerService {
+export class ControlServer {
     private get headers() {
         const headers: { [key: string]: string } = {
             "Content-Type": "application/json",

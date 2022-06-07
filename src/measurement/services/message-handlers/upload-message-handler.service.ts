@@ -1,5 +1,4 @@
 import { randomBytes } from "crypto"
-import { hrtime } from "process"
 import { SingleThreadResult } from "../../dto/single-thread-result.dto"
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import { IMeasurementThreadResult } from "../../interfaces/measurement-result.interface"
@@ -9,6 +8,7 @@ import {
 } from "../../interfaces/message-handler.interface"
 import { DownloadMessageHandler } from "./download-message-handler.service"
 import { Logger } from "../logger.service"
+import { Time } from "../time.service"
 
 export class UploadMessageHandler implements IMessageHandler {
     static statsIntervalTime = BigInt(1e6)
@@ -67,7 +67,7 @@ export class UploadMessageHandler implements IMessageHandler {
                 if (
                     bytes > 0 &&
                     nanos > 0n &&
-                    hrtime.bigint() < this.uploadEndTime
+                    Time.nowNs() < this.uploadEndTime
                 ) {
                     this.result.addResult(bytes, nanos)
                     this.setIntermidiateResults(bytes, nanos)
@@ -90,11 +90,10 @@ export class UploadMessageHandler implements IMessageHandler {
     }
 
     private putChunks() {
-        const statsTime =
-            hrtime.bigint() + UploadMessageHandler.statsIntervalTime
+        const statsTime = Time.nowNs() + UploadMessageHandler.statsIntervalTime
         while (true) {
             const buffer = randomBytes(this.ctx.chunksize)
-            if (hrtime.bigint() >= this.uploadEndTime) {
+            if (Time.nowNs() >= this.uploadEndTime) {
                 buffer[buffer.length - 1] = 0xff
                 Logger.I.info(
                     `Thread ${this.ctx.index} sending the last chunk.`
@@ -111,7 +110,7 @@ export class UploadMessageHandler implements IMessageHandler {
                 buffer[buffer.length - 1] = 0x00
                 Logger.I.info(`Thread ${this.ctx.index} sending a chunk.`)
                 this.ctx.client.write(buffer)
-                if (hrtime.bigint() >= statsTime) {
+                if (Time.nowNs() >= statsTime) {
                     break
                 }
             }
@@ -122,10 +121,10 @@ export class UploadMessageHandler implements IMessageHandler {
         clearInterval(this.activityInterval)
         const uploadDuration =
             BigInt(this.ctx.params.test_duration) * BigInt(1e9)
-        this.uploadEndTime = hrtime.bigint() + uploadDuration
+        this.uploadEndTime = Time.nowNs() + uploadDuration
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
-            if (hrtime.bigint() > this.uploadEndTime) {
+            if (Time.nowNs() > this.uploadEndTime) {
                 Logger.I.info(`Thread ${this.ctx.index} timed out.`)
                 this.stopMessaging()
             }

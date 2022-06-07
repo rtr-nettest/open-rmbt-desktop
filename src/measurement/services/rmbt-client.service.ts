@@ -1,10 +1,10 @@
-import { hrtime } from "process"
 import { TransferListItem, Worker } from "worker_threads"
 import { MeasurementThreadResult } from "../dto/measurement-result.dto"
 import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
 import { Logger } from "./logger.service"
+import { Time } from "./time.service"
 import {
     IncomingMessageWithData,
     OutgoingMessageWithData,
@@ -19,7 +19,7 @@ export class RMBTWorker extends Worker {
     }
 }
 
-export class RMBTClientService {
+export class RMBTClient {
     measurementLastUpdate?: number
     measurementStatus: EMeasurementStatus = EMeasurementStatus.WAIT
     measurementTasks: RMBTWorker[] = []
@@ -105,7 +105,7 @@ export class RMBTClientService {
                                     .ping_median || 0n) / 1000000n
                             }ms.`
                         )
-                        this.phaseStartTime = hrtime.bigint()
+                        this.phaseStartTime = Time.nowNs()
                         for (const w of this.measurementTasks) {
                             w.postMessage(
                                 new IncomingMessageWithData("download")
@@ -122,7 +122,7 @@ export class RMBTClientService {
                         ) {
                             Logger.I.info(
                                 `The download is finished in ${
-                                    (hrtime.bigint() - this.phaseStartTime) /
+                                    (Time.nowNs() - this.phaseStartTime) /
                                     BigInt(1e9)
                                 }s`
                             )
@@ -169,7 +169,7 @@ export class RMBTClientService {
                                 `All threads are reconnected. Starting upload.`
                             )
                             this.threadResults = []
-                            this.phaseStartTime = hrtime.bigint()
+                            this.phaseStartTime = Time.nowNs()
                             for (const w of this.measurementTasks) {
                                 w.postMessage(
                                     new IncomingMessageWithData("upload")
@@ -187,7 +187,7 @@ export class RMBTClientService {
                         ) {
                             Logger.I.info(
                                 `The upload is finished in ${
-                                    (hrtime.bigint() - this.phaseStartTime) /
+                                    (Time.nowNs() - this.phaseStartTime) /
                                     BigInt(1e9)
                                 }s`
                             )

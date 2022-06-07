@@ -1,4 +1,3 @@
-import { hrtime } from "process"
 import { SingleThreadResult } from "../../dto/single-thread-result.dto"
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import { IMeasurementThreadResult } from "../../interfaces/measurement-result.interface"
@@ -7,11 +6,12 @@ import {
     IMessageHandlerContext,
 } from "../../interfaces/message-handler.interface"
 import { Logger } from "../logger.service"
+import { Time } from "../time.service"
 
 export class DownloadMessageHandler implements IMessageHandler {
     static minDiffTime = 100000000n
-    private downloadStartTime = hrtime.bigint()
-    private downloadEndTime = hrtime.bigint()
+    private downloadStartTime = Time.nowNs()
+    private downloadEndTime = Time.nowNs()
     private downloadBytesRead = Buffer.alloc(0)
     private activityInterval?: NodeJS.Timer
     private inactivityTimeout = 0
@@ -46,13 +46,13 @@ export class DownloadMessageHandler implements IMessageHandler {
     }
 
     writeData(): void {
-        this.downloadStartTime = hrtime.bigint()
+        this.downloadStartTime = Time.nowNs()
         this.downloadEndTime =
             this.downloadStartTime +
             BigInt(this.ctx.params.test_duration) * BigInt(1e9)
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
-            if (hrtime.bigint() > this.downloadEndTime) {
+            if (Time.nowNs() > this.downloadEndTime) {
                 Logger.I.info(`Thread ${this.ctx.index} timed out.`)
                 this.requestFinish()
             }
@@ -79,7 +79,7 @@ export class DownloadMessageHandler implements IMessageHandler {
                 this.downloadBytesRead.byteLength + data.byteLength
             )
 
-            this.nsec = hrtime.bigint() - this.downloadStartTime
+            this.nsec = Time.nowNs() - this.downloadStartTime
             this.result.addResult(this.downloadBytesRead.byteLength, this.nsec)
 
             isFullChunk =

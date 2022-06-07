@@ -1,4 +1,3 @@
-import { hrtime } from "process"
 import { randomBytes } from "crypto"
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import {
@@ -6,11 +5,12 @@ import {
     IMessageHandlerContext,
 } from "../../interfaces/message-handler.interface"
 import { Logger } from "../logger.service"
+import { Time } from "../time.service"
 
 export class PreUploadMessageHandler implements IMessageHandler {
     public totalUpload = 0
     public preUploadChunks = 0
-    private preUploadEndTime = hrtime.bigint()
+    private preUploadEndTime = Time.nowNs()
     private preUploadDuration = 2000000000n
 
     constructor(
@@ -29,7 +29,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
     }
 
     writeData(): void {
-        this.preUploadEndTime = hrtime.bigint() + this.preUploadDuration
+        this.preUploadEndTime = Time.nowNs() + this.preUploadDuration
         Logger.I.info(`Thread ${this.ctx.index} starts sending chunks.`)
         this.putNoResult()
     }
@@ -40,7 +40,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
             return
         }
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
-            if (hrtime.bigint() < this.preUploadEndTime) {
+            if (Time.nowNs() < this.preUploadEndTime) {
                 this.putNoResult()
             } else {
                 this.stopMessaging()

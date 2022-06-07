@@ -1,4 +1,3 @@
-import { hrtime } from "process"
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import {
     IMeasurementThreadResult,
@@ -9,11 +8,12 @@ import {
     IMessageHandlerContext,
 } from "../../interfaces/message-handler.interface"
 import { Logger } from "../logger.service"
+import { Time } from "../time.service"
 
 export class PingMessageHandler implements IMessageHandler {
     private serverPings: bigint[] = []
-    private pingCurrentStartTime = hrtime.bigint()
-    private pingCurrentEndTime = hrtime.bigint()
+    private pingCurrentStartTime = Time.nowNs()
+    private pingCurrentEndTime = Time.nowNs()
     private pingCounter = 0
 
     constructor(
@@ -36,7 +36,7 @@ export class PingMessageHandler implements IMessageHandler {
     }
 
     writeData() {
-        this.pingCurrentStartTime = hrtime.bigint()
+        this.pingCurrentStartTime = Time.nowNs()
         this.ctx.client.write(Buffer.from(ESocketMessage.PING, "ascii"))
         Logger.I.info(
             `Thread ${this.ctx.index} sent ${ESocketMessage.PING.replace(
@@ -49,7 +49,7 @@ export class PingMessageHandler implements IMessageHandler {
 
     readData(data: Buffer) {
         if (data.includes(ESocketMessage.PONG)) {
-            this.pingCurrentEndTime = hrtime.bigint()
+            this.pingCurrentEndTime = Time.nowNs()
             Logger.I.info(
                 `Thread ${this.ctx.index} is ${ESocketMessage.OK}Continuing.`
             )

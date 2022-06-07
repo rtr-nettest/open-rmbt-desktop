@@ -81,6 +81,7 @@ export class RMBTClientService {
                         if (
                             this.chunks.length === this.measurementTasks.length
                         ) {
+                            this.checkIfShouldUseOneThread(this.chunks)
                             this.measurementTasks[0].postMessage("ping")
                             this.chunks = []
                         }
@@ -170,20 +171,20 @@ export class RMBTClientService {
         )
         if (threadWithLowestChunkNumber >= 0) {
             Logger.I.info("Switching to one thread.")
-            // this.measurementTasks = this.measurementTasks.reduce(
-            //     (acc, mt, index) => {
-            //         if (index === 0) {
-            //             return [mt]
-            //         }
-            //         mt.disconnect()
-            //         return acc
-            //     },
-            //     [] as RMBTThreadService[]
-            // )
+            this.measurementTasks = this.measurementTasks.reduce(
+                (acc, mt, index) => {
+                    if (index === 0) {
+                        return [mt]
+                    }
+                    mt.terminate()
+                    return acc
+                },
+                [] as RMBTWorker[]
+            )
         }
     }
 
-    // in bytes
+    // in bits per nano
     private getTotalSpeed() {
         let sumTrans = 0
         let maxTime = 0n

@@ -10,6 +10,7 @@ export type IncomingMessage =
     | "ping"
     | "preDownload"
     | "preUpload"
+    | "reconnectForUpload"
     | "upload"
 export type OutgoingMessage =
     | "connected"
@@ -17,6 +18,7 @@ export type OutgoingMessage =
     | "pingFinished"
     | "preDownloadFinished"
     | "preUploadFinished"
+    | "reconnectedForUpload"
     | "uploadFinished"
 export class OutgoingMessageWithData {
     constructor(
@@ -79,9 +81,17 @@ parentPort?.on("message", async (message: IncomingMessage) => {
                 )
             )
             break
-        case "upload":
+        case "reconnectForUpload":
             await thread?.connect(workerData.result)
             await thread?.manageInit()
+            parentPort?.postMessage(
+                new OutgoingMessageWithData(
+                    "reconnectedForUpload",
+                    workerData.result
+                )
+            )
+            break
+        case "upload":
             result = await thread?.manageUpload()
             if (result) {
                 result.currentTime = thread?.currentTime || 0n

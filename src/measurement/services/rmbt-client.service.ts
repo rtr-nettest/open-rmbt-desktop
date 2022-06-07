@@ -1,4 +1,4 @@
-import { Worker } from "worker_threads"
+import { TransferListItem, Worker } from "worker_threads"
 import { MeasurementThreadResult } from "../dto/measurement-result.dto"
 import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
@@ -6,10 +6,19 @@ import { IMeasurementThreadResult } from "../interfaces/measurement-result.inter
 import { Logger } from "./logger.service"
 import { IncomingMessage, OutgoingMessageWithData } from "./worker.service"
 
+export class RMBTWorker extends Worker {
+    postMessage(
+        value: IncomingMessage,
+        transferList?: readonly TransferListItem[]
+    ): void {
+        super.postMessage(value, transferList)
+    }
+}
+
 export class RMBTClientService {
     measurementLastUpdate?: number
     measurementStatus: EMeasurementStatus = EMeasurementStatus.WAIT
-    measurementTasks: Worker[] = []
+    measurementTasks: RMBTWorker[] = []
     params: IMeasurementRegistrationResponse
     threadResults: IMeasurementThreadResult[] = []
     chunks: number[] = []
@@ -59,7 +68,7 @@ export class RMBTClientService {
                             this.measurementTasks.length
                         ) {
                             for (const w of this.measurementTasks) {
-                                w.postMessage("preDownload" as IncomingMessage)
+                                w.postMessage("preDownload")
                             }
                             this.threadResults = []
                         }
@@ -72,9 +81,7 @@ export class RMBTClientService {
                         if (
                             this.chunks.length === this.measurementTasks.length
                         ) {
-                            this.measurementTasks[0].postMessage(
-                                "ping" as IncomingMessage
-                            )
+                            this.measurementTasks[0].postMessage("ping")
                             this.chunks = []
                         }
                         break
@@ -85,7 +92,7 @@ export class RMBTClientService {
                             }ms.`
                         )
                         for (const w of this.measurementTasks) {
-                            w.postMessage("download" as IncomingMessage)
+                            w.postMessage("download")
                         }
                         break
                     case "downloadFinished":
@@ -101,7 +108,7 @@ export class RMBTClientService {
                             )
                             this.threadResults = []
                             for (const w of this.measurementTasks) {
-                                w.postMessage("preUpload" as IncomingMessage)
+                                w.postMessage("preUpload")
                             }
                         }
                         break
@@ -114,9 +121,24 @@ export class RMBTClientService {
                             this.chunks.length === this.measurementTasks.length
                         ) {
                             for (const w of this.measurementTasks) {
-                                w.postMessage("upload" as IncomingMessage)
+                                w.postMessage("reconnectForUpload")
                             }
                             this.chunks = []
+                        }
+                        break
+                    case "reconnectedForUpload":
+                        this.threadResults.push(message.result!)
+                        if (
+                            this.threadResults.length ===
+                            this.measurementTasks.length
+                        ) {
+                            Logger.I.info(
+                                `All threads are reconnected. Starting upload.`
+                            )
+                            this.threadResults = []
+                            for (const w of this.measurementTasks) {
+                                w.postMessage("upload")
+                            }
                         }
                         break
                     case "uploadFinished":

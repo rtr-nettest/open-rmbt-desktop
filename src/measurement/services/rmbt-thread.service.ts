@@ -266,6 +266,8 @@ export class RMBTThreadService implements IMessageHandlerContext {
     async manageUpload(): Promise<IMeasurementThreadResult> {
         return new Promise((resolve) => {
             this.phase = "upload"
+            this.currentTransfer = 0
+            this.currentTime = 0n
             this.uploadMessageHandler = new UploadMessageHandler(
                 this,
                 (total, currentTime) => {

@@ -20,6 +20,8 @@ export interface IMeasurementThreadResult extends IMeasurementResult {
     totalDownBytes: number
     totalUpBytes: number
     chunksize?: number
+    currentTime: bigint
+    currentTransfer: number
 }
 
 export interface IMeasurementThreadResultList {

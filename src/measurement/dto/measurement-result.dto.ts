@@ -26,4 +26,6 @@ export class MeasurementThreadResult implements IMeasurementThreadResult {
     encryption: string = "NONE"
     pings: IPing[] = []
     speedItems: ISpeedItem[] = []
+    currentTime = 0n
+    currentTransfer = 0
 }

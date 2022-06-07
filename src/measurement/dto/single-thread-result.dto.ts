@@ -2,7 +2,7 @@ import {
     IMeasurementThreadResultList,
     ISpeedItem,
 } from "../interfaces/measurement-result.interface"
-import { DownloadMessageHandler } from "../services/download-message-handler.service"
+import { DownloadMessageHandler } from "../services/message-handlers/download-message-handler.service"
 import { Logger } from "../services/logger.service"
 
 export class SingleThreadResult {
@@ -103,8 +103,7 @@ export class SingleThreadResult {
         return { bytes: resultBytes, nsec: resultNsec }
     }
 
-    getSpeedItems(upload: boolean, thread: number) {
-        const list: ISpeedItem[] = []
+    addSpeedItems(list: ISpeedItem[] = [], upload: boolean, thread: number) {
         let coarsNsec = 0n
         const numResultsCoarse = Math.min(
             this.coarseResults,

@@ -74,10 +74,10 @@ export class RMBTClientService {
                         }
                         break
                     case "preDownloadFinished":
+                        this.chunks.push(message.chunks)
                         Logger.I.warn(
                             `Worker ${index} finished pre-download with ${this.chunks} chunks.`
                         )
-                        this.chunks.push(message.chunks)
                         if (
                             this.chunks.length === this.measurementTasks.length
                         ) {
@@ -114,10 +114,10 @@ export class RMBTClientService {
                         }
                         break
                     case "preUploadFinished":
+                        this.chunks.push(message.chunks)
                         Logger.I.warn(
                             `Worker ${index} finished pre-upload with ${this.chunks} chunks.`
                         )
-                        this.chunks.push(message.chunks)
                         if (
                             this.chunks.length === this.measurementTasks.length
                         ) {

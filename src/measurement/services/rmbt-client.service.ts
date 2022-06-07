@@ -1,23 +1,11 @@
-import { TransferListItem, Worker } from "worker_threads"
 import { MeasurementThreadResult } from "../dto/measurement-result.dto"
 import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
 import { Logger } from "./logger.service"
+import { RMBTWorker, RMBTWorkerFactory } from "./rmbt-worker-factory.service"
 import { Time } from "./time.service"
-import {
-    IncomingMessageWithData,
-    OutgoingMessageWithData,
-} from "./worker.service"
-
-export class RMBTWorker extends Worker {
-    postMessage(
-        value: IncomingMessageWithData,
-        transferList?: readonly TransferListItem[]
-    ): void {
-        super.postMessage(value, transferList)
-    }
-}
+import { IncomingMessageWithData } from "./worker.service"
 
 export class RMBTClient {
     measurementLastUpdate?: number
@@ -51,20 +39,24 @@ export class RMBTClient {
         Logger.I.info("Running measurement...")
         this.measurementStatus = EMeasurementStatus.INIT
         for (let i = 0; i < this.params.test_numthreads; i++) {
-            this.measurementTasks.push(
-                new Worker("./dist/measurement/services/worker.service.js", {
+            const worker = RMBTWorkerFactory.getWorker(
+                "./dist/measurement/services/worker.service.js",
+                {
                     workerData: {
                         params: this.params,
                         index: i,
                         result: new MeasurementThreadResult(),
                     },
-                })
+                }
             )
+            if (worker) {
+                this.measurementTasks.push(worker)
+            }
         }
 
         for (const [index, worker] of this.measurementTasks.entries()) {
             worker.postMessage(new IncomingMessageWithData("connect"))
-            worker.on("message", (message: OutgoingMessageWithData) => {
+            worker.on("message", (message) => {
                 switch (message.message) {
                     case "connected":
                         Logger.I.warn(`Worker ${index} is connected`)

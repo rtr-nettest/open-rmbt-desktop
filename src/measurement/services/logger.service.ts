@@ -2,6 +2,7 @@ import fs from "fs"
 import path from "path"
 import pino from "pino"
 import pretty from "pino-pretty"
+import { isMainThread } from "worker_threads"
 
 export class Logger {
     private static instance: pino.Logger
@@ -23,7 +24,12 @@ export class Logger {
                 }
                 streams.push({
                     stream: fs.createWriteStream(
-                        path.join(logDir, `${new Date().getTime()}.log`)
+                        path.join(
+                            logDir,
+                            `${new Date().getTime()}${
+                                isMainThread ? "-main" : ""
+                            }.log`
+                        )
                     ),
                 })
             } else {

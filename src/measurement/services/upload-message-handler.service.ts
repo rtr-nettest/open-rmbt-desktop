@@ -1,9 +1,7 @@
 import { randomBytes } from "crypto"
-import { Socket } from "net"
 import { hrtime } from "process"
 import { SingleThreadResult } from "../dto/single-thread-result.dto"
 import { ESocketMessage } from "../enums/socket-message.enum"
-import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
 import {
     IMessageHandler,
@@ -26,7 +24,9 @@ export class UploadMessageHandler implements IMessageHandler {
         ) => void,
         public onFinish: (result: IMeasurementThreadResult) => void
     ) {
-        const maxStoredResults = 280
+        const maxStoredResults =
+            (BigInt(this.ctx.params.test_duration) * BigInt(1e9)) /
+            DownloadMessageHandler.minDiffTime
         this.result = new SingleThreadResult(Number(maxStoredResults))
         this.inactivityTimeout = Number(this.ctx.params.test_duration) * 1000
     }

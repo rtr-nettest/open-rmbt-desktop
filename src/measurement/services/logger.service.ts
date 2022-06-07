@@ -27,7 +27,7 @@ export class Logger {
                         path.join(
                             logDir,
                             `${new Date().getTime()}${
-                                isMainThread ? "-main" : ""
+                                isMainThread ? "-main" : "-worker"
                             }.log`
                         )
                     ),

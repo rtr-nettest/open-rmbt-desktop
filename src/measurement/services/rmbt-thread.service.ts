@@ -87,8 +87,8 @@ export class RMBTThreadService implements IMessageHandlerContext {
             }
             Logger.I.info(`Thread ${this.index} is disconnecting.`)
             this.isConnected = false
-            this.onDisconnect = resolve
             this.client.end()
+            resolve(this)
         })
     }
 
@@ -159,7 +159,6 @@ export class RMBTThreadService implements IMessageHandlerContext {
             hadError || this.hadError ? " with error" : ""
         )
         this.isConnected = false
-        this.onDisconnect?.(this)
 
         switch (this.phase) {
             case "preupload":

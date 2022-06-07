@@ -11,10 +11,14 @@ import { DownloadMessageHandler } from "./download-message-handler.service"
 import { Logger } from "../logger.service"
 
 export class UploadMessageHandler implements IMessageHandler {
+    static statsIntervalTime = BigInt(1e6)
+    static waitForAllChunksTime = 3000
+    static clientTimeOffset = BigInt(1e9)
     private uploadEndTime = 0n
     private result = new SingleThreadResult(0)
     private activityInterval?: NodeJS.Timer
     private inactivityTimeout = 0
+    private finalTimeout?: NodeJS.Timeout
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -60,11 +64,22 @@ export class UploadMessageHandler implements IMessageHandler {
             if (dataArr.length === 4) {
                 const nanos = BigInt(Number(dataArr[1]))
                 const bytes = Number(dataArr[3])
-                if (bytes > 0 && nanos > 0n) {
+                if (
+                    bytes > 0 &&
+                    nanos > 0n &&
+                    hrtime.bigint() < this.uploadEndTime
+                ) {
                     this.result.addResult(bytes, nanos)
                     this.setIntermidiateResults(bytes, nanos)
                 }
-                this.putChunks()
+                if (
+                    nanos >=
+                    this.uploadEndTime - UploadMessageHandler.clientTimeOffset
+                ) {
+                    this.stopMessaging()
+                } else {
+                    this.putChunks()
+                }
             }
             return
         }
@@ -75,24 +90,31 @@ export class UploadMessageHandler implements IMessageHandler {
     }
 
     private putChunks() {
-        let chunkCounter = Math.max(
-            this.ctx.preUploadChunks!,
-            this.ctx.preDownloadChunks!
-        )
-        while (chunkCounter > 0) {
+        const statsTime =
+            hrtime.bigint() + UploadMessageHandler.statsIntervalTime
+        while (true) {
             const buffer = randomBytes(this.ctx.chunksize)
-            if (chunkCounter === 1 || hrtime.bigint() >= this.uploadEndTime) {
+            if (hrtime.bigint() >= this.uploadEndTime) {
                 buffer[buffer.length - 1] = 0xff
-                chunkCounter = 0
                 Logger.I.info(
                     `Thread ${this.ctx.index} sending the last chunk.`
                 )
+                this.ctx.client.write(buffer)
+                if (!this.finalTimeout) {
+                    this.finalTimeout = setTimeout(
+                        () => this.stopMessaging.bind(this),
+                        UploadMessageHandler.waitForAllChunksTime
+                    )
+                }
+                break
             } else {
                 buffer[buffer.length - 1] = 0x00
-                chunkCounter -= 1
                 Logger.I.info(`Thread ${this.ctx.index} sending a chunk.`)
+                this.ctx.client.write(buffer)
+                if (hrtime.bigint() >= statsTime) {
+                    break
+                }
             }
-            this.ctx.client.write(buffer)
         }
     }
 

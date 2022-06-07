@@ -2,7 +2,7 @@ import {
     IMeasurementThreadResultList,
     ISpeedItem,
 } from "../interfaces/measurement-result.interface"
-import { DownloadMessageHandler } from "../services/download-message-handler.service"
+import { DownloadMessageHandler } from "../services/message-handlers/download-message-handler.service"
 import { Logger } from "../services/logger.service"
 
 export class SingleThreadResult {

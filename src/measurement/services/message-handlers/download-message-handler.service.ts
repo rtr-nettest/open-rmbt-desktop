@@ -1,12 +1,12 @@
 import { hrtime } from "process"
-import { SingleThreadResult } from "../dto/single-thread-result.dto"
-import { ESocketMessage } from "../enums/socket-message.enum"
-import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
+import { SingleThreadResult } from "../../dto/single-thread-result.dto"
+import { ESocketMessage } from "../../enums/socket-message.enum"
+import { IMeasurementThreadResult } from "../../interfaces/measurement-result.interface"
 import {
     IMessageHandler,
     IMessageHandlerContext,
-} from "../interfaces/message-handler.interface"
-import { Logger } from "./logger.service"
+} from "../../interfaces/message-handler.interface"
+import { Logger } from "../logger.service"
 
 export class DownloadMessageHandler implements IMessageHandler {
     static minDiffTime = 100000000n

@@ -1,16 +1,14 @@
-import { Socket } from "net"
 import { hrtime } from "process"
-import { ESocketMessage } from "../enums/socket-message.enum"
-import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
+import { ESocketMessage } from "../../enums/socket-message.enum"
 import {
     IMeasurementThreadResult,
     IPing,
-} from "../interfaces/measurement-result.interface"
+} from "../../interfaces/measurement-result.interface"
 import {
     IMessageHandler,
     IMessageHandlerContext,
-} from "../interfaces/message-handler.interface"
-import { Logger } from "./logger.service"
+} from "../../interfaces/message-handler.interface"
+import { Logger } from "../logger.service"
 
 export class PingMessageHandler implements IMessageHandler {
     private serverPings: bigint[] = []

@@ -1,11 +1,10 @@
-import { Socket } from "net"
 import { hrtime } from "process"
-import { ESocketMessage } from "../enums/socket-message.enum"
+import { ESocketMessage } from "../../enums/socket-message.enum"
 import {
     IMessageHandler,
     IMessageHandlerContext,
-} from "../interfaces/message-handler.interface"
-import { Logger } from "./logger.service"
+} from "../../interfaces/message-handler.interface"
+import { Logger } from "../logger.service"
 
 export class PreDownloadMessageHandler implements IMessageHandler {
     private preDownloadChunks = 1

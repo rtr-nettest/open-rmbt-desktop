@@ -76,8 +76,8 @@ export class UploadMessageHandler implements IMessageHandler {
 
     private putChunks() {
         let chunkCounter = Math.max(
-            this.ctx.preUploadChunks || 1,
-            this.ctx.preDownloadChunks || 1
+            this.ctx.preUploadChunks!,
+            this.ctx.preDownloadChunks!
         )
         while (chunkCounter > 0) {
             const buffer = randomBytes(this.ctx.chunksize)

@@ -13,14 +13,12 @@ export class MeasurementRegistrationRequest
     timezone = ""
     type = ""
     user_server_selection = false
-    uuid = ""
 
     constructor(
-        uuid: string,
+        public uuid: string,
         measurementServerId?: number,
         settingsRequest?: UserSettingsRequest
     ) {
-        this.uuid = uuid
         if (typeof measurementServerId === "number") {
             this.prefer_server = measurementServerId
             this.user_server_selection = true

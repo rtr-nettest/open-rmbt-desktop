@@ -12,6 +12,7 @@ export class RMBTClient {
     measurementStatus: EMeasurementStatus = EMeasurementStatus.WAIT
     measurementTasks: RMBTWorker[] = []
     params: IMeasurementRegistrationResponse
+    initializedThreads: number[] = []
     threadResults: IMeasurementThreadResult[] = []
     chunks: number[] = []
     timestamps: { index: number; time: bigint }[] = []
@@ -59,12 +60,22 @@ export class RMBTClient {
             worker.on("message", (message) => {
                 switch (message.message) {
                     case "connected":
-                        Logger.I.warn(`Worker ${index} is connected`)
-                        this.threadResults.push(
-                            message.data! as IMeasurementThreadResult
-                        )
+                        const isInitialized = message.data as boolean
+                        if (isInitialized) {
+                            Logger.I.warn(`Worker ${index} is ready`)
+                            this.initializedThreads.push(index)
+                        } else {
+                            Logger.I.warn(
+                                `Worker ${index} errored out. Reattempting connection.`
+                            )
+                            setImmediate(() => {
+                                worker.postMessage(
+                                    new IncomingMessageWithData("connect")
+                                )
+                            })
+                        }
                         if (
-                            this.threadResults.length ===
+                            this.initializedThreads.length ===
                             this.measurementTasks.length
                         ) {
                             for (const w of this.measurementTasks) {
@@ -72,7 +83,7 @@ export class RMBTClient {
                                     new IncomingMessageWithData("preDownload")
                                 )
                             }
-                            this.threadResults = []
+                            this.initializedThreads = []
                         }
                         break
                     case "preDownloadFinished":

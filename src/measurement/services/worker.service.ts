@@ -32,16 +32,17 @@ export class IncomingMessageWithData {
 
 parentPort?.on("message", async (message: IncomingMessageWithData) => {
     let result: IMeasurementThreadResult | undefined
-    let chunks: number | undefined
+    let chunks: number | undefined = 0
+    let isConnected = false
     switch (message.message) {
         case "connect":
             if (!thread) {
                 thread = new RMBTThread(workerData.params, workerData.index)
             }
             await thread.connect(workerData.result)
-            const isInitialized = await thread.manageInit()
+            isConnected = await thread.manageInit()
             parentPort?.postMessage(
-                new OutgoingMessageWithData("connected", isInitialized)
+                new OutgoingMessageWithData("connected", isConnected)
             )
             break
         case "preDownload":
@@ -68,20 +69,19 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
             break
         case "preUpload":
             await thread?.connect(workerData.result)
-            await thread?.manageInit()
-            chunks = await thread?.managePreUpload()
+            isConnected = (await thread?.manageInit()) || false
+            if (isConnected) {
+                chunks = await thread?.managePreUpload()
+            }
             parentPort?.postMessage(
                 new OutgoingMessageWithData("preUploadFinished", chunks)
             )
             break
         case "reconnectForUpload":
             await thread?.connect(workerData.result)
-            await thread?.manageInit()
+            isConnected = (await thread?.manageInit()) || false
             parentPort?.postMessage(
-                new OutgoingMessageWithData(
-                    "reconnectedForUpload",
-                    workerData.result
-                )
+                new OutgoingMessageWithData("reconnectedForUpload", isConnected)
             )
             break
         case "upload":

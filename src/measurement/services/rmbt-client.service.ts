@@ -161,17 +161,27 @@ export class RMBTClient {
                         }
                         break
                     case "reconnectedForUpload":
-                        this.threadResults.push(
-                            message.data! as IMeasurementThreadResult
-                        )
+                        const isReconnected = message.data as boolean
+                        if (isReconnected) {
+                            Logger.I.warn(
+                                `Worker ${index} is reconnected for upload.`
+                            )
+                            this.initializedThreads.push(index)
+                        } else {
+                            Logger.I.warn(
+                                `Worker ${index} errored out. Reattempting connection.`
+                            )
+                            setImmediate(() => {
+                                worker.postMessage(
+                                    new IncomingMessageWithData("connect")
+                                )
+                            })
+                        }
                         if (
-                            this.threadResults.length ===
+                            this.initializedThreads.length ===
                             this.measurementTasks.length
                         ) {
-                            Logger.I.info(
-                                `All threads are reconnected. Starting upload.`
-                            )
-                            this.threadResults = []
+                            this.initializedThreads = []
                             this.phaseStartTime = Time.nowNs()
                             for (const w of this.measurementTasks) {
                                 w.postMessage(

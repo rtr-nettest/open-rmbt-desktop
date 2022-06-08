@@ -167,7 +167,7 @@ export class RMBTThread implements IMessageHandlerContext {
         }
     }
 
-    async manageInit(): Promise<IMeasurementThreadResult> {
+    async manageInit(): Promise<boolean> {
         return new Promise((resolve) => {
             this.phase = "init"
             this.initMessageHandler = new InitMessageHandler(this, (result) => {
@@ -175,7 +175,11 @@ export class RMBTThread implements IMessageHandlerContext {
                 this.chunksize = this.threadResult.chunksize || 0
                 delete this.threadResult.chunksize
                 Logger.I.info(`Resolving thread ${this.index} init.`)
-                resolve(result)
+                if (result) {
+                    resolve(result)
+                } else {
+                    this.disconnect().then(() => resolve(result))
+                }
             })
             this.initMessageHandler.writeData()
         })

@@ -23,7 +23,7 @@ export type OutgoingMessage =
 export class OutgoingMessageWithData {
     constructor(
         public message: OutgoingMessage,
-        public data?: IMeasurementThreadResult | number | bigint
+        public data?: IMeasurementThreadResult | number | bigint | boolean
     ) {}
 }
 export class IncomingMessageWithData {
@@ -39,9 +39,9 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
                 thread = new RMBTThread(workerData.params, workerData.index)
             }
             await thread.connect(workerData.result)
-            await thread.manageInit()
+            const isInitialized = await thread.manageInit()
             parentPort?.postMessage(
-                new OutgoingMessageWithData("connected", workerData.result)
+                new OutgoingMessageWithData("connected", isInitialized)
             )
             break
         case "preDownload":

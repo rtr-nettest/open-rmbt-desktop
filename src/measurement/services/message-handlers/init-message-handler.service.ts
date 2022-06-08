@@ -1,5 +1,4 @@
 import { ESocketMessage } from "../../enums/socket-message.enum"
-import { IMeasurementThreadResult } from "../../interfaces/measurement-result.interface"
 import {
     IMessageHandler,
     IMessageHandlerContext,
@@ -7,14 +6,23 @@ import {
 import { Logger } from "../logger.service"
 
 export class InitMessageHandler implements IMessageHandler {
+    private isInitialized = false
+    private inactivityTimeout = 0
+
     constructor(
         private ctx: IMessageHandlerContext,
-        public onFinish: (result: IMeasurementThreadResult) => void
-    ) {}
+        public onFinish: (result: boolean) => void
+    ) {
+        this.inactivityTimeout = Number(this.ctx.params.test_duration) * 1e6
+    }
 
     stopMessaging(): void {
-        Logger.I.info(`Thread ${this.ctx.index} finished initialization.`)
-        this.onFinish?.(this.ctx.threadResult)
+        Logger.I.info(
+            `Thread ${this.ctx.index} finished initialization ${
+                this.isInitialized ? "successfully" : "with error"
+            }.`
+        )
+        this.onFinish?.(this.isInitialized)
     }
 
     writeData(): void {
@@ -24,7 +32,15 @@ export class InitMessageHandler implements IMessageHandler {
             )
             this.ctx.client.write(ESocketMessage.HTTP_UPGRADE, "ascii")
         }
+        setTimeout(() => {
+            Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
+            if (!this.isInitialized) {
+                Logger.I.info(`Thread ${this.ctx.index} timed out.`)
+                this.stopMessaging()
+            }
+        }, this.inactivityTimeout)
     }
+
     readData(data: Buffer): void {
         const dataString = data.toString().trim()
         if (dataString.includes(ESocketMessage.GREETING)) {
@@ -52,6 +68,7 @@ export class InitMessageHandler implements IMessageHandler {
             return
         }
         if (dataString.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
+            this.isInitialized = true
             this.stopMessaging()
             return
         }

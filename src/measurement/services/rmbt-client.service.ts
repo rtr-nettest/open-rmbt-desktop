@@ -105,7 +105,7 @@ export class RMBTClient {
                         Logger.I.info(
                             `The ping median is ${
                                 ((message.data! as IMeasurementThreadResult)
-                                    .ping_median || 0n) / 1000000n
+                                    .ping_median || -1000000n) / 1000000n
                             }ms.`
                         )
                         this.phaseStartTime = Time.nowNs()

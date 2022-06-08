@@ -37,7 +37,7 @@ export class PingMessageHandler implements IMessageHandler {
 
     writeData() {
         this.pingCurrentStartTime = Time.nowNs()
-        this.ctx.client.write(Buffer.from(ESocketMessage.PING, "ascii"))
+        this.ctx.client.write(ESocketMessage.PING)
         Logger.I.info(
             `Thread ${this.ctx.index} sent ${ESocketMessage.PING.replace(
                 "\n",
@@ -48,31 +48,30 @@ export class PingMessageHandler implements IMessageHandler {
     }
 
     readData(data: Buffer) {
-        if (data.includes(ESocketMessage.PONG)) {
-            this.pingCurrentEndTime = Time.nowNs()
+        if (data.includes(ESocketMessage.ERR)) {
             Logger.I.info(
-                `Thread ${this.ctx.index} is ${ESocketMessage.OK}Continuing.`
+                `Thread ${this.ctx.index} received an error. Terminating.`
+            )
+            const pingClient = this.setShortestPing()
+            this.serverPings.push(pingClient)
+            this.stopMessaging()
+            return
+        }
+        if (data.includes(ESocketMessage.PONG)) {
+            Logger.I.info(
+                `Thread ${this.ctx.index} received a PONG. Continuing.`
             )
             this.ctx.client.write(ESocketMessage.OK)
             return
         }
         if (data.includes(ESocketMessage.TIME)) {
+            this.setShortestPing()
+
             const timeMatches = new RegExp(/TIME ([0-9]+)/).exec(
                 data.toString().trim()
             )
-
-            const ping: IPing = {
-                client: this.pingCurrentEndTime - this.pingCurrentStartTime,
-                server: timeMatches?.[1] ? BigInt(timeMatches[1]) : 0n,
-                timeNs: this.pingCurrentStartTime,
-            }
-
-            if (
-                ping.client < (this.ctx.threadResult.ping_shortest || Infinity)
-            ) {
-                this.ctx.threadResult.ping_shortest = ping.client
-            }
-            this.serverPings.push(ping.server)
+            const pingServer = timeMatches?.[1] ? BigInt(timeMatches[1]) : -1n
+            this.serverPings.push(pingServer)
         }
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
             if (this.pingCounter < (this.ctx.params.test_numpings ?? 0)) {
@@ -82,5 +81,13 @@ export class PingMessageHandler implements IMessageHandler {
             }
             return
         }
+    }
+
+    private setShortestPing() {
+        const pingTime = this.pingCurrentEndTime - this.pingCurrentStartTime
+        if (pingTime < (this.ctx.threadResult.ping_shortest || Infinity)) {
+            this.ctx.threadResult.ping_shortest = pingTime
+        }
+        return pingTime
     }
 }

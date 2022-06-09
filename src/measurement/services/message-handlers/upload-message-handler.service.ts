@@ -11,9 +11,9 @@ import { Logger } from "../logger.service"
 import { Time } from "../time.service"
 
 export class UploadMessageHandler implements IMessageHandler {
-    static statsIntervalTime = Number(1e6)
+    static statsIntervalTime = 1001001
     static waitForAllChunksTime = 3000
-    static clientTimeOffset = Number(1e9)
+    static clientTimeOffset = 1e9
     private uploadEndTime = 0
     private result = new SingleThreadResult(0)
     private activityInterval?: NodeJS.Timer
@@ -62,7 +62,7 @@ export class UploadMessageHandler implements IMessageHandler {
         if (data.includes(ESocketMessage.TIME)) {
             const dataArr = data.toString().trim().split(" ")
             if (dataArr.length === 4) {
-                const nanos =Number(dataArr[1])
+                const nanos = Number(dataArr[1])
                 const bytes = Number(dataArr[3])
                 if (
                     bytes > 0 &&
@@ -119,8 +119,7 @@ export class UploadMessageHandler implements IMessageHandler {
 
     private setActivityInterval() {
         clearInterval(this.activityInterval)
-        const uploadDuration =
-            Number(this.ctx.params.test_duration) * 1e9
+        const uploadDuration = Number(this.ctx.params.test_duration) * 1e9
         this.uploadEndTime = Time.nowNs() + uploadDuration
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)

@@ -20,8 +20,8 @@ export class RMBTThread implements IMessageHandlerContext {
     currentTime: number = -1
     currentTransfer: number = -1
     threadResult: IMeasurementThreadResult = new MeasurementThreadResult()
-    preDownloadChunks?: number | undefined
-    preUploadChunks?: number | undefined
+    preDownloadChunks: number = -1
+    preUploadChunks: number = -1
     private totalPreDownload = 0
     private totalDownload = 0
     private totalPreUpload = 0

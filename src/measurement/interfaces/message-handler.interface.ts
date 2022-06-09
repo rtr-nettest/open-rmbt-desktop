@@ -15,6 +15,6 @@ export interface IMessageHandlerContext {
     chunksize: number
     params: IMeasurementRegistrationResponse
     threadResult: IMeasurementThreadResult
-    preUploadChunks?: number
-    preDownloadChunks?: number
+    preUploadChunks: number
+    preDownloadChunks: number
 }

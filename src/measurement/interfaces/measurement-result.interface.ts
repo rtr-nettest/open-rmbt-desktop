@@ -6,8 +6,8 @@ export interface IMeasurementResult {
     jitterMeanNanos?: number
     num_threads?: number
     packetLossPercent?: number
-    ping_median?: bigint
-    ping_shortest?: bigint
+    ping_median?: number
+    ping_shortest?: number
     pings: IPing[]
     port_remote?: number
     speedItems: ISpeedItem[]
@@ -20,25 +20,25 @@ export interface IMeasurementThreadResult extends IMeasurementResult {
     totalDownBytes: number
     totalUpBytes: number
     chunksize?: number
-    currentTime: bigint
+    currentTime: number
     currentTransfer: number
 }
 
 export interface IMeasurementThreadResultList {
     bytes: number[]
-    nsec: bigint[]
+    nsec: number[]
 }
 
 export interface IPing {
-    client: bigint
-    server: bigint
-    timeNs: bigint
+    client: number
+    server: number
+    timeNs: number
 }
 
 export interface ISpeedItem {
     upload: boolean
     thread: number
-    time: bigint
+    time: number
     bytes: number
 }
 

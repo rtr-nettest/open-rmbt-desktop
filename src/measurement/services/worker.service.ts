@@ -23,11 +23,11 @@ export type OutgoingMessage =
 export class OutgoingMessageWithData {
     constructor(
         public message: OutgoingMessage,
-        public data?: IMeasurementThreadResult | number | bigint | boolean
+        public data?: IMeasurementThreadResult | number | number | boolean
     ) {}
 }
 export class IncomingMessageWithData {
-    constructor(public message: IncomingMessage, public data?: bigint) {}
+    constructor(public message: IncomingMessage, public data?: number) {}
 }
 
 parentPort?.on("message", async (message: IncomingMessageWithData) => {
@@ -60,7 +60,7 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
         case "download":
             result = await thread?.manageDownload()
             if (result) {
-                result.currentTime = thread?.currentTime || 0n
+                result.currentTime = thread?.currentTime || 0
                 result.currentTransfer = thread?.currentTransfer || 0
             }
             parentPort?.postMessage(
@@ -87,7 +87,7 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
         case "upload":
             result = await thread?.manageUpload()
             if (result) {
-                result.currentTime = thread?.currentTime || 0n
+                result.currentTime = thread?.currentTime || 0
                 result.currentTransfer = thread?.currentTransfer || 0
             }
             parentPort?.postMessage(

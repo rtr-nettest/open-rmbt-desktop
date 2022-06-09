@@ -11,10 +11,10 @@ import { Logger } from "../logger.service"
 import { Time } from "../time.service"
 
 export class UploadMessageHandler implements IMessageHandler {
-    static statsIntervalTime = BigInt(1e6)
+    static statsIntervalTime = Number(1e6)
     static waitForAllChunksTime = 3000
-    static clientTimeOffset = BigInt(1e9)
-    private uploadEndTime = 0n
+    static clientTimeOffset = Number(1e9)
+    private uploadEndTime = 0
     private result = new SingleThreadResult(0)
     private activityInterval?: NodeJS.Timer
     private inactivityTimeout = 0
@@ -24,12 +24,12 @@ export class UploadMessageHandler implements IMessageHandler {
         private ctx: IMessageHandlerContext,
         private setIntermidiateResults: (
             currentTransfer: number,
-            currentTime: bigint
+            currentTime: number
         ) => void,
         public onFinish: (result: IMeasurementThreadResult) => void
     ) {
         const maxStoredResults =
-            (BigInt(this.ctx.params.test_duration) * BigInt(1e9)) /
+            (Number(this.ctx.params.test_duration) * 1e9) /
             DownloadMessageHandler.minDiffTime
         this.result = new SingleThreadResult(Number(maxStoredResults))
         this.inactivityTimeout = Number(this.ctx.params.test_duration) * 1000
@@ -62,7 +62,7 @@ export class UploadMessageHandler implements IMessageHandler {
         if (data.includes(ESocketMessage.TIME)) {
             const dataArr = data.toString().trim().split(" ")
             if (dataArr.length === 4) {
-                const nanos = BigInt(Number(dataArr[1]))
+                const nanos =Number(dataArr[1])
                 const bytes = Number(dataArr[3])
                 if (
                     bytes > 0 &&
@@ -120,7 +120,7 @@ export class UploadMessageHandler implements IMessageHandler {
     private setActivityInterval() {
         clearInterval(this.activityInterval)
         const uploadDuration =
-            BigInt(this.ctx.params.test_duration) * BigInt(1e9)
+            Number(this.ctx.params.test_duration) * 1e9
         this.uploadEndTime = Time.nowNs() + uploadDuration
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)

@@ -1,7 +1,6 @@
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import {
     IMeasurementThreadResult,
-    IPing,
 } from "../../interfaces/measurement-result.interface"
 import {
     IMessageHandler,
@@ -11,7 +10,7 @@ import { Logger } from "../logger.service"
 import { Time } from "../time.service"
 
 export class PingMessageHandler implements IMessageHandler {
-    private serverPings: bigint[] = []
+    private serverPings: number[] = []
     private pingCurrentStartTime = Time.nowNs()
     private pingCurrentEndTime = Time.nowNs()
     private pingCounter = 0
@@ -27,7 +26,7 @@ export class PingMessageHandler implements IMessageHandler {
         if (this.serverPings.length % 2 === 0) {
             const medianA = this.serverPings[middle]
             const medianB = this.serverPings[middle - 1]
-            this.ctx.threadResult.ping_median = (medianA + medianB) / 2n
+            this.ctx.threadResult.ping_median = (medianA + medianB) / 2
         } else {
             this.ctx.threadResult.ping_median =
                 this.serverPings[Math.floor(middle)]
@@ -70,7 +69,7 @@ export class PingMessageHandler implements IMessageHandler {
             const timeMatches = new RegExp(/TIME ([0-9]+)/).exec(
                 data.toString().trim()
             )
-            const pingServer = timeMatches?.[1] ? BigInt(timeMatches[1]) : -1n
+            const pingServer = timeMatches?.[1] ? Number(timeMatches[1]) : -1
             this.serverPings.push(pingServer)
         }
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {

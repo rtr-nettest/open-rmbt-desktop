@@ -14,15 +14,15 @@ export class SingleThreadResult {
     constructor(private maxStoredResults: number) {
         this.coarse = {
             bytes: Array(maxStoredResults),
-            nsec: Array(BigInt(maxStoredResults)),
+            nsec: Array(maxStoredResults),
         }
         this.fine = {
             bytes: Array(maxStoredResults),
-            nsec: Array(BigInt(maxStoredResults)),
+            nsec: Array(maxStoredResults),
         }
     }
 
-    addResult(newBytes: number, newNsec: bigint) {
+    addResult(newBytes: number, newNsec: number) {
         Logger.I.info("New bytes: %d. New nsec: %d.", newBytes, newNsec)
         let addToCoarse = this.coarseResults === 0
         if (!addToCoarse) {
@@ -58,7 +58,7 @@ export class SingleThreadResult {
         const numResults = numResultsCoarse + numResultsFine
 
         let resultBytes = Array(numResults)
-        let resultNsec = Array(BigInt(numResults))
+        let resultNsec = Array(numResults)
 
         let results = 0
         let posCoarse = this.coarseResults - numResultsCoarse
@@ -72,19 +72,19 @@ export class SingleThreadResult {
             const fineAvail = posFine < this.fineResults
             const thisCoarse = coarseAvail
                 ? this.coarse.nsec[posCoarse % this.coarse.nsec.length]
-                : -1n
+                : -1
             const thisFine = fineAvail
                 ? this.fine.nsec[posFine % this.fine.nsec.length]
-                : -1n
+                : -1
 
-            if ((thisFine <= thisCoarse || thisCoarse == -1n) && fineAvail) {
+            if ((thisFine <= thisCoarse || thisCoarse == -1) && fineAvail) {
                 resultNsec[results] = thisFine
                 resultBytes[results++] =
                     this.fine.bytes[posFine++ % this.fine.bytes.length]
 
                 if (thisFine == thisCoarse && coarseAvail) posCoarse++
             } else if (
-                (thisCoarse < thisFine || thisFine == -1n) &&
+                (thisCoarse < thisFine || thisFine == -1) &&
                 coarseAvail
             ) {
                 resultNsec[results] = thisCoarse
@@ -104,7 +104,7 @@ export class SingleThreadResult {
     }
 
     addSpeedItems(list: ISpeedItem[] = [], upload: boolean, thread: number) {
-        let coarsNsec = 0n
+        let coarsNsec = 0
         const numResultsCoarse = Math.min(
             this.coarseResults,
             this.maxStoredResults
@@ -124,7 +124,7 @@ export class SingleThreadResult {
 
         const fineNsec =
             this.fineResults === 0
-                ? 0n
+                ? 0
                 : this.fine.nsec[(this.fineResults - 1) % this.fine.nsec.length]
         if (fineNsec > coarsNsec) {
             const bytes =

@@ -17,7 +17,7 @@ import { IMessageHandlerContext } from "../interfaces/message-handler.interface"
 export class RMBTThread implements IMessageHandlerContext {
     chunksize: number = 0
     client: net.Socket = new net.Socket()
-    currentTime: bigint = -1n
+    currentTime: number = -1
     currentTransfer: number = -1
     threadResult: IMeasurementThreadResult = new MeasurementThreadResult()
     preDownloadChunks?: number | undefined
@@ -265,7 +265,7 @@ export class RMBTThread implements IMessageHandlerContext {
         return new Promise((resolve) => {
             this.phase = "upload"
             this.currentTransfer = 0
-            this.currentTime = 0n
+            this.currentTime = 0
             this.uploadMessageHandler = new UploadMessageHandler(
                 this,
                 (total, currentTime) => {

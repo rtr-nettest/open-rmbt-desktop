@@ -11,7 +11,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
     public totalUpload = 0
     public preUploadChunks = 0
     private preUploadEndTime = Time.nowNs()
-    private preUploadDuration = 2000000000n
+    private preUploadDuration = 2000000000
 
     constructor(
         private ctx: IMessageHandlerContext,

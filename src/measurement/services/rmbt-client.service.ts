@@ -15,8 +15,8 @@ export class RMBTClient {
     initializedThreads: number[] = []
     threadResults: IMeasurementThreadResult[] = []
     chunks: number[] = []
-    timestamps: { index: number; time: bigint }[] = []
-    phaseStartTime = 0n
+    timestamps: { index: number; time: number }[] = []
+    phaseStartTime = 0
 
     constructor(params: IMeasurementRegistrationResponse) {
         this.params = params
@@ -105,7 +105,7 @@ export class RMBTClient {
                         Logger.I.info(
                             `The ping median is ${
                                 ((message.data! as IMeasurementThreadResult)
-                                    .ping_median || -1000000n) / 1000000n
+                                    .ping_median || -1000000) / 1000000
                             }ms.`
                         )
                         this.phaseStartTime = Time.nowNs()
@@ -126,7 +126,7 @@ export class RMBTClient {
                             Logger.I.info(
                                 `The download is finished in ${
                                     (Time.nowNs() - this.phaseStartTime) /
-                                    BigInt(1e9)
+                                    1e9
                                 }s`
                             )
                             Logger.I.info(
@@ -201,7 +201,7 @@ export class RMBTClient {
                             Logger.I.info(
                                 `The upload is finished in ${
                                     (Time.nowNs() - this.phaseStartTime) /
-                                    BigInt(1e9)
+                                    1e9
                                 }s`
                             )
                             Logger.I.info(
@@ -243,7 +243,7 @@ export class RMBTClient {
     // in bits per nano
     private getTotalSpeed() {
         let sumTrans = 0
-        let maxTime = 0n
+        let maxTime = 0
 
         for (const task of this.threadResults) {
             if (task.currentTime > maxTime) {
@@ -252,6 +252,6 @@ export class RMBTClient {
             sumTrans += task.currentTransfer
         }
 
-        return maxTime === 0n ? 0 : (sumTrans / Number(maxTime)) * 1e9 * 8.0
+        return maxTime === 0 ? 0 : (sumTrans / Number(maxTime)) * 1e9 * 8.0
     }
 }

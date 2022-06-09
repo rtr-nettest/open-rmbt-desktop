@@ -9,25 +9,25 @@ import { Logger } from "../logger.service"
 import { Time } from "../time.service"
 
 export class DownloadMessageHandler implements IMessageHandler {
-    static minDiffTime = 100000000n
+    static minDiffTime = 100000000
     private downloadStartTime = Time.nowNs()
     private downloadEndTime = Time.nowNs()
-    private downloadBytesRead = Buffer.alloc(0)
+    private downloadBytesRead = 0
     private activityInterval?: NodeJS.Timer
     private inactivityTimeout = 0
     private result = new SingleThreadResult(0)
-    private nsec = 0n
+    private nsec = 0
 
     constructor(
         private ctx: IMessageHandlerContext,
         private setIntermidiateResults: (
             currentTransfer: number,
-            currentTime: bigint
+            currentTime: number
         ) => void,
         public onFinish: (result: IMeasurementThreadResult) => void
     ) {
         const maxStoredResults =
-            (BigInt(this.ctx.params.test_duration) * BigInt(1e9)) /
+            (Number(this.ctx.params.test_duration) * 1e9) /
             DownloadMessageHandler.minDiffTime
         this.result = new SingleThreadResult(Number(maxStoredResults))
         this.inactivityTimeout = Number(this.ctx.params.test_duration) * 1000
@@ -49,7 +49,7 @@ export class DownloadMessageHandler implements IMessageHandler {
         this.downloadStartTime = Time.nowNs()
         this.downloadEndTime =
             this.downloadStartTime +
-            BigInt(this.ctx.params.test_duration) * BigInt(1e9)
+            Number(this.ctx.params.test_duration) * 1e9
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
             if (Time.nowNs() > this.downloadEndTime) {
@@ -75,20 +75,18 @@ export class DownloadMessageHandler implements IMessageHandler {
         let lastByte = 0
         let isFullChunk = false
         if (data.length > 0) {
-            this.downloadBytesRead = Buffer.alloc(
-                this.downloadBytesRead.byteLength + data.byteLength
-            )
+            this.downloadBytesRead = this.downloadBytesRead + data.byteLength
 
             this.nsec = Time.nowNs() - this.downloadStartTime
-            this.result.addResult(this.downloadBytesRead.byteLength, this.nsec)
+            this.result.addResult(this.downloadBytesRead, this.nsec)
 
             isFullChunk =
-                this.downloadBytesRead.byteLength % this.ctx.chunksize === 0
+                this.downloadBytesRead % this.ctx.chunksize === 0
 
             lastByte = data[data.length - 1]
 
             this.setIntermidiateResults?.(
-                this.downloadBytesRead.byteLength,
+                this.downloadBytesRead,
                 this.nsec
             )
         }

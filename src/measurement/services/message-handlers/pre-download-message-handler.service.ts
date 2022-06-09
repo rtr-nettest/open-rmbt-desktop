@@ -9,7 +9,7 @@ import { Time } from "../time.service"
 export class PreDownloadMessageHandler implements IMessageHandler {
     private preDownloadChunks = 1
     private preDownloadEndTime = Time.nowNs()
-    private preDownloadDuration = 2000000000n
+    private preDownloadDuration = 2000000000
     private preDownloadBytesRead = Buffer.alloc(0)
     private activityInterval?: NodeJS.Timer
 

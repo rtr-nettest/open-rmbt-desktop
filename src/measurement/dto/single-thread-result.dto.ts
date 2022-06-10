@@ -23,33 +23,30 @@ export class SingleThreadResult {
     }
 
     addResult(newBytes: number, newNsec: number) {
-        return new Promise((resolve) => {
-            Logger.I.info("New bytes: %d. New nsec: %d.", newBytes, newNsec)
-            let addToCoarse = this.coarseResults === 0
-            if (!addToCoarse) {
-                const diffTime =
-                    newNsec -
-                    this.coarse.nsec[
-                        (this.coarseResults - 1) % this.coarse.nsec.length
-                    ]
-                if (diffTime > DownloadMessageHandler.minDiffTime) {
-                    addToCoarse = true
-                }
+        Logger.I.info("New bytes: %d. New nsec: %d.", newBytes, newNsec)
+        let addToCoarse = this.coarseResults === 0
+        if (!addToCoarse) {
+            const diffTime =
+                newNsec -
+                this.coarse.nsec[
+                    (this.coarseResults - 1) % this.coarse.nsec.length
+                ]
+            if (diffTime > DownloadMessageHandler.minDiffTime) {
+                addToCoarse = true
             }
-            if (this.coarse.bytes.length > 0) {
-                if (addToCoarse) {
-                    const coarsePos =
-                        (this.coarseResults += 1) % this.coarse.bytes.length
-                    this.coarse.bytes[coarsePos] = newBytes
-                    this.coarse.nsec[coarsePos] = newNsec
-                }
+        }
+        if (this.coarse.bytes.length > 0) {
+            if (addToCoarse) {
+                const coarsePos =
+                    (this.coarseResults += 1) % this.coarse.bytes.length
+                this.coarse.bytes[coarsePos] = newBytes
+                this.coarse.nsec[coarsePos] = newNsec
+            }
 
-                const finePos = (this.fineResults += 1) % this.fine.bytes.length
-                this.fine.bytes[finePos] = newBytes
-                this.fine.nsec[finePos] = newNsec
-            }
-            resolve(this)
-        })
+            const finePos = (this.fineResults += 1) % this.fine.bytes.length
+            this.fine.bytes[finePos] = newBytes
+            this.fine.nsec[finePos] = newNsec
+        }
     }
 
     getAllResults(): IMeasurementThreadResultList {

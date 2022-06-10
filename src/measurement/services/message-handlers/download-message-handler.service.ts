@@ -73,23 +73,26 @@ export class DownloadMessageHandler implements IMessageHandler {
         if (data.includes(ESocketMessage.TIME)) {
             return
         }
-        let lastByte = 0
-        let isFullChunk = false
-        if (data.length > 0) {
-            this.downloadBytesRead = this.downloadBytesRead + data.byteLength
+        setImmediate(() => {
+            let lastByte = 0
+            let isFullChunk = false
+            if (data.length > 0) {
+                this.downloadBytesRead =
+                    this.downloadBytesRead + data.byteLength
 
-            this.nsec = Time.nowNs() - this.downloadStartTime - lag() * 1e6
-            this.result.addResult(this.downloadBytesRead, this.nsec)
+                this.nsec = Time.nowNs() - this.downloadStartTime - lag() * 1e6
+                this.result.addResult(this.downloadBytesRead, this.nsec)
 
-            isFullChunk = this.downloadBytesRead % this.ctx.chunksize === 0
+                isFullChunk = this.downloadBytesRead % this.ctx.chunksize === 0
 
-            lastByte = data[data.length - 1]
+                lastByte = data[data.length - 1]
 
-            this.setIntermidiateResults?.(this.downloadBytesRead, this.nsec)
-        }
-        if (isFullChunk && lastByte === 0xff) {
-            this.requestFinish()
-        }
+                this.setIntermidiateResults?.(this.downloadBytesRead, this.nsec)
+            }
+            if (isFullChunk && lastByte === 0xff) {
+                this.requestFinish()
+            }
+        })
     }
 
     private requestFinish() {

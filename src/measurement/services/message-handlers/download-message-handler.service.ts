@@ -8,6 +8,8 @@ import {
 import { Logger } from "../logger.service"
 import { Time } from "../time.service"
 
+const lag = require("event-loop-lag")(1000)
+
 export class DownloadMessageHandler implements IMessageHandler {
     static minDiffTime = 100000000
     private downloadStartTime = Time.nowNs()
@@ -48,8 +50,7 @@ export class DownloadMessageHandler implements IMessageHandler {
     writeData(): void {
         this.downloadStartTime = Time.nowNs()
         this.downloadEndTime =
-            this.downloadStartTime +
-            Number(this.ctx.params.test_duration) * 1e9
+            this.downloadStartTime + Number(this.ctx.params.test_duration) * 1e9
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
             if (Time.nowNs() > this.downloadEndTime) {
@@ -77,18 +78,14 @@ export class DownloadMessageHandler implements IMessageHandler {
         if (data.length > 0) {
             this.downloadBytesRead = this.downloadBytesRead + data.byteLength
 
-            this.nsec = Time.nowNs() - this.downloadStartTime
+            this.nsec = Time.nowNs() - this.downloadStartTime - lag() * 1e6
             this.result.addResult(this.downloadBytesRead, this.nsec)
 
-            isFullChunk =
-                this.downloadBytesRead % this.ctx.chunksize === 0
+            isFullChunk = this.downloadBytesRead % this.ctx.chunksize === 0
 
             lastByte = data[data.length - 1]
 
-            this.setIntermidiateResults?.(
-                this.downloadBytesRead,
-                this.nsec
-            )
+            this.setIntermidiateResults?.(this.downloadBytesRead, this.nsec)
         }
         if (isFullChunk && lastByte === 0xff) {
             this.requestFinish()

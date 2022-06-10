@@ -8,8 +8,6 @@ import {
 import { Logger } from "../logger.service"
 import { Time } from "../time.service"
 
-const lag = require("event-loop-lag")(1000)
-
 export class DownloadMessageHandler implements IMessageHandler {
     static minDiffTime = 100000000
     private downloadStartTime = Time.nowNs()
@@ -37,7 +35,7 @@ export class DownloadMessageHandler implements IMessageHandler {
 
     stopMessaging() {
         clearInterval(this.activityInterval)
-        Logger.I.info(`Download is stoped for thread ${this.ctx.index}`)
+        Logger.I.info(`Download is stopped for thread ${this.ctx.index}`)
         this.ctx.threadResult.down = this.result.getAllResults()
         this.ctx.threadResult.speedItems = this.result.addSpeedItems(
             this.ctx.threadResult.speedItems,
@@ -58,9 +56,6 @@ export class DownloadMessageHandler implements IMessageHandler {
                 this.requestFinish()
             }
         }, this.inactivityTimeout)
-        Logger.I.info(
-            `Thread ${this.ctx.index} will run download for ${this.ctx.params.test_duration} seconds.`
-        )
         this.ctx.client.write(
             `${ESocketMessage.GETTIME} ${this.ctx.params.test_duration}\n`
         )
@@ -80,7 +75,7 @@ export class DownloadMessageHandler implements IMessageHandler {
                 this.downloadBytesRead =
                     this.downloadBytesRead + data.byteLength
 
-                this.nsec = Time.nowNs() - this.downloadStartTime - lag() * 1e6
+                this.nsec = Time.nowNs() - this.downloadStartTime
                 this.result.addResult(this.downloadBytesRead, this.nsec)
 
                 isFullChunk = this.downloadBytesRead % this.ctx.chunksize === 0

@@ -10,8 +10,6 @@ import { DownloadMessageHandler } from "./download-message-handler.service"
 import { Logger } from "../logger.service"
 import { Time } from "../time.service"
 
-const lag = require("event-loop-lag")(1000)
-
 export class UploadMessageHandler implements IMessageHandler {
     static statsIntervalTime = 1001001
     static waitForAllChunksTime = 3000
@@ -64,7 +62,7 @@ export class UploadMessageHandler implements IMessageHandler {
         if (data.includes(ESocketMessage.TIME)) {
             const dataArr = data.toString().trim().split(" ")
             if (dataArr.length === 4) {
-                const nanos = Number(dataArr[1]) - lag() * 1e6
+                const nanos = Number(dataArr[1])
                 const bytes = Number(dataArr[3])
                 if (
                     bytes > 0 &&
@@ -97,9 +95,6 @@ export class UploadMessageHandler implements IMessageHandler {
             const buffer = randomBytes(this.ctx.chunksize)
             if (Time.nowNs() >= this.uploadEndTime) {
                 buffer[buffer.length - 1] = 0xff
-                Logger.I.info(
-                    `Thread ${this.ctx.index} sending the last chunk.`
-                )
                 this.ctx.client.write(buffer)
                 if (!this.finalTimeout) {
                     this.finalTimeout = setTimeout(
@@ -110,7 +105,6 @@ export class UploadMessageHandler implements IMessageHandler {
                 break
             } else {
                 buffer[buffer.length - 1] = 0x00
-                Logger.I.info(`Thread ${this.ctx.index} sending a chunk.`)
                 this.ctx.client.write(buffer)
                 if (Time.nowNs() >= statsTime) {
                     break

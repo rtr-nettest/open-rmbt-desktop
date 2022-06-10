@@ -58,9 +58,6 @@ export class PreUploadMessageHandler implements IMessageHandler {
         this.preUploadChunks = !this.preUploadChunks
             ? 1
             : this.preUploadChunks * 2
-        Logger.I.info(
-            `Thread ${this.ctx.index} sending ${this.preUploadChunks} chunks.`
-        )
         for (let i = 0; i < this.preUploadChunks; i++) {
             const buffer = randomBytes(this.ctx.chunksize)
             if (i == this.preUploadChunks - 1) {
@@ -68,9 +65,6 @@ export class PreUploadMessageHandler implements IMessageHandler {
             }
             this.ctx.client.write(buffer)
             this.totalUpload += buffer.byteLength
-            Logger.I.info(
-                `Thread ${this.ctx.index} has sent ${this.totalUpload} bytes.`
-            )
         }
     }
 }

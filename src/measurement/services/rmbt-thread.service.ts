@@ -101,17 +101,7 @@ export class RMBTThread implements IMessageHandlerContext {
         }
 
     private dataListener(data: Buffer) {
-        let dataString = data.length < 128 ? data.toString().trim() : ""
-        if (dataString.length) {
-            Logger.I.info(
-                `Thread ${this.index} received string: %s`,
-                dataString
-            )
-        } else {
-            Logger.I.info(
-                `Thread ${this.index} received bytes of length ${data.byteLength}`
-            )
-        }
+        const dataString = data.length < 128 ? data.toString().trim() : ""
         if (dataString.includes(ESocketMessage.ERR)) {
             this.hadError = true
         }

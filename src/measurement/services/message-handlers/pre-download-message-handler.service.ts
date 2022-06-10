@@ -10,7 +10,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     private preDownloadChunks = 1
     private preDownloadEndTime = Time.nowNs()
     private preDownloadDuration = 2000000000
-    private preDownloadBytesRead = Buffer.alloc(0)
+    private preDownloadBytesRead = -1
     private activityInterval?: NodeJS.Timer
 
     constructor(
@@ -26,12 +26,12 @@ export class PreDownloadMessageHandler implements IMessageHandler {
         clearInterval(this.activityInterval)
         this.onFinish?.({
             chunks: this.preDownloadChunks,
-            totalDownload: this.preDownloadBytesRead.byteLength,
+            totalDownload: this.preDownloadBytesRead,
         })
     }
 
     writeData(): void {
-        this.preDownloadBytesRead = Buffer.alloc(0)
+        this.preDownloadBytesRead = 0
         this.preDownloadChunks = 1
         this.preDownloadEndTime = Time.nowNs() + this.preDownloadDuration
         this.getChunks()
@@ -53,11 +53,9 @@ export class PreDownloadMessageHandler implements IMessageHandler {
         let lastByte = 0
         let isFullChunk = false
         if (data.length > 0) {
-            this.preDownloadBytesRead = Buffer.alloc(
-                this.preDownloadBytesRead.byteLength + data.byteLength
-            )
-            isFullChunk =
-                this.preDownloadBytesRead.byteLength % this.ctx.chunksize === 0
+            this.preDownloadBytesRead =
+                this.preDownloadBytesRead + data.byteLength
+            isFullChunk = this.preDownloadBytesRead % this.ctx.chunksize === 0
             lastByte = data[data.length - 1]
         }
         if (isFullChunk && lastByte === 0xff) {
@@ -74,12 +72,8 @@ export class PreDownloadMessageHandler implements IMessageHandler {
                 this.finishChunkPortion()
             }
         }, 1000)
-        Logger.I.info(
-            `Thread ${this.ctx.index} getting ${this.preDownloadChunks} chunks.`
-        )
         this.ctx.client.write(
-            `${ESocketMessage.GETCHUNKS} ${this.preDownloadChunks}\n`,
-            "ascii"
+            `${ESocketMessage.GETCHUNKS} ${this.preDownloadChunks}\n`
         )
     }
 

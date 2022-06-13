@@ -225,7 +225,6 @@ export class RMBTThread implements IMessageHandlerContext {
     async managePreUpload(): Promise<number> {
         return new Promise((resolve) => {
             this.phase = "preupload"
-            this.chunkSize = this.defaultChunkSize
             this.preUploadMessageHandler = new PreUploadMessageHandler(
                 this,
                 () => {
@@ -247,7 +246,6 @@ export class RMBTThread implements IMessageHandlerContext {
             this.phase = "upload"
             this.currentTransfer = 0
             this.currentTime = 0
-            this.setChunkSize()
             this.uploadMessageHandler = new UploadMessageHandler(
                 this,
                 (result) => {

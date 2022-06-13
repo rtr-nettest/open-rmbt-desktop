@@ -261,12 +261,8 @@ export class RMBTThread implements IMessageHandlerContext {
     }
     // from RMBTws client
     private setChunkSize() {
-        const totalBytesPerSecPretest = this.bytesPerSecPretest.reduce(
-            (acc, bps) => acc + bps
-        )
-
         // set chunk size to accordingly 1 chunk every n/2 ms on average with n threads
-        this.chunkSize = totalBytesPerSecPretest / 50
+        this.chunkSize = this.preDownloadChunks
 
         //but min 4KiB
         this.chunkSize = Math.max(this.minChunkSize, this.chunkSize)
@@ -277,7 +273,5 @@ export class RMBTThread implements IMessageHandlerContext {
         Logger.I.warn(
             `Thread ${this.index} is setting chunk size to ${this.chunkSize}`
         )
-
-        this.bytesPerSecPretest = []
     }
 }

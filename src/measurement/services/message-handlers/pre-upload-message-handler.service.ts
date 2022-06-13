@@ -51,7 +51,9 @@ export class PreUploadMessageHandler implements IMessageHandler {
 
     private putNoResult() {
         Logger.I.info(`Thread ${this.ctx.index} sending PUTNORESULT.`)
-        this.ctx.client.write(ESocketMessage.PUTNORESULT)
+        this.ctx.client.write(
+            `${ESocketMessage.PUTNORESULT} ${this.ctx.preUploadChunks}\n`
+        )
     }
 
     private putChunks() {

@@ -17,7 +17,7 @@ export type IncomingMessage =
     | "preUpload"
     | "reconnectForUpload"
     | "upload"
-    | "startRandomGenerator"
+    | "putNewBuffer"
 export type OutgoingMessage =
     | "connected"
     | "downloadFinished"
@@ -26,7 +26,6 @@ export type OutgoingMessage =
     | "preUploadFinished"
     | "reconnectedForUpload"
     | "uploadFinished"
-    | "bufferGenerated"
 export class OutgoingMessageWithData {
     constructor(
         public message: OutgoingMessage,
@@ -34,7 +33,10 @@ export class OutgoingMessageWithData {
     ) {}
 }
 export class IncomingMessageWithData {
-    constructor(public message: IncomingMessage, public data?: number) {}
+    constructor(
+        public message: IncomingMessage,
+        public data?: number | Buffer
+    ) {}
 }
 export interface IBuffer {
     index: number

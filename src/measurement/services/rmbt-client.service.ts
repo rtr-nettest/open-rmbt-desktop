@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto"
 import { MeasurementThreadResult } from "../dto/measurement-result.dto"
 import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
@@ -20,6 +21,7 @@ export class RMBTClient {
     chunks: number[] = []
     timestamps: { index: number; time: number }[] = []
     phaseStartTime = 0
+    rngIntervals: NodeJS.Timer[] = []
 
     constructor(params: IMeasurementRegistrationResponse) {
         this.params = params
@@ -92,7 +94,7 @@ export class RMBTClient {
                     case "preDownloadFinished":
                         this.chunks.push(message.data as number)
                         Logger.I.warn(
-                            `Worker ${index} finished pre-download with ${this.chunks} chunks.`
+                            `Worker ${index} finished pre-download with ${this.chunks} chunk sizes.`
                         )
                         if (
                             this.chunks.length === this.measurementTasks.length
@@ -101,6 +103,19 @@ export class RMBTClient {
                             this.measurementTasks[0].postMessage(
                                 new IncomingMessageWithData("ping")
                             )
+                            for (const w of this.measurementTasks) {
+                                const chunkSize = this.chunks[index]
+                                this.rngIntervals.push(
+                                    setInterval(() => {
+                                        w.postMessage(
+                                            new IncomingMessageWithData(
+                                                "putNewBuffer",
+                                                randomBytes(chunkSize)
+                                            )
+                                        )
+                                    }, 0)
+                                )
+                            }
                             this.chunks = []
                         }
                         break
@@ -213,6 +228,9 @@ export class RMBTClient {
                             this.threadResults = []
                             for (const w of this.measurementTasks) {
                                 w.terminate()
+                            }
+                            for (const i of this.rngIntervals) {
+                                clearInterval(i)
                             }
                         }
                         break

@@ -184,7 +184,7 @@ export class RMBTThread implements IMessageHandlerContext {
                     Logger.I.info(
                         `Resolving thread ${this.index} pre-download.`
                     )
-                    resolve(this.preDownloadChunks)
+                    resolve(this.chunkSize)
                 }
             )
             this.preDownloadMessageHandler.writeData()
@@ -234,7 +234,7 @@ export class RMBTThread implements IMessageHandlerContext {
                         Logger.I.info(
                             `Resolving thread ${this.index} pre-upload.`
                         )
-                        resolve(this.preUploadChunks)
+                        resolve(this.chunkSize)
                     })
                 }
             )

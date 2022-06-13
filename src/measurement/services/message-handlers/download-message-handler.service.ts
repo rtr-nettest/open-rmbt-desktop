@@ -86,7 +86,6 @@ export class DownloadMessageHandler implements IMessageHandler {
 
                 this.ctx.currentTime = this.nsec
                 this.ctx.currentTransfer = this.downloadBytesRead
-                this.ctx.generatedBuffers.push(data)
             }
             if (isFullChunk && lastByte === 0xff) {
                 this.requestFinish()

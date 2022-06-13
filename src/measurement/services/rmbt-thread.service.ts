@@ -225,7 +225,6 @@ export class RMBTThread implements IMessageHandlerContext {
     async managePreUpload(): Promise<number> {
         return new Promise((resolve) => {
             this.phase = "preupload"
-            this.chunkSize = this.defaultChunkSize
             this.preUploadMessageHandler = new PreUploadMessageHandler(
                 this,
                 () => {
@@ -247,7 +246,6 @@ export class RMBTThread implements IMessageHandlerContext {
             this.phase = "upload"
             this.currentTransfer = 0
             this.currentTime = 0
-            this.setChunkSize()
             this.uploadMessageHandler = new UploadMessageHandler(
                 this,
                 (result) => {
@@ -263,12 +261,8 @@ export class RMBTThread implements IMessageHandlerContext {
     }
     // from RMBTws client
     private setChunkSize() {
-        const totalBytesPerSecPretest = this.bytesPerSecPretest.reduce(
-            (acc, bps) => acc + bps
-        )
-
         // set chunk size to accordingly 1 chunk every n/2 ms on average with n threads
-        this.chunkSize = totalBytesPerSecPretest / 50
+        this.chunkSize = this.preDownloadChunks
 
         //round to the nearest full KB
         this.chunkSize -= this.chunkSize % 1024
@@ -278,8 +272,6 @@ export class RMBTThread implements IMessageHandlerContext {
 
         //and max MAX_CHUNKSIZE
         this.chunkSize = Math.min(this.maxChunkSize, this.chunkSize)
-
-        this.chunkSize = 131072
 
         Logger.I.warn(
             `Thread ${this.index} is setting chunk size to ${this.chunkSize}`

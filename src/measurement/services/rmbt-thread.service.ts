@@ -264,12 +264,6 @@ export class RMBTThread implements IMessageHandlerContext {
         // set chunk size to accordingly 1 chunk every n/2 ms on average with n threads
         this.chunkSize = this.preDownloadChunks
 
-        //round to the nearest full KB
-        this.chunkSize -= this.chunkSize % 1024
-
-        //but min 4KiB
-        this.chunkSize = Math.max(this.minChunkSize, this.chunkSize)
-
         //and max MAX_CHUNKSIZE
         this.chunkSize = Math.min(this.maxChunkSize, this.chunkSize)
 

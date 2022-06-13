@@ -279,6 +279,8 @@ export class RMBTThread implements IMessageHandlerContext {
         //and max MAX_CHUNKSIZE
         this.chunkSize = Math.min(this.maxChunkSize, this.chunkSize)
 
+        this.chunkSize = 131072
+
         Logger.I.warn(
             `Thread ${this.index} is setting chunk size to ${this.chunkSize}`
         )

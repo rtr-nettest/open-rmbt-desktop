@@ -7,7 +7,6 @@ import { Logger } from "../logger.service"
 import { Time } from "../time.service"
 
 export class PreDownloadMessageHandler implements IMessageHandler {
-    private preDownloadChunks = 1
     private preDownloadEndTime = Time.nowNs()
     private preDownloadDuration = 2000000000
     private preDownloadBytesRead = -1
@@ -15,24 +14,18 @@ export class PreDownloadMessageHandler implements IMessageHandler {
 
     constructor(
         private ctx: IMessageHandlerContext,
-        public onFinish: (result: {
-            chunks: number
-            totalDownload: number
-        }) => void
+        public onFinish: () => void
     ) {}
 
     stopMessaging(): void {
         Logger.I.info(`Predownload is finished for thread ${this.ctx.index}`)
         clearInterval(this.activityInterval)
-        this.onFinish?.({
-            chunks: this.preDownloadChunks,
-            totalDownload: this.preDownloadBytesRead,
-        })
+        this.onFinish?.()
     }
 
     writeData(): void {
         this.preDownloadBytesRead = 0
-        this.preDownloadChunks = 1
+        this.ctx.preDownloadChunks = 1
         this.preDownloadEndTime = Time.nowNs() + this.preDownloadDuration
         this.getChunks()
     }
@@ -40,7 +33,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     readData(data: Buffer): void {
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
             if (Time.nowNs() < this.preDownloadEndTime) {
-                this.preDownloadChunks *= 2
+                this.ctx.preDownloadChunks *= 2
                 this.getChunks()
             } else {
                 this.stopMessaging()
@@ -48,6 +41,10 @@ export class PreDownloadMessageHandler implements IMessageHandler {
             return
         }
         if (data.includes(ESocketMessage.TIME)) {
+            const timeNs = Number(data.toString().split(" ")[1])
+            this.ctx.bytesPerSecPretest.push(
+                this.ctx.preDownloadChunks / timeNs / 1e9
+            )
             return
         }
         let lastByte = 0
@@ -55,7 +52,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
         if (data.length > 0) {
             this.preDownloadBytesRead =
                 this.preDownloadBytesRead + data.byteLength
-            isFullChunk = this.preDownloadBytesRead % this.ctx.chunksize === 0
+            isFullChunk = this.preDownloadBytesRead % this.ctx.chunkSize === 0
             lastByte = data[data.length - 1]
         }
         if (isFullChunk && lastByte === 0xff) {
@@ -73,15 +70,12 @@ export class PreDownloadMessageHandler implements IMessageHandler {
             }
         }, 1000)
         this.ctx.client.write(
-            `${ESocketMessage.GETCHUNKS} ${this.preDownloadChunks}\n`
+            `${ESocketMessage.GETCHUNKS} ${this.ctx.preDownloadChunks}\n`
         )
     }
 
     private finishChunkPortion() {
         clearInterval(this.activityInterval)
-        Logger.I.info(
-            `Thread ${this.ctx.index} is ${ESocketMessage.OK}Continuing.`
-        )
         this.ctx.client.write(ESocketMessage.OK)
     }
 }

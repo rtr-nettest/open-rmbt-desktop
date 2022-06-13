@@ -16,6 +16,6 @@ export enum ESocketMessage {
     PONG = "PONG",
     GETTIME = "GETTIME",
     PUTNORESULT = "PUTNORESULT\n",
-    PUT = "PUT\n",
+    PUT = "PUT",
     ERR = "ERR",
 }

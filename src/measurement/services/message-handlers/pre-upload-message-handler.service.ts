@@ -8,24 +8,16 @@ import { Logger } from "../logger.service"
 import { Time } from "../time.service"
 
 export class PreUploadMessageHandler implements IMessageHandler {
-    public totalUpload = 0
-    public preUploadChunks = 0
     private preUploadEndTime = Time.nowNs()
     private preUploadDuration = 2000000000
 
     constructor(
         private ctx: IMessageHandlerContext,
-        public onFinish: (result: {
-            chunks: number
-            totalUpload: number
-        }) => void
+        public onFinish: () => void
     ) {}
 
     stopMessaging(): void {
-        this.onFinish?.({
-            chunks: this.preUploadChunks,
-            totalUpload: this.totalUpload,
-        })
+        this.onFinish?.()
     }
 
     writeData(): void {
@@ -35,6 +27,14 @@ export class PreUploadMessageHandler implements IMessageHandler {
     }
 
     readData(data: Buffer): void {
+        if (data.includes(ESocketMessage.TIME)) {
+            const timeNs = Number(data.toString().split(" ")[1])
+            if (timeNs) {
+                this.ctx.bytesPerSecPretest.push(
+                    this.ctx.preUploadChunks / timeNs / 1e9
+                )
+            }
+        }
         if (data.includes(ESocketMessage.OK)) {
             this.putChunks()
             return
@@ -55,16 +55,15 @@ export class PreUploadMessageHandler implements IMessageHandler {
     }
 
     private putChunks() {
-        this.preUploadChunks = !this.preUploadChunks
+        this.ctx.preUploadChunks = !this.ctx.preUploadChunks
             ? 1
-            : this.preUploadChunks * 2
-        for (let i = 0; i < this.preUploadChunks; i++) {
-            const buffer = randomBytes(this.ctx.chunksize)
-            if (i == this.preUploadChunks - 1) {
+            : this.ctx.preUploadChunks * 2
+        for (let i = 0; i < this.ctx.preUploadChunks; i++) {
+            const buffer = randomBytes(this.ctx.chunkSize)
+            if (i == this.ctx.preUploadChunks - 1) {
                 buffer[buffer.length - 1] = 0xff
             }
             this.ctx.client.write(buffer)
-            this.totalUpload += buffer.byteLength
         }
     }
 }

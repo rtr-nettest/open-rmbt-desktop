@@ -20,10 +20,6 @@ export class DownloadMessageHandler implements IMessageHandler {
 
     constructor(
         private ctx: IMessageHandlerContext,
-        private setIntermidiateResults: (
-            currentTransfer: number,
-            currentTime: number
-        ) => void,
         public onFinish: (result: IMeasurementThreadResult) => void
     ) {
         const maxStoredResults =
@@ -56,9 +52,15 @@ export class DownloadMessageHandler implements IMessageHandler {
                 this.requestFinish()
             }
         }, this.inactivityTimeout)
-        this.ctx.client.write(
-            `${ESocketMessage.GETTIME} ${this.ctx.params.test_duration}\n`
-        )
+        const msg = `${ESocketMessage.GETTIME} ${
+            this.ctx.params.test_duration
+        }${
+            this.ctx.chunkSize === this.ctx.defaultChunkSize
+                ? ""
+                : ` ${this.ctx.chunkSize}`
+        }\n`
+        Logger.I.info(`Thread ${this.ctx.index} is sending "${msg}"`)
+        this.ctx.client.write(msg)
     }
     readData(data: Buffer): void {
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
@@ -78,11 +80,12 @@ export class DownloadMessageHandler implements IMessageHandler {
                 this.nsec = Time.nowNs() - this.downloadStartTime
                 this.result.addResult(this.downloadBytesRead, this.nsec)
 
-                isFullChunk = this.downloadBytesRead % this.ctx.chunksize === 0
+                isFullChunk = this.downloadBytesRead % this.ctx.chunkSize === 0
 
                 lastByte = data[data.length - 1]
 
-                this.setIntermidiateResults?.(this.downloadBytesRead, this.nsec)
+                this.ctx.currentTime = this.nsec
+                this.ctx.currentTransfer = this.downloadBytesRead
             }
             if (isFullChunk && lastByte === 0xff) {
                 this.requestFinish()

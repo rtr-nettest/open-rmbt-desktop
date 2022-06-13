@@ -61,10 +61,14 @@ export class InitMessageHandler implements IMessageHandler {
             return
         }
         if (dataString.includes(ESocketMessage.CHUNKSIZE)) {
-            this.ctx.threadResult.chunksize = Number(dataString.split(" ")[1])
+            const chunkSizes = dataString.split(" ")
             Logger.I.info(
-                `Setting chunksize ${this.ctx.threadResult.chunksize} for the thread ${this.ctx.index}.`
+                `Thread ${this.ctx.index} received chunksizes ${chunkSizes}.`
             )
+            this.ctx.defaultChunkSize = +chunkSizes[1]
+            this.ctx.minChunkSize = +chunkSizes[2]
+            this.ctx.maxChunkSize = +chunkSizes[3]
+            this.ctx.chunkSize = +chunkSizes[1]
             return
         }
         if (dataString.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {

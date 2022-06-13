@@ -22,10 +22,6 @@ export class UploadMessageHandler implements IMessageHandler {
 
     constructor(
         private ctx: IMessageHandlerContext,
-        private setIntermidiateResults: (
-            currentTransfer: number,
-            currentTime: number
-        ) => void,
         public onFinish: (result: IMeasurementThreadResult) => void
     ) {
         const maxStoredResults =
@@ -48,9 +44,14 @@ export class UploadMessageHandler implements IMessageHandler {
     }
 
     writeData(): void {
-        Logger.I.info(`Thread ${this.ctx.index} sending PUT.`)
         this.setActivityInterval()
-        this.ctx.client.write(ESocketMessage.PUT)
+        const msg = `${ESocketMessage.PUT} ${
+            this.ctx.chunkSize === this.ctx.defaultChunkSize
+                ? ""
+                : ` ${this.ctx.chunkSize}`
+        }\n`
+        Logger.I.info(`Thread ${this.ctx.index} is sending "${msg}"`)
+        this.ctx.client.write(msg)
     }
 
     readData(data: Buffer): void {
@@ -70,7 +71,8 @@ export class UploadMessageHandler implements IMessageHandler {
                     Time.nowNs() < this.uploadEndTime
                 ) {
                     this.result.addResult(bytes, nanos)
-                    this.setIntermidiateResults(bytes, nanos)
+                    this.ctx.currentTime = nanos
+                    this.ctx.currentTransfer = bytes
                 }
                 if (
                     nanos >=
@@ -92,7 +94,7 @@ export class UploadMessageHandler implements IMessageHandler {
     private putChunks() {
         const statsTime = Time.nowNs() + UploadMessageHandler.statsIntervalTime
         while (true) {
-            const buffer = randomBytes(this.ctx.chunksize)
+            const buffer = randomBytes(this.ctx.chunkSize)
             if (Time.nowNs() >= this.uploadEndTime) {
                 buffer[buffer.length - 1] = 0xff
                 this.ctx.client.write(buffer)

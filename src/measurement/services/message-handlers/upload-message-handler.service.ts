@@ -19,6 +19,7 @@ export class UploadMessageHandler implements IMessageHandler {
     private activityInterval?: NodeJS.Timer
     private inactivityTimeout = 0
     private finalTimeout?: NodeJS.Timeout
+    private rngDelay = 0
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -63,7 +64,7 @@ export class UploadMessageHandler implements IMessageHandler {
         if (data.includes(ESocketMessage.TIME)) {
             const dataArr = data.toString().trim().split(" ")
             if (dataArr.length === 4) {
-                const nanos = Number(dataArr[1])
+                const nanos = Number(dataArr[1]) - this.rngDelay
                 const bytes = Number(dataArr[3])
                 if (
                     bytes > 0 &&
@@ -94,10 +95,9 @@ export class UploadMessageHandler implements IMessageHandler {
     private putChunks() {
         const statsTime = Time.nowNs() + UploadMessageHandler.statsIntervalTime
         while (true) {
-            let buffer = this.ctx.generatedBuffers.pop()
-            if (!buffer) {
-                buffer = randomBytes(this.ctx.chunkSize)
-            }
+            let bufferGenStartTime = Time.nowNs()
+            let buffer = randomBytes(this.ctx.chunkSize)
+            this.rngDelay = this.rngDelay + (Time.nowNs() - bufferGenStartTime)
             if (Time.nowNs() >= this.uploadEndTime) {
                 buffer[buffer.length - 1] = 0xff
                 this.ctx.client.write(buffer)

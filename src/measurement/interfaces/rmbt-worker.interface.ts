@@ -17,7 +17,6 @@ export type IncomingMessage =
     | "preUpload"
     | "reconnectForUpload"
     | "upload"
-    | "putNewBuffer"
 export type OutgoingMessage =
     | "connected"
     | "downloadFinished"

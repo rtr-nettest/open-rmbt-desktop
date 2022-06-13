@@ -23,7 +23,6 @@ export class RMBTThread implements IMessageHandlerContext {
     client: net.Socket = new net.Socket()
     currentTime: number = -1
     currentTransfer: number = -1
-    generatedBuffers: Buffer[] = []
     threadResult: IMeasurementThreadResult = new MeasurementThreadResult()
     preDownloadChunks: number = 1
     preUploadChunks: number = 1

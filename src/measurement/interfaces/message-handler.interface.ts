@@ -16,7 +16,6 @@ export interface IMessageHandlerContext {
     currentTime: number
     currentTransfer: number
     defaultChunkSize: number
-    generatedBuffers: Buffer[]
     index: number
     maxChunkSize: number
     minChunkSize: number

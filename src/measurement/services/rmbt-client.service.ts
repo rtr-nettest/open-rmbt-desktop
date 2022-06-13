@@ -21,7 +21,6 @@ export class RMBTClient {
     chunks: number[] = []
     timestamps: { index: number; time: number }[] = []
     phaseStartTime = 0
-    rngIntervals: NodeJS.Timer[] = []
 
     constructor(params: IMeasurementRegistrationResponse) {
         this.params = params
@@ -103,19 +102,6 @@ export class RMBTClient {
                             this.measurementTasks[0].postMessage(
                                 new IncomingMessageWithData("ping")
                             )
-                            for (const w of this.measurementTasks) {
-                                const chunkSize = this.chunks[index]
-                                this.rngIntervals.push(
-                                    setInterval(() => {
-                                        w.postMessage(
-                                            new IncomingMessageWithData(
-                                                "putNewBuffer",
-                                                randomBytes(chunkSize)
-                                            )
-                                        )
-                                    }, 0)
-                                )
-                            }
                             this.chunks = []
                         }
                         break
@@ -228,9 +214,6 @@ export class RMBTClient {
                             this.threadResults = []
                             for (const w of this.measurementTasks) {
                                 w.terminate()
-                            }
-                            for (const i of this.rngIntervals) {
-                                clearInterval(i)
                             }
                         }
                         break

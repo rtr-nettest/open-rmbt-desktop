@@ -62,9 +62,6 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
                 new OutgoingMessageWithData("reconnectedForUpload", isConnected)
             )
             break
-        case "putNewBuffer":
-            thread?.generatedBuffers.push(message.data! as Buffer)
-            break
         case "upload":
             result = await thread?.manageUpload()
             if (result) {

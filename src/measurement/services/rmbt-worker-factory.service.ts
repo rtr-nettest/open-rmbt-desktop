@@ -1,8 +1,5 @@
+import { RMBTWorker } from "../interfaces/rmbt-worker.interface"
 import { Window } from "../interfaces/window.interface"
-import {
-    IncomingMessageWithData,
-    OutgoingMessageWithData,
-} from "./worker.service"
 
 export class RMBTWorkerFactory {
     private constructor() {}
@@ -22,13 +19,4 @@ export class RMBTWorkerFactory {
             return undefined
         }
     }
-}
-
-export interface RMBTWorker {
-    postMessage(value: IncomingMessageWithData): void
-    terminate(): void
-    on(
-        event: "message",
-        listener: (value: OutgoingMessageWithData) => void
-    ): void
 }

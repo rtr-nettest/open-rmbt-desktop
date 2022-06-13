@@ -5,5 +5,8 @@
         "resolveJsonModule": true,
         "rootDir": "src"
     },
-    "files": ["./src/measurement/services/worker.service.ts"]
+    "files": [
+        "./src/measurement/services/worker.service.ts",
+        "./src/measurement/services/random-bytes-worker.service.ts"
+    ]
 }

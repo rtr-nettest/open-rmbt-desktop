@@ -1,34 +1,12 @@
 import { parentPort, workerData } from "worker_threads"
 import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
+import {
+    IncomingMessageWithData,
+    OutgoingMessageWithData,
+} from "../interfaces/rmbt-worker.interface"
 import { RMBTThread } from "./rmbt-thread.service"
 
 let thread: RMBTThread | undefined
-
-export type IncomingMessage =
-    | "connect"
-    | "download"
-    | "ping"
-    | "preDownload"
-    | "preUpload"
-    | "reconnectForUpload"
-    | "upload"
-export type OutgoingMessage =
-    | "connected"
-    | "downloadFinished"
-    | "pingFinished"
-    | "preDownloadFinished"
-    | "preUploadFinished"
-    | "reconnectedForUpload"
-    | "uploadFinished"
-export class OutgoingMessageWithData {
-    constructor(
-        public message: OutgoingMessage,
-        public data?: IMeasurementThreadResult | number | number | boolean
-    ) {}
-}
-export class IncomingMessageWithData {
-    constructor(public message: IncomingMessage, public data?: number) {}
-}
 
 parentPort?.on("message", async (message: IncomingMessageWithData) => {
     let result: IMeasurementThreadResult | undefined

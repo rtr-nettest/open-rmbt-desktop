@@ -2,10 +2,13 @@ import { MeasurementThreadResult } from "../dto/measurement-result.dto"
 import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
+import {
+    IncomingMessageWithData,
+    RMBTWorker,
+} from "../interfaces/rmbt-worker.interface"
 import { Logger } from "./logger.service"
-import { RMBTWorker, RMBTWorkerFactory } from "./rmbt-worker-factory.service"
+import { RMBTWorkerFactory } from "./rmbt-worker-factory.service"
 import { Time } from "./time.service"
-import { IncomingMessageWithData } from "./worker.service"
 
 export class RMBTClient {
     measurementLastUpdate?: number
@@ -125,8 +128,7 @@ export class RMBTClient {
                         ) {
                             Logger.I.info(
                                 `The download is finished in ${
-                                    (Time.nowNs() - this.phaseStartTime) /
-                                    1e9
+                                    (Time.nowNs() - this.phaseStartTime) / 1e9
                                 }s`
                             )
                             Logger.I.info(
@@ -200,8 +202,7 @@ export class RMBTClient {
                         ) {
                             Logger.I.info(
                                 `The upload is finished in ${
-                                    (Time.nowNs() - this.phaseStartTime) /
-                                    1e9
+                                    (Time.nowNs() - this.phaseStartTime) / 1e9
                                 }s`
                             )
                             Logger.I.info(

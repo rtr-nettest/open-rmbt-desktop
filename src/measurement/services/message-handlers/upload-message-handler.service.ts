@@ -9,6 +9,12 @@ import {
 import { DownloadMessageHandler } from "./download-message-handler.service"
 import { Logger } from "../logger.service"
 import { Time } from "../time.service"
+import {
+    IBuffer,
+    IncomingMessageWithData,
+    RMBTWorker,
+} from "../../interfaces/rmbt-worker.interface"
+import { RMBTWorkerFactory } from "../rmbt-worker-factory.service"
 
 export class UploadMessageHandler implements IMessageHandler {
     static statsIntervalTime = 1001001
@@ -19,6 +25,8 @@ export class UploadMessageHandler implements IMessageHandler {
     private activityInterval?: NodeJS.Timer
     private inactivityTimeout = 0
     private finalTimeout?: NodeJS.Timeout
+    private randomBytesWorker?: RMBTWorker
+    private generatedBuffers: Buffer[] = []
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -29,9 +37,32 @@ export class UploadMessageHandler implements IMessageHandler {
             DownloadMessageHandler.minDiffTime
         this.result = new SingleThreadResult(Number(maxStoredResults))
         this.inactivityTimeout = Number(this.ctx.params.test_duration) * 1000
+        this.randomBytesWorker = RMBTWorkerFactory.getWorker(
+            "./dist/measurement/services/random-bytes-worker.service.js",
+            {
+                workerData: {
+                    chunkSize: this.ctx.chunkSize,
+                    index: this.ctx.index,
+                },
+            }
+        )
+        this.randomBytesWorker?.on("message", (message) => {
+            switch (message.message) {
+                case "bufferGenerated":
+                    const generatedBuffer = message.data as IBuffer
+                    if (generatedBuffer.index === this.ctx.index) {
+                        this.generatedBuffers.push(generatedBuffer.buffer)
+                    }
+                    break
+            }
+        })
+        this.randomBytesWorker?.postMessage(
+            new IncomingMessageWithData("startRandomGenerator")
+        )
     }
 
     stopMessaging(): void {
+        this.randomBytesWorker?.terminate()
         clearInterval(this.activityInterval)
         Logger.I.info(`Upload is finished for thread ${this.ctx.index}`)
         this.ctx.threadResult.up = this.result.getAllResults()
@@ -94,7 +125,10 @@ export class UploadMessageHandler implements IMessageHandler {
     private putChunks() {
         const statsTime = Time.nowNs() + UploadMessageHandler.statsIntervalTime
         while (true) {
-            const buffer = randomBytes(this.ctx.chunkSize)
+            let buffer = this.generatedBuffers.pop()
+            if (!buffer) {
+                buffer = randomBytes(this.ctx.chunkSize)
+            }
             if (Time.nowNs() >= this.uploadEndTime) {
                 buffer[buffer.length - 1] = 0xff
                 this.ctx.client.write(buffer)

@@ -56,9 +56,9 @@ export class DownloadMessageHandler implements IMessageHandler {
             this.ctx.params.test_duration
         }${
             this.ctx.chunkSize === this.ctx.defaultChunkSize
-                ? ""
-                : ` ${this.ctx.chunkSize}`
-        }\n`
+                ? "\n"
+                : ` ${this.ctx.chunkSize}\n`
+        }`
         Logger.I.info(`Thread ${this.ctx.index} is sending "${msg}"`)
         this.ctx.client.write(msg)
     }

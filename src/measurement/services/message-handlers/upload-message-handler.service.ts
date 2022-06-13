@@ -76,11 +76,11 @@ export class UploadMessageHandler implements IMessageHandler {
 
     writeData(): void {
         this.setActivityInterval()
-        const msg = `${ESocketMessage.PUT} ${
+        const msg = `${ESocketMessage.PUT}${
             this.ctx.chunkSize === this.ctx.defaultChunkSize
-                ? ""
-                : ` ${this.ctx.chunkSize}`
-        }\n`
+                ? "\n"
+                : ` ${this.ctx.chunkSize}\n`
+        }`
         Logger.I.info(`Thread ${this.ctx.index} is sending "${msg}"`)
         this.ctx.client.write(msg)
     }

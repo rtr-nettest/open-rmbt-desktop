@@ -18,7 +18,6 @@ export class UploadMessageHandler implements IMessageHandler {
     private activityInterval?: NodeJS.Timer
     private inactivityTimeout = 0
     private finalTimeout?: NodeJS.Timeout
-    private backupBuffers: Buffer[] = []
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -94,10 +93,8 @@ export class UploadMessageHandler implements IMessageHandler {
     private putChunks() {
         const statsTime = Time.nowNs() + UploadMessageHandler.statsIntervalTime
         while (true) {
-            let buffer = this.ctx.generatedBuffers.length
-                ? this.ctx.generatedBuffers.pop()!
-                : this.backupBuffers.pop()!
-            this.backupBuffers.push(buffer)
+            let buffer = this.ctx.generatedBuffers.shift()!
+            this.ctx.generatedBuffers.push(buffer)
             if (Time.nowNs() >= this.uploadEndTime) {
                 buffer[buffer.length - 1] = 0xff
                 this.ctx.client.write(buffer)

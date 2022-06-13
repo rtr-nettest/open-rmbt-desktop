@@ -15,17 +15,17 @@ import { UploadMessageHandler } from "./message-handlers/upload-message-handler.
 import { IMessageHandlerContext } from "../interfaces/message-handler.interface"
 
 export class RMBTThread implements IMessageHandlerContext {
-    bytesPerSecPretest: number[] = []
-    minChunkSize = 0
-    maxChunkSize = 4194304
-    defaultChunkSize = 4096
-    chunkSize = 0
+    chunksize: number = 0
     client: net.Socket = new net.Socket()
     currentTime: number = -1
     currentTransfer: number = -1
     threadResult: IMeasurementThreadResult = new MeasurementThreadResult()
     preDownloadChunks: number = -1
     preUploadChunks: number = -1
+    private totalPreDownload = 0
+    private totalDownload = 0
+    private totalPreUpload = 0
+    private totalUpload = 0
     private phase?:
         | "init"
         | "predownload"
@@ -41,27 +41,6 @@ export class RMBTThread implements IMessageHandlerContext {
     private uploadMessageHandler?: UploadMessageHandler
     private hadError = false
     private isConnected = false
-
-    // from RMBTws client
-    setChunkSize() {
-        const totalBytesPerSecPretest = this.bytesPerSecPretest.reduce(
-            (acc, bps) => acc + bps
-        )
-
-        // set chunk size to accordingly 1 chunk every n/2 ms on average with n threads
-        this.chunkSize = totalBytesPerSecPretest / 50
-
-        //round to the nearest full KB
-        this.chunkSize -= this.chunkSize % 1024
-
-        //but min 4KiB
-        this.chunkSize = Math.max(this.minChunkSize, this.chunkSize)
-
-        //and max MAX_CHUNKSIZE
-        this.chunkSize = Math.min(this.maxChunkSize, this.chunkSize)
-
-        this.bytesPerSecPretest = []
-    }
 
     constructor(
         public params: IMeasurementRegistrationResponse,
@@ -183,6 +162,8 @@ export class RMBTThread implements IMessageHandlerContext {
             this.phase = "init"
             this.initMessageHandler = new InitMessageHandler(this, (result) => {
                 this.initMessageHandler = undefined
+                this.chunksize = this.threadResult.chunksize || 0
+                delete this.threadResult.chunksize
                 Logger.I.info(`Resolving thread ${this.index} init.`)
                 if (result) {
                     resolve(result)
@@ -199,12 +180,14 @@ export class RMBTThread implements IMessageHandlerContext {
             this.phase = "predownload"
             this.preDownloadMessageHandler = new PreDownloadMessageHandler(
                 this,
-                () => {
+                (result) => {
                     this.preDownloadMessageHandler = undefined
+                    this.totalPreDownload = result.totalDownload
+                    this.preDownloadChunks = result.chunks
                     Logger.I.info(
                         `Resolving thread ${this.index} pre-download.`
                     )
-                    resolve(this.preDownloadChunks)
+                    resolve(result.chunks)
                 }
             )
             this.preDownloadMessageHandler.writeData()
@@ -226,9 +209,13 @@ export class RMBTThread implements IMessageHandlerContext {
     async manageDownload(): Promise<IMeasurementThreadResult> {
         return new Promise((resolve) => {
             this.phase = "download"
-            this.setChunkSize()
             this.downloadMessageHandler = new DownloadMessageHandler(
                 this,
+                (total, currentTime) => {
+                    this.totalDownload = total
+                    this.currentTransfer = total
+                    this.currentTime = currentTime
+                },
                 (result) => {
                     this.downloadMessageHandler = undefined
                     this.disconnect().then(() => {
@@ -250,6 +237,7 @@ export class RMBTThread implements IMessageHandlerContext {
                 this,
                 (result) => {
                     this.preUploadMessageHandler = undefined
+                    this.totalPreUpload = result.totalUpload
                     this.preUploadChunks = result.chunks
                     this.disconnect().then(() => {
                         Logger.I.info(
@@ -271,6 +259,7 @@ export class RMBTThread implements IMessageHandlerContext {
             this.uploadMessageHandler = new UploadMessageHandler(
                 this,
                 (total, currentTime) => {
+                    this.totalUpload = total
                     this.currentTransfer = total
                     this.currentTime = currentTime
                 },

@@ -10,15 +10,9 @@ export interface IMessageHandler {
 }
 
 export interface IMessageHandlerContext {
-    bytesPerSecPretest: number[]
     client: Socket
     index: number
-    maxChunkSize: number
-    minChunkSize: number
-    defaultChunkSize: number
-    chunkSize: number
-    currentTime: number
-    currentTransfer: number
+    chunksize: number
     params: IMeasurementRegistrationResponse
     threadResult: IMeasurementThreadResult
     preUploadChunks: number

@@ -8,6 +8,7 @@ import {
 import { DownloadMessageHandler } from "./download-message-handler.service"
 import { Logger } from "../logger.service"
 import { Time } from "../time.service"
+import { randomBytes } from "crypto"
 
 export class UploadMessageHandler implements IMessageHandler {
     static statsIntervalTime = 1001001
@@ -93,8 +94,10 @@ export class UploadMessageHandler implements IMessageHandler {
     private putChunks() {
         const statsTime = Time.nowNs() + UploadMessageHandler.statsIntervalTime
         while (true) {
-            let buffer = this.ctx.generatedBuffers.shift()!
-            this.ctx.generatedBuffers.push(buffer)
+            let buffer = this.ctx.generatedBuffers.pop()
+            if (!buffer) {
+                buffer = randomBytes(this.ctx.chunkSize)
+            }
             if (Time.nowNs() >= this.uploadEndTime) {
                 buffer[buffer.length - 1] = 0xff
                 this.ctx.client.write(buffer)

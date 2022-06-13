@@ -16,7 +16,7 @@ import { IMessageHandlerContext } from "../interfaces/message-handler.interface"
 
 export class RMBTThread implements IMessageHandlerContext {
     bytesPerSecPretest: number[] = []
-    minChunkSize = 0
+    minChunkSize = 4096
     maxChunkSize = 4194304
     defaultChunkSize = 4096
     chunkSize: number = 0
@@ -263,6 +263,9 @@ export class RMBTThread implements IMessageHandlerContext {
     private setChunkSize() {
         // set chunk size to accordingly 1 chunk every n/2 ms on average with n threads
         this.chunkSize = this.preDownloadChunks
+
+        //but min 4KiB
+        this.chunkSize = Math.max(this.minChunkSize, this.chunkSize)
 
         //and max MAX_CHUNKSIZE
         this.chunkSize = Math.min(this.maxChunkSize, this.chunkSize)

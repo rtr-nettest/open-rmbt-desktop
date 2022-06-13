@@ -92,7 +92,7 @@ export class UploadMessageHandler implements IMessageHandler {
     private putChunks() {
         const statsTime = Time.nowNs() + UploadMessageHandler.statsIntervalTime
         while (true) {
-            const buffer = randomBytes(this.ctx.chunksize)
+            const buffer = randomBytes(this.ctx.chunkSize)
             if (Time.nowNs() >= this.uploadEndTime) {
                 buffer[buffer.length - 1] = 0xff
                 this.ctx.client.write(buffer)

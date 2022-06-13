@@ -59,7 +59,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
             ? 1
             : this.preUploadChunks * 2
         for (let i = 0; i < this.preUploadChunks; i++) {
-            const buffer = randomBytes(this.ctx.chunksize)
+            const buffer = randomBytes(this.ctx.chunkSize)
             if (i == this.preUploadChunks - 1) {
                 buffer[buffer.length - 1] = 0xff
             }

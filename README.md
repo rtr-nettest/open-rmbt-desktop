@@ -1,5 +1,10 @@
 # Open RMBT Desktop
 
+
+## Status
+
+This code is in early development and is not intended for production use.
+
 ## Configuration
 
 The project contains a `.env.example` file. You can use it as an example to configure some variables needed to successfully run a measurement. The path to your custom `.env` file can be passed through an environment variable `RMBT_DESKTOP_DOTENV_CONFIG_PATH`. Otherwise the client will try to read the variables from a `.env` file in the root of the project, if such exists.

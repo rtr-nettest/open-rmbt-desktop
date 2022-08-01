@@ -1,9 +1,16 @@
 # Open RMBT Desktop
 
-
 ## Status
 
 This code is in early development and is not intended for production use.
+
+## Requirements
+
+The project requires Node.js v18 or later.
+
+## Simple setup
+
+Install packages by running `npm i`. Rename `.env.example` file into `.env`. Run `npm run start` to launch the measurement.
 
 ## Configuration
 

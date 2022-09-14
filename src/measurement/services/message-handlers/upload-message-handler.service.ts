@@ -19,17 +19,21 @@ export class UploadMessageHandler implements IMessageHandler {
     private activityInterval?: NodeJS.Timer
     private inactivityTimeout = 0
     private finalTimeout?: NodeJS.Timeout
-    private rngDelay = 0
+    private buffers: Buffer[] = []
 
     constructor(
         private ctx: IMessageHandlerContext,
         public onFinish: (result: IMeasurementThreadResult) => void
     ) {
-        const maxStoredResults =
+        let maxStoredResults =
             (Number(this.ctx.params.test_duration) * 1e9) /
             DownloadMessageHandler.minDiffTime
         this.result = new SingleThreadResult(Number(maxStoredResults))
         this.inactivityTimeout = Number(this.ctx.params.test_duration) * 1000
+        while (maxStoredResults > 0) {
+            this.buffers.push(randomBytes(this.ctx.chunkSize))
+            maxStoredResults--
+        }
     }
 
     stopMessaging(): void {
@@ -64,7 +68,7 @@ export class UploadMessageHandler implements IMessageHandler {
         if (data.includes(ESocketMessage.TIME)) {
             const dataArr = data.toString().trim().split(" ")
             if (dataArr.length === 4) {
-                const nanos = Number(dataArr[1]) - this.rngDelay
+                const nanos = Number(dataArr[1])
                 const bytes = Number(dataArr[3])
                 if (
                     bytes > 0 &&
@@ -92,15 +96,20 @@ export class UploadMessageHandler implements IMessageHandler {
         }
     }
 
-    private putChunks() {
+    private async writeToSocketAsync(buffer: Buffer) {
+        return new Promise((resolve, _) => {
+            this.ctx.client.write(buffer, resolve)
+        })
+    }
+
+    private async putChunks() {
         const statsTime = Time.nowNs() + UploadMessageHandler.statsIntervalTime
         while (true) {
-            let bufferGenStartTime = Time.nowNs()
-            let buffer = randomBytes(this.ctx.chunkSize)
-            this.rngDelay = this.rngDelay + (Time.nowNs() - bufferGenStartTime)
+            let buffer = this.buffers.shift()!
+            this.buffers.push(buffer)
             if (Time.nowNs() >= this.uploadEndTime) {
                 buffer[buffer.length - 1] = 0xff
-                this.ctx.client.write(buffer)
+                await this.writeToSocketAsync(buffer)
                 if (!this.finalTimeout) {
                     this.finalTimeout = setTimeout(
                         () => this.stopMessaging.bind(this),
@@ -110,7 +119,7 @@ export class UploadMessageHandler implements IMessageHandler {
                 break
             } else {
                 buffer[buffer.length - 1] = 0x00
-                this.ctx.client.write(buffer)
+                await this.writeToSocketAsync(buffer)
                 if (Time.nowNs() >= statsTime) {
                     break
                 }

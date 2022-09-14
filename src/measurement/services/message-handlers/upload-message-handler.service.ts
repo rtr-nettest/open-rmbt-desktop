@@ -104,12 +104,18 @@ export class UploadMessageHandler implements IMessageHandler {
 
     private async putChunks() {
         const statsTime = Time.nowNs() + UploadMessageHandler.statsIntervalTime
+        let bufferIndex = 0
         while (true) {
-            let buffer = this.buffers.shift()!
-            this.buffers.push(buffer)
-            if (Time.nowNs() >= this.uploadEndTime) {
+            let buffer = this.buffers[bufferIndex]!
+            if (bufferIndex >= this.buffers.length - 1) {
+                bufferIndex = 0
+            } else {
+                bufferIndex++
+            }
+            const nowNs = Time.nowNs()
+            if (nowNs >= this.uploadEndTime) {
                 buffer[buffer.length - 1] = 0xff
-                await this.writeToSocketAsync(buffer)
+                this.ctx.client.write(buffer)
                 if (!this.finalTimeout) {
                     this.finalTimeout = setTimeout(
                         () => this.stopMessaging.bind(this),
@@ -119,8 +125,8 @@ export class UploadMessageHandler implements IMessageHandler {
                 break
             } else {
                 buffer[buffer.length - 1] = 0x00
-                await this.writeToSocketAsync(buffer)
-                if (Time.nowNs() >= statsTime) {
+                this.ctx.client.write(buffer)
+                if (nowNs >= statsTime) {
                     break
                 }
             }

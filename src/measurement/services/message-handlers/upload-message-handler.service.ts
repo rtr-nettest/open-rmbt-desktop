@@ -20,6 +20,8 @@ export class UploadMessageHandler implements IMessageHandler {
     private inactivityTimeout = 0
     private finalTimeout?: NodeJS.Timeout
     private buffers: Buffer[] = []
+    private statStart = 0
+    private statDiff = 0
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -69,13 +71,10 @@ export class UploadMessageHandler implements IMessageHandler {
         if (data.includes(ESocketMessage.TIME)) {
             const dataArr = data.toString().trim().split(" ")
             if (dataArr.length === 4) {
-                const nanos = +dataArr[1]
+                const nanos = +dataArr[1] - this.statDiff
                 const bytes = +dataArr[3]
-                if (
-                    bytes > 0 &&
-                    nanos > 0 &&
-                    Time.nowNs() < this.uploadEndTime
-                ) {
+                const nowNs = Time.nowNs()
+                if (bytes > 0 && nanos > 0 && nowNs < this.uploadEndTime) {
                     this.result.addResult(bytes, nanos)
                     this.ctx.currentTime = nanos
                     this.ctx.currentTransfer = bytes
@@ -86,6 +85,7 @@ export class UploadMessageHandler implements IMessageHandler {
                 ) {
                     this.stopMessaging()
                 } else {
+                    this.statDiff += nowNs - this.statStart
                     this.putChunks()
                 }
             }
@@ -128,6 +128,7 @@ export class UploadMessageHandler implements IMessageHandler {
                 buffer[buffer.length - 1] = 0x00
                 this.writeToSocketNextTick(buffer)
                 if (nowNs >= statsTime) {
+                    this.statStart = nowNs
                     break
                 }
             }

@@ -11,7 +11,7 @@ import { Time } from "../time.service"
 import { randomBytes } from "crypto"
 
 export class UploadMessageHandler implements IMessageHandler {
-    static statsIntervalTime = 1001001
+    static statsIntervalTime = 10000
     static waitForAllChunksTime = 3000
     static clientTimeOffset = 1e9
     private uploadEndTime = 0
@@ -19,17 +19,22 @@ export class UploadMessageHandler implements IMessageHandler {
     private activityInterval?: NodeJS.Timer
     private inactivityTimeout = 0
     private finalTimeout?: NodeJS.Timeout
-    private rngDelay = 0
+    private buffers: Buffer[] = []
 
     constructor(
         private ctx: IMessageHandlerContext,
         public onFinish: (result: IMeasurementThreadResult) => void
     ) {
-        const maxStoredResults =
+        let maxStoredResults =
             (Number(this.ctx.params.test_duration) * 1e9) /
             DownloadMessageHandler.minDiffTime
         this.result = new SingleThreadResult(Number(maxStoredResults))
         this.inactivityTimeout = Number(this.ctx.params.test_duration) * 1000
+        maxStoredResults = 3
+        while (maxStoredResults > 0) {
+            this.buffers.push(randomBytes(this.ctx.chunkSize))
+            maxStoredResults--
+        }
     }
 
     stopMessaging(): void {
@@ -64,13 +69,10 @@ export class UploadMessageHandler implements IMessageHandler {
         if (data.includes(ESocketMessage.TIME)) {
             const dataArr = data.toString().trim().split(" ")
             if (dataArr.length === 4) {
-                const nanos = Number(dataArr[1]) - this.rngDelay
-                const bytes = Number(dataArr[3])
-                if (
-                    bytes > 0 &&
-                    nanos > 0 &&
-                    Time.nowNs() < this.uploadEndTime
-                ) {
+                const nanos = +dataArr[1]
+                const bytes = +dataArr[3]
+                const nowNs = Time.nowNs()
+                if (bytes > 0 && nanos > 0 && nowNs < this.uploadEndTime) {
                     this.result.addResult(bytes, nanos)
                     this.ctx.currentTime = nanos
                     this.ctx.currentTransfer = bytes
@@ -92,15 +94,26 @@ export class UploadMessageHandler implements IMessageHandler {
         }
     }
 
+    private writeToSocketNextTick(buffer: Buffer) {
+        process.nextTick(() => {
+            this.ctx.client.write(buffer)
+        })
+    }
+
     private putChunks() {
         const statsTime = Time.nowNs() + UploadMessageHandler.statsIntervalTime
+        let bufferIndex = 0
         while (true) {
-            let bufferGenStartTime = Time.nowNs()
-            let buffer = randomBytes(this.ctx.chunkSize)
-            this.rngDelay = this.rngDelay + (Time.nowNs() - bufferGenStartTime)
-            if (Time.nowNs() >= this.uploadEndTime) {
+            let buffer = this.buffers[bufferIndex]!
+            if (bufferIndex >= this.buffers.length - 1) {
+                bufferIndex = 0
+            } else {
+                bufferIndex++
+            }
+            const nowNs = Time.nowNs()
+            if (nowNs >= this.uploadEndTime) {
                 buffer[buffer.length - 1] = 0xff
-                this.ctx.client.write(buffer)
+                this.writeToSocketNextTick(buffer)
                 if (!this.finalTimeout) {
                     this.finalTimeout = setTimeout(
                         () => this.stopMessaging.bind(this),
@@ -110,8 +123,8 @@ export class UploadMessageHandler implements IMessageHandler {
                 break
             } else {
                 buffer[buffer.length - 1] = 0x00
-                this.ctx.client.write(buffer)
-                if (Time.nowNs() >= statsTime) {
+                this.writeToSocketNextTick(buffer)
+                if (nowNs >= statsTime) {
                     break
                 }
             }

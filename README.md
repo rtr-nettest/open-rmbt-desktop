@@ -4,6 +4,10 @@
 
 This code is in early development and is not intended for production use.
 
+## Limitations
+
+The client can produce incorrect results on connections faster than 10Gbps for download, 5Gbps for upload.
+
 ## Requirements
 
 The project requires Node.js v18 or later.

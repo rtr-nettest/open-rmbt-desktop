@@ -11,7 +11,7 @@ import { Time } from "../time.service"
 import { randomBytes } from "crypto"
 
 export class UploadMessageHandler implements IMessageHandler {
-    static statsIntervalTimeNs = 10000
+    static statsIntervalTimeNs = 100000
     static waitForAllChunksTimeMs = 3000
     static clientTimeOffsetNs = 1e9
     private uploadEndTimeNs = 0
@@ -20,7 +20,6 @@ export class UploadMessageHandler implements IMessageHandler {
     private inactivityTimeoutMs = 1000
     private finalTimeout?: NodeJS.Timeout
     private buffers: Buffer[] = []
-    private bytesWritten = 0
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -122,12 +121,8 @@ export class UploadMessageHandler implements IMessageHandler {
                 break
             } else {
                 buffer[buffer.length - 1] = 0x00
-                this.writeToSocketNextTick(buffer)
-                this.bytesWritten += buffer.length
-                if (
-                    this.bytesWritten >= this.ctx.client.writableHighWaterMark
-                ) {
-                    this.bytesWritten = 0
+                const keepSending = this.ctx.client.write(buffer)
+                if (!keepSending) {
                     break
                 }
             }
@@ -141,7 +136,7 @@ export class UploadMessageHandler implements IMessageHandler {
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
             if (Time.nowNs() > this.uploadEndTimeNs) {
-                Logger.I.info(`Thread ${this.ctx.index} timed out.`)
+                Logger.I.info(`Thread ${this.ctx.index} upload timed out.`)
                 this.stopMessaging()
             }
         }, this.inactivityTimeoutMs)

@@ -65,8 +65,11 @@ export class PreDownloadMessageHandler implements IMessageHandler {
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
             if (Time.nowNs() > this.preDownloadEndTime) {
-                Logger.I.info(`Thread ${this.ctx.index} timed out.`)
+                Logger.I.info(
+                    `Thread ${this.ctx.index} pre-download timed out.`
+                )
                 this.finishChunkPortion()
+                this.stopMessaging()
             }
         }, 1000)
         this.ctx.client.write(

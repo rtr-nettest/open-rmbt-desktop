@@ -20,6 +20,7 @@ export class UploadMessageHandler implements IMessageHandler {
     private inactivityTimeoutMs = 1000
     private finalTimeout?: NodeJS.Timeout
     private buffers: Buffer[] = []
+    private bytesWritten = 0
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -121,8 +122,12 @@ export class UploadMessageHandler implements IMessageHandler {
                 break
             } else {
                 buffer[buffer.length - 1] = 0x00
-                const keepSending = this.ctx.client.write(buffer)
-                if (!keepSending) {
+                this.writeToSocketNextTick(buffer)
+                this.bytesWritten += buffer.length
+                if (
+                    this.bytesWritten >= this.ctx.client.writableHighWaterMark
+                ) {
+                    this.bytesWritten = 0
                     break
                 }
             }

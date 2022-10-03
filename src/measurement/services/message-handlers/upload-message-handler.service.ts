@@ -11,13 +11,13 @@ import { Time } from "../time.service"
 import { randomBytes } from "crypto"
 
 export class UploadMessageHandler implements IMessageHandler {
-    static statsIntervalTime = 10000
-    static waitForAllChunksTime = 3000
-    static clientTimeOffset = 1e9
-    private uploadEndTime = 0
+    static statsIntervalTimeNs = 10000
+    static waitForAllChunksTimeMs = 3000
+    static clientTimeOffsetNs = 1e9
+    private uploadEndTimeNs = 0
     private result = new SingleThreadResult(0)
     private activityInterval?: NodeJS.Timer
-    private inactivityTimeout = 0
+    private inactivityTimeoutMs = 1000
     private finalTimeout?: NodeJS.Timeout
     private buffers: Buffer[] = []
 
@@ -29,7 +29,6 @@ export class UploadMessageHandler implements IMessageHandler {
             (Number(this.ctx.params.test_duration) * 1e9) /
             DownloadMessageHandler.minDiffTime
         this.result = new SingleThreadResult(Number(maxStoredResults))
-        this.inactivityTimeout = Number(this.ctx.params.test_duration) * 1000
         maxStoredResults = 3
         while (maxStoredResults > 0) {
             this.buffers.push(randomBytes(this.ctx.chunkSize))
@@ -58,6 +57,7 @@ export class UploadMessageHandler implements IMessageHandler {
         }`
         Logger.I.info(`Thread ${this.ctx.index} is sending "${msg}"`)
         this.ctx.client.write(msg)
+        this.ctx.client.on("drain", this.putChunks.bind(this))
     }
 
     readData(data: Buffer): void {
@@ -72,18 +72,17 @@ export class UploadMessageHandler implements IMessageHandler {
                 const nanos = +dataArr[1]
                 const bytes = +dataArr[3]
                 const nowNs = Time.nowNs()
-                if (bytes > 0 && nanos > 0 && nowNs < this.uploadEndTime) {
+                if (bytes > 0 && nanos > 0 && nowNs < this.uploadEndTimeNs) {
                     this.result.addResult(bytes, nanos)
                     this.ctx.currentTime = nanos
                     this.ctx.currentTransfer = bytes
                 }
                 if (
                     nanos >=
-                    this.uploadEndTime - UploadMessageHandler.clientTimeOffset
+                    this.uploadEndTimeNs -
+                        UploadMessageHandler.clientTimeOffsetNs
                 ) {
                     this.stopMessaging()
-                } else {
-                    this.putChunks()
                 }
             }
             return
@@ -101,7 +100,8 @@ export class UploadMessageHandler implements IMessageHandler {
     }
 
     private putChunks() {
-        const statsTime = Time.nowNs() + UploadMessageHandler.statsIntervalTime
+        const statsTime =
+            Time.nowNs() + UploadMessageHandler.statsIntervalTimeNs
         let bufferIndex = 0
         while (true) {
             let buffer = this.buffers[bufferIndex]!
@@ -111,13 +111,13 @@ export class UploadMessageHandler implements IMessageHandler {
                 bufferIndex++
             }
             const nowNs = Time.nowNs()
-            if (nowNs >= this.uploadEndTime) {
+            if (nowNs >= this.uploadEndTimeNs) {
                 buffer[buffer.length - 1] = 0xff
                 this.writeToSocketNextTick(buffer)
                 if (!this.finalTimeout) {
                     this.finalTimeout = setTimeout(
                         () => this.stopMessaging.bind(this),
-                        UploadMessageHandler.waitForAllChunksTime
+                        UploadMessageHandler.waitForAllChunksTimeMs
                     )
                 }
                 break
@@ -134,13 +134,13 @@ export class UploadMessageHandler implements IMessageHandler {
     private setActivityInterval() {
         clearInterval(this.activityInterval)
         const uploadDuration = Number(this.ctx.params.test_duration) * 1e9
-        this.uploadEndTime = Time.nowNs() + uploadDuration
+        this.uploadEndTimeNs = Time.nowNs() + uploadDuration
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
-            if (Time.nowNs() > this.uploadEndTime) {
+            if (Time.nowNs() > this.uploadEndTimeNs) {
                 Logger.I.info(`Thread ${this.ctx.index} timed out.`)
                 this.stopMessaging()
             }
-        }, this.inactivityTimeout)
+        }, this.inactivityTimeoutMs)
     }
 }

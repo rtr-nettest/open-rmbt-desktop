@@ -121,7 +121,7 @@ export class UploadMessageHandler implements IMessageHandler {
                 break
             } else {
                 buffer[buffer.length - 1] = 0x00
-                this.writeToSocketNextTick(buffer)
+                this.ctx.client.write(buffer)
                 this.bytesWritten += buffer.length
                 if (
                     this.bytesWritten >= this.ctx.client.writableHighWaterMark

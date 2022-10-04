@@ -48,7 +48,7 @@ export class DownloadMessageHandler implements IMessageHandler {
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
             if (Time.nowNs() > this.downloadEndTime) {
-                Logger.I.info(`Thread ${this.ctx.index} timed out.`)
+                Logger.I.info(`Thread ${this.ctx.index} download timed out.`)
                 this.requestFinish()
             }
         }, this.inactivityTimeout)

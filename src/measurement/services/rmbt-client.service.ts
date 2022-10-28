@@ -26,17 +26,19 @@ export class RMBTClient {
         this.params = params
     }
 
-    scheduleMeasurement() {
+    async scheduleMeasurement() {
         Logger.I.info("Scheduling measurement...")
         this.measurementLastUpdate = new Date().getTime()
         if (this.params.test_wait > 0) {
             this.measurementStatus = EMeasurementStatus.WAIT
-            setTimeout(
-                this.runMeasurement.bind(this),
-                this.params.test_wait * 1000
-            )
+            return new Promise((resolve) => {
+                setTimeout(async () => {
+                    await this.runMeasurement()
+                    resolve(void 0)
+                }, this.params.test_wait * 1000)
+            })
         } else {
-            this.runMeasurement()
+            return this.runMeasurement()
         }
     }
 

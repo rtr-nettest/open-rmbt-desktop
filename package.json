@@ -6,7 +6,8 @@
     "scripts": {
         "buildWorkers": "npx tsc --project tsconfig.worker.json",
         "build": "npm run buildWorkers && npx tsc",
-        "start": "npm run buildWorkers && npx ts-node src/index.ts",
+        "start:cli": "npm run buildWorkers && npx ts-node src/cli.ts",
+        "start:electron": "npm run build && electron dist/electron.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {
@@ -29,6 +30,7 @@
         "axios": "^0.27.2",
         "dayjs": "^1.11.2",
         "dotenv": "^16.0.1",
+        "electron": "^21.2.0",
         "event-loop-lag": "^1.4.0",
         "pino": "^7.11.0",
         "pino-pretty": "^7.6.1",

@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain } from "electron"
 import path from "path"
-import { runMeasurement } from "./measurement"
+import { runMeasurement } from "../measurement"
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -12,7 +12,7 @@ const createWindow = () => {
         },
     })
 
-    win.loadFile(path.join(__dirname, "..", "index.html"))
+    win.loadFile(path.join(__dirname, "..", "..", "index.html"))
     win.webContents.openDevTools()
 }
 

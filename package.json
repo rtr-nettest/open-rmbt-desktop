@@ -6,8 +6,8 @@
     "scripts": {
         "buildWorkers": "npx tsc --project tsconfig.worker.json",
         "build": "npm run buildWorkers && npx tsc",
-        "start:cli": "npm run buildWorkers && npx ts-node src/cli.ts",
-        "start:electron": "npm run build && electron dist/electron.js",
+        "start:cli": "npm run buildWorkers && npx ts-node src/cli/cli.ts",
+        "start:electron": "npm run build && electron dist/electron/electron.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {

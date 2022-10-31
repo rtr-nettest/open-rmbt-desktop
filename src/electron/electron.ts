@@ -1,6 +1,12 @@
 import { app, BrowserWindow, ipcMain } from "electron"
 import path from "path"
-import { runMeasurement } from "../measurement"
+import {
+    getCurrentDownload,
+    getCurrentPing,
+    getCurrentUpload,
+    runMeasurement,
+} from "../measurement"
+import { Events } from "./events"
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -14,10 +20,10 @@ const createWindow = () => {
 
     if (process.env.DEV === "true") {
         win.loadURL("http://localhost:5173/")
+        win.webContents.openDevTools()
     } else {
         win.loadFile(path.join(__dirname, "..", "index.html"))
     }
-    win.webContents.openDevTools()
 }
 
 app.on("window-all-closed", () => {
@@ -28,13 +34,30 @@ app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
-ipcMain.on("run-measurement", (event) => {
+ipcMain.on(Events.RUN_MEASUREMENT, (event) => {
     const webContents = event.sender
     const win = BrowserWindow.fromWebContents(webContents)
     win?.setTitle("Running measurement")
     runMeasurement().then(() => {
         win?.setTitle("Measurement finished")
+        webContents.send(Events.MEASUREMENT_FINISH, [
+            getCurrentPing(),
+            getCurrentDownload(),
+            getCurrentUpload(),
+        ])
     })
+})
+
+ipcMain.handle(Events.GET_CURRENT_PING, () => {
+    return getCurrentPing()
+})
+
+ipcMain.handle(Events.GET_CURRENT_DOWNLOAD, () => {
+    return getCurrentDownload()
+})
+
+ipcMain.handle(Events.GET_CURRENT_UPLOAD, () => {
+    return getCurrentUpload()
 })
 
 app.whenReady().then(() => createWindow())

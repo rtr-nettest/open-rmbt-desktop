@@ -5,7 +5,10 @@ import { ControlServer } from "./services/control-server.service"
 import { Logger } from "./services/logger.service"
 import { RMBTClient } from "./services/rmbt-client.service"
 
+let rmbtClient: RMBTClient | undefined
+
 export async function runMeasurement() {
+    rmbtClient = undefined
     config({
         path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
     })
@@ -23,9 +26,21 @@ export async function runMeasurement() {
                 settingsRequest
             )
         )
-        const rmbClient = new RMBTClient(measurementRegistration)
-        rmbClient.scheduleMeasurement()
+        rmbtClient = new RMBTClient(measurementRegistration)
+        await rmbtClient.scheduleMeasurement()
     } catch (err) {
         Logger.I.error(err)
     }
+}
+
+export function getCurrentPing() {
+    return rmbtClient?.pingMedian ?? -1
+}
+
+export function getCurrentDownload() {
+    return rmbtClient?.downloadMedian ?? -1
+}
+
+export function getCurrentUpload() {
+    return rmbtClient?.uploadMedian ?? -1
 }

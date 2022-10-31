@@ -1,36 +1,118 @@
-import { useState } from "react"
-import reactLogo from "./assets/react.svg"
-import "./App.css"
+import { useState, useEffect, useReducer } from "react"
+import "./App.scss"
+
+declare global {
+    interface Window {
+        electronAPI: {
+            runMeasurement: () => Promise<void>
+            getCurrentPing: () => Promise<number>
+            getCurrentDownload: () => Promise<number>
+            getCurrentUpload: () => Promise<number>
+            onMeasurementFinish: (callback: (results: number[]) => any) => any
+        }
+    }
+}
+
+let interval: NodeJS.Timer | undefined
+
+type AppState = {
+    isMeasurementRunning: boolean
+    ping: number
+    download: number
+    upload: number
+}
+
+type Action = {
+    type: "startMeasurement" | "finishMeasurement" | "setInterimResults"
+    payload: any
+}
+
+const initialState: AppState = {
+    isMeasurementRunning: false,
+    ping: -1,
+    download: -1,
+    upload: -1,
+}
+
+function reducer(state: AppState, action: Action): AppState {
+    switch (action.type) {
+        case "setInterimResults":
+            return {
+                ...state,
+                ping: action.payload[0],
+                download: action.payload[1],
+                upload: action.payload[2],
+            }
+        case "startMeasurement":
+            return { ...initialState, isMeasurementRunning: true }
+        case "finishMeasurement":
+            return {
+                ...initialState,
+                ping: action.payload[0],
+                download: action.payload[1],
+                upload: action.payload[2],
+            }
+    }
+}
 
 function App() {
-    const [count, setCount] = useState(0)
+    const [state, dispatch] = useReducer(reducer, initialState)
+    useEffect(() => {
+        if (state.isMeasurementRunning) {
+            interval = setInterval(async () => {
+                console.log("Checking results")
+                const payload = await Promise.all([
+                    window.electronAPI.getCurrentPing(),
+                    window.electronAPI.getCurrentDownload(),
+                    window.electronAPI.getCurrentUpload(),
+                ])
+                dispatch({
+                    type: "setInterimResults",
+                    payload,
+                })
+            }, 200)
+        } else {
+            clearInterval(interval)
+        }
+        return () => clearInterval(interval)
+    }, [state.isMeasurementRunning])
+
+    const runMeasurement = async () => {
+        dispatch({ type: "startMeasurement", payload: null })
+        await window.electronAPI.runMeasurement()
+        window.electronAPI.onMeasurementFinish((payload) => {
+            dispatch({
+                type: "finishMeasurement",
+                payload,
+            })
+        })
+    }
 
     return (
-        <div className="App">
-            <div>
-                <a href="https://vitejs.dev" target="_blank">
-                    <img src="/vite.svg" className="logo" alt="Vite logo" />
-                </a>
-                <a href="https://reactjs.org" target="_blank">
-                    <img
-                        src={reactLogo}
-                        className="logo react"
-                        alt="React logo"
-                    />
-                </a>
-            </div>
-            <h1>Vite + React</h1>
-            <div className="card">
-                <button onClick={() => setCount((count) => count + 1)}>
-                    count is {count}
+        <div className="app-block app-block--center app-block--fullscreen">
+            {!state.isMeasurementRunning ? (
+                <button onClick={() => runMeasurement()}>
+                    Run measurement
                 </button>
-                <p>
-                    Edit <code>src/App.tsx</code> and save to test HMR
-                </p>
-            </div>
-            <p className="read-the-docs">
-                Click on the Vite and React logos to learn more
-            </p>
+            ) : (
+                <div>Measurement is running</div>
+            )}
+            <table className="app-table">
+                <thead>
+                    <tr>
+                        <th>Ping, ms</th>
+                        <th>Download, Mbps</th>
+                        <th>Upload, Mbps</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{state.ping >= 0 ? state.ping : "-"}</td>
+                        <td>{state.download >= 0 ? state.download : "-"}</td>
+                        <td>{state.upload >= 0 ? state.upload : "-"}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     )
 }

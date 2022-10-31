@@ -19,12 +19,13 @@ export async function runMeasurement() {
         const measurementServer =
             await controlServer.getMeasurementServerFromApi(settingsRequest)
         const settings = await controlServer.getUserSettings(settingsRequest)
+        const registrationRequest = new MeasurementRegistrationRequest(
+            settings.uuid,
+            measurementServer?.id,
+            settingsRequest
+        )
         let measurementRegistration = await controlServer.registerMeasurement(
-            new MeasurementRegistrationRequest(
-                settings.uuid,
-                measurementServer?.id,
-                settingsRequest
-            )
+            registrationRequest
         )
         rmbtClient = new RMBTClient(measurementRegistration)
         await rmbtClient.scheduleMeasurement()

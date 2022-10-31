@@ -4,6 +4,8 @@ import tz from "dayjs/plugin/timezone"
 import { IUserSettingsRequest } from "../interfaces/user-settings-request.interface"
 import { v4 as uuidv4 } from "uuid"
 import { EMeasurementServerType } from "../enums/measurement-server-type.enum"
+import os from "os"
+const packageJson = require("../../../package.json")
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -15,6 +17,8 @@ export class UserSettingsRequest implements IUserSettingsRequest {
     terms_and_conditions_accepted = true
     type = "DESKTOP"
     uuid = ""
+    operating_system = `${os.type}, ${os.release}`
+    client_version = packageJson.version
 
     constructor() {
         // TODO: store and read the stored UUID

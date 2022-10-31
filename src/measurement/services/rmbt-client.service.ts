@@ -24,6 +24,8 @@ export class RMBTClient {
     pingMedian = -1
     downloadMedian = -1
     uploadMedian = -1
+    isRunning = false
+    activityInterval?: NodeJS.Timer
 
     constructor(params: IMeasurementRegistrationResponse) {
         this.params = params
@@ -46,18 +48,19 @@ export class RMBTClient {
     }
 
     private async runMeasurement() {
-        let isRunning = true
-        const getIsRunning = () => isRunning
-        return new Promise((resolve) => {
+        this.isRunning = true
+        return new Promise((finishMeasurement) => {
             Logger.I.info("Running measurement...")
-            setTimeout(() => {
-                if (getIsRunning()) {
+            this.activityInterval = setInterval(() => {
+                if (!this.isRunning) {
+                    Logger.I.info("Measurement is finished")
                     for (const w of this.measurementTasks) {
                         w.terminate()
                     }
-                    resolve(null)
+                    clearInterval(this.activityInterval)
+                    finishMeasurement(null)
                 }
-            }, 120000)
+            }, 1000)
             this.measurementStatus = EMeasurementStatus.INIT
             for (let i = 0; i < this.params.test_numthreads; i++) {
                 const worker = RMBTWorkerFactory.getWorker(
@@ -234,11 +237,7 @@ export class RMBTClient {
                                     `The total upload speed is ${this.uploadMedian}Mbps`
                                 )
                                 this.threadResults = []
-                                for (const w of this.measurementTasks) {
-                                    w.terminate()
-                                }
-                                isRunning = false
-                                resolve(null)
+                                this.isRunning = false
                             }
                             break
                     }

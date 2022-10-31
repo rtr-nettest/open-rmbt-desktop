@@ -4,10 +4,14 @@
     "description": "",
     "main": "src/index.js",
     "scripts": {
-        "buildWorkers": "npx tsc --project tsconfig.worker.json",
-        "build": "npm run buildWorkers && npx tsc",
-        "start:cli": "npm run buildWorkers && npx ts-node src/cli/cli.ts",
-        "start:electron": "npm run build && electron dist/electron/electron.js",
+        "build:workers": "npx tsc --project tsconfig.worker.json",
+        "build:electron": "npm run build:workers && npx tsc",
+        "build:all": "npm run build:electron && cd src/react-ui && npm run build",
+        "start:cli": "npm run build:workers && npx ts-node src/cli/cli.ts",
+        "start:electron": "npm run build:electron && DEV=true electron dist/electron/electron.js",
+        "start:ui": "(cd src/react-ui && npm run dev)",
+        "start:all": "start-server-and-test start:ui http://localhost:5173/ start:electron",
+        "electron": "electron",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {
@@ -34,6 +38,7 @@
         "event-loop-lag": "^1.4.0",
         "pino": "^7.11.0",
         "pino-pretty": "^7.6.1",
+        "start-server-and-test": "^1.14.0",
         "uuidv4": "^6.2.13"
     }
 }

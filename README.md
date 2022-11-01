@@ -18,14 +18,16 @@ The variables used are:
     -   `LOG_WORKERS` - if set to `true` will output the client's worker's logs to files in the `log` folder in the root of the project. If set to another value or ommitted, only the main thread's output will be logged.
     -   `SSL_KEY_PATH` and `SSL_CERT_PATH` - paths to SSL key and certificate files which should be used by the client to establish a secure connection to a measurement server.
 
-## Compilation
+## Compilation and running
 
-To compile the project into a single JS file ready for running launch `npm run build` form the terminal.
+To run a measurement from the command line use
 
-## Running
+    npm run start:cli
 
-To compile and run the project launch `npm run start` from the terminal.
+To launch an Electron app in the dev mode use
 
-## Testing
+    npm run start:all
 
-To compile the project and run tests against it launch `npm run test` from the terminal.
+To build the Electron app in the prod mode without launching it use
+
+    npm run build:all

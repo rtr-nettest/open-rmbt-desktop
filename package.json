@@ -19,14 +19,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+ssh://git@github.com/rtr-nettest/open-rmbt-desktop.git"
+        "url": "git+ssh://git@github.com/specure/open-rmbt-desktop.git"
     },
     "author": "Polina Gurina",
     "license": "Apache-2.0",
     "bugs": {
-        "url": "https://github.com/rtr-nettest/open-rmbt-desktop/issues"
+        "url": "https://github.com/specure/open-rmbt-desktop/issues"
     },
-    "homepage": "https://github.com/rtr-nettest/open-rmbt-desktop#readme",
+    "homepage": "https://github.com/specure/open-rmbt-desktop#readme",
     "devDependencies": {
         "@tsconfig/node18": "^1.0.0",
         "@types/node": "^17.0.34",

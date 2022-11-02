@@ -67,6 +67,7 @@ export class ControlServer {
     }
 
     async registerMeasurement(request: IMeasurementRegistrationRequest) {
+        Logger.I.info("Registration request: %o", request)
         Logger.I.info(`POST: ${process.env.MESUREMENT_REGISTRATION_PATH}`)
         const response = (
             await axios.post(

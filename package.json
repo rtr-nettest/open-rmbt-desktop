@@ -1,12 +1,20 @@
 {
     "name": "open-rmbt-desktop",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "description": "",
     "main": "src/index.js",
+    "engines": {
+        "node": ">=18"
+    },
     "scripts": {
-        "buildWorkers": "npx tsc --project tsconfig.worker.json",
-        "build": "npm run buildWorkers && npx tsc",
-        "start": "npm run buildWorkers && npx ts-node src/index.ts",
+        "build:workers": "npx tsc --project tsconfig.worker.json",
+        "build:electron": "npm run build:workers && npx tsc",
+        "build:all": "npm run build:electron && cd src/react-ui && npm run build",
+        "start:cli": "npm run build:workers && npx ts-node src/cli/cli.ts",
+        "start:electron": "npm run build:electron && cross-env DEV=true electron dist/electron/electron.js",
+        "start:ui": "(cd src/react-ui && npm run dev)",
+        "start:all": "start-server-and-test start:ui http://localhost:5173/ start:electron",
+        "electron": "electron",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {
@@ -22,6 +30,7 @@
     "devDependencies": {
         "@tsconfig/node18": "^1.0.0",
         "@types/node": "^17.0.34",
+        "cross-env": "^7.0.3",
         "ts-node": "^10.7.0",
         "typescript": "^4.6.4"
     },
@@ -29,9 +38,11 @@
         "axios": "^0.27.2",
         "dayjs": "^1.11.2",
         "dotenv": "^16.0.1",
+        "electron": "^21.2.0",
         "event-loop-lag": "^1.4.0",
         "pino": "^7.11.0",
         "pino-pretty": "^7.6.1",
+        "start-server-and-test": "^1.14.0",
         "uuidv4": "^6.2.13"
     }
 }

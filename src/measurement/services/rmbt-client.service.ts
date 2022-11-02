@@ -24,6 +24,7 @@ export class RMBTClient {
     pingMedian = -1
     downloadMedian = -1
     uploadMedian = -1
+    measurementStart: number = 0
     isRunning = false
     activityInterval?: NodeJS.Timer
 
@@ -49,10 +50,24 @@ export class RMBTClient {
 
     private async runMeasurement() {
         this.isRunning = true
+        this.measurementStart = Date.now()
         return new Promise((finishMeasurement) => {
             Logger.I.info("Running measurement...")
             this.activityInterval = setInterval(() => {
-                if (!this.isRunning) {
+                if (
+                    !this.isRunning ||
+                    Date.now() - this.measurementStart >= 60000
+                ) {
+                    this.uploadMedian = this.getTotalSpeed() / 1000000
+                    this.threadResults = []
+                    Logger.I.info(
+                        `The upload is finished in ${
+                            (Time.nowNs() - this.phaseStartTime) / 1e9
+                        }s`
+                    )
+                    Logger.I.info(
+                        `The total upload speed is ${this.uploadMedian}Mbps`
+                    )
                     Logger.I.info("Measurement is finished")
                     for (const w of this.measurementTasks) {
                         w.terminate()
@@ -177,6 +192,7 @@ export class RMBTClient {
                                 this.chunks.length ===
                                 this.measurementTasks.length
                             ) {
+                                this.checkIfShouldUseOneThread(this.chunks)
                                 for (const w of this.measurementTasks) {
                                     w.postMessage(
                                         new IncomingMessageWithData(
@@ -225,18 +241,6 @@ export class RMBTClient {
                                 this.threadResults.length ===
                                 this.measurementTasks.length
                             ) {
-                                this.uploadMedian =
-                                    this.getTotalSpeed() / 1000000
-                                Logger.I.info(
-                                    `The upload is finished in ${
-                                        (Time.nowNs() - this.phaseStartTime) /
-                                        1e9
-                                    }s`
-                                )
-                                Logger.I.info(
-                                    `The total upload speed is ${this.uploadMedian}Mbps`
-                                )
-                                this.threadResults = []
                                 this.isRunning = false
                             }
                             break

@@ -10,6 +10,7 @@ import {
 import { Logger } from "./logger.service"
 import { RMBTWorkerFactory } from "./rmbt-worker-factory.service"
 import { Time } from "./time.service"
+import path from "path"
 
 export class RMBTClient {
     measurementLastUpdate?: number
@@ -79,7 +80,7 @@ export class RMBTClient {
             this.measurementStatus = EMeasurementStatus.INIT
             for (let i = 0; i < this.params.test_numthreads; i++) {
                 const worker = RMBTWorkerFactory.getWorker(
-                    "./dist/measurement/services/worker.service.js",
+                    path.join(__dirname, "worker.service.js"),
                     {
                         workerData: {
                             params: this.params,

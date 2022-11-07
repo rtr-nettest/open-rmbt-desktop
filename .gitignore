@@ -57,3 +57,4 @@ patches/mtime-cache.json
 spec/fixtures/logo.png
 
 /log/
+out/

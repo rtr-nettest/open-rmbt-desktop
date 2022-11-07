@@ -36,10 +36,7 @@ app.on("activate", () => {
 
 ipcMain.on(Events.RUN_MEASUREMENT, (event) => {
     const webContents = event.sender
-    const win = BrowserWindow.fromWebContents(webContents)
-    win?.setTitle("Measurement is running")
     runMeasurement().then(() => {
-        win?.setTitle("Measurement is finished")
         webContents.send(Events.MEASUREMENT_FINISH, [
             getCurrentPing(),
             getCurrentDownload(),

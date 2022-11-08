@@ -2,33 +2,48 @@
     "name": "open-rmbt-desktop",
     "version": "0.0.1",
     "description": "",
-    "main": "src/electron/electron.ts",
+    "main": "dist/main.js",
     "engines": {
         "node": ">=18"
     },
     "scripts": {
-        "build:all": "npx tsc && cd src/react-ui && npm run build",
+        "build:all": "webpack --mode production && cd src/react-ui && npm run build",
         "start:cli": "npx ts-node src/cli/cli.ts",
         "start:electron": "npx tsc && cross-env DEV=true electron dist/electron/electron.js",
         "start:ui": "(cd src/react-ui && npm run dev)",
         "start:all": "start-server-and-test start:ui http://localhost:5173/ start:electron",
         "electron": "electron",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "package": "npm run build:all && electron-forge package",
+        "make": "npm run build:all && electron-forge make"
     },
     "author": "Polina Gurina",
     "license": "Apache-2.0",
     "devDependencies": {
+        "@electron-forge/cli": "^6.0.0",
+        "@electron-forge/maker-deb": "^6.0.0",
+        "@electron-forge/maker-rpm": "^6.0.0",
+        "@electron-forge/maker-squirrel": "^6.0.0",
+        "@electron-forge/maker-zip": "^6.0.0",
+        "@electron-forge/plugin-webpack": "^6.0.0",
         "@tsconfig/node18": "^1.0.0",
         "@types/node": "^17.0.34",
+        "@vercel/webpack-asset-relocator-loader": "^1.7.3",
         "cross-env": "^7.0.3",
+        "dotenv-webpack": "^8.0.1",
+        "electron": "^21.2.0",
+        "node-loader": "^2.0.0",
+        "ts-loader": "^9.4.1",
         "ts-node": "^10.7.0",
-        "typescript": "^4.6.4"
+        "typescript": "^4.6.4",
+        "webpack": "^5.74.0",
+        "webpack-cli": "^4.10.0"
     },
     "dependencies": {
         "axios": "^0.27.2",
         "dayjs": "^1.11.2",
         "dotenv": "^16.0.1",
-        "electron": "^21.2.0",
+        "electron-squirrel-startup": "^1.0.0",
         "event-loop-lag": "^1.4.0",
         "pino": "^7.11.0",
         "pino-pretty": "^7.6.1",

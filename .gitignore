@@ -58,3 +58,4 @@ spec/fixtures/logo.png
 
 /log/
 out/
+.webpack

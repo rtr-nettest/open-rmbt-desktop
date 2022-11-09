@@ -22,7 +22,8 @@ const createWindow = () => {
         win.loadURL("http://localhost:5173/")
         win.webContents.openDevTools()
     } else {
-        win.loadFile(path.join(__dirname, "..", "index.html"))
+        win.loadFile(path.join(__dirname, "index.html"))
+        win.webContents.openDevTools()
     }
 }
 
@@ -36,10 +37,7 @@ app.on("activate", () => {
 
 ipcMain.on(Events.RUN_MEASUREMENT, (event) => {
     const webContents = event.sender
-    const win = BrowserWindow.fromWebContents(webContents)
-    win?.setTitle("Measurement is running")
     runMeasurement().then(() => {
-        win?.setTitle("Measurement is finished")
         webContents.send(Events.MEASUREMENT_FINISH, [
             getCurrentPing(),
             getCurrentDownload(),

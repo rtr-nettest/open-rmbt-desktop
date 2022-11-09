@@ -2,8 +2,15 @@
     "extends": "@tsconfig/node18/tsconfig.json",
     "compilerOptions": {
         "outDir": "dist",
+        "rootDir": "src",
+        "allowJs": true,
+        "noImplicitAny": true,
+        "sourceMap": true,
+        "baseUrl": ".",
         "resolveJsonModule": true,
-        "rootDir": "src"
+        "paths": {
+            "*": ["node_modules/*"]
+        }
     },
-    "exclude": ["node_modules", "dist", "src/react-ui"]
+    "exclude": ["dist", "src/react-ui", "out", "*.config.js"]
 }

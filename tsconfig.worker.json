@@ -1,9 +1,0 @@
-{
-    "extends": "@tsconfig/node18/tsconfig.json",
-    "compilerOptions": {
-        "outDir": "dist",
-        "resolveJsonModule": true,
-        "rootDir": "src"
-    },
-    "files": ["./src/measurement/services/worker.service.ts"]
-}

@@ -8,7 +8,7 @@
     },
     "scripts": {
         "build:all": "webpack --mode production && cd src/react-ui && npm run build",
-        "start:cli": "npx ts-node src/cli/cli.ts",
+        "start:cli": "webpack --mode development --config ./webpack.cli.config.js && npx ts-node src/cli/cli.ts",
         "start:electron": "npx tsc && cross-env DEV=true electron dist/electron/electron.js",
         "start:ui": "(cd src/react-ui && npm run dev)",
         "start:all": "start-server-and-test start:ui http://localhost:5173/ start:electron",
@@ -33,6 +33,8 @@
         "dotenv-webpack": "^8.0.1",
         "electron": "^21.2.0",
         "node-loader": "^2.0.0",
+        "start-server-and-test": "^1.14.0",
+        "terser-webpack-plugin": "^5.3.6",
         "ts-loader": "^9.4.1",
         "ts-node": "^10.7.0",
         "typescript": "^4.6.4",
@@ -47,7 +49,6 @@
         "event-loop-lag": "^1.4.0",
         "pino": "^7.11.0",
         "pino-pretty": "^7.6.1",
-        "start-server-and-test": "^1.14.0",
         "uuidv4": "^6.2.13"
     }
 }

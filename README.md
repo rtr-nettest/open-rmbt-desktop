@@ -52,6 +52,7 @@ The variables used are:
     -   `CONTROL_SERVER_URL` - a complete URL of an RMBT-compatible control server, including protocol, host, and port if needed.
     -   `SETTINGS_PATH` - a control server endpoint starting with `/` which is used to receive a measurement's settings including a unique id of the client.
     -   `MESUREMENT_REGISTRATION_PATH` - a control server endpoint starting with `/` which is used to register a measurement on the control server.
+    -   `CONFIG_FOLDER` - a path to a folder that contains flavor specific files, such as icons and styles.
 -   Optional:
     -   `X_NETTEST_CLIENT` - an identificator sent to the control server in an `X-Nettest-Client` HTTP header and used by some control server implementations to internally differentiate one client from another.
     -   `MEASUREMENT_SERVERS_PATH` - a control server endpoint starting with `/` which returns a list of measurement servers from which the client will try to pick one to run a measurement against.

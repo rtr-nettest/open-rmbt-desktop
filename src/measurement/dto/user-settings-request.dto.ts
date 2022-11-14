@@ -19,6 +19,7 @@ export class UserSettingsRequest implements IUserSettingsRequest {
     uuid = ""
     operating_system = `${os.type}, ${os.release}`
     client_version = packageJson.version
+    capabilities = {"RMBThttp": true}
 
     constructor() {
         // TODO: store and read the stored UUID

@@ -31,6 +31,7 @@ export class MeasurementRegistrationRequest
                 language: settingsRequest.language,
                 operating_system: settingsRequest.operating_system,
                 client_version: settingsRequest.client_version,
+                capabilities: settingsRequest.capabilities
             })
         }
     }

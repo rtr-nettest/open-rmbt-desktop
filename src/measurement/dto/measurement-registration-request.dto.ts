@@ -13,7 +13,6 @@ export class MeasurementRegistrationRequest
     timezone = ""
     type = ""
     user_server_selection = false
-    capabilities = {"RMBThttp": true}
 
     constructor(
         public uuid: string,
@@ -32,6 +31,7 @@ export class MeasurementRegistrationRequest
                 language: settingsRequest.language,
                 operating_system: settingsRequest.operating_system,
                 client_version: settingsRequest.client_version,
+                capabilities: settingsRequest.capabilities
             })
         }
     }

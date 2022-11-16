@@ -36,11 +36,13 @@ or
 
 To build the Electron app in the prod mode without launching it use
 
-    npm run build:all
+    npm run package
 
 or
 
-    yarn build:all
+    yarn package
+    
+The app will be placed in the `out` folder at the root of the project.
 
 ## Configuration
 

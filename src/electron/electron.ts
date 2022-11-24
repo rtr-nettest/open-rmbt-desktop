@@ -1,3 +1,4 @@
+import { config } from "dotenv"
 import { app, BrowserWindow, ipcMain } from "electron"
 import path from "path"
 import {
@@ -7,6 +8,10 @@ import {
     runMeasurement,
 } from "../measurement"
 import { Events } from "./events"
+
+config({
+    path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
+})
 
 const createWindow = () => {
     const win = new BrowserWindow({

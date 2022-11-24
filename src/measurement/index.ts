@@ -1,4 +1,3 @@
-import { config } from "dotenv"
 import { MeasurementRegistrationRequest } from "./dto/measurement-registration-request.dto"
 import { UserSettingsRequest } from "./dto/user-settings-request.dto"
 import { ControlServer } from "./services/control-server.service"
@@ -7,14 +6,15 @@ import { RMBTClient } from "./services/rmbt-client.service"
 
 let rmbtClient: RMBTClient | undefined
 
-export async function runMeasurement() {
+export interface MeasurementOptions {
+    platform?: string
+}
+
+export async function runMeasurement(options?: MeasurementOptions) {
     rmbtClient = undefined
-    config({
-        path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
-    })
 
     const controlServer = new ControlServer()
-    const settingsRequest = new UserSettingsRequest()
+    const settingsRequest = new UserSettingsRequest(options?.platform)
     try {
         const measurementServer =
             await controlServer.getMeasurementServerFromApi(settingsRequest)

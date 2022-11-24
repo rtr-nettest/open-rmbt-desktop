@@ -15,13 +15,15 @@ export class UserSettingsRequest implements IUserSettingsRequest {
     name = EMeasurementServerType.RMBT
     timezone = dayjs.tz.guess()
     terms_and_conditions_accepted = true
-    type = "DESKTOP"
     uuid = ""
     operating_system = `${os.type}, ${os.release}`
     client_version = packageJson.version
-    capabilities = {"RMBThttp": true}
 
-    constructor() {
+    // RTR BE compatibility
+    capabilities = { RMBThttp: true }
+    type = "DESKTOP"
+
+    constructor(public platform = "DESKTOP") {
         // TODO: store and read the stored UUID
         // let uuid = this.isHistoryAllowed && localStorage.getItem(TEST_COOKIE)
         // if (!uuid && this.isHistoryAllowed) {

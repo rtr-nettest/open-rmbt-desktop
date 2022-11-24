@@ -25,13 +25,14 @@ export class MeasurementRegistrationRequest
         }
         if (settingsRequest) {
             Object.assign(this, {
-                timezone: settingsRequest.timezone,
+                capabilities: settingsRequest.capabilities,
+                client_version: settingsRequest.client_version,
                 client: settingsRequest.name,
-                type: settingsRequest.type,
                 language: settingsRequest.language,
                 operating_system: settingsRequest.operating_system,
-                client_version: settingsRequest.client_version,
-                capabilities: settingsRequest.capabilities
+                platform: settingsRequest.platform,
+                timezone: settingsRequest.timezone,
+                type: settingsRequest.type,
             })
         }
     }

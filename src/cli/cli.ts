@@ -1,3 +1,10 @@
+import { config } from "dotenv"
 import { runMeasurement } from "../measurement"
 
-runMeasurement()
+config({
+    path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
+})
+
+runMeasurement({
+    platform: process.env.PLATFORM_CLI,
+})

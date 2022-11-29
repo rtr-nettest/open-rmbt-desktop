@@ -1,7 +1,5 @@
 import { ESocketMessage } from "../../enums/socket-message.enum"
-import {
-    IMeasurementThreadResult,
-} from "../../interfaces/measurement-result.interface"
+import { IMeasurementThreadResult } from "../../interfaces/measurement-result.interface"
 import {
     IMessageHandler,
     IMessageHandlerContext,
@@ -51,6 +49,7 @@ export class PingMessageHandler implements IMessageHandler {
             Logger.I.info(
                 `Thread ${this.ctx.index} received an error. Terminating.`
             )
+            this.pingCurrentEndTime = Time.nowNs()
             const pingClient = this.setShortestPing()
             this.serverPings.push(pingClient)
             this.stopMessaging()
@@ -60,6 +59,7 @@ export class PingMessageHandler implements IMessageHandler {
             Logger.I.info(
                 `Thread ${this.ctx.index} received a PONG. Continuing.`
             )
+            this.pingCurrentEndTime = Time.nowNs()
             this.ctx.client.write(ESocketMessage.OK)
             return
         }

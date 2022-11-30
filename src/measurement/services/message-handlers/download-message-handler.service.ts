@@ -63,10 +63,10 @@ export class DownloadMessageHandler implements IMessageHandler {
         this.ctx.client.write(msg)
     }
     readData(data: Buffer): void {
-        if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
-            this.stopMessaging()
-            return
-        }
+        // if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
+        //     this.stopMessaging()
+        //     return
+        // }
         if (data.includes(ESocketMessage.TIME)) {
             return
         }

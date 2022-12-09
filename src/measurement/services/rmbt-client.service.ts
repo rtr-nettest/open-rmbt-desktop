@@ -22,16 +22,34 @@ export class RMBTClient {
     threadResults: IMeasurementThreadResult[] = []
     chunks: number[] = []
     timestamps: { index: number; time: number }[] = []
-    phaseStartTime = 0
     pingMedian = -1
     downloadMedian = -1
     uploadMedian = -1
     measurementStart: number = 0
     isRunning = false
     activityInterval?: NodeJS.Timer
+    phaseStartTimeNs = 0
+    estimatePhaseDuration = {
+        init: 0.5,
+        preDownload: 2.5,
+        ping: 1.5,
+        download: -1,
+        preUpload: 5,
+        upload: -1,
+    }
+
+    get phaseDuration() {
+        return (Time.nowNs() - this.phaseStartTimeNs) / 1e9
+    }
+
+    getPhaseProgress(estimatePhaseDuration: number) {
+        return Math.min(100, (this.phaseDuration / estimatePhaseDuration) * 100)
+    }
 
     constructor(params: IMeasurementRegistrationResponse) {
         this.params = params
+        this.estimatePhaseDuration.download = Number(params.test_duration)
+        this.estimatePhaseDuration.upload = Number(params.test_duration)
     }
 
     async scheduleMeasurement() {
@@ -66,20 +84,18 @@ export class RMBTClient {
                     this.interimThreadResults = new Array(
                         this.params.test_numthreads
                     )
-                    Logger.I.info(
-                        `The upload is finished in ${
-                            (Time.nowNs() - this.phaseStartTime) / 1e9
-                        }s`
-                    )
-                    Logger.I.info(
-                        `The total upload speed is ${this.uploadMedian}Mbps`
-                    )
-                    Logger.I.info("Measurement is finished")
                     for (const w of this.measurementTasks) {
                         w.terminate()
                     }
                     clearInterval(this.activityInterval)
                     finishMeasurement(null)
+                    Logger.I.info(
+                        `Upload is finished in ${this.phaseDuration}s`
+                    )
+                    Logger.I.info(
+                        `The total upload speed is ${this.uploadMedian}Mbps`
+                    )
+                    Logger.I.info("Measurement is finished")
                 }
             }, 1000)
             this.measurementStatus = EMeasurementStatus.INIT
@@ -100,6 +116,7 @@ export class RMBTClient {
                 }
             }
 
+            this.phaseStartTimeNs = Time.nowNs()
             for (const [index, worker] of this.measurementTasks.entries()) {
                 worker.postMessage(new IncomingMessageWithData("connect"))
                 worker.on("message", (message) => {
@@ -131,6 +148,11 @@ export class RMBTClient {
                                     )
                                 }
                                 this.initializedThreads = []
+                                Logger.I.warn(
+                                    "Init is finished in %d s",
+                                    this.phaseDuration
+                                )
+                                this.phaseStartTimeNs = Time.nowNs()
                             }
                             break
                         case "preDownloadFinished":
@@ -147,21 +169,30 @@ export class RMBTClient {
                                     new IncomingMessageWithData("ping")
                                 )
                                 this.chunks = []
+                                Logger.I.warn(
+                                    "Pre-download is finished in %d s",
+                                    this.phaseDuration
+                                )
+                                this.phaseStartTimeNs = Time.nowNs()
                             }
                             break
                         case "pingFinished":
                             this.pingMedian =
                                 ((message.data! as IMeasurementThreadResult)
                                     .ping_median ?? -1000000) / 1000000
-                            Logger.I.info(
-                                `The ping median is ${this.pingMedian}ms.`
-                            )
-                            this.phaseStartTime = Time.nowNs()
                             for (const w of this.measurementTasks) {
                                 w.postMessage(
                                     new IncomingMessageWithData("download")
                                 )
                             }
+                            Logger.I.info(
+                                `The ping median is ${this.pingMedian}ms.`
+                            )
+                            Logger.I.warn(
+                                "Ping is finished in %d s",
+                                this.phaseDuration
+                            )
+                            this.phaseStartTimeNs = Time.nowNs()
                             break
                         case "downloadUpdated":
                             this.interimThreadResults[index] =
@@ -169,10 +200,6 @@ export class RMBTClient {
                             this.downloadMedian =
                                 this.getTotalSpeed(this.interimThreadResults) /
                                 1000000
-                            Logger.I.info(
-                                "Current download is %d",
-                                this.downloadMedian
-                            )
                             break
                         case "downloadFinished":
                             this.threadResults.push(
@@ -185,15 +212,6 @@ export class RMBTClient {
                                 this.downloadMedian =
                                     this.getTotalSpeed(this.threadResults) /
                                     1000000
-                                Logger.I.info(
-                                    `The download is finished in ${
-                                        (Time.nowNs() - this.phaseStartTime) /
-                                        1e9
-                                    }s`
-                                )
-                                Logger.I.info(
-                                    `The total download speed is ${this.downloadMedian}Mbps`
-                                )
                                 this.threadResults = []
                                 this.interimThreadResults = new Array(
                                     this.params.test_numthreads
@@ -203,6 +221,13 @@ export class RMBTClient {
                                         new IncomingMessageWithData("preUpload")
                                     )
                                 }
+                                Logger.I.info(
+                                    `Download is finished in ${this.phaseDuration}s`
+                                )
+                                Logger.I.info(
+                                    `The total download speed is ${this.downloadMedian}Mbps`
+                                )
+                                this.phaseStartTimeNs = Time.nowNs()
                             }
                             break
                         case "preUploadFinished":
@@ -223,6 +248,10 @@ export class RMBTClient {
                                     )
                                 }
                                 this.chunks = []
+                                Logger.I.info(
+                                    `Pre-upload is finished in ${this.phaseDuration}s`
+                                )
+                                this.phaseStartTimeNs = Time.nowNs()
                             }
                             break
                         case "reconnectedForUpload":
@@ -247,7 +276,6 @@ export class RMBTClient {
                                 this.measurementTasks.length
                             ) {
                                 this.initializedThreads = []
-                                this.phaseStartTime = Time.nowNs()
                                 for (const w of this.measurementTasks) {
                                     w.postMessage(
                                         new IncomingMessageWithData("upload")
@@ -261,10 +289,6 @@ export class RMBTClient {
                             this.uploadMedian =
                                 this.getTotalSpeed(this.interimThreadResults) /
                                 1000000
-                            Logger.I.info(
-                                "Current upload is %d",
-                                this.uploadMedian
-                            )
                             break
                         case "uploadFinished":
                             this.threadResults.push(

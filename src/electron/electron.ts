@@ -1,12 +1,7 @@
 import { config } from "dotenv"
 import { app, BrowserWindow, ipcMain } from "electron"
 import path from "path"
-import {
-    getCurrentDownload,
-    getCurrentPing,
-    getCurrentUpload,
-    runMeasurement,
-} from "../measurement"
+import { getCurrentPhaseState, runMeasurement } from "../measurement"
 import { Events } from "./events"
 
 config({
@@ -44,23 +39,35 @@ ipcMain.on(Events.RUN_MEASUREMENT, (event) => {
     const webContents = event.sender
     runMeasurement().then(() => {
         webContents.send(Events.MEASUREMENT_FINISH, [
-            getCurrentPing(),
-            getCurrentDownload(),
-            getCurrentUpload(),
+            getCurrentPhaseState("ping"),
+            getCurrentPhaseState("download"),
+            getCurrentPhaseState("upload"),
         ])
     })
 })
 
-ipcMain.handle(Events.GET_CURRENT_PING, () => {
-    return getCurrentPing()
+ipcMain.handle(Events.GET_INIT_STATE, () => {
+    return getCurrentPhaseState("init")
 })
 
-ipcMain.handle(Events.GET_CURRENT_DOWNLOAD, () => {
-    return getCurrentDownload()
+ipcMain.handle(Events.GET_PRE_DOWNLOAD_STATE, () => {
+    return getCurrentPhaseState("preDownload")
 })
 
-ipcMain.handle(Events.GET_CURRENT_UPLOAD, () => {
-    return getCurrentUpload()
+ipcMain.handle(Events.GET_PING_STATE, () => {
+    return getCurrentPhaseState("ping")
+})
+
+ipcMain.handle(Events.GET_DOWNLOAD_STATE, () => {
+    return getCurrentPhaseState("download")
+})
+
+ipcMain.handle(Events.GET_PRE_UPLOAD_STATE, () => {
+    return getCurrentPhaseState("preUpload")
+})
+
+ipcMain.handle(Events.GET_UPLOAD_STATE, () => {
+    return getCurrentPhaseState("upload")
 })
 
 app.whenReady().then(() => createWindow())

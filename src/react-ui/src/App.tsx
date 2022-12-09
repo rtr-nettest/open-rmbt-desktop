@@ -1,14 +1,16 @@
-import { useState, useEffect, useReducer } from "react"
+import { useEffect, useReducer } from "react"
 import "./App.scss"
+import { Events } from "../../electron/events"
+import { ITestPhaseState } from "../../measurement/interfaces/test-phase-state.interface"
 
 declare global {
     interface Window {
         electronAPI: {
             runMeasurement: () => Promise<void>
-            getCurrentPing: () => Promise<number>
-            getCurrentDownload: () => Promise<number>
-            getCurrentUpload: () => Promise<number>
-            onMeasurementFinish: (callback: (results: number[]) => any) => any
+            getCurrentState: (event: Events) => Promise<ITestPhaseState>
+            onMeasurementFinish: (
+                callback: (results: ITestPhaseState[]) => any
+            ) => any
         }
     }
 }
@@ -24,7 +26,7 @@ type AppState = {
 
 type Action = {
     type: "startMeasurement" | "finishMeasurement" | "setInterimResults"
-    payload: any
+    payload: ITestPhaseState[]
 }
 
 const initialState: AppState = {
@@ -39,18 +41,18 @@ function reducer(state: AppState, action: Action): AppState {
         case "setInterimResults":
             return {
                 ...state,
-                ping: action.payload[0],
-                download: action.payload[1],
-                upload: action.payload[2],
+                ping: action.payload[0]?.value,
+                download: action.payload[1]?.value,
+                upload: action.payload[2]?.value,
             }
         case "startMeasurement":
             return { ...initialState, isMeasurementRunning: true }
         case "finishMeasurement":
             return {
                 ...initialState,
-                ping: action.payload[0],
-                download: action.payload[1],
-                upload: action.payload[2],
+                ping: action.payload[0]?.value,
+                download: action.payload[1]?.value,
+                upload: action.payload[2]?.value,
             }
     }
 }
@@ -62,9 +64,11 @@ function App() {
             interval = setInterval(async () => {
                 console.log("Checking results")
                 const payload = await Promise.all([
-                    window.electronAPI.getCurrentPing(),
-                    window.electronAPI.getCurrentDownload(),
-                    window.electronAPI.getCurrentUpload(),
+                    window.electronAPI.getCurrentState(Events.GET_PING_STATE),
+                    window.electronAPI.getCurrentState(
+                        Events.GET_DOWNLOAD_STATE
+                    ),
+                    window.electronAPI.getCurrentState(Events.GET_UPLOAD_STATE),
                 ])
                 dispatch({
                     type: "setInterimResults",
@@ -78,7 +82,7 @@ function App() {
     }, [state.isMeasurementRunning])
 
     const runMeasurement = async () => {
-        dispatch({ type: "startMeasurement", payload: null })
+        dispatch({ type: "startMeasurement", payload: [] })
         await window.electronAPI.runMeasurement()
         window.electronAPI.onMeasurementFinish((payload) => {
             dispatch({

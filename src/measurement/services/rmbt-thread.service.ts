@@ -15,6 +15,7 @@ import { UploadMessageHandler } from "./message-handlers/upload-message-handler.
 import { IMessageHandlerContext } from "../interfaces/message-handler.interface"
 
 export class RMBTThread implements IMessageHandlerContext {
+    static interimUpdatesIntervalMs = 100
     bytesPerSecPretest: number[] = []
     minChunkSize = 0
     maxChunkSize = 4194304
@@ -23,6 +24,7 @@ export class RMBTThread implements IMessageHandlerContext {
     client: net.Socket = new net.Socket()
     currentTime: number = -1
     currentTransfer: number = -1
+    interimHandler?: (interimResult: IMeasurementThreadResult) => void
     threadResult: IMeasurementThreadResult = new MeasurementThreadResult()
     preDownloadChunks: number = 1
     preUploadChunks: number = 1
@@ -210,6 +212,7 @@ export class RMBTThread implements IMessageHandlerContext {
                 this,
                 (result) => {
                     this.downloadMessageHandler = undefined
+                    this.interimHandler = undefined
                     this.disconnect().then(() => {
                         Logger.I.info(
                             `Resolving thread ${this.index} download.`
@@ -250,6 +253,7 @@ export class RMBTThread implements IMessageHandlerContext {
                 this,
                 (result) => {
                     this.uploadMessageHandler = undefined
+                    this.interimHandler = undefined
                     this.disconnect().then(() => {
                         Logger.I.info(`Resolving thread ${this.index} upload.`)
                         resolve(result)

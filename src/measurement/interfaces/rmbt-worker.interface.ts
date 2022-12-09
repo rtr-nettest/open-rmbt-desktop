@@ -19,11 +19,13 @@ export type IncomingMessage =
     | "upload"
 export type OutgoingMessage =
     | "connected"
+    | "downloadUpdated"
     | "downloadFinished"
     | "pingFinished"
     | "preDownloadFinished"
     | "preUploadFinished"
     | "reconnectedForUpload"
+    | "uploadUpdated"
     | "uploadFinished"
 export class OutgoingMessageWithData {
     constructor(

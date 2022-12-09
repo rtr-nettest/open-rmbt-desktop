@@ -18,6 +18,7 @@ export class RMBTClient {
     measurementTasks: RMBTWorker[] = []
     params: IMeasurementRegistrationResponse
     initializedThreads: number[] = []
+    interimThreadResults: IMeasurementThreadResult[] = []
     threadResults: IMeasurementThreadResult[] = []
     chunks: number[] = []
     timestamps: { index: number; time: number }[] = []
@@ -59,8 +60,12 @@ export class RMBTClient {
                     !this.isRunning ||
                     Date.now() - this.measurementStart >= 60000
                 ) {
-                    this.uploadMedian = this.getTotalSpeed() / 1000000
+                    this.uploadMedian =
+                        this.getTotalSpeed(this.threadResults) / 1000000
                     this.threadResults = []
+                    this.interimThreadResults = new Array(
+                        this.params.test_numthreads
+                    )
                     Logger.I.info(
                         `The upload is finished in ${
                             (Time.nowNs() - this.phaseStartTime) / 1e9
@@ -78,6 +83,7 @@ export class RMBTClient {
                 }
             }, 1000)
             this.measurementStatus = EMeasurementStatus.INIT
+            this.interimThreadResults = new Array(this.params.test_numthreads)
             for (let i = 0; i < this.params.test_numthreads; i++) {
                 const worker = RMBTWorkerFactory.getWorker(
                     path.join(__dirname, "worker.service.js"),
@@ -157,6 +163,17 @@ export class RMBTClient {
                                 )
                             }
                             break
+                        case "downloadUpdated":
+                            this.interimThreadResults[index] =
+                                message.data! as IMeasurementThreadResult
+                            this.downloadMedian =
+                                this.getTotalSpeed(this.interimThreadResults) /
+                                1000000
+                            Logger.I.info(
+                                "Current download is %d",
+                                this.downloadMedian
+                            )
+                            break
                         case "downloadFinished":
                             this.threadResults.push(
                                 message.data! as IMeasurementThreadResult
@@ -166,7 +183,8 @@ export class RMBTClient {
                                 this.measurementTasks.length
                             ) {
                                 this.downloadMedian =
-                                    this.getTotalSpeed() / 1000000
+                                    this.getTotalSpeed(this.threadResults) /
+                                    1000000
                                 Logger.I.info(
                                     `The download is finished in ${
                                         (Time.nowNs() - this.phaseStartTime) /
@@ -177,6 +195,9 @@ export class RMBTClient {
                                     `The total download speed is ${this.downloadMedian}Mbps`
                                 )
                                 this.threadResults = []
+                                this.interimThreadResults = new Array(
+                                    this.params.test_numthreads
+                                )
                                 for (const w of this.measurementTasks) {
                                     w.postMessage(
                                         new IncomingMessageWithData("preUpload")
@@ -234,6 +255,17 @@ export class RMBTClient {
                                 }
                             }
                             break
+                        case "uploadUpdated":
+                            this.interimThreadResults[index] =
+                                message.data! as IMeasurementThreadResult
+                            this.uploadMedian =
+                                this.getTotalSpeed(this.interimThreadResults) /
+                                1000000
+                            Logger.I.info(
+                                "Current upload is %d",
+                                this.uploadMedian
+                            )
+                            break
                         case "uploadFinished":
                             this.threadResults.push(
                                 message.data! as IMeasurementThreadResult
@@ -272,17 +304,21 @@ export class RMBTClient {
     }
 
     // in bits per nano
-    private getTotalSpeed() {
+    private getTotalSpeed(threadResults: IMeasurementThreadResult[]) {
         let sumTrans = 0
         let maxTime = 0
 
-        for (const task of this.threadResults) {
+        for (const task of threadResults) {
+            if (!task) {
+                continue
+            }
             if (task.currentTime > maxTime) {
                 maxTime = task.currentTime
             }
             sumTrans += task.currentTransfer
         }
 
-        return maxTime === 0 ? 0 : (sumTrans / Number(maxTime)) * 1e9 * 8.0
+        const totalSpeed = (sumTrans / Number(maxTime)) * 1e9 * 8.0
+        return maxTime === 0 ? 0 : isNaN(totalSpeed) ? 0 : totalSpeed
     }
 }

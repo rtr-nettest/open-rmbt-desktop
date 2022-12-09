@@ -65,7 +65,7 @@ export class DownloadMessageHandler implements IMessageHandler {
     readData(data: Buffer): void {
         if (
             data.includes(ESocketMessage.ACCEPT_GETCHUNKS) &&
-            Time.nowNs() >= this.downloadEndTime
+            Time.nowNs() >= this.downloadEndTime - 1e9
         ) {
             this.stopMessaging()
             return
@@ -87,6 +87,11 @@ export class DownloadMessageHandler implements IMessageHandler {
 
             this.ctx.currentTime = this.nsec
             this.ctx.currentTransfer = this.downloadBytesRead
+            this.ctx.interimHandler?.({
+                ...this.ctx.threadResult,
+                currentTime: this.ctx.currentTime,
+                currentTransfer: this.ctx.currentTransfer,
+            })
         }
         if (isFullChunk && lastByte === 0xff) {
             this.requestFinish()

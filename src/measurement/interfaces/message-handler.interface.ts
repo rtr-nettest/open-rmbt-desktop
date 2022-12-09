@@ -23,4 +23,6 @@ export interface IMessageHandlerContext {
     preDownloadChunks: number
     preUploadChunks: number
     threadResult: IMeasurementThreadResult
+
+    interimHandler?: (interimResult: IMeasurementThreadResult) => void
 }

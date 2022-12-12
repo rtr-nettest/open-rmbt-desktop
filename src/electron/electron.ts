@@ -38,36 +38,12 @@ app.on("activate", () => {
 ipcMain.on(Events.RUN_MEASUREMENT, (event) => {
     const webContents = event.sender
     runMeasurement().then(() => {
-        webContents.send(Events.MEASUREMENT_FINISH, [
-            getCurrentPhaseState("ping"),
-            getCurrentPhaseState("download"),
-            getCurrentPhaseState("upload"),
-        ])
+        webContents.send(Events.MEASUREMENT_FINISH, getCurrentPhaseState())
     })
 })
 
-ipcMain.handle(Events.GET_INIT_STATE, () => {
-    return getCurrentPhaseState("init")
-})
-
-ipcMain.handle(Events.GET_PRE_DOWNLOAD_STATE, () => {
-    return getCurrentPhaseState("preDownload")
-})
-
-ipcMain.handle(Events.GET_PING_STATE, () => {
-    return getCurrentPhaseState("ping")
-})
-
-ipcMain.handle(Events.GET_DOWNLOAD_STATE, () => {
-    return getCurrentPhaseState("download")
-})
-
-ipcMain.handle(Events.GET_PRE_UPLOAD_STATE, () => {
-    return getCurrentPhaseState("preUpload")
-})
-
-ipcMain.handle(Events.GET_UPLOAD_STATE, () => {
-    return getCurrentPhaseState("upload")
+ipcMain.handle(Events.GET_MEASUREMENT_STATE, () => {
+    return getCurrentPhaseState()
 })
 
 app.whenReady().then(() => createWindow())

@@ -1,0 +1,31 @@
+//__<<ngThemingMigrationEscapedComment0>>__
+
+@mixin screen-large {
+    @media (max-width: #{$moq__screen-lg}) {
+        @content;
+    }
+}
+
+@mixin screen-medium {
+    @media (max-width: #{$moq__screen-md}) {
+        @content;
+    }
+}
+
+@mixin screen-small {
+    @media (max-width: #{$moq__screen-sm}) {
+        @content;
+    }
+}
+
+@mixin screen-small-portrait {
+    @media (max-width: #{$moq__screen-sm}) and (orientation: portrait) {
+        @content;
+    }
+}
+
+@mixin screen-xs {
+    @media (max-width: #{$moq__screen-xs}) {
+        @content;
+    }
+}

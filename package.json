@@ -7,11 +7,11 @@
         "node": ">=18"
     },
     "scripts": {
-        "build:all": "webpack --mode production && cd src/react-ui && npm run build",
+        "build:all": "webpack --mode production && cd src/ui && npm run build && cp -rf dist/ui/* ../../dist",
         "start:cli": "webpack --mode development --config ./webpack.cli.config.js && npx ts-node src/cli/cli.ts",
         "start:electron": "npx tsc && cross-env DEV=true electron dist/electron/electron.js",
-        "start:ui": "(cd src/react-ui && npm run dev)",
-        "start:all": "start-server-and-test start:ui http://localhost:5173/ start:electron",
+        "start:ui": "(cd src/ui && npm run start)",
+        "start:all": "start-server-and-test start:ui http://localhost:4200/ start:electron",
         "electron": "electron",
         "test": "echo \"Error: no test specified\" && exit 1",
         "package": "npm run build:all && electron-forge package",

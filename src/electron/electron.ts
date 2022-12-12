@@ -19,7 +19,7 @@ const createWindow = () => {
     })
 
     if (process.env.DEV === "true") {
-        win.loadURL("http://localhost:5173/")
+        win.loadURL("http://localhost:4200/")
         win.webContents.openDevTools()
     } else {
         win.loadFile(path.join(__dirname, "index.html"))

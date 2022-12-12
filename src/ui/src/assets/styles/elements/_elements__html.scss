@@ -1,0 +1,18 @@
+/*------------------------------------
+    # ELEMENT HTML
+------------------------------------*/
+
+html {
+    font-family: $base-font-family;
+    font-size: $base-font-size + px;
+    line-height: $base-line-height;
+    height: 100%;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/*------------------------------------
+    # END ELEMENT HTML
+------------------------------------*/

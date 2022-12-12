@@ -1,0 +1,57 @@
+@import "../../../assets/styles/core.scss";
+
+// Source: https://www.netztest.at/en/
+.uk-card {
+    display: block;
+    height: 100%;
+    padding: 40px 60px;
+    transition: transform 0.15s ease-out;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.28);
+    border: 1px solid #2f5f00;
+    border-radius: 7px;
+
+    &:hover {
+        text-decoration: none;
+        transform: translateY(0.4rem) scale(0.98);
+    }
+    &.uk-card-primary {
+        background-color: #2f5f00;
+        color: white;
+        .uk-icon {
+            align-items: center;
+            background: #2f5f00;
+            border-radius: 500px;
+            border: 1px solid #2f5f00;
+            bottom: 15px;
+            color: white;
+            display: inline-flex;
+            height: 50px;
+            justify-content: center;
+            position: absolute;
+            right: -10px;
+            transition-property: all;
+            transition-property: color, background-color;
+            transition: 0.1s ease-in-out;
+            width: 50px;
+            & > * {
+                transform: translate(0, 0);
+            }
+        }
+    }
+
+    .uk-card-media-top {
+        position: relative;
+    }
+
+    p {
+        font-size: rem(16);
+        font-weight: 400;
+        margin: 20px 0;
+    }
+
+    h3 {
+        font-size: rem(28);
+        font-weight: 700;
+        letter-spacing: 0.06px;
+    }
+}

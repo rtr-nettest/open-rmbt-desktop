@@ -1,10 +1,27 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { NgModule } from "@angular/core"
+import { RouterModule, Routes } from "@angular/router"
+import { HomeScreenComponent } from "./screens/home-screen/home-screen.component"
+import { ResultScreenComponent } from "./screens/result-screen/result-screen.component"
+import { TestScreenComponent } from "./screens/test-screen/test-screen.component"
 
-const routes: Routes = [];
+const routes: Routes = [
+    {
+        path: "test",
+        component: TestScreenComponent,
+    },
+    {
+        path: "result/:id",
+        component: ResultScreenComponent,
+    },
+    {
+        path: "**",
+        component: HomeScreenComponent,
+        pathMatch: "full",
+    },
+]
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forRoot(routes)],
+    exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

@@ -38,7 +38,8 @@ export async function runMeasurement(options?: MeasurementOptions) {
 
 export function getCurrentPhaseState(): ITestPhaseState {
     let value = -1
-    const phase = rmbtClient?.measurementStatus ?? EMeasurementStatus.UNKNOWN
+    const phase =
+        rmbtClient?.measurementStatus ?? EMeasurementStatus.NOT_STARTED
     switch (phase) {
         case EMeasurementStatus.PING:
             value = rmbtClient?.pingMedian ?? -1

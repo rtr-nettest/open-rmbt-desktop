@@ -1,0 +1,14 @@
+@import "../../../assets/styles/core.scss";
+
+.app-main {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    padding: rem(90);
+    height: 100%;
+
+    & > * {
+        flex: 1 1 50%;
+        padding: 0 rem(10);
+    }
+}

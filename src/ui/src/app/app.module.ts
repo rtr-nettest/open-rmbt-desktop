@@ -8,7 +8,9 @@ import { TestScreenComponent } from "./screens/test-screen/test-screen.component
 import { ResultScreenComponent } from "./screens/result-screen/result-screen.component"
 import { HeaderComponent } from "./widgets/header/header.component"
 import { FooterComponent } from "./widgets/footer/footer.component"
-import { StartTestButtonComponent } from "./widgets/start-test-button/start-test-button.component"
+import { StartTestButtonComponent } from "./widgets/start-test-button/start-test-button.component";
+import { GaugeComponent } from './widgets/gauge/gauge.component';
+import { InterimResultsComponent } from './widgets/interim-results/interim-results.component'
 
 @NgModule({
     declarations: [
@@ -19,6 +21,8 @@ import { StartTestButtonComponent } from "./widgets/start-test-button/start-test
         HeaderComponent,
         FooterComponent,
         StartTestButtonComponent,
+        GaugeComponent,
+        InterimResultsComponent,
     ],
     imports: [BrowserModule, AppRoutingModule],
     providers: [],

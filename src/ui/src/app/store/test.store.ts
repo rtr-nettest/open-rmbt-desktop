@@ -38,15 +38,16 @@ export class TestStore {
     )
 
     launchTest() {
-        return from(window.electronAPI.runMeasurement()).pipe(
-            switchMap(() => interval(STATE_UPDATE_TIMEOUT)),
+        window.electronAPI.runMeasurement()
+        return interval(STATE_UPDATE_TIMEOUT).pipe(
             concatMap(() => from(window.electronAPI.getMeasurementState())),
-            tap((phaseState) => {
+            map((phaseState) => {
                 const newState = TestVisualizationState.from(
                     this.visualization$.value,
                     phaseState
                 )
                 this.visualization$.next(newState)
+                return newState
             })
         )
     }

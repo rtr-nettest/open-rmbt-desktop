@@ -27,7 +27,6 @@ export class RMBTClient {
     measurementStart: number = 0
     isRunning = false
     activityInterval?: NodeJS.Timer
-    phaseStartTimeNs = 0
     private estimatePhaseDuration: { [key: string]: number } = {
         [EMeasurementStatus.INIT]: 0.5,
         [EMeasurementStatus.INIT_DOWN]: 2.5,
@@ -36,7 +35,7 @@ export class RMBTClient {
         [EMeasurementStatus.INIT_UP]: 5,
         [EMeasurementStatus.UP]: -1,
     }
-    private phaseDuration: { [key: string]: number } = {
+    private phaseStartTimeNs: { [key: string]: number } = {
         [EMeasurementStatus.INIT]: -1,
         [EMeasurementStatus.INIT_DOWN]: -1,
         [EMeasurementStatus.PING]: -1,
@@ -56,19 +55,12 @@ export class RMBTClient {
     }
 
     getPhaseDuration(phase: string) {
-        return this.phaseDuration[phase]
-    }
-
-    setPhaseDuration(phase: string) {
-        this.phaseDuration[phase] = (Time.nowNs() - this.phaseStartTimeNs) / 1e9
+        return (Time.nowNs() - this.phaseStartTimeNs[phase]) / 1e9
     }
 
     getPhaseProgress(phase: string) {
         const estimatePhaseDuration = this.estimatePhaseDuration[phase] ?? -1
-        return Math.min(
-            100,
-            (this.getPhaseDuration(phase) / estimatePhaseDuration) * 100
-        )
+        return Math.min(1, this.getPhaseDuration(phase) / estimatePhaseDuration)
     }
 
     async scheduleMeasurement() {
@@ -109,7 +101,7 @@ export class RMBTClient {
                     clearInterval(this.activityInterval)
                     finishMeasurement(null)
                     this.measurementStatus = EMeasurementStatus.END
-                    this.setPhaseDuration(EMeasurementStatus.UP)
+                    this.phaseStartTimeNs[EMeasurementStatus.END] = Time.nowNs()
                     Logger.I.info(
                         `Upload is finished in ${this.getPhaseDuration(
                             EMeasurementStatus.UP
@@ -123,7 +115,7 @@ export class RMBTClient {
             }, 1000)
             this.measurementStatus = EMeasurementStatus.INIT
             this.interimThreadResults = new Array(this.params.test_numthreads)
-            this.phaseStartTimeNs = Time.nowNs()
+            this.phaseStartTimeNs[EMeasurementStatus.INIT] = Time.nowNs()
             for (let i = 0; i < this.params.test_numthreads; i++) {
                 const worker = RMBTWorkerFactory.getWorker(
                     path.join(__dirname, "worker.service.js"),
@@ -172,14 +164,15 @@ export class RMBTClient {
                                 this.initializedThreads = []
                                 this.measurementStatus =
                                     EMeasurementStatus.INIT_DOWN
-                                this.setPhaseDuration(EMeasurementStatus.INIT)
+                                this.phaseStartTimeNs[
+                                    EMeasurementStatus.INIT_DOWN
+                                ] = Time.nowNs()
                                 Logger.I.warn(
                                     "Init is finished in %d s",
                                     this.getPhaseDuration(
                                         EMeasurementStatus.INIT
                                     )
                                 )
-                                this.phaseStartTimeNs = Time.nowNs()
                             }
                             break
                         case "preDownloadFinished":
@@ -197,16 +190,14 @@ export class RMBTClient {
                                 )
                                 this.chunks = []
                                 this.measurementStatus = EMeasurementStatus.PING
-                                this.setPhaseDuration(
-                                    EMeasurementStatus.INIT_DOWN
-                                )
+                                this.phaseStartTimeNs[EMeasurementStatus.PING] =
+                                    Time.nowNs()
                                 Logger.I.warn(
                                     "Pre-download is finished in %d s",
                                     this.getPhaseDuration(
                                         EMeasurementStatus.INIT_DOWN
                                     )
                                 )
-                                this.phaseStartTimeNs = Time.nowNs()
                             }
                             break
                         case "pingFinished":
@@ -219,7 +210,8 @@ export class RMBTClient {
                                 )
                             }
                             this.measurementStatus = EMeasurementStatus.DOWN
-                            this.setPhaseDuration(EMeasurementStatus.PING)
+                            this.phaseStartTimeNs[EMeasurementStatus.DOWN] =
+                                Time.nowNs()
                             Logger.I.info(
                                 `The ping median is ${this.pingMedian}ms.`
                             )
@@ -227,7 +219,6 @@ export class RMBTClient {
                                 "Ping is finished in %d s",
                                 this.getPhaseDuration(EMeasurementStatus.PING)
                             )
-                            this.phaseStartTimeNs = Time.nowNs()
                             break
                         case "downloadUpdated":
                             this.interimThreadResults[index] =
@@ -258,7 +249,9 @@ export class RMBTClient {
                                 }
                                 this.measurementStatus =
                                     EMeasurementStatus.INIT_UP
-                                this.setPhaseDuration(EMeasurementStatus.DOWN)
+                                this.phaseStartTimeNs[
+                                    EMeasurementStatus.INIT_UP
+                                ] = Time.nowNs()
                                 Logger.I.info(
                                     `Download is finished in ${this.getPhaseDuration(
                                         EMeasurementStatus.DOWN
@@ -267,7 +260,6 @@ export class RMBTClient {
                                 Logger.I.info(
                                     `The total download speed is ${this.downloadMedian}Mbps`
                                 )
-                                this.phaseStartTimeNs = Time.nowNs()
                             }
                             break
                         case "preUploadFinished":
@@ -289,15 +281,13 @@ export class RMBTClient {
                                 }
                                 this.chunks = []
                                 this.measurementStatus = EMeasurementStatus.UP
-                                this.setPhaseDuration(
-                                    EMeasurementStatus.INIT_UP
-                                )
+                                this.phaseStartTimeNs[EMeasurementStatus.UP] =
+                                    Time.nowNs()
                                 Logger.I.info(
                                     `Pre-upload is finished in ${this.getPhaseDuration(
                                         EMeasurementStatus.INIT_UP
                                     )}s`
                                 )
-                                this.phaseStartTimeNs = Time.nowNs()
                             }
                             break
                         case "reconnectedForUpload":

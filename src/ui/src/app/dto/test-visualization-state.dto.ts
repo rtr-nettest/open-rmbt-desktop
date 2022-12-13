@@ -26,6 +26,7 @@ export class TestVisualizationState implements ITestVisualizationState {
         [EMeasurementStatus.PING]: new TestItemState(),
         [EMeasurementStatus.DOWN]: new TestItemState(),
         [EMeasurementStatus.INIT_UP]: new TestItemState(),
+        [EMeasurementStatus.UP]: new TestItemState(),
         [EMeasurementStatus.END]: new TestItemState(),
     }
     currentPhase: EMeasurementStatus = EMeasurementStatus.NOT_STARTED
@@ -35,10 +36,13 @@ export class TestVisualizationState implements ITestVisualizationState {
         phaseState: ITestPhaseState
     ) {
         const newState = extend<ITestVisualizationState>(initialState)
-        newState.phases[phaseState.phase] = extend<ITestItemState>(
-            newState.phases[phaseState.phase],
-            phaseState
-        )
+        if (newState.phases[phaseState.phase]) {
+            newState.phases[phaseState.phase] = extend<ITestItemState>(
+                newState.phases[phaseState.phase],
+                phaseState
+            )
+            newState.currentPhase = phaseState.phase
+        }
         return newState
     }
 

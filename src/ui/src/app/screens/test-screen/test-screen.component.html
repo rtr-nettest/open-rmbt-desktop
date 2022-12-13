@@ -1,5 +1,4 @@
-<app-header></app-header>
-<main class="app-main">
+<main *ngIf="visualization$ | async" class="app-main">
     <app-gauge></app-gauge>
     <app-interim-results></app-interim-results>
 </main>

@@ -12,7 +12,7 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
 export class TestScreenComponent {
     visualization$ = this.store.launchTest().pipe(
         tap((state) => {
-            if (state.currentPhase === EMeasurementStatus.END) {
+            if (state.currentPhase === EMeasurementStatus.SPEEDTEST_END) {
                 this.router.navigate(["/"])
             }
         })

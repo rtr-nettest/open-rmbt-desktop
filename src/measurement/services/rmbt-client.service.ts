@@ -1,4 +1,4 @@
-import { MeasurementThreadResult } from "../dto/measurement-result.dto"
+import { MeasurementThreadResult } from "../dto/measurement-thread-result.dto"
 import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
@@ -19,6 +19,8 @@ export class RMBTClient {
     initializedThreads: number[] = []
     interimThreadResults: IMeasurementThreadResult[] = []
     threadResults: IMeasurementThreadResult[] = []
+    downThreadResults: IMeasurementThreadResult[] = []
+    upThreadResults: IMeasurementThreadResult[] = []
     chunks: number[] = []
     timestamps: { index: number; time: number }[] = []
     pingMedian = -1
@@ -63,15 +65,14 @@ export class RMBTClient {
         return Math.min(1, this.getPhaseDuration(phase) / estimatePhaseDuration)
     }
 
-    async scheduleMeasurement() {
+    async scheduleMeasurement(): Promise<IMeasurementThreadResult[]> {
         Logger.I.info("Scheduling measurement...")
         this.measurementLastUpdate = new Date().getTime()
         if (this.params.test_wait > 0) {
             this.measurementStatus = EMeasurementStatus.WAIT
             return new Promise((resolve) => {
                 setTimeout(async () => {
-                    await this.runMeasurement()
-                    resolve(null)
+                    resolve(await this.runMeasurement())
                 }, this.params.test_wait * 1000)
             })
         } else {
@@ -79,7 +80,7 @@ export class RMBTClient {
         }
     }
 
-    private async runMeasurement() {
+    private async runMeasurement(): Promise<IMeasurementThreadResult[]> {
         this.isRunning = true
         this.measurementStart = Date.now()
         return new Promise((finishMeasurement) => {
@@ -91,6 +92,7 @@ export class RMBTClient {
                 ) {
                     this.uploadMedian =
                         this.getTotalSpeed(this.threadResults) / 1000000
+                    this.upThreadResults = [...this.threadResults]
                     this.threadResults = []
                     this.interimThreadResults = new Array(
                         this.params.test_numthreads
@@ -99,9 +101,13 @@ export class RMBTClient {
                         w.terminate()
                     }
                     clearInterval(this.activityInterval)
-                    finishMeasurement(null)
-                    this.measurementStatus = EMeasurementStatus.END
-                    this.phaseStartTimeNs[EMeasurementStatus.END] = Time.nowNs()
+                    finishMeasurement([
+                        ...this.downThreadResults,
+                        ...this.upThreadResults,
+                    ])
+                    this.measurementStatus = EMeasurementStatus.SPEEDTEST_END
+                    this.phaseStartTimeNs[EMeasurementStatus.SPEEDTEST_END] =
+                        Time.nowNs()
                     Logger.I.info(
                         `Upload is finished in ${this.getPhaseDuration(
                             EMeasurementStatus.UP
@@ -238,6 +244,7 @@ export class RMBTClient {
                                 this.downloadMedian =
                                     this.getTotalSpeed(this.threadResults) /
                                     1000000
+                                this.downThreadResults = [...this.threadResults]
                                 this.threadResults = []
                                 this.interimThreadResults = new Array(
                                     this.params.test_numthreads

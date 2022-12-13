@@ -17,7 +17,7 @@ export class UserSettingsRequest implements IUserSettingsRequest {
     terms_and_conditions_accepted = true
     uuid = ""
     operating_system = `${os.type}, ${os.release}`
-    client_version = packageJson.version
+    client_version = ""
 
     // RTR BE compatibility
     capabilities = { RMBThttp: true }

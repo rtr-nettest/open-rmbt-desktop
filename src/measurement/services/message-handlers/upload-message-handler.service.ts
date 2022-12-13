@@ -42,7 +42,7 @@ export class UploadMessageHandler implements IMessageHandler {
         this.ctx.threadResult.up = this.result.getAllResults()
         this.ctx.threadResult.speedItems = this.result.addSpeedItems(
             this.ctx.threadResult.speedItems,
-            true,
+            "upload",
             this.ctx.index
         )
         this.onFinish?.(this.ctx.threadResult)

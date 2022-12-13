@@ -35,7 +35,7 @@ export class DownloadMessageHandler implements IMessageHandler {
         this.ctx.threadResult.down = this.result.getAllResults()
         this.ctx.threadResult.speedItems = this.result.addSpeedItems(
             this.ctx.threadResult.speedItems,
-            false,
+            "download",
             this.ctx.index
         )
         this.onFinish?.(this.ctx.threadResult)

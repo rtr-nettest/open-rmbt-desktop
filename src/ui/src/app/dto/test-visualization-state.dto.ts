@@ -29,6 +29,8 @@ export class TestVisualizationState implements ITestVisualizationState {
         [EMeasurementStatus.DOWN]: new TestItemState(),
         [EMeasurementStatus.INIT_UP]: new TestItemState(),
         [EMeasurementStatus.UP]: new TestItemState(),
+        [EMeasurementStatus.SPEEDTEST_END]: new TestItemState(),
+        [EMeasurementStatus.SUBMITTING_RESULTS]: new TestItemState(),
         [EMeasurementStatus.END]: new TestItemState(),
     }
     currentPhase: EMeasurementStatus = EMeasurementStatus.NOT_STARTED

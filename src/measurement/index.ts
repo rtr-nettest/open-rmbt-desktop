@@ -1,4 +1,5 @@
 import { MeasurementRegistrationRequest } from "./dto/measurement-registration-request.dto"
+import { MeasurementResult } from "./dto/measurement-result.dto"
 import { UserSettingsRequest } from "./dto/user-settings-request.dto"
 import { EMeasurementStatus } from "./enums/measurement-status.enum"
 import { IBasicNetworkInfo } from "./interfaces/basic-network-info.interface"
@@ -31,7 +32,14 @@ export async function runMeasurement(options?: MeasurementOptions) {
             registrationRequest
         )
         rmbtClient = new RMBTClient(measurementRegistration)
-        await rmbtClient.scheduleMeasurement()
+        const threadResults = await rmbtClient.scheduleMeasurement()
+        Logger.I.info("Thread results: %o", threadResults)
+        const resultsToSubmit = new MeasurementResult(
+            registrationRequest,
+            measurementRegistration,
+            threadResults
+        )
+        Logger.I.info("Results to submit: %o", resultsToSubmit)
     } catch (err) {
         Logger.I.error(err)
     }

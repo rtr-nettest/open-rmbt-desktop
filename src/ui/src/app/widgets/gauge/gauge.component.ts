@@ -21,7 +21,76 @@ export class GaugeComponent {
 
     constructor(private store: TestStore, private ngZone: NgZone) {}
 
-    setBarPercentage(barSelector: string, percents: number) {
+    private getProgressSegment(status: EMeasurementStatus, progress: number) {
+        var ProgressSegmentsTotal = 96
+        var ProgressSegmentsInit = 1
+        var ProgressSegmentsInitDown = 13
+        var ProgressSegmentsPing = 15
+        var ProgressSegmentsDown = 34
+        var ProgressSegmentsInitUp = 4
+        var ProgressSegmentsUp = 29
+        var progressValue = 0
+        var progressSegments = 0
+        switch (status) {
+            case EMeasurementStatus.INIT:
+                progressSegments = +Math.round(ProgressSegmentsInit * progress)
+                break
+            case EMeasurementStatus.INIT_DOWN:
+                progressSegments =
+                    ProgressSegmentsInit +
+                    Math.round(ProgressSegmentsInitDown * progress)
+                break
+            case EMeasurementStatus.PING:
+                progressSegments =
+                    ProgressSegmentsInit +
+                    ProgressSegmentsInitDown +
+                    Math.round(ProgressSegmentsPing * progress)
+                break
+            case EMeasurementStatus.DOWN:
+                progressSegments =
+                    ProgressSegmentsInit +
+                    ProgressSegmentsInitDown +
+                    ProgressSegmentsPing +
+                    Math.round(ProgressSegmentsDown * progress)
+                break
+            case EMeasurementStatus.INIT_UP:
+                progressSegments =
+                    ProgressSegmentsInit +
+                    ProgressSegmentsInitDown +
+                    ProgressSegmentsPing +
+                    ProgressSegmentsDown +
+                    Math.round(ProgressSegmentsInitUp * progress)
+                break
+            case EMeasurementStatus.UP:
+                progressSegments =
+                    ProgressSegmentsInit +
+                    ProgressSegmentsInitDown +
+                    ProgressSegmentsPing +
+                    ProgressSegmentsDown +
+                    ProgressSegmentsInitUp +
+                    Math.round(ProgressSegmentsUp * progress)
+                progressSegments = Math.min(95, progressSegments)
+                break
+            case EMeasurementStatus.END:
+                progressSegments = ProgressSegmentsTotal
+                break
+            case EMeasurementStatus.QOS_TEST_RUNNING:
+                progressSegments = 95
+                break
+            case EMeasurementStatus.SPEEDTEST_END:
+            case EMeasurementStatus.QOS_END:
+                progressSegments = 95
+                break
+            case EMeasurementStatus.ERROR:
+            case EMeasurementStatus.ABORTED:
+                progressSegments = 0
+                break
+        }
+        progressValue = progressSegments / ProgressSegmentsTotal
+        return progressValue
+    }
+
+    private setBarPercentage(barSelector: string, percents: number) {
         var bar = document.querySelector(barSelector) as SVGGeometryElement
         if (!bar) {
             console.error("Element not found: " + barSelector + ".")
@@ -31,11 +100,18 @@ export class GaugeComponent {
         }
     }
 
-    drawLoop(phaseState: ITestItemState) {
+    private drawLoop(phaseState: ITestItemState) {
         let { phase: status, progress, down, up } = phaseState
         let barSelector = null
         let directionSymbol = null
         let speedMbit = -1
+        const fullProgress = Math.round(
+            this.getProgressSegment(status, progress) * 100
+        )
+        const percents = document.querySelector("#percents")
+        if (percents) {
+            percents.textContent = fullProgress + "\u200a%"
+        }
         switch (status) {
             case EMeasurementStatus.INIT:
                 barSelector = "#init"

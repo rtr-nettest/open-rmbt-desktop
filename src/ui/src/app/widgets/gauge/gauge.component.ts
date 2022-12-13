@@ -11,7 +11,7 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
     styleUrls: ["./gauge.component.scss"],
 })
 export class GaugeComponent {
-    visualization$ = this.testStore.visualization$.pipe(
+    visualization$ = this.store.visualization$.pipe(
         tap((state) => {
             this.ngZone.runOutsideAngular(() => {
                 this.drawLoop(state.phases[state.currentPhase])
@@ -19,7 +19,7 @@ export class GaugeComponent {
         })
     )
 
-    constructor(private testStore: TestStore, private ngZone: NgZone) {}
+    constructor(private store: TestStore, private ngZone: NgZone) {}
 
     setBarPercentage(barSelector: string, percents: number) {
         var bar = document.querySelector(barSelector) as SVGGeometryElement
@@ -32,9 +32,10 @@ export class GaugeComponent {
     }
 
     drawLoop(phaseState: ITestItemState) {
-        let { phase: status, progress, value: speedMbit } = phaseState
-        var barSelector = null
-        var directionSymbol = null
+        let { phase: status, progress, down, up } = phaseState
+        let barSelector = null
+        let directionSymbol = null
+        let speedMbit = -1
         switch (status) {
             case EMeasurementStatus.INIT:
                 barSelector = "#init"
@@ -51,6 +52,7 @@ export class GaugeComponent {
                 this.setBarPercentage("#ping", 1)
                 barSelector = "#download"
                 //set symbol as unicode, since IE won't handle html entities
+                speedMbit = down
                 directionSymbol = "\u21a7" //↧
                 break
             case EMeasurementStatus.INIT_UP:
@@ -62,6 +64,7 @@ export class GaugeComponent {
             case EMeasurementStatus.UP:
                 barSelector = "#upload"
                 progress = Math.min(0.95, progress * 0.9 + 0.1)
+                speedMbit = up
                 directionSymbol = "\u21a5" //↥
                 break
             case EMeasurementStatus.END:
@@ -88,10 +91,6 @@ export class GaugeComponent {
             speedLog = Math.min(1, speedLog)
             this.setBarPercentage("#speed", speedLog)
 
-            //set .text and .html, since .html is not ignored by Internet Explorer
-            //\u2009 = unicode "hair space"
-            speedTextEl.textContent =
-                directionSymbol + "\u2009" + getSignificantDigits(speedMbit)
             speedTextEl.innerHTML =
                 '<tspan style="fill:#59b200">' +
                 directionSymbol +
@@ -107,8 +106,6 @@ export class GaugeComponent {
         }
         //if only direction symbol is set - display this (init upload phase)
         else if (directionSymbol !== null) {
-            //again set .text and .html for Internet Explorer
-            speedTextEl.textContent = directionSymbol
             speedEl.setAttribute("class", "gauge speed")
             this.setBarPercentage("#speed", 0)
             speedTextEl.innerHTML =

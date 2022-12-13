@@ -4,11 +4,19 @@
     align-items: center;
     display: flex;
     justify-content: center;
+    margin-left: 10%;
     padding: rem(90);
     height: 100%;
 
     & > * {
-        flex: 1 1 50%;
-        padding: 0 rem(10);
+        flex: 0 0 45%;
+    }
+
+    & > .app-spacer {
+        flex: 0 0 10%;
+    }
+
+    @include screen-small {
+        padding: rem(40);
     }
 }

@@ -1,7 +1,11 @@
 import { config } from "dotenv"
 import { app, BrowserWindow, ipcMain } from "electron"
 import path from "path"
-import { getCurrentPhaseState, runMeasurement } from "../measurement"
+import {
+    getBasicNetworkInfo,
+    getCurrentPhaseState,
+    runMeasurement,
+} from "../measurement"
 import { Events } from "./events"
 
 config({
@@ -40,6 +44,10 @@ ipcMain.on(Events.RUN_MEASUREMENT, (event) => {
     runMeasurement().then(() => {
         webContents.send(Events.MEASUREMENT_FINISH, getCurrentPhaseState())
     })
+})
+
+ipcMain.handle(Events.GET_BASIC_NETWORK_INFO, () => {
+    return getBasicNetworkInfo()
 })
 
 ipcMain.handle(Events.GET_MEASUREMENT_STATE, () => {

@@ -1,6 +1,18 @@
 <div class="app-wrapper">
-    <dl class="app-dl">
-        <dt class="app-dt">Test item header</dt>
-        <dd class="app-dd">Test item description</dd>
+    <dl *ngIf="visualization$ | async" class="app-dl">
+        <dt class="app-dt">Ping</dt>
+        <dd class="app-dd">{{ ping < 0 ? "-" : ping + " ms" }}</dd>
+        <dt class="app-dt">Download</dt>
+        <dd class="app-dd">{{ download < 0 ? "-" : download + " Mbps" }}</dd>
+        <dt class="app-dt">Upload</dt>
+        <dd class="app-dd">{{ upload < 0 ? "-" : upload + " Mbps" }}</dd>
+    </dl>
+    <dl *ngIf="basicNetworkInfo$ | async" class="app-dl">
+        <dt class="app-dt">Server name</dt>
+        <dd class="app-dd">{{ serverName }}</dd>
+        <dt class="app-dt">IP Address</dt>
+        <dd class="app-dd">{{ ipAddress }}</dd>
+        <dt class="app-dt">Provider</dt>
+        <dd class="app-dd">{{ providerName }}</dd>
     </dl>
 </div>

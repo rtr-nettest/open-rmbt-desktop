@@ -10,7 +10,7 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
     styleUrls: ["./test-screen.component.scss"],
 })
 export class TestScreenComponent {
-    visualization$ = this.testStore.launchTest().pipe(
+    visualization$ = this.store.launchTest().pipe(
         tap((state) => {
             if (state.currentPhase === EMeasurementStatus.END) {
                 this.router.navigate(["/"])
@@ -18,5 +18,5 @@ export class TestScreenComponent {
         })
     )
 
-    constructor(private testStore: TestStore, private router: Router) {}
+    constructor(private store: TestStore, private router: Router) {}
 }

@@ -1,7 +1,8 @@
 import { MeasurementRegistrationRequest } from "./dto/measurement-registration-request.dto"
 import { UserSettingsRequest } from "./dto/user-settings-request.dto"
 import { EMeasurementStatus } from "./enums/measurement-status.enum"
-import { ITestPhaseState } from "./interfaces/test-phase-state.interface"
+import { IBasicNetworkInfo } from "./interfaces/basic-network-info.interface"
+import { IMeasurementPhaseState } from "./interfaces/measurement-phase-state.interface"
 import { ControlServer } from "./services/control-server.service"
 import { Logger } from "./services/logger.service"
 import { RMBTClient } from "./services/rmbt-client.service"
@@ -36,25 +37,23 @@ export async function runMeasurement(options?: MeasurementOptions) {
     }
 }
 
-export function getCurrentPhaseState(): ITestPhaseState {
-    let value = -1
+export function getBasicNetworkInfo(): IBasicNetworkInfo {
+    return {
+        ipAddress: rmbtClient?.params.client_remote_ip ?? "-",
+        serverName: rmbtClient?.params.test_server_name ?? "-",
+        providerName: rmbtClient?.params.provider ?? "-",
+    }
+}
+
+export function getCurrentPhaseState(): IMeasurementPhaseState {
     const phase =
         rmbtClient?.measurementStatus ?? EMeasurementStatus.NOT_STARTED
-    switch (phase) {
-        case EMeasurementStatus.PING:
-            value = rmbtClient?.pingMedian ?? -1
-            break
-        case EMeasurementStatus.DOWN:
-            value = rmbtClient?.downloadMedian ?? -1
-            break
-        case EMeasurementStatus.UP:
-            value = rmbtClient?.uploadMedian ?? -1
-            break
-    }
     return {
         duration: rmbtClient?.getPhaseDuration(phase) ?? -1,
         progress: rmbtClient?.getPhaseProgress(phase) ?? -1,
-        value,
+        ping: rmbtClient?.pingMedian ?? -1,
+        down: rmbtClient?.downloadMedian ?? -1,
+        up: rmbtClient?.uploadMedian ?? -1,
         phase,
     }
 }

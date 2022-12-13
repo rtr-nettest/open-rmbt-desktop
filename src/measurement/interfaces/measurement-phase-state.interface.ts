@@ -1,8 +1,10 @@
 import { EMeasurementStatus } from "../enums/measurement-status.enum"
 
-export interface ITestPhaseState {
+export interface IMeasurementPhaseState {
     duration: number
     progress: number
-    value: number
+    down: number
+    up: number
+    ping: number
     phase: EMeasurementStatus
 }

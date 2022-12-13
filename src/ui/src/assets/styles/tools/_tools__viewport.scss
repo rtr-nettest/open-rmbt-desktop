@@ -1,5 +1,3 @@
-//__<<ngThemingMigrationEscapedComment0>>__
-
 @mixin screen-large {
     @media (max-width: #{$screen-lg}) {
         @content;

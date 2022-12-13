@@ -1,17 +1,19 @@
 import { ITestVisualizationState } from "../interfaces/test-visualization-state.interface"
 import { ITestItemState } from "../interfaces/test-item-state.interface"
 import { EMeasurementStatus } from "../../../../measurement/enums/measurement-status.enum"
-import { ITestPhaseState } from "../../../../measurement/interfaces/test-phase-state.interface"
+import { IMeasurementPhaseState } from "../../../../measurement/interfaces/measurement-phase-state.interface"
 import { extend } from "../helpers/extend"
 import { ETestStatuses } from "../enums/test-statuses.enum"
 
 export class TestItemState implements ITestItemState {
+    down: number = -1
+    up: number = -1
+    ping: number = -1
     chart?: { x: number; y: number }[] | undefined
     container?: ETestStatuses | undefined
     label?: string | undefined
     duration: number = 0
     progress: number = 0
-    value: number = -1
     phase: EMeasurementStatus = EMeasurementStatus.NOT_STARTED
 }
 
@@ -33,7 +35,7 @@ export class TestVisualizationState implements ITestVisualizationState {
 
     static from(
         initialState: ITestVisualizationState,
-        phaseState: ITestPhaseState
+        phaseState: IMeasurementPhaseState
     ) {
         const newState = extend<ITestVisualizationState>(initialState)
         if (newState.phases[phaseState.phase]) {

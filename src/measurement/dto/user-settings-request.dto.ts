@@ -5,7 +5,6 @@ import { IUserSettingsRequest } from "../interfaces/user-settings-request.interf
 import { v4 as uuidv4 } from "uuid"
 import { EMeasurementServerType } from "../enums/measurement-server-type.enum"
 import os from "os"
-const packageJson = require("../../../package.json")
 
 dayjs.extend(utc)
 dayjs.extend(tz)

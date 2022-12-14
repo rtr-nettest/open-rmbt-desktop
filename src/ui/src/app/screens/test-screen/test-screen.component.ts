@@ -12,8 +12,11 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
 export class TestScreenComponent {
     visualization$ = this.store.launchTest().pipe(
         tap((state) => {
-            if (state.currentPhase === EMeasurementStatus.SPEEDTEST_END) {
-                this.router.navigate(["/"])
+            if (state.currentPhase === EMeasurementStatus.END) {
+                this.router.navigate([
+                    "result",
+                    state.phases[state.currentPhase].testUuid,
+                ])
             }
         })
     )

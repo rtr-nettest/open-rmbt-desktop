@@ -4,6 +4,7 @@ import path from "path"
 import {
     getBasicNetworkInfo,
     getCurrentPhaseState,
+    getMeasurementResult,
     runMeasurement,
 } from "../measurement"
 import { Events } from "./events"
@@ -39,11 +40,8 @@ app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
-ipcMain.on(Events.RUN_MEASUREMENT, (event) => {
-    const webContents = event.sender
-    runMeasurement().then(() => {
-        webContents.send(Events.MEASUREMENT_FINISH, getCurrentPhaseState())
-    })
+ipcMain.on(Events.RUN_MEASUREMENT, () => {
+    runMeasurement()
 })
 
 ipcMain.handle(Events.GET_BASIC_NETWORK_INFO, () => {
@@ -52,6 +50,10 @@ ipcMain.handle(Events.GET_BASIC_NETWORK_INFO, () => {
 
 ipcMain.handle(Events.GET_MEASUREMENT_STATE, () => {
     return getCurrentPhaseState()
+})
+
+ipcMain.handle(Events.GET_MEASUREMENT_RESULT, (event, testUuid) => {
+    return getMeasurementResult(testUuid)
 })
 
 app.whenReady().then(() => createWindow())

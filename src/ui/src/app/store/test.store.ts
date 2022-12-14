@@ -6,10 +6,6 @@ import {
     from,
     interval,
     map,
-    Observable,
-    of,
-    Subscription,
-    switchMap,
     tap,
 } from "rxjs"
 import { TestVisualizationState } from "../dto/test-visualization-state.dto"
@@ -18,6 +14,7 @@ import { IMeasurementPhaseState } from "../../../../measurement/interfaces/measu
 import { EMeasurementStatus } from "../../../../measurement/enums/measurement-status.enum"
 import { IBasicNetworkInfo } from "../../../../measurement/interfaces/basic-network-info.interface"
 import { BasicNetworkInfo } from "../dto/basic-network-info.dto"
+import { ISimpleHistoryResult } from "../../../../measurement/interfaces/simple-history-result.interface"
 
 declare global {
     interface Window {
@@ -25,9 +22,9 @@ declare global {
             runMeasurement: () => Promise<void>
             getBasicNetworkInfo: () => Promise<IBasicNetworkInfo>
             getMeasurementState: () => Promise<IMeasurementPhaseState>
-            onMeasurementFinish: (
-                callback: (results: IMeasurementPhaseState[]) => any
-            ) => any
+            getMeasurementResult: (
+                testUuid: string
+            ) => Promise<ISimpleHistoryResult>
         }
     }
 }
@@ -42,6 +39,9 @@ export class TestStore {
     )
     visualization$ = new BehaviorSubject<ITestVisualizationState>(
         new TestVisualizationState()
+    )
+    simpleHistoryResult$ = new BehaviorSubject<ISimpleHistoryResult | null>(
+        null
     )
 
     launchTest() {

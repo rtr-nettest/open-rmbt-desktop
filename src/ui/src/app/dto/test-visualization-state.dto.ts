@@ -6,6 +6,7 @@ import { extend } from "../helpers/extend"
 import { ETestStatuses } from "../enums/test-statuses.enum"
 
 export class TestItemState implements ITestItemState {
+    testUuid: string = ""
     down: number = -1
     up: number = -1
     ping: number = -1

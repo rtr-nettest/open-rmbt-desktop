@@ -397,7 +397,7 @@ export class RMBTClient {
             bytes += task.currentTransfer
         }
 
-        let speed = (bytes / Number(nsec)) * 1e9 * 8.0
+        let speed = (bytes / nsec) * 1e9 * 8.0
         speed = nsec === 0 ? 0 : isNaN(speed) ? 0 : speed
         return {
             bytes,

@@ -17,7 +17,7 @@ export interface MeasurementOptions {
 export async function runMeasurement(options?: MeasurementOptions) {
     rmbtClient = undefined
 
-    const controlServer = new ControlServer()
+    const controlServer = ControlServer.instance
     const settingsRequest = new UserSettingsRequest(options?.platform)
     try {
         const measurementServer =
@@ -33,14 +33,17 @@ export async function runMeasurement(options?: MeasurementOptions) {
         )
         rmbtClient = new RMBTClient(measurementRegistration)
         const threadResults = await rmbtClient.scheduleMeasurement()
-        const resultsToSubmit = new MeasurementResult(
+        rmbtClient.measurementStatus = EMeasurementStatus.SUBMITTING_RESULTS
+        const resultToSubmit = new MeasurementResult(
             registrationRequest,
             rmbtClient.params!,
             threadResults,
             rmbtClient.overallResultDown!,
             rmbtClient.overallResultUp!
         )
-        Logger.I.info("Results to submit: %o", resultsToSubmit)
+        await controlServer.submitMeasurement(resultToSubmit)
+        await controlServer.getMeasurementResult(resultToSubmit.test_uuid)
+        rmbtClient.measurementStatus = EMeasurementStatus.END
     } catch (err) {
         Logger.I.error(err)
     }
@@ -64,5 +67,10 @@ export function getCurrentPhaseState(): IMeasurementPhaseState {
         down: rmbtClient?.downloadSpeedTotalMbps ?? -1,
         up: rmbtClient?.uploadSpeedTotalMbps ?? -1,
         phase,
+        testUuid: rmbtClient?.params?.test_uuid ?? "",
     }
+}
+
+export async function getMeasurementResult(testUuid: string) {
+    return await ControlServer.instance.getMeasurementResult(testUuid)
 }

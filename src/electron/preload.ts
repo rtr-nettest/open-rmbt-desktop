@@ -6,8 +6,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getBasicNetworkInfo: () =>
         ipcRenderer.invoke(Events.GET_BASIC_NETWORK_INFO),
     getMeasurementState: () => ipcRenderer.invoke(Events.GET_MEASUREMENT_STATE),
-    onMeasurementFinish: (callback: (results: number[]) => any) =>
-        ipcRenderer.on(Events.MEASUREMENT_FINISH, (event, results) =>
-            callback(results)
-        ),
+    getMeasurementResult: (testUuid: string) =>
+        ipcRenderer.invoke(Events.GET_MEASUREMENT_RESULT, testUuid),
 })

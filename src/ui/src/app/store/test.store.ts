@@ -6,6 +6,7 @@ import {
     from,
     interval,
     map,
+    of,
     tap,
 } from "rxjs"
 import { TestVisualizationState } from "../dto/test-visualization-state.dto"
@@ -15,6 +16,7 @@ import { EMeasurementStatus } from "../../../../measurement/enums/measurement-st
 import { IBasicNetworkInfo } from "../../../../measurement/interfaces/basic-network-info.interface"
 import { BasicNetworkInfo } from "../dto/basic-network-info.dto"
 import { ISimpleHistoryResult } from "../../../../measurement/interfaces/simple-history-result.interface"
+import { Router } from "@angular/router"
 
 declare global {
     interface Window {
@@ -47,6 +49,7 @@ export class TestStore {
     launchTest() {
         this.basicNetworkInfo$.next(new BasicNetworkInfo())
         this.visualization$.next(new TestVisualizationState())
+        this.simpleHistoryResult$.next(null)
         window.electronAPI.runMeasurement()
         return interval(STATE_UPDATE_TIMEOUT).pipe(
             concatMap(() =>
@@ -68,4 +71,18 @@ export class TestStore {
             })
         )
     }
+
+    getMeasurementResult(testUuid: string | null) {
+        if (!testUuid) {
+            return of(null)
+        }
+        return from(window.electronAPI.getMeasurementResult(testUuid)).pipe(
+            map((result) => {
+                this.simpleHistoryResult$.next(result)
+                return result
+            })
+        )
+    }
+
+    constructor(private router: Router) {}
 }

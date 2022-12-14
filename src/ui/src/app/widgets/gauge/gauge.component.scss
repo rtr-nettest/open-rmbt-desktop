@@ -1,7 +1,6 @@
 @import "../../../assets/styles/core.scss";
 
 $blue: #0071d7;
-$green: #2f5f00;
 
 .gauge {
     width: 100%;
@@ -40,5 +39,5 @@ svg .upload {
 }
 
 svg .speed {
-    stroke: $green;
+    stroke: $color-primary;
 }

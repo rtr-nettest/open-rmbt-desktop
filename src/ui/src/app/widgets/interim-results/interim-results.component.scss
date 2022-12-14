@@ -4,19 +4,3 @@
     display: flex;
     flex-direction: column;
 }
-
-.app-dl {
-    margin-bottom: rem(32);
-}
-
-.app-dt {
-    color: $color-pale;
-    font-size: rem(12);
-    margin-bottom: rem(4);
-    text-transform: uppercase;
-}
-
-.app-dd {
-    font-size: rem(16);
-    margin-bottom: rem(8);
-}

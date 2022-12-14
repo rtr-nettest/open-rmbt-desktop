@@ -1,1 +1,26 @@
-<p>result-screen works!</p>
+<app-header></app-header>
+<main *ngIf="result$ | async as result" class="app-main">
+    <header class="app-title">
+        Measurement result from {{ result.measurementDate | date }}
+    </header>
+    <div class="app-wrapper">
+        <app-dl
+            [items]="{
+                'Server name': result.measurementServerName,
+                'IP Address': result.ipAddress,
+                Provider: result.providerName
+            }"
+        ></app-dl>
+        <app-dl
+            [items]="{
+                Download: getSpeedInMbps(result.speedDownload),
+                Upload: getSpeedInMbps(result.speedUpload),
+                Ping: getPingInMs(result.ping)
+            }"
+        ></app-dl>
+    </div>
+    <footer class="app-footer">
+        <a routerLink="/" class="app-btn">Start a new test</a>
+    </footer>
+</main>
+<app-footer></app-footer>

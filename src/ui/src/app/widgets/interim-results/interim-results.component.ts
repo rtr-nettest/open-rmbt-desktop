@@ -12,15 +12,18 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
 export class InterimResultsComponent {
     visualization$ = this.store.visualization$.pipe(
         tap((state) => {
-            this.ping = getSignificantDigits(
+            const ping = getSignificantDigits(
                 state.phases[EMeasurementStatus.DOWN].ping
             )
-            this.download = getSignificantDigits(
+            this.ping = ping < 0 ? "-" : ping + " ms"
+            const download = getSignificantDigits(
                 state.phases[EMeasurementStatus.DOWN].down
             )
-            this.upload = getSignificantDigits(
+            this.download = download < 0 ? "-" : download + " Mbps"
+            const upload = getSignificantDigits(
                 state.phases[EMeasurementStatus.UP].up
             )
+            this.upload = upload < 0 ? "-" : upload + " Mbps"
         })
     )
     basicNetworkInfo$ = this.store.basicNetworkInfo$.pipe(
@@ -31,9 +34,9 @@ export class InterimResultsComponent {
         })
     )
 
-    ping: number = -1
-    download: number = -1
-    upload: number = -1
+    ping: string = "-"
+    download: string = "-"
+    upload: string = "-"
 
     serverName: string = "-"
     ipAddress: string = "-"

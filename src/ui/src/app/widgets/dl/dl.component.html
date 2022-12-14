@@ -1,0 +1,6 @@
+<dl *ngIf="entries" class="app-dl">
+    <ng-container *ngFor="let entry of entries">
+        <dt class="app-dt">{{ entry[0] }}</dt>
+        <dd class="app-dd">{{ entry[1] }}</dd>
+    </ng-container>
+</dl>

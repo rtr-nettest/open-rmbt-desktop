@@ -10,7 +10,7 @@ const routes: Routes = [
         component: TestScreenComponent,
     },
     {
-        path: "result/:id",
+        path: "result/:testUuid",
         component: ResultScreenComponent,
     },
     {

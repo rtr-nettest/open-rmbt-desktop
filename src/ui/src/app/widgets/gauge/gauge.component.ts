@@ -71,6 +71,7 @@ export class GaugeComponent {
                     Math.round(ProgressSegmentsUp * progress)
                 progressSegments = Math.min(95, progressSegments)
                 break
+            case EMeasurementStatus.SUBMITTING_RESULTS:
             case EMeasurementStatus.END:
                 progressSegments = ProgressSegmentsTotal
                 break
@@ -143,6 +144,7 @@ export class GaugeComponent {
                 speedMbit = up
                 directionSymbol = "\u21a5" //↥
                 break
+            case EMeasurementStatus.SUBMITTING_RESULTS:
             case EMeasurementStatus.END:
                 barSelector = "#upload"
                 progress = 1

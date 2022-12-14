@@ -42,7 +42,6 @@ export async function runMeasurement(options?: MeasurementOptions) {
             rmbtClient.overallResultUp!
         )
         await controlServer.submitMeasurement(resultToSubmit)
-        await controlServer.getMeasurementResult(resultToSubmit.test_uuid)
         rmbtClient.measurementStatus = EMeasurementStatus.END
     } catch (err) {
         Logger.I.error(err)

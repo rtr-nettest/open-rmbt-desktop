@@ -10,7 +10,8 @@ import { HeaderComponent } from "./widgets/header/header.component"
 import { FooterComponent } from "./widgets/footer/footer.component"
 import { StartTestButtonComponent } from "./widgets/start-test-button/start-test-button.component";
 import { GaugeComponent } from './widgets/gauge/gauge.component';
-import { InterimResultsComponent } from './widgets/interim-results/interim-results.component'
+import { InterimResultsComponent } from './widgets/interim-results/interim-results.component';
+import { DlComponent } from './widgets/dl/dl.component'
 
 @NgModule({
     declarations: [
@@ -23,6 +24,7 @@ import { InterimResultsComponent } from './widgets/interim-results/interim-resul
         StartTestButtonComponent,
         GaugeComponent,
         InterimResultsComponent,
+        DlComponent,
     ],
     imports: [BrowserModule, AppRoutingModule],
     providers: [],

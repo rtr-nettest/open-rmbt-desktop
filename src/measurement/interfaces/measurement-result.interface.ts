@@ -33,6 +33,8 @@ export interface IMeasurementThreadResult {
     speedItems: ISpeedItem[]
     pings: IPing[]
     ping_median: number
+    ping_shortest: number
+    client_version?: string
 }
 
 export interface IMeasurementThreadResultList {
@@ -41,9 +43,9 @@ export interface IMeasurementThreadResultList {
 }
 
 export interface IPing {
-    client: number
-    server: number
-    timeNs: number
+    time_ns: number
+    value: number
+    value_server: number
 }
 
 export interface ISpeedItem {

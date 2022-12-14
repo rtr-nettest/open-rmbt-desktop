@@ -1,4 +1,4 @@
-import { SingleThreadResult } from "../../dto/single-thread-result.dto"
+import { MeasurementThreadResultList } from "../../dto/measurement-thread-result-list.dto"
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import { IMeasurementThreadResult } from "../../interfaces/measurement-result.interface"
 import {
@@ -15,7 +15,7 @@ export class DownloadMessageHandler implements IMessageHandler {
     private downloadBytesRead = 0
     private activityInterval?: NodeJS.Timer
     private inactivityTimeout = 0
-    private result = new SingleThreadResult(0)
+    private result = new MeasurementThreadResultList(0)
     private nsec = 0
 
     constructor(
@@ -25,16 +25,15 @@ export class DownloadMessageHandler implements IMessageHandler {
         const maxStoredResults =
             (Number(this.ctx.params.test_duration) * 1e9) /
             DownloadMessageHandler.minDiffTime
-        this.result = new SingleThreadResult(Number(maxStoredResults))
+        this.result = new MeasurementThreadResultList(Number(maxStoredResults))
         this.inactivityTimeout = Number(this.ctx.params.test_duration) * 1000
     }
 
     stopMessaging() {
         clearInterval(this.activityInterval)
         Logger.I.info(`Download is stopped for thread ${this.ctx.index}`)
-        this.ctx.threadResult.down = this.result.getAllResults()
-        this.ctx.threadResult.speedItems = this.result.addSpeedItems(
-            this.ctx.threadResult.speedItems,
+        this.ctx.threadResult.down = this.result
+        this.ctx.threadResult.speedItems = this.result.getSpeedItems(
             "download",
             this.ctx.index
         )

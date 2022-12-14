@@ -9,6 +9,7 @@ import { Time } from "../time.service"
 
 export class PingMessageHandler implements IMessageHandler {
     private serverPings: number[] = []
+    private pingStartTime = Time.nowNs()
     private pingCurrentStartTime = Time.nowNs()
     private pingCurrentEndTime = Time.nowNs()
     private pingCounter = 0
@@ -33,7 +34,8 @@ export class PingMessageHandler implements IMessageHandler {
     }
 
     writeData() {
-        this.pingCurrentStartTime = Time.nowNs()
+        this.pingStartTime = Time.nowNs()
+        this.pingCurrentStartTime = this.pingStartTime
         this.ctx.client.write(ESocketMessage.PING)
         Logger.I.info(
             `Thread ${this.ctx.index} sent ${ESocketMessage.PING.replace(
@@ -50,8 +52,14 @@ export class PingMessageHandler implements IMessageHandler {
                 `Thread ${this.ctx.index} received an error. Terminating.`
             )
             this.pingCurrentEndTime = Time.nowNs()
-            const pingClient = this.setShortestPing()
+            const pingClient = this.getClientPing()
+
             this.serverPings.push(pingClient)
+            this.ctx.threadResult.pings.push({
+                value_server: pingClient,
+                value: pingClient,
+                time_ns: this.getDuration(),
+            })
             this.stopMessaging()
             return
         }
@@ -64,13 +72,18 @@ export class PingMessageHandler implements IMessageHandler {
             return
         }
         if (data.includes(ESocketMessage.TIME)) {
-            this.setShortestPing()
-
             const timeMatches = new RegExp(/TIME ([0-9]+)/).exec(
                 data.toString().trim()
             )
             const pingServer = timeMatches?.[1] ? Number(timeMatches[1]) : -1
             this.serverPings.push(pingServer)
+            if (pingServer > 0) {
+                this.ctx.threadResult.pings.push({
+                    value: this.getClientPing(),
+                    value_server: pingServer,
+                    time_ns: this.getDuration(),
+                })
+            }
         }
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
             if (this.pingCounter < (this.ctx.params.test_numpings ?? 0)) {
@@ -82,11 +95,11 @@ export class PingMessageHandler implements IMessageHandler {
         }
     }
 
-    private setShortestPing() {
-        const pingTime = this.pingCurrentEndTime - this.pingCurrentStartTime
-        if (pingTime < (this.ctx.threadResult.ping_shortest || Infinity)) {
-            this.ctx.threadResult.ping_shortest = pingTime
-        }
-        return pingTime
+    private getClientPing() {
+        return this.pingCurrentEndTime - this.pingCurrentStartTime
+    }
+
+    private getDuration() {
+        return Time.nowNs() - this.pingStartTime
     }
 }

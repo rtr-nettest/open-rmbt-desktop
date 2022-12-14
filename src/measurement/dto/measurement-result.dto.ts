@@ -7,12 +7,7 @@ import {
     IPing,
     ISpeedItem,
 } from "../interfaces/measurement-result.interface"
-
-export interface IOverallResult {
-    bytes: number
-    nsec: number
-    speed: number
-}
+import { IOverallResult } from "../interfaces/overall-result.interface"
 
 export class MeasurementResult implements IMeasurementResult {
     client_name?: string
@@ -41,14 +36,16 @@ export class MeasurementResult implements IMeasurementResult {
     constructor(
         registrationRequest: IMeasurementRegistrationRequest,
         registrationResponse: IMeasurementRegistrationResponse,
-        threadResults: IMeasurementThreadResult[]
+        threadResults: IMeasurementThreadResult[],
+        overallResultDown: IOverallResult,
+        overallResultUp: IOverallResult
     ) {
         this.client_name = registrationRequest.client
-        this.client_version = registrationRequest.client_version // TODO: get version
-        this.client_uuid = registrationResponse.uuid ?? ""
+        this.client_version = threadResults[0].client_version ?? ""
+        this.client_uuid = registrationRequest.uuid ?? ""
         this.operating_system = registrationRequest.operating_system ?? ""
         this.pings = this.getPings(threadResults)
-        this.test_ping_shortest = this.pings[0]?.timeNs
+        this.test_ping_shortest = this.getShortestPing(this.pings)
         this.platform = registrationRequest.platform ?? ""
         this.speed_detail = this.getSpeedDetail(threadResults)
         this.test_num_threads = registrationResponse.test_numthreads
@@ -60,12 +57,6 @@ export class MeasurementResult implements IMeasurementResult {
         this.user_server_selection = registrationRequest.user_server_selection
             ? 1
             : 0
-        const overallResultDown = this.calculateOverallResult(
-            threadResults.map((result) => result.down)
-        )
-        const overallResultUp = this.calculateOverallResult(
-            threadResults.map((result) => result.up)
-        )
         this.test_bytes_download = overallResultDown.bytes
         this.test_nsec_download = overallResultDown.nsec
         this.test_speed_download = overallResultDown.speed
@@ -82,91 +73,30 @@ export class MeasurementResult implements IMeasurementResult {
                         result?.pings?.length > 0 ? result.pings : acc,
                     [] as IPing[]
                 )
-                .sort((a, b) => a.timeNs - b.timeNs) ?? []
+                .sort((a, b) => a.time_ns - b.time_ns) ?? []
         )
+    }
+
+    private getShortestPing(pings: IPing[]) {
+        return pings.reduce((acc, ping) => {
+            return Math.min(acc, ping.value, ping.value_server)
+        }, Infinity)
     }
 
     private getSpeedDetail(threadResults: IMeasurementThreadResult[]) {
-        return (
-            threadResults
-                ?.reduce(
-                    (acc, result) => [...acc, ...result.speedItems],
-                    [] as ISpeedItem[]
-                )
-                .sort((a, b) => {
-                    let shift = 0
-                    if (a.direction === "download") {
-                        shift = -1
-                    } else {
-                        shift = 1
-                    }
-                    shift += a.time - b.time
-                    return shift
-                }) ?? []
-        )
-    }
-
-    private calculateOverallResult(
-        threadResults: IMeasurementThreadResultList[]
-    ): IOverallResult {
-        let overallResult: IOverallResult = {
-            bytes: 0,
-            nsec: 0,
-            speed: 0,
-        }
-        const numThreads = threadResults.length
-
-        let targetTime = Infinity
-        // Looking for minimal duration of all threads
-        for (let i = 0; i < numThreads; i++) {
-            const { nsec } = threadResults[i]
-            if (nsec.length > 0) {
-                if (nsec[nsec.length - 1] < targetTime) {
-                    targetTime = nsec[nsec.length - 1]
-                }
-            }
-        }
-        overallResult.nsec = targetTime
-
-        let totalBytes = 0
-        for (let i = 0; i < numThreads; i++) {
-            const { bytes, nsec } = threadResults[i]
-            if (bytes?.length > 0 && bytes.length === nsec?.length) {
-                let targetIdx = bytes.length
-                // Looking for maximal bytes of the thread
-                for (let j = 0; j < bytes.length; j++) {
-                    if (nsec[j] >= targetTime) {
-                        targetIdx = j
-                        break
-                    }
-                }
-                let calcBytes = 0
-                if (targetIdx === bytes.length) {
-                    // nsec[max] == targetTime
-                    calcBytes = bytes[bytes.length - 1]
+        const speedItemsDown = []
+        const speedItemsUp = []
+        for (const threadResult of threadResults) {
+            for (const speedItem of threadResult.speedItems) {
+                if (speedItem.direction === "download") {
+                    speedItemsDown.push(speedItem)
                 } else {
-                    const bytes1 = targetIdx === 0 ? 0 : bytes[targetIdx - 1]
-                    const bytes2 = bytes[targetIdx]
-                    const bytesDiff = bytes2 - bytes1
-
-                    const nsec1 = targetIdx === 0 ? 0 : nsec[targetIdx - 1]
-                    const nsec2 = nsec[targetIdx]
-                    const nsecDiff = nsec2 - nsec1
-
-                    const nsecCompensation = targetTime - nsec1
-                    const factor = nsecCompensation / nsecDiff
-
-                    let compensation = Math.round(bytesDiff * factor)
-                    if (compensation < 0) {
-                        compensation = 0
-                    }
-                    calcBytes = bytes1 + compensation
+                    speedItemsUp.push(speedItem)
                 }
-                totalBytes += calcBytes
             }
         }
-        overallResult.bytes = totalBytes
-        overallResult.speed = (totalBytes * 8) / (targetTime / 1e9)
-        return overallResult
+        speedItemsDown.sort((a, b) => a.thread - b.thread)
+        speedItemsUp.sort((a, b) => a.thread - b.thread)
+        return [...speedItemsDown, ...speedItemsUp]
     }
 }

@@ -10,6 +10,7 @@ import { Logger } from "./logger.service"
 import { RMBTWorkerFactory } from "./rmbt-worker-factory.service"
 import { Time } from "./time.service"
 import path from "path"
+import { IOverallResult } from "../interfaces/overall-result.interface"
 
 export class RMBTClient {
     measurementLastUpdate?: number
@@ -24,11 +25,11 @@ export class RMBTClient {
     chunks: number[] = []
     timestamps: { index: number; time: number }[] = []
     pingMedian = -1
-    downloadMedian = -1
-    uploadMedian = -1
     measurementStart: number = 0
     isRunning = false
     activityInterval?: NodeJS.Timer
+    overallResultDown?: IOverallResult
+    overallResultUp?: IOverallResult
     private estimatePhaseDuration: { [key: string]: number } = {
         [EMeasurementStatus.INIT]: 0.5,
         [EMeasurementStatus.INIT_DOWN]: 2.5,
@@ -44,6 +45,14 @@ export class RMBTClient {
         [EMeasurementStatus.DOWN]: -1,
         [EMeasurementStatus.INIT_UP]: -1,
         [EMeasurementStatus.UP]: -1,
+    }
+
+    get downloadSpeedTotalMbps() {
+        return (this.overallResultDown?.speed ?? 0) / 1e6
+    }
+
+    get uploadSpeedTotalMbps() {
+        return (this.overallResultUp?.speed ?? 0) / 1e6
     }
 
     constructor(params: IMeasurementRegistrationResponse) {
@@ -90,8 +99,9 @@ export class RMBTClient {
                     !this.isRunning ||
                     Date.now() - this.measurementStart >= 60000
                 ) {
-                    this.uploadMedian =
-                        this.getTotalSpeed(this.threadResults) / 1000000
+                    this.overallResultUp = this.getOverallResult(
+                        this.threadResults
+                    )
                     this.upThreadResults = [...this.threadResults]
                     this.threadResults = []
                     this.interimThreadResults = new Array(
@@ -114,7 +124,7 @@ export class RMBTClient {
                         )}s`
                     )
                     Logger.I.info(
-                        `The total upload speed is ${this.uploadMedian}Mbps`
+                        `The total upload speed is ${this.uploadSpeedTotalMbps}Mbps`
                     )
                     Logger.I.info("Measurement is finished")
                 }
@@ -229,9 +239,9 @@ export class RMBTClient {
                         case "downloadUpdated":
                             this.interimThreadResults[index] =
                                 message.data! as IMeasurementThreadResult
-                            this.downloadMedian =
-                                this.getTotalSpeed(this.interimThreadResults) /
-                                1000000
+                            this.overallResultDown = this.getOverallResult(
+                                this.interimThreadResults
+                            )
                             break
                         case "downloadFinished":
                             this.threadResults.push(
@@ -241,9 +251,9 @@ export class RMBTClient {
                                 this.threadResults.length ===
                                 this.measurementTasks.length
                             ) {
-                                this.downloadMedian =
-                                    this.getTotalSpeed(this.threadResults) /
-                                    1000000
+                                this.overallResultDown = this.getOverallResult(
+                                    this.threadResults
+                                )
                                 this.downThreadResults = [...this.threadResults]
                                 this.threadResults = []
                                 this.interimThreadResults = new Array(
@@ -265,7 +275,7 @@ export class RMBTClient {
                                     )}s`
                                 )
                                 Logger.I.info(
-                                    `The total download speed is ${this.downloadMedian}Mbps`
+                                    `The total download speed is ${this.downloadSpeedTotalMbps}Mbps`
                                 )
                             }
                             break
@@ -329,9 +339,9 @@ export class RMBTClient {
                         case "uploadUpdated":
                             this.interimThreadResults[index] =
                                 message.data! as IMeasurementThreadResult
-                            this.uploadMedian =
-                                this.getTotalSpeed(this.interimThreadResults) /
-                                1000000
+                            this.overallResultUp = this.getOverallResult(
+                                this.interimThreadResults
+                            )
                             break
                         case "uploadFinished":
                             this.threadResults.push(
@@ -371,21 +381,28 @@ export class RMBTClient {
     }
 
     // in bits per nano
-    private getTotalSpeed(threadResults: IMeasurementThreadResult[]) {
-        let sumTrans = 0
-        let maxTime = 0
+    private getOverallResult(
+        threadResults: IMeasurementThreadResult[]
+    ): IOverallResult {
+        let bytes = 0
+        let nsec = 0
 
         for (const task of threadResults) {
             if (!task) {
                 continue
             }
-            if (task.currentTime > maxTime) {
-                maxTime = task.currentTime
+            if (task.currentTime > nsec) {
+                nsec = task.currentTime
             }
-            sumTrans += task.currentTransfer
+            bytes += task.currentTransfer
         }
 
-        const totalSpeed = (sumTrans / Number(maxTime)) * 1e9 * 8.0
-        return maxTime === 0 ? 0 : isNaN(totalSpeed) ? 0 : totalSpeed
+        let speed = (bytes / Number(nsec)) * 1e9 * 8.0
+        speed = nsec === 0 ? 0 : isNaN(speed) ? 0 : speed
+        return {
+            bytes,
+            nsec,
+            speed,
+        }
     }
 }

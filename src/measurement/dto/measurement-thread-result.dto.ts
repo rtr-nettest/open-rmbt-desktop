@@ -19,4 +19,5 @@ export class MeasurementThreadResult implements IMeasurementThreadResult {
     currentTime = 0
     currentTransfer = 0
     ping_median = -1
+    ping_shortest = -1
 }

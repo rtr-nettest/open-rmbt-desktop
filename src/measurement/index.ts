@@ -33,11 +33,12 @@ export async function runMeasurement(options?: MeasurementOptions) {
         )
         rmbtClient = new RMBTClient(measurementRegistration)
         const threadResults = await rmbtClient.scheduleMeasurement()
-        Logger.I.info("Thread results: %o", threadResults)
         const resultsToSubmit = new MeasurementResult(
             registrationRequest,
-            measurementRegistration,
-            threadResults
+            rmbtClient.params!,
+            threadResults,
+            rmbtClient.overallResultDown!,
+            rmbtClient.overallResultUp!
         )
         Logger.I.info("Results to submit: %o", resultsToSubmit)
     } catch (err) {
@@ -60,8 +61,8 @@ export function getCurrentPhaseState(): IMeasurementPhaseState {
         duration: rmbtClient?.getPhaseDuration(phase) ?? -1,
         progress: rmbtClient?.getPhaseProgress(phase) ?? -1,
         ping: rmbtClient?.pingMedian ?? -1,
-        down: rmbtClient?.downloadMedian ?? -1,
-        up: rmbtClient?.uploadMedian ?? -1,
+        down: rmbtClient?.downloadSpeedTotalMbps ?? -1,
+        up: rmbtClient?.uploadSpeedTotalMbps ?? -1,
         phase,
     }
 }

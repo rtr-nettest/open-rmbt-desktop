@@ -4,7 +4,6 @@ import { IGeolocation } from "./geolocation.interface"
 export interface IMeasurementRegistrationRequest {
     capabilities?: { [key: string]: any }
     client: EMeasurementServerType
-    client_version?: string
     language: string
     location?: IGeolocation
     loopmode_info?: {

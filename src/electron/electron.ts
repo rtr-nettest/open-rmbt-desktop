@@ -1,19 +1,29 @@
 import { config } from "dotenv"
-import { app, BrowserWindow, ipcMain } from "electron"
+import { app, BrowserWindow, ipcMain, protocol } from "electron"
 import path from "path"
 import {
-    getCurrentDownload,
-    getCurrentPing,
-    getCurrentUpload,
+    getBasicNetworkInfo,
+    getCurrentPhaseState,
+    getMeasurementResult,
     runMeasurement,
 } from "../measurement"
 import { Events } from "./events"
+import Protocol from "./protocol"
 
 config({
     path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
 })
 
 const createWindow = () => {
+    if (process.env.DEV !== "true") {
+        // Needs to happen before creating/loading the browser window;
+        // protocol is only used in prod
+        protocol.registerBufferProtocol(
+            Protocol.scheme,
+            Protocol.requestHandler
+        )
+    }
+
     const win = new BrowserWindow({
         width: 1200,
         height: 600,
@@ -24,13 +34,26 @@ const createWindow = () => {
     })
 
     if (process.env.DEV === "true") {
-        win.loadURL("http://localhost:5173/")
+        win.loadURL("http://localhost:4200/")
         win.webContents.openDevTools()
     } else {
-        win.loadFile(path.join(__dirname, "index.html"))
-        win.webContents.openDevTools()
+        win.loadURL(`${Protocol.scheme}://index.html`)
     }
 }
+
+// Needs to be called before app is ready;
+// gives our scheme access to load relative files,
+// as well as local storage, cookies, etc.
+// https://electronjs.org/docs/api/protocol#protocolregisterschemesasprivilegedcustomschemes
+protocol.registerSchemesAsPrivileged([
+    {
+        scheme: Protocol.scheme,
+        privileges: {
+            standard: true,
+            secure: true,
+        },
+    },
+])
 
 app.on("window-all-closed", () => {
     if (process.platform !== "darwin") app.quit()
@@ -42,25 +65,26 @@ app.on("activate", () => {
 
 ipcMain.on(Events.RUN_MEASUREMENT, (event) => {
     const webContents = event.sender
-    runMeasurement().then(() => {
-        webContents.send(Events.MEASUREMENT_FINISH, [
-            getCurrentPing(),
-            getCurrentDownload(),
-            getCurrentUpload(),
-        ])
+    runMeasurement().catch((e) => {
+        webContents.send(Events.ERROR, e)
     })
 })
 
-ipcMain.handle(Events.GET_CURRENT_PING, () => {
-    return getCurrentPing()
+ipcMain.handle(Events.GET_BASIC_NETWORK_INFO, () => {
+    return getBasicNetworkInfo()
 })
 
-ipcMain.handle(Events.GET_CURRENT_DOWNLOAD, () => {
-    return getCurrentDownload()
+ipcMain.handle(Events.GET_MEASUREMENT_STATE, () => {
+    return getCurrentPhaseState()
 })
 
-ipcMain.handle(Events.GET_CURRENT_UPLOAD, () => {
-    return getCurrentUpload()
+ipcMain.handle(Events.GET_MEASUREMENT_RESULT, async (event, testUuid) => {
+    const webContents = event.sender
+    try {
+        return await getMeasurementResult(testUuid)
+    } catch (e) {
+        webContents.send(Events.ERROR, e)
+    }
 })
 
 app.whenReady().then(() => createWindow())

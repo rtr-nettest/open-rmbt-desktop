@@ -12,5 +12,5 @@
             "*": ["node_modules/*"]
         }
     },
-    "exclude": ["dist", "src/react-ui", "out", "*.config.js"]
+    "exclude": ["dist", "src/ui", "out", "*.config.js"]
 }

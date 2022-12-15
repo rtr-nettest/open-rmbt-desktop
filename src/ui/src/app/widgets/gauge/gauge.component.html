@@ -1,0 +1,54 @@
+<div *ngIf="visualization$ | async" class="gauge uk-width-1-2@s">
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 500 500"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+    >
+        <path
+            id="init"
+            class="gauge active init"
+            d="m216.4 87.5c12.638-25.427 33.09-46.28 58.22-59.42"
+        ></path>
+        <path
+            id="ping"
+            class="gauge active ping"
+            d="m285.5 22.996c15.803-6.531 33.12-10.135 51.29-10.135 5.249 0 10.428.301 15.521.887"
+        ></path>
+        <path
+            id="download"
+            class="gauge active download"
+            d="m364 15.617c61.16 12.578 107.15 66.72 107.15 131.6 0 15.07-2.48 29.555-7.05 43.08"
+        ></path>
+        <path
+            id="upload"
+            class="gauge active upload"
+            d="m459.93 201.02c-20.747 47.42-68.08 80.55-123.15 80.55-28.353 0-54.655-8.783-76.33-23.776"
+        ></path>
+        <path
+            id="speed"
+            class="gauge speed"
+            d="m299.35 352.53c.001.155.001.311.001.466 0 74.2-60.15 134.35-134.35 134.35-74.2 0-134.35-60.15-134.35-134.35 0-74.2 60.15-134.35 134.35-134.35 26.83 0 51.823 7.864 72.799 21.413"
+        ></path>
+        <text
+            x="343.5"
+            y="161.56"
+            font-size="40"
+            text-anchor="middle"
+            id="percents"
+        ></text>
+        <text
+            x="163.93"
+            y="367.56"
+            text-anchor="middle"
+            font-size="40"
+            id="speedtext"
+        ></text>
+        <text
+            x="163.93"
+            y="392"
+            text-anchor="middle"
+            font-size="14"
+            id="speedunit"
+        ></text>
+    </svg>
+</div>

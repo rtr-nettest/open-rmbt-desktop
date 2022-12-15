@@ -1,12 +1,24 @@
 import axios from "axios"
 import { IMeasurementRegistrationRequest } from "../interfaces/measurement-registration-request.interface"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
+import { IMeasurementResult } from "../interfaces/measurement-result.interface"
 import { IMeasurementServerResponse } from "../interfaces/measurement-server-response.interface"
+import { ISimpleHistoryResult } from "../interfaces/simple-history-result.interface"
 import { IUserSettingsRequest } from "../interfaces/user-settings-request.interface"
 import { IUserSetingsResponse } from "../interfaces/user-settings-response.interface"
 import { Logger } from "./logger.service"
+import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+import tz from "dayjs/plugin/timezone"
+
+dayjs.extend(utc)
+dayjs.extend(tz)
 
 export class ControlServer {
+    static instance = new ControlServer()
+
+    private constructor() {}
+
     private get headers() {
         const headers: { [key: string]: string } = {
             "Content-Type": "application/json",
@@ -84,5 +96,116 @@ export class ControlServer {
             throw new Error(response.error.join(" "))
         }
         throw new Error("Measurement was not registered")
+    }
+
+    async submitMeasurement(result: IMeasurementResult) {
+        Logger.I.info("Submitting result: %o", result)
+        Logger.I.info(`POST: ${process.env.RESULT_SUBMISSION_PATH}`)
+        try {
+            const response = (
+                await axios.post(
+                    `${process.env.CONTROL_SERVER_URL}${process.env.RESULT_SUBMISSION_PATH}`,
+                    result,
+                    { headers: this.headers }
+                )
+            ).data
+            Logger.I.info("Result is submitted. Response: %o", response)
+        } catch (e: any) {
+            this.handleError(e)
+        }
+    }
+
+    async getMeasurementResult(
+        uuid: string
+    ): Promise<ISimpleHistoryResult | undefined> {
+        Logger.I.info("Receiving measurement result by UUID: %s", uuid)
+        let response: any
+        let retVal: ISimpleHistoryResult | undefined = undefined
+        try {
+            if (process.env.HISTORY_RESULT_PATH_METHOD === "GET") {
+                // as used by Specure
+                Logger.I.info(`GET: ${process.env.HISTORY_RESULT_PATH}/${uuid}`)
+                response = (
+                    await axios.get(
+                        `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}/${uuid}`,
+                        { headers: this.headers }
+                    )
+                ).data
+                Logger.I.info("Response is: %o", retVal)
+                if (response) {
+                    retVal = {
+                        measurementDate: response.measurement_date,
+                        measurementServerName: response.measurementServerName,
+                        downloadKbit: response.speed_download,
+                        uploadKbit: response.speed_upload,
+                        ping: response.ping,
+                        providerName: response.operator,
+                        ipAddress: "-", // TODO
+                    }
+                }
+            } else if (process.env.HISTORY_RESULT_PATH_METHOD === "POST") {
+                // as used by RTR
+                Logger.I.info(`POST: ${process.env.HISTORY_RESULT_PATH}`)
+                const timezone = dayjs.tz.guess()
+                response = (
+                    await axios.post(
+                        `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}`,
+                        {
+                            test_uuid: uuid,
+                            timezone,
+                            capabilities: { classification: { count: 4 } },
+                        },
+                        { headers: this.headers }
+                    )
+                ).data
+                Logger.I.info("Response is: %o", response)
+                if (response?.testresult?.length) {
+                    response = response.testresult[0]
+                    let openTestsResponse: any
+                    if (
+                        response.open_test_uuid &&
+                        process.env.HISTORY_RESULT_STATS_PATH
+                    ) {
+                        openTestsResponse = (
+                            await axios.get(
+                                `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_STATS_PATH}/${response.open_test_uuid}`,
+                                { headers: this.headers }
+                            )
+                        ).data
+                    }
+                    Logger.I.info(
+                        "Open test response is: %o",
+                        openTestsResponse
+                    )
+                    retVal = {
+                        measurementDate: dayjs(response.time).toISOString(),
+                        measurementServerName: openTestsResponse?.server_name,
+                        downloadKbit: openTestsResponse?.download_kbit,
+                        uploadKbit: openTestsResponse?.upload_kbit,
+                        ping: openTestsResponse?.ping_ms,
+                        providerName: openTestsResponse?.public_ip_as_name,
+                        ipAddress: openTestsResponse?.ip_anonym,
+                    }
+                }
+            }
+            Logger.I.info("The final result is: %o", retVal)
+        } catch (e: any) {
+            this.handleError(e)
+        }
+        return retVal
+    }
+
+    private handleError(e: any) {
+        if (e.response) {
+            Logger.I.error(e.response)
+            if (e.response.data?.error?.length) {
+                throw new Error(e.response.data.error.json(". "))
+            } else {
+                throw e.response.data
+            }
+        } else {
+            Logger.I.error(e)
+            throw e
+        }
     }
 }

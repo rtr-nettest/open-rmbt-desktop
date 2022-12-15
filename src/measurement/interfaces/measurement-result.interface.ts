@@ -1,27 +1,40 @@
 export interface IMeasurementResult {
+    client_uuid: string
+    client_name?: string
     client_version?: string
-    encryption: string
-    ip_local?: string
-    ip_server?: string
-    jitterMeanNanos?: number
-    num_threads?: number
-    packetLossPercent?: number
-    ping_median?: number
-    ping_shortest?: number
+    model?: string
+    network_type: number
+    operating_system: string
     pings: IPing[]
-    port_remote?: number
-    speedItems: ISpeedItem[]
-    voipTestResult?: IVoipTestResult
+    platform: string
+    speed_detail: ISpeedItem[]
+    test_bytes_download: number
+    test_bytes_upload: number
+    test_nsec_download: number
+    test_nsec_upload: number
+    test_num_threads: number
+    test_ping_shortest: number
+    test_speed_download: number
+    test_speed_upload: number
+    test_token: string
+    test_uuid: string
+    time: number
+    timezone: string
+    type: string
+    user_server_selection: number
 }
 
-export interface IMeasurementThreadResult extends IMeasurementResult {
+export interface IMeasurementThreadResult {
     down: IMeasurementThreadResultList
     up: IMeasurementThreadResultList
-    totalDownBytes: number
-    totalUpBytes: number
     chunkSize?: number
     currentTime: number
     currentTransfer: number
+    speedItems: ISpeedItem[]
+    pings: IPing[]
+    ping_median: number
+    ping_shortest: number
+    client_version?: string
 }
 
 export interface IMeasurementThreadResultList {
@@ -30,13 +43,13 @@ export interface IMeasurementThreadResultList {
 }
 
 export interface IPing {
-    client: number
-    server: number
-    timeNs: number
+    time_ns: number
+    value: number
+    value_server: number
 }
 
 export interface ISpeedItem {
-    upload: boolean
+    direction: "download" | "upload"
     thread: number
     time: number
     bytes: number

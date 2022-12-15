@@ -1,4 +1,4 @@
-import { SingleThreadResult } from "../../dto/single-thread-result.dto"
+import { MeasurementThreadResultList } from "../../dto/measurement-thread-result-list.dto"
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import { IMeasurementThreadResult } from "../../interfaces/measurement-result.interface"
 import {
@@ -14,7 +14,7 @@ export class UploadMessageHandler implements IMessageHandler {
     static waitForAllChunksTimeMs = 3000
     static clientTimeOffsetNs = 1e9
     private uploadEndTimeNs = 0
-    private result = new SingleThreadResult(0)
+    private result = new MeasurementThreadResultList(0)
     private activityInterval?: NodeJS.Timer
     private inactivityTimeoutMs = 1000
     private finalTimeout?: NodeJS.Timeout
@@ -28,7 +28,7 @@ export class UploadMessageHandler implements IMessageHandler {
         let maxStoredResults =
             (Number(this.ctx.params.test_duration) * 1e9) /
             DownloadMessageHandler.minDiffTime
-        this.result = new SingleThreadResult(Number(maxStoredResults))
+        this.result = new MeasurementThreadResultList(Number(maxStoredResults))
         maxStoredResults = 3
         while (maxStoredResults > 0) {
             this.buffers.push(randomBytes(this.ctx.chunkSize))
@@ -39,10 +39,9 @@ export class UploadMessageHandler implements IMessageHandler {
     stopMessaging(): void {
         clearInterval(this.activityInterval)
         Logger.I.info(`Upload is finished for thread ${this.ctx.index}`)
-        this.ctx.threadResult.up = this.result.getAllResults()
-        this.ctx.threadResult.speedItems = this.result.addSpeedItems(
-            this.ctx.threadResult.speedItems,
-            true,
+        this.ctx.threadResult.up = this.result
+        this.ctx.threadResult.speedItems = this.result.getSpeedItems(
+            "upload",
             this.ctx.index
         )
         this.onFinish?.(this.ctx.threadResult)
@@ -76,6 +75,11 @@ export class UploadMessageHandler implements IMessageHandler {
                     this.result.addResult(bytes, nanos)
                     this.ctx.currentTime = nanos
                     this.ctx.currentTransfer = bytes
+                    this.ctx.interimHandler?.({
+                        ...this.ctx.threadResult,
+                        currentTime: this.ctx.currentTime,
+                        currentTransfer: this.ctx.currentTransfer,
+                    })
                 }
                 if (
                     nanos >=

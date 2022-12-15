@@ -1,5 +1,9 @@
 import { MeasurementRegistrationRequest } from "./dto/measurement-registration-request.dto"
+import { MeasurementResult } from "./dto/measurement-result.dto"
 import { UserSettingsRequest } from "./dto/user-settings-request.dto"
+import { EMeasurementStatus } from "./enums/measurement-status.enum"
+import { IBasicNetworkInfo } from "./interfaces/basic-network-info.interface"
+import { IMeasurementPhaseState } from "./interfaces/measurement-phase-state.interface"
 import { ControlServer } from "./services/control-server.service"
 import { Logger } from "./services/logger.service"
 import { RMBTClient } from "./services/rmbt-client.service"
@@ -13,35 +17,56 @@ export interface MeasurementOptions {
 export async function runMeasurement(options?: MeasurementOptions) {
     rmbtClient = undefined
 
-    const controlServer = new ControlServer()
+    const controlServer = ControlServer.instance
     const settingsRequest = new UserSettingsRequest(options?.platform)
-    try {
-        const measurementServer =
-            await controlServer.getMeasurementServerFromApi(settingsRequest)
-        const settings = await controlServer.getUserSettings(settingsRequest)
-        const registrationRequest = new MeasurementRegistrationRequest(
-            settings.uuid,
-            measurementServer?.id,
-            settingsRequest
-        )
-        let measurementRegistration = await controlServer.registerMeasurement(
-            registrationRequest
-        )
-        rmbtClient = new RMBTClient(measurementRegistration)
-        await rmbtClient.scheduleMeasurement()
-    } catch (err) {
-        Logger.I.error(err)
+    const measurementServer = await controlServer.getMeasurementServerFromApi(
+        settingsRequest
+    )
+    const settings = await controlServer.getUserSettings(settingsRequest)
+    const registrationRequest = new MeasurementRegistrationRequest(
+        settings.uuid,
+        measurementServer?.id,
+        settingsRequest
+    )
+    let measurementRegistration = await controlServer.registerMeasurement(
+        registrationRequest
+    )
+    rmbtClient = new RMBTClient(measurementRegistration)
+    const threadResults = await rmbtClient.scheduleMeasurement()
+    rmbtClient.measurementStatus = EMeasurementStatus.SUBMITTING_RESULTS
+    const resultToSubmit = new MeasurementResult(
+        registrationRequest,
+        rmbtClient.params!,
+        threadResults,
+        rmbtClient.overallResultDown!,
+        rmbtClient.overallResultUp!
+    )
+    await controlServer.submitMeasurement(resultToSubmit)
+    rmbtClient.measurementStatus = EMeasurementStatus.END
+}
+
+export function getBasicNetworkInfo(): IBasicNetworkInfo {
+    return {
+        ipAddress: rmbtClient?.params.client_remote_ip ?? "-",
+        serverName: rmbtClient?.params.test_server_name ?? "-",
+        providerName: rmbtClient?.params.provider ?? "-",
     }
 }
 
-export function getCurrentPing() {
-    return rmbtClient?.pingMedian ?? -1
+export function getCurrentPhaseState(): IMeasurementPhaseState {
+    const phase =
+        rmbtClient?.measurementStatus ?? EMeasurementStatus.NOT_STARTED
+    return {
+        duration: rmbtClient?.getPhaseDuration(phase) ?? -1,
+        progress: rmbtClient?.getPhaseProgress(phase) ?? -1,
+        ping: rmbtClient?.pingMedian ?? -1,
+        down: rmbtClient?.downloadSpeedTotalMbps ?? -1,
+        up: rmbtClient?.uploadSpeedTotalMbps ?? -1,
+        phase,
+        testUuid: rmbtClient?.params?.test_uuid ?? "",
+    }
 }
 
-export function getCurrentDownload() {
-    return rmbtClient?.downloadMedian ?? -1
-}
-
-export function getCurrentUpload() {
-    return rmbtClient?.uploadMedian ?? -1
+export async function getMeasurementResult(testUuid: string) {
+    return await ControlServer.instance.getMeasurementResult(testUuid)
 }

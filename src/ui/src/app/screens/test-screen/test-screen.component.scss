@@ -1,0 +1,22 @@
+@import "../../../assets/styles/core.scss";
+
+.app-main {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    margin-left: 10%;
+    padding: rem(90);
+    height: 100%;
+
+    & > * {
+        flex: 0 0 45%;
+    }
+
+    & > app-spacer {
+        flex: 0 0 10%;
+    }
+
+    @include screen-small {
+        padding: rem(40);
+    }
+}

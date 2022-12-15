@@ -4,6 +4,14 @@ const path = require("path")
 module.exports = {
     packagerConfig: {
         icon: path.join(process.env.CONFIG_FOLDER, "app-icon", "icon"),
+        ignore: [
+            "src/",
+            "log/",
+            "node_modules",
+            ".prettierrc",
+            ".config.js",
+            ".example",
+        ],
     },
     rebuildConfig: {},
     makers: [

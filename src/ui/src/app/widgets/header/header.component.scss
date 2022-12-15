@@ -1,0 +1,12 @@
+@import "../../../assets/styles/core.scss";
+
+.app-header {
+    height: rem(108);
+    padding: rem(30);
+
+    img {
+        height: auto;
+        max-height: 100%;
+        width: auto;
+    }
+}

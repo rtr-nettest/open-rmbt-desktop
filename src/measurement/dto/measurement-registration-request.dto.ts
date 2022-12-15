@@ -26,7 +26,6 @@ export class MeasurementRegistrationRequest
         if (settingsRequest) {
             Object.assign(this, {
                 capabilities: settingsRequest.capabilities,
-                client_version: settingsRequest.client_version,
                 client: settingsRequest.name,
                 language: settingsRequest.language,
                 operating_system: settingsRequest.operating_system,

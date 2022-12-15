@@ -1,0 +1,17 @@
+<div class="app-wrapper">
+    <ng-container *ngIf="visualization$ | async">
+        <app-dl
+            [items]="{ Ping: ping, Download: download, Upload: upload }"
+            style="margin-bottom: 32px"
+        ></app-dl>
+    </ng-container>
+    <ng-container *ngIf="basicNetworkInfo$ | async">
+        <app-dl
+            [items]="{
+                'Server name': serverName,
+                'IP Address': ipAddress,
+                Provider: providerName
+            }"
+        ></app-dl>
+    </ng-container>
+</div>

@@ -1,5 +1,5 @@
 import { config } from "dotenv"
-import { app, BrowserWindow, ipcMain } from "electron"
+import { app, BrowserWindow, ipcMain, protocol } from "electron"
 import path from "path"
 import {
     getBasicNetworkInfo,
@@ -8,12 +8,22 @@ import {
     runMeasurement,
 } from "../measurement"
 import { Events } from "./events"
+import Protocol from "./protocol"
 
 config({
     path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
 })
 
 const createWindow = () => {
+    if (process.env.DEV !== "true") {
+        // Needs to happen before creating/loading the browser window;
+        // protocol is only used in prod
+        protocol.registerBufferProtocol(
+            Protocol.scheme,
+            Protocol.requestHandler
+        )
+    }
+
     const win = new BrowserWindow({
         width: 1200,
         height: 600,
@@ -27,10 +37,23 @@ const createWindow = () => {
         win.loadURL("http://localhost:4200/")
         win.webContents.openDevTools()
     } else {
-        win.loadFile(path.join(__dirname, "index.html"))
-        win.webContents.openDevTools()
+        win.loadURL(`${Protocol.scheme}://index.html`)
     }
 }
+
+// Needs to be called before app is ready;
+// gives our scheme access to load relative files,
+// as well as local storage, cookies, etc.
+// https://electronjs.org/docs/api/protocol#protocolregisterschemesasprivilegedcustomschemes
+protocol.registerSchemesAsPrivileged([
+    {
+        scheme: Protocol.scheme,
+        privileges: {
+            standard: true,
+            secure: true,
+        },
+    },
+])
 
 app.on("window-all-closed", () => {
     if (process.platform !== "darwin") app.quit()

@@ -7,7 +7,6 @@ import { IMeasurementPhaseState } from "./interfaces/measurement-phase-state.int
 import { ControlServer } from "./services/control-server.service"
 import { Logger } from "./services/logger.service"
 import { RMBTClient } from "./services/rmbt-client.service"
-import fs from "fs"
 
 let rmbtClient: RMBTClient | undefined
 
@@ -42,7 +41,6 @@ export async function runMeasurement(options?: MeasurementOptions) {
             rmbtClient.overallResultDown!,
             rmbtClient.overallResultUp!
         )
-        fs.writeFileSync("resultToSubmit.json", JSON.stringify(resultToSubmit))
         await controlServer.submitMeasurement(resultToSubmit)
         rmbtClient.measurementStatus = EMeasurementStatus.END
     } catch (err) {

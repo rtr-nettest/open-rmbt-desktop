@@ -1,6 +1,6 @@
 @import "../../../assets/styles/core.scss";
 
-$container-width: 60%;
+$container-width: 80%;
 
 app-header {
     top: 0;
@@ -31,6 +31,10 @@ app-footer {
 
     & > * {
         flex: 0 0 50%;
+    }
+
+    & > app-spacer {
+        flex: 0 0 5%;
     }
 }
 

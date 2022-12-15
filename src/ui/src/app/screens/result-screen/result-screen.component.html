@@ -11,10 +11,11 @@
                 Provider: result.providerName
             }"
         ></app-dl>
+        <app-spacer></app-spacer>
         <app-dl
             [items]="{
-                Download: getSpeedInMbps(result.speedDownload),
-                Upload: getSpeedInMbps(result.speedUpload),
+                Download: getSpeedInMbps(result.downloadKbit),
+                Upload: getSpeedInMbps(result.uploadKbit),
                 Ping: getPingInMs(result.ping)
             }"
         ></app-dl>

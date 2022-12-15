@@ -55,13 +55,13 @@ The variables used are:
     -   `SETTINGS_PATH` - a control server endpoint starting with `/`, which is used to receive a measurement's settings including a unique id of the client.
     -   `MESUREMENT_REGISTRATION_PATH` - a control server endpoint starting with `/`, which is used to register a measurement on the control server.
     -   `RESULT_SUBMISSION_PATH` - a control server endpoint starting with `/`, which is used to submit results of a measurement to the control server.
-    -   `RESULT_HISTORY_PATH` - a control server endpoint starting with `/`, from which we can receive a measurement result by its `test_uuid`.
-    -   `RESULT_HISTORY_PATH_METHOD` - an HTTP method used to receive the result from the `RESULT_HISTORY_PATH` endpoint, either `GET` or `POST`.
+    -   `HISTORY_RESULT_PATH` - a control server endpoint starting with `/`, from which we can receive a saved measurement result by its `test_uuid`.
+    -   `HISTORY_RESULT_PATH_METHOD` - an HTTP method used to receive the result from the `HISTORY_RESULT_PATH` endpoint, either `GET` (when using the app with Specure servers) or `POST` (when using the app with RTR servers).
+    -   `HISTORY_RESULT_STATS_PATH` - a control server endpoint starting with `/`, from which we can receive a measurement result by its `open_test_uuid`. Required when using the app with RTR servers, otherwise optional.
     -   `CONFIG_FOLDER` - a path to a folder that contains flavor specific files, such as icons and styles.
 -   Optional:
-    -   `X_NETTEST_CLIENT` - an identificator sent to the control server in an `X-Nettest-Client` HTTP header and used by some control server implementations to internally differentiate one client from another.
+    -   `X_NETTEST_CLIENT` - an identificator sent to the control server in an `X-Nettest-Client` HTTP header and used by Specure control servers to internally differentiate between the app's flavors.
     -   `MEASUREMENT_SERVERS_PATH` - a control server endpoint starting with `/` which returns a list of measurement servers from which the client will try to pick one to run a measurement against.
-    -   `RESULT_OPEN_TESTS_PATH` - a control server endpoint starting with `/`, from which we can receive a measurement result by its `open_test_uuid`.
     -   `LOG_TO_CONSOLE` - if set to `true` will output the client's logs to the stdout and stderr.
     -   `LOG_TO_FILE` - if set to `true` will output the client's logs to a file in the `log` folder in the root of the project.
     -   `LOG_WORKERS` - if set to `true` will output the client's worker's logs to files in the `log` folder in the root of the project. If set to another value or ommitted, only the main thread's output will be logged.

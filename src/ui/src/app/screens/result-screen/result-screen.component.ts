@@ -16,7 +16,7 @@ export class ResultScreenComponent {
     constructor(private store: TestStore, private route: ActivatedRoute) {}
 
     getSpeedInMbps(speed: number) {
-        return getSignificantDigits(speed / 1e6) + " Mbps"
+        return getSignificantDigits(speed / 1e3) + " Mbps"
     }
 
     getPingInMs(ping: number) {

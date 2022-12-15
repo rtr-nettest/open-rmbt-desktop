@@ -59,10 +59,10 @@ export class MeasurementResult implements IMeasurementResult {
             : 0
         this.test_bytes_download = overallResultDown.bytes
         this.test_nsec_download = overallResultDown.nsec
-        this.test_speed_download = overallResultDown.speed
+        this.test_speed_download = overallResultDown.speed / 1e3
         this.test_bytes_upload = overallResultUp.bytes
         this.test_nsec_upload = overallResultUp.nsec
-        this.test_speed_upload = overallResultUp.speed
+        this.test_speed_upload = overallResultUp.speed / 1e3
     }
 
     private getPings(threadResults: IMeasurementThreadResult[]) {

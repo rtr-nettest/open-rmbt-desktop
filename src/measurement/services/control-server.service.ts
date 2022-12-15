@@ -126,58 +126,73 @@ export class ControlServer {
         let response: any
         let retVal: ISimpleHistoryResult | undefined = undefined
         try {
-            if (process.env.RESULT_HISTORY_PATH_METHOD === "GET") {
-                Logger.I.info(`GET: ${process.env.RESULT_HISTORY_PATH}/${uuid}`)
+            if (process.env.HISTORY_RESULT_PATH_METHOD === "GET") {
+                // as used by Specure
+                Logger.I.info(`GET: ${process.env.HISTORY_RESULT_PATH}/${uuid}`)
                 response = (
                     await axios.get(
-                        `${process.env.CONTROL_SERVER_URL}${process.env.RESULT_HISTORY_PATH}/${uuid}`,
+                        `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}/${uuid}`,
                         { headers: this.headers }
                     )
                 ).data
+                Logger.I.info("Response is: %o", retVal)
                 if (response) {
                     retVal = {
                         measurementDate: response.measurement_date,
                         measurementServerName: response.measurementServerName,
-                        speedDownload: response.speed_download,
-                        speedUpload: response.speed_upload,
+                        downloadKbit: response.speed_download,
+                        uploadKbit: response.speed_upload,
                         ping: response.ping,
                         providerName: response.operator,
                         ipAddress: "-", // TODO
                     }
                 }
-            } else if (process.env.RESULT_HISTORY_PATH_METHOD === "POST") {
-                Logger.I.info(`POST: ${process.env.RESULT_HISTORY_PATH}`)
+            } else if (process.env.HISTORY_RESULT_PATH_METHOD === "POST") {
+                // as used by RTR
+                Logger.I.info(`POST: ${process.env.HISTORY_RESULT_PATH}`)
                 const timezone = dayjs.tz.guess()
-                response = await axios.post(
-                    `${process.env.CONTROL_SERVER_URL}${process.env.RESULT_HISTORY_PATH}`,
-                    {
-                        test_uuid: uuid,
-                        timezone,
-                        capabilities: { classification: { count: 4 } },
-                    },
-                    { headers: this.headers }
-                )
+                response = (
+                    await axios.post(
+                        `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}`,
+                        {
+                            test_uuid: uuid,
+                            timezone,
+                            capabilities: { classification: { count: 4 } },
+                        },
+                        { headers: this.headers }
+                    )
+                ).data
+                Logger.I.info("Response is: %o", response)
                 if (response?.testresult?.length) {
                     response = response.testresult[0]
                     let openTestsResponse: any
-                    if (response.open_test_uuid) {
-                        openTestsResponse = await axios.get(
-                            `${process.env.CONTROL_SERVER_URL}${process.env.RESULT_OPEN_TESTS_PATH}/${response.open_test_uuid}`,
-                            { headers: this.headers }
-                        )
+                    if (
+                        response.open_test_uuid &&
+                        process.env.HISTORY_RESULT_STATS_PATH
+                    ) {
+                        openTestsResponse = (
+                            await axios.get(
+                                `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_STATS_PATH}/${response.open_test_uuid}`,
+                                { headers: this.headers }
+                            )
+                        ).data
                     }
+                    Logger.I.info(
+                        "Open test response is: %o",
+                        openTestsResponse
+                    )
                     retVal = {
                         measurementDate: dayjs(response.time).toISOString(),
                         measurementServerName: openTestsResponse?.server_name,
-                        speedDownload: openTestsResponse?.download_kbit * 1e3,
-                        speedUpload: openTestsResponse?.upload_kbit * 1e3,
+                        downloadKbit: openTestsResponse?.download_kbit,
+                        uploadKbit: openTestsResponse?.upload_kbit,
                         ping: openTestsResponse?.ping_ms,
                         providerName: openTestsResponse?.public_ip_as_name,
                         ipAddress: openTestsResponse?.ip_anonym,
                     }
                 }
             }
-            Logger.I.info("Result is received: %o", retVal)
+            Logger.I.info("The final result is: %o", retVal)
         } catch (e: any) {
             if (e.response) {
                 Logger.I.error(e.response)

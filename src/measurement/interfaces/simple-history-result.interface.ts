@@ -1,8 +1,8 @@
 export interface ISimpleHistoryResult {
     measurementDate: string
     measurementServerName: string
-    speedUpload: number
-    speedDownload: number
+    uploadKbit: number
+    downloadKbit: number
     ping: number
     providerName: string
     ipAddress: string

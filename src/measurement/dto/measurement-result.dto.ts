@@ -79,7 +79,11 @@ export class MeasurementResult implements IMeasurementResult {
 
     private getShortestPing(pings: IPing[]) {
         return pings.reduce((acc, ping) => {
-            return Math.min(acc, ping.value, ping.value_server)
+            return Math.min(
+                acc,
+                ping.value > 0 ? ping.value : acc,
+                ping.value_server > 0 ? ping.value_server : acc
+            )
         }, Infinity)
     }
 

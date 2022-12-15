@@ -111,11 +111,7 @@ export class ControlServer {
             ).data
             Logger.I.info("Result is submitted. Response: %o", response)
         } catch (e: any) {
-            if (e.response) {
-                Logger.I.error(e.response)
-            } else {
-                Logger.I.error(e)
-            }
+            this.handleError(e)
         }
     }
 
@@ -194,12 +190,22 @@ export class ControlServer {
             }
             Logger.I.info("The final result is: %o", retVal)
         } catch (e: any) {
-            if (e.response) {
-                Logger.I.error(e.response)
-            } else {
-                Logger.I.error(e)
-            }
+            this.handleError(e)
         }
         return retVal
+    }
+
+    private handleError(e: any) {
+        if (e.response) {
+            Logger.I.error(e.response)
+            if (e.response.data?.error?.length) {
+                throw new Error(e.response.data.error.json(". "))
+            } else {
+                throw e.response.data
+            }
+        } else {
+            Logger.I.error(e)
+            throw e
+        }
     }
 }

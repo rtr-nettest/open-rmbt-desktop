@@ -12,6 +12,7 @@ export class ResultScreenComponent {
     result$ = this.store.getMeasurementResult(
         this.route.snapshot.paramMap.get("testUuid")
     )
+    error$ = this.store.error$
 
     constructor(private store: TestStore, private route: ActivatedRoute) {}
 

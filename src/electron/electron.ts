@@ -63,8 +63,11 @@ app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
-ipcMain.on(Events.RUN_MEASUREMENT, () => {
-    runMeasurement()
+ipcMain.on(Events.RUN_MEASUREMENT, (event) => {
+    const webContents = event.sender
+    runMeasurement().catch((e) => {
+        webContents.send(Events.ERROR, e)
+    })
 })
 
 ipcMain.handle(Events.GET_BASIC_NETWORK_INFO, () => {
@@ -75,8 +78,13 @@ ipcMain.handle(Events.GET_MEASUREMENT_STATE, () => {
     return getCurrentPhaseState()
 })
 
-ipcMain.handle(Events.GET_MEASUREMENT_RESULT, (event, testUuid) => {
-    return getMeasurementResult(testUuid)
+ipcMain.handle(Events.GET_MEASUREMENT_RESULT, async (event, testUuid) => {
+    const webContents = event.sender
+    try {
+        return await getMeasurementResult(testUuid)
+    } catch (e) {
+        webContents.send(Events.ERROR, e)
+    }
 })
 
 app.whenReady().then(() => createWindow())

@@ -12,11 +12,9 @@ import {
 import { TestVisualizationState } from "../dto/test-visualization-state.dto"
 import { ITestVisualizationState } from "../interfaces/test-visualization-state.interface"
 import { IMeasurementPhaseState } from "../../../../measurement/interfaces/measurement-phase-state.interface"
-import { EMeasurementStatus } from "../../../../measurement/enums/measurement-status.enum"
 import { IBasicNetworkInfo } from "../../../../measurement/interfaces/basic-network-info.interface"
 import { BasicNetworkInfo } from "../dto/basic-network-info.dto"
 import { ISimpleHistoryResult } from "../../../../measurement/interfaces/simple-history-result.interface"
-import { Router } from "@angular/router"
 
 declare global {
     interface Window {
@@ -27,6 +25,7 @@ declare global {
             getMeasurementResult: (
                 testUuid: string
             ) => Promise<ISimpleHistoryResult>
+            onError: (callback: (error: Error) => any) => Promise<any>
         }
     }
 }
@@ -45,12 +44,17 @@ export class TestStore {
     simpleHistoryResult$ = new BehaviorSubject<ISimpleHistoryResult | null>(
         null
     )
+    error$ = new BehaviorSubject<Error | null>(null)
 
     launchTest() {
         this.basicNetworkInfo$.next(new BasicNetworkInfo())
         this.visualization$.next(new TestVisualizationState())
         this.simpleHistoryResult$.next(null)
+        this.error$.next(null)
         window.electronAPI.runMeasurement()
+        window.electronAPI.onError((error) => {
+            this.error$.next(error)
+        })
         return interval(STATE_UPDATE_TIMEOUT).pipe(
             concatMap(() =>
                 from(window.electronAPI.getBasicNetworkInfo()).pipe(
@@ -76,6 +80,9 @@ export class TestStore {
         if (!testUuid) {
             return of(null)
         }
+        window.electronAPI.onError((error) => {
+            this.error$.next(error)
+        })
         return from(window.electronAPI.getMeasurementResult(testUuid)).pipe(
             map((result) => {
                 this.simpleHistoryResult$.next(result)
@@ -84,5 +91,5 @@ export class TestStore {
         )
     }
 
-    constructor(private router: Router) {}
+    constructor() {}
 }

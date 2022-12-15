@@ -1,5 +1,5 @@
 <app-header></app-header>
-<main *ngIf="result$ | async as result" class="app-main">
+<main *ngIf="result$ | async as result; else noResult" class="app-main">
     <header class="app-title">
         Measurement result from {{ result.measurementDate | date }}
     </header>
@@ -25,3 +25,12 @@
     </footer>
 </main>
 <app-footer></app-footer>
+
+<ng-template #noResult>
+    <main *ngIf="error$ | async as error" class="app-main">
+        There was an error while processing the result. {{ error.message }}
+    </main>
+    <main *ngIf="(error$ | async) === null" class="app-main">
+        Fetching the result...
+    </main>
+</ng-template>

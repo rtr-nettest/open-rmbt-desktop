@@ -19,33 +19,30 @@ export async function runMeasurement(options?: MeasurementOptions) {
 
     const controlServer = ControlServer.instance
     const settingsRequest = new UserSettingsRequest(options?.platform)
-    try {
-        const measurementServer =
-            await controlServer.getMeasurementServerFromApi(settingsRequest)
-        const settings = await controlServer.getUserSettings(settingsRequest)
-        const registrationRequest = new MeasurementRegistrationRequest(
-            settings.uuid,
-            measurementServer?.id,
-            settingsRequest
-        )
-        let measurementRegistration = await controlServer.registerMeasurement(
-            registrationRequest
-        )
-        rmbtClient = new RMBTClient(measurementRegistration)
-        const threadResults = await rmbtClient.scheduleMeasurement()
-        rmbtClient.measurementStatus = EMeasurementStatus.SUBMITTING_RESULTS
-        const resultToSubmit = new MeasurementResult(
-            registrationRequest,
-            rmbtClient.params!,
-            threadResults,
-            rmbtClient.overallResultDown!,
-            rmbtClient.overallResultUp!
-        )
-        await controlServer.submitMeasurement(resultToSubmit)
-        rmbtClient.measurementStatus = EMeasurementStatus.END
-    } catch (err) {
-        Logger.I.error(err)
-    }
+    const measurementServer = await controlServer.getMeasurementServerFromApi(
+        settingsRequest
+    )
+    const settings = await controlServer.getUserSettings(settingsRequest)
+    const registrationRequest = new MeasurementRegistrationRequest(
+        settings.uuid,
+        measurementServer?.id,
+        settingsRequest
+    )
+    let measurementRegistration = await controlServer.registerMeasurement(
+        registrationRequest
+    )
+    rmbtClient = new RMBTClient(measurementRegistration)
+    const threadResults = await rmbtClient.scheduleMeasurement()
+    rmbtClient.measurementStatus = EMeasurementStatus.SUBMITTING_RESULTS
+    const resultToSubmit = new MeasurementResult(
+        registrationRequest,
+        rmbtClient.params!,
+        threadResults,
+        rmbtClient.overallResultDown!,
+        rmbtClient.overallResultUp!
+    )
+    await controlServer.submitMeasurement(resultToSubmit)
+    rmbtClient.measurementStatus = EMeasurementStatus.END
 }
 
 export function getBasicNetworkInfo(): IBasicNetworkInfo {

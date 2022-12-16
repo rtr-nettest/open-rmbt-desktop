@@ -53,13 +53,14 @@ export class PingMessageHandler implements IMessageHandler {
             )
             this.pingCurrentEndTime = Time.nowNs()
             const pingClient = this.getClientPing()
-
-            this.serverPings.push(pingClient)
-            this.ctx.threadResult.pings.push({
-                value_server: pingClient,
-                value: pingClient,
-                time_ns: this.getDuration(),
-            })
+            if (pingClient > 0) {
+                this.serverPings.push(pingClient)
+                this.ctx.threadResult.pings.push({
+                    value_server: pingClient,
+                    value: pingClient,
+                    time_ns: this.getDuration(),
+                })
+            }
             this.stopMessaging()
             return
         }
@@ -72,14 +73,13 @@ export class PingMessageHandler implements IMessageHandler {
             return
         }
         if (data.includes(ESocketMessage.TIME)) {
-            const timeMatches = new RegExp(/TIME ([0-9]+)/).exec(
-                data.toString().trim()
-            )
+            const timeMatches = data.toString().split(" ")
             const pingServer = timeMatches?.[1] ? Number(timeMatches[1]) : -1
-            this.serverPings.push(pingServer)
-            if (pingServer > 0) {
+            const pingClient = this.getClientPing()
+            if (pingServer > 0 && pingClient > 0) {
+                this.serverPings.push(pingServer)
                 this.ctx.threadResult.pings.push({
-                    value: this.getClientPing(),
+                    value: pingClient,
                     value_server: pingServer,
                     time_ns: this.getDuration(),
                 })

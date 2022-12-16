@@ -34,7 +34,7 @@ app-footer {
     }
 
     & > app-spacer {
-        flex: 0 0 5%;
+        flex: 0 0 10%;
     }
 }
 
@@ -51,5 +51,11 @@ app-footer {
     display: block;
     margin-top: rem(40);
     padding: rem(14) rem(12);
+    text-decoration: none !important;
+}
+
+.app-link {
+    color: $color-primary;
+    font-weight: bold;
     text-decoration: none !important;
 }

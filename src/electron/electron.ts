@@ -1,5 +1,5 @@
 import { config } from "dotenv"
-import { app, BrowserWindow, ipcMain, protocol } from "electron"
+import { app, BrowserWindow, ipcMain, protocol, shell } from "electron"
 import path from "path"
 import {
     getBasicNetworkInfo,
@@ -31,6 +31,16 @@ const createWindow = () => {
             preload: path.join(__dirname, "preload.js"),
             nodeIntegration: true,
         },
+    })
+
+    win.webContents.setWindowOpenHandler(({ url }) => {
+        if (
+            process.env.FULL_HISTORY_RESUlT_URL &&
+            url.startsWith(process.env.FULL_HISTORY_RESUlT_URL)
+        ) {
+            shell.openExternal(url)
+        }
+        return { action: "deny" }
     })
 
     if (process.env.DEV === "true") {

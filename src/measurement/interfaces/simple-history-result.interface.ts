@@ -7,4 +7,7 @@ export interface ISimpleHistoryResult {
     providerName: string
     ipAddress: string
     fullResultLink: string
+    downloadClass?: number
+    uploadClass?: number
+    pingClass?: number
 }

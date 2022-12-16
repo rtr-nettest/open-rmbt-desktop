@@ -188,6 +188,13 @@ export class ControlServer {
                         providerName: openTestsResponse?.public_ip_as_name,
                         ipAddress: openTestsResponse?.ip_anonym,
                         fullResultLink,
+                        downloadClass:
+                            response.measurement_result
+                                ?.download_classification,
+                        uploadClass:
+                            response.measurement_result?.upload_classification,
+                        pingClass:
+                            response.measurement_result?.ping_classification,
                     }
                 }
             }

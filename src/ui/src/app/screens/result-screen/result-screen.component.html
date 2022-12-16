@@ -19,6 +19,19 @@
                     Upload: getSpeedInMbps(result.uploadKbit),
                     Ping: getPingInMs(result.ping)
                 }"
+                [icons]="
+                    result.downloadClass &&
+                    result.uploadClass &&
+                    result.pingClass
+                        ? {
+                              Download: getIconStyleByClass(
+                                  result.downloadClass
+                              ),
+                              Upload: getIconStyleByClass(result.uploadClass),
+                              Ping: getIconStyleByClass(result.pingClass)
+                          }
+                        : undefined
+                "
             ></app-dl>
             <div style="margin-top: 30px">
                 <a

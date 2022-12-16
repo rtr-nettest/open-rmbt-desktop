@@ -16,6 +16,21 @@ export class ResultScreenComponent {
 
     constructor(private store: TestStore, private route: ActivatedRoute) {}
 
+    getIconStyleByClass(classification: number) {
+        switch (classification) {
+            case 1:
+                return ["app-icon--class", "app-icon--class-red"]
+            case 2:
+                return ["app-icon--class", "app-icon--class-yellow"]
+            case 3:
+                return ["app-icon--class", "app-icon--class-green"]
+            case 4:
+                return ["app-icon--class", "app-icon--class-greenest"]
+            default:
+                return ["app-icon--class"]
+        }
+    }
+
     getSpeedInMbps(speed: number) {
         return getSignificantDigits(speed / 1e3) + " Mbps"
     }

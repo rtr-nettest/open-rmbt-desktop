@@ -46,15 +46,12 @@ export class TestStore {
     )
     error$ = new BehaviorSubject<Error | null>(null)
 
+    constructor() {}
+
     launchTest() {
-        this.basicNetworkInfo$.next(new BasicNetworkInfo())
-        this.visualization$.next(new TestVisualizationState())
-        this.simpleHistoryResult$.next(null)
-        this.error$.next(null)
+        this.resetState()
+        this.setErrorHandler()
         window.electronAPI.runMeasurement()
-        window.electronAPI.onError((error) => {
-            this.error$.next(error)
-        })
         return interval(STATE_UPDATE_TIMEOUT).pipe(
             concatMap(() =>
                 from(window.electronAPI.getBasicNetworkInfo()).pipe(
@@ -80,9 +77,7 @@ export class TestStore {
         if (!testUuid) {
             return of(null)
         }
-        window.electronAPI.onError((error) => {
-            this.error$.next(error)
-        })
+        this.setErrorHandler()
         return from(window.electronAPI.getMeasurementResult(testUuid)).pipe(
             map((result) => {
                 this.simpleHistoryResult$.next(result)
@@ -91,5 +86,16 @@ export class TestStore {
         )
     }
 
-    constructor() {}
+    private resetState() {
+        this.basicNetworkInfo$.next(new BasicNetworkInfo())
+        this.visualization$.next(new TestVisualizationState())
+        this.simpleHistoryResult$.next(null)
+        this.error$.next(null)
+    }
+
+    private setErrorHandler() {
+        window.electronAPI.onError((error) => {
+            this.error$.next(error)
+        })
+    }
 }

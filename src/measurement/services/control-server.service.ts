@@ -121,6 +121,7 @@ export class ControlServer {
         Logger.I.info("Receiving measurement result by UUID: %s", uuid)
         let response: any
         let retVal: ISimpleHistoryResult | undefined = undefined
+        const fullResultLink = `${process.env.FULL_HISTORY_RESUlT_URL}${uuid}`
         try {
             if (process.env.HISTORY_RESULT_PATH_METHOD === "GET") {
                 // as used by Specure
@@ -140,7 +141,8 @@ export class ControlServer {
                         uploadKbit: response.speed_upload,
                         ping: response.ping,
                         providerName: response.operator,
-                        ipAddress: "-", // TODO
+                        ipAddress: response.ip_address,
+                        fullResultLink,
                     }
                 }
             } else if (process.env.HISTORY_RESULT_PATH_METHOD === "POST") {
@@ -185,6 +187,7 @@ export class ControlServer {
                         ping: openTestsResponse?.ping_ms,
                         providerName: openTestsResponse?.public_ip_as_name,
                         ipAddress: openTestsResponse?.ip_anonym,
+                        fullResultLink,
                     }
                 }
             }

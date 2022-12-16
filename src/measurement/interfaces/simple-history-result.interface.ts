@@ -6,4 +6,5 @@ export interface ISimpleHistoryResult {
     ping: number
     providerName: string
     ipAddress: string
+    fullResultLink: string
 }

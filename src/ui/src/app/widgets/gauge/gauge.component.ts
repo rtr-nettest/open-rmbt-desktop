@@ -123,6 +123,7 @@ export class GaugeComponent {
                 progress = progress * 0.9 + 0.1
                 break
             case EMeasurementStatus.PING:
+                this.setBarPercentage("#init", 1)
                 barSelector = "#ping"
                 break
             case EMeasurementStatus.DOWN:

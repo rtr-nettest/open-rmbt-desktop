@@ -1,0 +1,55 @@
+$base-font-path: "/assets/fonts/" !default;
+
+@font-face {
+    font-display: swap;
+    font-family: "Open Sans";
+    font-style: normal;
+    font-weight: 300;
+    src: local("OpenSans-Light"),
+        url($base-font-path + "OpenSans-Light.ttf") format("truetype");
+}
+
+@font-face {
+    font-display: swap;
+    font-family: "Open Sans";
+    font-style: normal;
+    font-weight: 400;
+    src: local("OpenSans-Medium"),
+        url($base-font-path + "OpenSans-Medium.ttf") format("truetype");
+}
+
+@font-face {
+    font-display: swap;
+    font-family: "Open Sans";
+    font-style: normal;
+    font-weight: 500;
+    src: local("OpenSans-Medium"),
+        url($base-font-path + "OpenSans-Medium.ttf") format("truetype");
+}
+
+@font-face {
+    font-display: swap;
+    font-family: "Open Sans";
+    font-style: normal;
+    font-weight: 600;
+    src: local("OpenSans-SemiBold"),
+        url($base-font-path + "OpenSans-SemiBold.ttf") format("truetype");
+}
+
+@font-face {
+    font-display: swap;
+    font-family: "Open Sans";
+    font-style: normal;
+    font-weight: 700;
+    src: local("OpenSans-Bold"),
+        url($base-font-path + "OpenSans-Bold.ttf") format("truetype");
+}
+
+@font-face {
+    font-display: swap;
+    font-family: "Open Sans";
+    font-style: normal;
+    font-weight: 800;
+    src: local("OpenSans-ExtraBold"),
+        url($base-font-path + "OpenSans-ExtraBold.ttf") format("truetype");
+}

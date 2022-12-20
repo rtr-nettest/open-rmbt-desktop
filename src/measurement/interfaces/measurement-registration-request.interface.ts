@@ -20,6 +20,7 @@ export interface IMeasurementRegistrationRequest {
     measurement_type_flag: string
     ndt?: boolean
     num_threads?: number
+    operating_system?: string
     platform?: string
     prefer_server?: number
     previousTestStatus?: string

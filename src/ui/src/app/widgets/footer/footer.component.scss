@@ -1,0 +1,15 @@
+@import "../../../assets/styles/core.scss";
+
+.app-footer {
+    align-items: center;
+    display: flex;
+    height: rem(108);
+    font-size: $font-size-sm;
+    padding: rem(30);
+
+    img {
+        height: auto;
+        max-height: 100%;
+        width: auto;
+    }
+}

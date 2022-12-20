@@ -1,4 +1,4 @@
-import { SingleThreadResult } from "../../dto/single-thread-result.dto"
+import { MeasurementThreadResultList } from "../../dto/measurement-thread-result-list.dto"
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import { IMeasurementThreadResult } from "../../interfaces/measurement-result.interface"
 import {
@@ -15,7 +15,7 @@ export class DownloadMessageHandler implements IMessageHandler {
     private downloadBytesRead = 0
     private activityInterval?: NodeJS.Timer
     private inactivityTimeout = 0
-    private result = new SingleThreadResult(0)
+    private result = new MeasurementThreadResultList(0)
     private nsec = 0
 
     constructor(
@@ -25,17 +25,16 @@ export class DownloadMessageHandler implements IMessageHandler {
         const maxStoredResults =
             (Number(this.ctx.params.test_duration) * 1e9) /
             DownloadMessageHandler.minDiffTime
-        this.result = new SingleThreadResult(Number(maxStoredResults))
+        this.result = new MeasurementThreadResultList(Number(maxStoredResults))
         this.inactivityTimeout = Number(this.ctx.params.test_duration) * 1000
     }
 
     stopMessaging() {
         clearInterval(this.activityInterval)
         Logger.I.info(`Download is stopped for thread ${this.ctx.index}`)
-        this.ctx.threadResult.down = this.result.getAllResults()
-        this.ctx.threadResult.speedItems = this.result.addSpeedItems(
-            this.ctx.threadResult.speedItems,
-            false,
+        this.ctx.threadResult.down = this.result
+        this.ctx.threadResult.speedItems = this.result.getSpeedItems(
+            "download",
             this.ctx.index
         )
         this.onFinish?.(this.ctx.threadResult)
@@ -48,7 +47,7 @@ export class DownloadMessageHandler implements IMessageHandler {
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
             if (Time.nowNs() > this.downloadEndTime) {
-                Logger.I.info(`Thread ${this.ctx.index} timed out.`)
+                Logger.I.info(`Thread ${this.ctx.index} download timed out.`)
                 this.requestFinish()
             }
         }, this.inactivityTimeout)
@@ -63,34 +62,39 @@ export class DownloadMessageHandler implements IMessageHandler {
         this.ctx.client.write(msg)
     }
     readData(data: Buffer): void {
-        if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
+        if (
+            data.includes(ESocketMessage.ACCEPT_GETCHUNKS) &&
+            Time.nowNs() >= this.downloadEndTime - 1e9
+        ) {
             this.stopMessaging()
             return
         }
         if (data.includes(ESocketMessage.TIME)) {
             return
         }
-        setImmediate(() => {
-            let lastByte = 0
-            let isFullChunk = false
-            if (data.length > 0) {
-                this.downloadBytesRead =
-                    this.downloadBytesRead + data.byteLength
+        let lastByte = 0
+        let isFullChunk = false
+        if (data.length > 0) {
+            this.downloadBytesRead = this.downloadBytesRead + data.byteLength
 
-                this.nsec = Time.nowNs() - this.downloadStartTime
-                this.result.addResult(this.downloadBytesRead, this.nsec)
+            this.nsec = Time.nowNs() - this.downloadStartTime
+            this.result.addResult(this.downloadBytesRead, this.nsec)
 
-                isFullChunk = this.downloadBytesRead % this.ctx.chunkSize === 0
+            isFullChunk = this.downloadBytesRead % this.ctx.chunkSize === 0
 
-                lastByte = data[data.length - 1]
+            lastByte = data[data.length - 1]
 
-                this.ctx.currentTime = this.nsec
-                this.ctx.currentTransfer = this.downloadBytesRead
-            }
-            if (isFullChunk && lastByte === 0xff) {
-                this.requestFinish()
-            }
-        })
+            this.ctx.currentTime = this.nsec
+            this.ctx.currentTransfer = this.downloadBytesRead
+            this.ctx.interimHandler?.({
+                ...this.ctx.threadResult,
+                currentTime: this.ctx.currentTime,
+                currentTransfer: this.ctx.currentTransfer,
+            })
+        }
+        if (isFullChunk && lastByte === 0xff) {
+            this.requestFinish()
+        }
     }
 
     private requestFinish() {

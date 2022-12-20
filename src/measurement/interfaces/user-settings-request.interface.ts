@@ -8,7 +8,7 @@ export interface IUserSettingsRequest {
     model?: string
     name: EMeasurementServerType
     os_version?: string
-    plattform?: string
+    platform?: string
     softwareRevision?: string
     softwareRevisionCode?: number
     softwareVersionName?: string

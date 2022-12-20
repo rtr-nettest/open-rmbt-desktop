@@ -1,0 +1,28 @@
+.app-icon {
+    &--class {
+        background-size: 165px 148.5px !important;
+        display: inline-block;
+        height: 16px;
+        width: 16px;
+
+        &-greenest {
+            background: url("/assets/images/icons-sprite.svg") 88.88889% 12.5%
+                no-repeat;
+        }
+
+        &-green {
+            background: url("/assets/images/icons-sprite.svg") 77.77778% 87.5%
+                no-repeat;
+        }
+
+        &-yellow {
+            background: url("/assets/images/icons-sprite.svg") 88.88889% 25%
+                no-repeat;
+        }
+
+        &-red {
+            background: url("/assets/images/icons-sprite.svg") 88.88889% 0
+                no-repeat;
+        }
+    }
+}

@@ -1,0 +1,43 @@
+@import "../../../assets/styles/core.scss";
+
+$blue: #0071d7;
+
+.gauge {
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    background: url("/assets/images/gauge.svg");
+    background-repeat: repeat;
+    background-position-x: 0%;
+    background-position-y: 0%;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    margin: 0 0;
+    padding: 0;
+    position: relative;
+}
+
+svg .gauge {
+    stroke-width: 26px;
+    stroke-dasharray: 0, 9999;
+    fill: transparent;
+}
+
+svg .gauge.active {
+    transition: stroke-dasharray 0.4s linear;
+}
+
+svg #speed.gauge.active {
+    transition: stroke-dasharray 0.4s ease;
+}
+
+svg .init,
+svg .ping,
+svg .download,
+svg .upload {
+    stroke: $blue;
+}
+
+svg .speed {
+    stroke: $color-primary;
+}

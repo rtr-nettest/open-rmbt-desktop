@@ -1,0 +1,14 @@
+<dl *ngIf="entries" class="app-dl">
+    <ng-container *ngFor="let entry of entries">
+        <dt class="app-dt">
+            <span>{{ entry[0] }}</span>
+        </dt>
+        <dd class="app-dd">
+            <i
+                *ngIf="icons?.[entry[0]]"
+                [ngClass]="icons && icons[entry[0]]"
+            ></i>
+            <span>{{ entry[1] }}</span>
+        </dd>
+    </ng-container>
+</dl>

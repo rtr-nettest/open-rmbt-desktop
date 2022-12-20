@@ -35,7 +35,7 @@ export class InitMessageHandler implements IMessageHandler {
         setTimeout(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
             if (!this.isInitialized) {
-                Logger.I.info(`Thread ${this.ctx.index} timed out.`)
+                Logger.I.info(`Thread ${this.ctx.index} init timed out.`)
                 this.stopMessaging()
             }
         }, this.inactivityTimeout)

@@ -36,10 +36,17 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
             )
             break
         case "download":
-            result = await thread?.manageDownload()
+            thread!.interimHandler = (interimResult) =>
+                parentPort?.postMessage(
+                    new OutgoingMessageWithData(
+                        "downloadUpdated",
+                        interimResult
+                    )
+                )
+            result = await thread!.manageDownload()
             if (result) {
-                result.currentTime = thread?.currentTime || 0
-                result.currentTransfer = thread?.currentTransfer || 0
+                result.currentTime = thread!.currentTime || 0
+                result.currentTransfer = thread!.currentTransfer || 0
             }
             parentPort?.postMessage(
                 new OutgoingMessageWithData("downloadFinished", result)
@@ -63,7 +70,11 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
             )
             break
         case "upload":
-            result = await thread?.manageUpload()
+            thread!.interimHandler = (interimResult) =>
+                parentPort?.postMessage(
+                    new OutgoingMessageWithData("uploadUpdated", interimResult)
+                )
+            result = await thread!.manageUpload()
             if (result) {
                 result.currentTime = thread?.currentTime || 0
                 result.currentTransfer = thread?.currentTransfer || 0

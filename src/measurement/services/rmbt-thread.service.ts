@@ -1,7 +1,7 @@
 import net from "net"
 import tls from "tls"
 import fs from "fs"
-import { MeasurementThreadResult } from "../dto/measurement-result.dto"
+import { MeasurementThreadResult } from "../dto/measurement-thread-result.dto"
 import { ESocketMessage } from "../enums/socket-message.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
@@ -15,6 +15,7 @@ import { UploadMessageHandler } from "./message-handlers/upload-message-handler.
 import { IMessageHandlerContext } from "../interfaces/message-handler.interface"
 
 export class RMBTThread implements IMessageHandlerContext {
+    static interimUpdatesIntervalMs = 100
     bytesPerSecPretest: number[] = []
     minChunkSize = 0
     maxChunkSize = 4194304
@@ -23,6 +24,7 @@ export class RMBTThread implements IMessageHandlerContext {
     client: net.Socket = new net.Socket()
     currentTime: number = -1
     currentTransfer: number = -1
+    interimHandler?: (interimResult: IMeasurementThreadResult) => void
     threadResult: IMeasurementThreadResult = new MeasurementThreadResult()
     preDownloadChunks: number = 1
     preUploadChunks: number = 1
@@ -94,9 +96,9 @@ export class RMBTThread implements IMessageHandlerContext {
             Logger.I.info(`Thread ${this.index} is connected.`)
             this.isConnected = true
             this.hadError = false
-            this.threadResult.ip_local = this.client.localAddress
-            this.threadResult.ip_server = this.client.remoteAddress
-            this.threadResult.port_remote = this.client.remotePort
+            // this.threadResult.ip_local = this.client.localAddress
+            // this.threadResult.ip_server = this.client.remoteAddress
+            // this.threadResult.port_remote = this.client.remotePort
             resolve(this)
         }
 
@@ -210,6 +212,7 @@ export class RMBTThread implements IMessageHandlerContext {
                 this,
                 (result) => {
                     this.downloadMessageHandler = undefined
+                    this.interimHandler = undefined
                     this.disconnect().then(() => {
                         Logger.I.info(
                             `Resolving thread ${this.index} download.`
@@ -250,6 +253,7 @@ export class RMBTThread implements IMessageHandlerContext {
                 this,
                 (result) => {
                     this.uploadMessageHandler = undefined
+                    this.interimHandler = undefined
                     this.disconnect().then(() => {
                         Logger.I.info(`Resolving thread ${this.index} upload.`)
                         resolve(result)

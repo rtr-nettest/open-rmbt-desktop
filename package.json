@@ -1,13 +1,13 @@
 {
     "name": "open-rmbt-desktop",
     "version": "0.0.1",
-    "description": "",
+    "description": "open-rmbt-desktop application",
     "main": "dist/main.js",
     "engines": {
         "node": ">=18"
     },
     "scripts": {
-        "build:all": "webpack --mode production && cd src/ui && npm run build-for-packaging && cp -rf dist/ui/* ../../dist",
+        "build:all": "webpack --mode production && cd src/ui && npm run build-for-packaging && shx cp -rf dist/ui/* ../../dist",
         "start:cli": "webpack --mode development --config ./webpack.cli.config.js && npx ts-node src/cli/cli.ts",
         "start:electron": "npx tsc && cross-env DEV=true electron dist/electron/electron.js",
         "start:ui": "(cd src/ui && npm run start)",
@@ -33,6 +33,7 @@
         "dotenv-webpack": "^8.0.1",
         "electron": "^21.2.0",
         "node-loader": "^2.0.0",
+        "shx": "^0.3.4",
         "start-server-and-test": "^1.14.0",
         "terser-webpack-plugin": "^5.3.6",
         "ts-loader": "^9.4.1",

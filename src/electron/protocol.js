@@ -48,7 +48,7 @@ function mime(filename) {
 function requestHandler(req, next) {
     const reqUrl = new URL(req.url)
     let reqPath = path.normalize(reqUrl.pathname)
-    if (reqPath === "/") {
+    if (reqPath === "/" || reqPath === "\\") {
         reqPath = "/index.html"
     }
     const reqFilename = path.basename(reqPath)

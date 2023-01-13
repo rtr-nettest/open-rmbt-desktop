@@ -14,9 +14,10 @@ export class DownloadMessageHandler implements IMessageHandler {
     private downloadEndTime = Time.nowNs()
     private downloadBytesRead = 0
     private activityInterval?: NodeJS.Timer
-    private inactivityTimeout = 0
+    private inactivityTimeout = 1e9
     private result = new MeasurementThreadResultList(0)
     private nsec = 0
+    private isFinishRequested = false
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -26,7 +27,6 @@ export class DownloadMessageHandler implements IMessageHandler {
             (Number(this.ctx.params.test_duration) * 1e9) /
             DownloadMessageHandler.minDiffTime
         this.result = new MeasurementThreadResultList(Number(maxStoredResults))
-        this.inactivityTimeout = Number(this.ctx.params.test_duration) * 1000
     }
 
     stopMessaging() {
@@ -46,7 +46,7 @@ export class DownloadMessageHandler implements IMessageHandler {
             this.downloadStartTime + Number(this.ctx.params.test_duration) * 1e9
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
-            if (Time.nowNs() > this.downloadEndTime) {
+            if (Time.nowNs() >= this.downloadEndTime) {
                 Logger.I.info(`Thread ${this.ctx.index} download timed out.`)
                 this.requestFinish()
             }
@@ -61,10 +61,11 @@ export class DownloadMessageHandler implements IMessageHandler {
         Logger.I.info(`Thread ${this.ctx.index} is sending "${msg}"`)
         this.ctx.client.write(msg)
     }
+
     readData(data: Buffer): void {
         if (
             data.includes(ESocketMessage.ACCEPT_GETCHUNKS) &&
-            Time.nowNs() >= this.downloadEndTime - 1e9
+            this.isFinishRequested
         ) {
             this.stopMessaging()
             return
@@ -103,6 +104,7 @@ export class DownloadMessageHandler implements IMessageHandler {
             this.stopMessaging.bind(this),
             this.inactivityTimeout
         )
+        this.isFinishRequested = true
         this.ctx.client.write(ESocketMessage.OK)
     }
 }

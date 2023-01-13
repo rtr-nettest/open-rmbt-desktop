@@ -1,3 +1,4 @@
+import { IPreDownloadResult } from "../services/rmbt-thread.service"
 import { IMeasurementThreadResult } from "./measurement-result.interface"
 
 export interface RMBTWorker {
@@ -30,7 +31,12 @@ export type OutgoingMessage =
 export class OutgoingMessageWithData {
     constructor(
         public message: OutgoingMessage,
-        public data?: IMeasurementThreadResult | number | boolean | IBuffer
+        public data?:
+            | IMeasurementThreadResult
+            | number
+            | boolean
+            | IBuffer
+            | IPreDownloadResult
     ) {}
 }
 export class IncomingMessageWithData {

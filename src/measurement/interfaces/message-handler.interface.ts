@@ -17,8 +17,6 @@ export interface IMessageHandlerContext {
     currentTransfer: number
     defaultChunkSize: number
     index: number
-    maxChunkSize: number
-    minChunkSize: number
     params: IMeasurementRegistrationResponse
     preDownloadChunks: number
     preUploadChunks: number

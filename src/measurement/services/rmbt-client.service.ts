@@ -11,11 +11,14 @@ import { RMBTWorkerFactory } from "./rmbt-worker-factory.service"
 import { Time } from "./time.service"
 import path from "path"
 import { IOverallResult } from "../interfaces/overall-result.interface"
+import { IPreDownloadResult } from "./rmbt-thread.service"
 
 export class RMBTClient {
     measurementLastUpdate?: number
     measurementStatus: EMeasurementStatus = EMeasurementStatus.WAIT
     measurementTasks: RMBTWorker[] = []
+    minChunkSize = 0
+    maxChunkSize = 4194304
     params: IMeasurementRegistrationResponse
     initializedThreads: number[] = []
     interimThreadResults: IMeasurementThreadResult[] = []
@@ -30,6 +33,7 @@ export class RMBTClient {
     activityInterval?: NodeJS.Timer
     overallResultDown?: IOverallResult
     overallResultUp?: IOverallResult
+    private bytesPerSecPreDownload: number[] = []
     private estimatePhaseDuration: { [key: string]: number } = {
         [EMeasurementStatus.INIT]: 0.5,
         [EMeasurementStatus.INIT_DOWN]: 2.5,
@@ -192,9 +196,12 @@ export class RMBTClient {
                             }
                             break
                         case "preDownloadFinished":
-                            this.chunks.push(message.data as number)
+                            const { chunkSize, bytesPerSec } =
+                                message.data as IPreDownloadResult
+                            this.chunks.push(chunkSize)
+                            this.bytesPerSecPreDownload.push(bytesPerSec)
                             Logger.I.warn(
-                                `Worker ${index} finished pre-download with ${this.chunks} chunk sizes.`
+                                `Worker ${index} finished pre-download with ${this.chunks} speeds.`
                             )
                             if (
                                 this.chunks.length ===
@@ -220,9 +227,13 @@ export class RMBTClient {
                             this.pingMedian =
                                 ((message.data! as IMeasurementThreadResult)
                                     .ping_median ?? -1000000) / 1000000
+                            const calculatedChunkSize = this.getChunkSize()
                             for (const w of this.measurementTasks) {
                                 w.postMessage(
-                                    new IncomingMessageWithData("download")
+                                    new IncomingMessageWithData(
+                                        "download",
+                                        calculatedChunkSize
+                                    )
                                 )
                             }
                             this.measurementStatus = EMeasurementStatus.DOWN
@@ -404,5 +415,30 @@ export class RMBTClient {
             nsec,
             speed,
         }
+    }
+
+    // from RMBTws client
+    private getChunkSize() {
+        const bytesPerSecTotal = this.bytesPerSecPreDownload.reduce(
+            (acc, bytes) => acc + bytes,
+            0
+        )
+
+        // set chunk size to accordingly 1 chunk every n/20 ms on average with n threads
+        let chunkSize = Math.floor(
+            bytesPerSecTotal / this.params.test_numthreads / (1000 / 20)
+        )
+
+        Logger.I.warn(`Calculated chunk size is ${chunkSize}`)
+
+        //but min 4KiB
+        chunkSize = Math.max(this.minChunkSize, chunkSize)
+
+        //and max MAX_CHUNKSIZE
+        chunkSize = Math.min(this.maxChunkSize, chunkSize)
+
+        Logger.I.warn(`Setting chunk size to ${chunkSize}`)
+
+        return chunkSize
     }
 }

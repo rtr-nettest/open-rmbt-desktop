@@ -14,11 +14,14 @@ import { InitMessageHandler } from "./message-handlers/init-message-handler.serv
 import { UploadMessageHandler } from "./message-handlers/upload-message-handler.service"
 import { IMessageHandlerContext } from "../interfaces/message-handler.interface"
 
+export interface IPreDownloadResult {
+    chunkSize: number
+    bytesPerSec: number
+}
+
 export class RMBTThread implements IMessageHandlerContext {
     static interimUpdatesIntervalMs = 100
     bytesPerSecPretest: number[] = []
-    minChunkSize = 0
-    maxChunkSize = 4194304
     defaultChunkSize = 4096
     chunkSize: number = 0
     client: net.Socket = new net.Socket()
@@ -178,7 +181,7 @@ export class RMBTThread implements IMessageHandlerContext {
         })
     }
 
-    async managePreDownload(): Promise<number> {
+    async managePreDownload(): Promise<IPreDownloadResult> {
         return new Promise((resolve) => {
             this.phase = "predownload"
             this.preDownloadMessageHandler = new PreDownloadMessageHandler(
@@ -188,7 +191,10 @@ export class RMBTThread implements IMessageHandlerContext {
                     Logger.I.info(
                         `Resolving thread ${this.index} pre-download.`
                     )
-                    resolve(this.chunkSize)
+                    resolve({
+                        chunkSize: this.chunkSize,
+                        bytesPerSec: Math.max(...this.bytesPerSecPretest),
+                    })
                 }
             )
             this.preDownloadMessageHandler.writeData()
@@ -207,10 +213,14 @@ export class RMBTThread implements IMessageHandlerContext {
         })
     }
 
-    async manageDownload(): Promise<IMeasurementThreadResult> {
+    async manageDownload(
+        chunkSize?: number
+    ): Promise<IMeasurementThreadResult> {
         return new Promise((resolve) => {
             this.phase = "download"
-            this.setChunkSize()
+            if (chunkSize) {
+                this.chunkSize = chunkSize
+            }
             this.downloadMessageHandler = new DownloadMessageHandler(
                 this,
                 (result) => {
@@ -265,35 +275,5 @@ export class RMBTThread implements IMessageHandlerContext {
             )
             this.uploadMessageHandler.writeData()
         })
-    }
-    // from RMBTws client
-    private setChunkSize() {
-        Logger.I.warn(
-            `Thread ${this.index} bytes per sec %o`,
-            this.bytesPerSecPretest
-        )
-
-        const bytesPerSecMax = Math.max(...this.bytesPerSecPretest)
-
-        Logger.I.warn(
-            `Thread ${this.index} maximal pretest speed is ${bytesPerSecMax}Bps`
-        )
-
-        // set chunk size to accordingly 1 chunk every n/20 ms on average with n threads
-        this.chunkSize = Math.floor(bytesPerSecMax / (1000 / 20))
-
-        Logger.I.warn(
-            `Thread ${this.index} calculated chunk size is ${this.chunkSize}B`
-        )
-
-        //but min 4KiB
-        this.chunkSize = Math.max(this.minChunkSize, this.chunkSize)
-
-        //and max MAX_CHUNKSIZE
-        this.chunkSize = Math.min(this.maxChunkSize, this.chunkSize)
-
-        Logger.I.warn(
-            `Thread ${this.index} is setting chunk size to ${this.chunkSize}`
-        )
     }
 }

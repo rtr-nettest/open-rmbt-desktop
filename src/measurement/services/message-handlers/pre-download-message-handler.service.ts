@@ -11,6 +11,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     private preDownloadDuration = 2000000000
     private preDownloadBytesRead = -1
     private activityInterval?: NodeJS.Timer
+    private inactivityTimeout = 1000
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -64,14 +65,17 @@ export class PreDownloadMessageHandler implements IMessageHandler {
         clearInterval(this.activityInterval)
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
-            if (Time.nowNs() > this.preDownloadEndTime) {
+            if (Time.nowNs() >= this.preDownloadEndTime) {
                 Logger.I.info(
                     `Thread ${this.ctx.index} pre-download timed out.`
                 )
                 this.finishChunkPortion()
-                this.stopMessaging()
+                this.activityInterval = setInterval(
+                    this.stopMessaging.bind(this),
+                    this.inactivityTimeout
+                )
             }
-        }, 1000)
+        }, this.inactivityTimeout)
         this.ctx.client.write(
             `${ESocketMessage.GETCHUNKS} ${this.ctx.preDownloadChunks}\n`
         )

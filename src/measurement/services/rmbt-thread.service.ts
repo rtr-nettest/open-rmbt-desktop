@@ -107,7 +107,9 @@ export class RMBTThread implements IMessageHandlerContext {
         if (dataString.includes(ESocketMessage.ERR)) {
             this.hadError = true
         }
-        Logger.I.info(`Received message ${dataString}`)
+        if (dataString.length) {
+            Logger.I.info(`Thread ${this.index} received message ${dataString}`)
+        }
         switch (true) {
             case this.phase === "init":
                 this.initMessageHandler?.readData(data)

@@ -280,9 +280,7 @@ export class RMBTThread implements IMessageHandlerContext {
         )
 
         // set chunk size to accordingly 1 chunk every n/20 ms on average with n threads
-        this.chunkSize = Math.floor(
-            bytesPerSecMax / this.params.test_numthreads / (1000 / 20)
-        )
+        this.chunkSize = Math.floor(bytesPerSecMax / (1000 / 20))
 
         Logger.I.warn(
             `Thread ${this.index} calculated chunk size is ${this.chunkSize}B`

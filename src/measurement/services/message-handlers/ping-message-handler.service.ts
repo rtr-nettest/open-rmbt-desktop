@@ -73,11 +73,11 @@ export class PingMessageHandler implements IMessageHandler {
             Logger.I.info(
                 `Thread ${this.ctx.index} received a PONG. Continuing.`
             )
-            this.pingCurrentEndTime = Time.nowNs()
             this.ctx.client.write(ESocketMessage.OK)
             return
         }
         if (data.includes(ESocketMessage.TIME)) {
+            this.pingCurrentEndTime = Time.nowNs()
             const timeMatches = data.toString().split(" ")
             const pingServer = timeMatches?.[1] ? Number(timeMatches[1]) : -1
             const pingClient = this.getClientPing()

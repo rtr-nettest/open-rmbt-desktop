@@ -77,10 +77,7 @@ export class PingMessageHandler implements IMessageHandler {
             this.ctx.client.write(ESocketMessage.OK)
             return
         }
-        if (
-            data.includes(ESocketMessage.TIME) &&
-            data.includes(ESocketMessage.ACCEPT_GETCHUNKS)
-        ) {
+        if (data.includes(ESocketMessage.TIME)) {
             const timeMatches = data.toString().split(" ")
             const pingServer = timeMatches?.[1] ? Number(timeMatches[1]) : -1
             const pingClient = this.getClientPing()
@@ -92,6 +89,9 @@ export class PingMessageHandler implements IMessageHandler {
                     time_ns: this.getDuration(),
                 })
             }
+            return
+        }
+        if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
             if (this.pingCounter < (this.ctx.params.test_numpings ?? 1)) {
                 this.writeData()
             } else {

@@ -13,6 +13,7 @@ export class PingMessageHandler implements IMessageHandler {
     private pingCurrentStartTime = Time.nowNs()
     private pingCurrentEndTime = Time.nowNs()
     private pingCounter = 0
+    private isStopped = false
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -20,6 +21,7 @@ export class PingMessageHandler implements IMessageHandler {
     ) {}
 
     stopMessaging(): void {
+        this.isStopped = true
         this.serverPings.sort()
         const middle = this.serverPings.length / 2
         if (this.serverPings.length % 2 === 0) {
@@ -49,6 +51,9 @@ export class PingMessageHandler implements IMessageHandler {
     }
 
     readData(data: Buffer) {
+        if (this.isStopped) {
+            return
+        }
         if (data.includes(ESocketMessage.ERR)) {
             Logger.I.info(
                 `Thread ${this.ctx.index} received an error. Terminating.`

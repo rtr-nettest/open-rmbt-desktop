@@ -1,3 +1,4 @@
+import { hrtime } from "process"
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import { IMeasurementThreadResult } from "../../interfaces/measurement-result.interface"
 import {
@@ -10,7 +11,7 @@ import { Time } from "../time.service"
 export class PingMessageHandler implements IMessageHandler {
     private serverPings: number[] = []
     private pingStartTime = Time.nowNs()
-    private pingTimes: { start: number; end: number }[] = []
+    private pingTimes: { start: bigint; end: bigint }[] = []
     private pingCounter = 0
 
     constructor(
@@ -38,8 +39,8 @@ export class PingMessageHandler implements IMessageHandler {
                 this.pingStartTime = Time.nowNs()
             }
             this.pingTimes.push({
-                start: Time.nowNs(),
-                end: 0,
+                start: hrtime.bigint(),
+                end: 0n,
             })
             Logger.I.info(
                 `Thread ${this.ctx.index} sent ${ESocketMessage.PING.replace(
@@ -56,7 +57,7 @@ export class PingMessageHandler implements IMessageHandler {
             Logger.I.info(
                 `Thread ${this.ctx.index} received an error. Terminating.`
             )
-            this.pingTimes[this.pingCounter - 1].end = Time.nowNs()
+            this.pingTimes[this.pingCounter - 1].end = hrtime.bigint()
             const pingClient = this.getClientPing()
             this.serverPings.push(pingClient)
             this.ctx.threadResult.pings.push({
@@ -72,7 +73,7 @@ export class PingMessageHandler implements IMessageHandler {
                 `Thread ${this.ctx.index} received a PONG. Continuing.`
             )
             this.ctx.client.write(ESocketMessage.OK, () => {
-                this.pingTimes[this.pingCounter - 1].end = Time.nowNs()
+                this.pingTimes[this.pingCounter - 1].end = hrtime.bigint()
             })
             return
         }
@@ -100,9 +101,9 @@ export class PingMessageHandler implements IMessageHandler {
     }
 
     private getClientPing() {
-        return (
+        return Number(
             this.pingTimes[this.pingCounter - 1].end -
-            this.pingTimes[this.pingCounter - 1].start
+                this.pingTimes[this.pingCounter - 1].start
         )
     }
 

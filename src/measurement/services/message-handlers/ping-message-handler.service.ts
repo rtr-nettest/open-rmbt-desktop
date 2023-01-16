@@ -73,11 +73,11 @@ export class PingMessageHandler implements IMessageHandler {
             Logger.I.info(
                 `Thread ${this.ctx.index} received a PONG. Continuing.`
             )
+            this.pingCurrentEndTime = Time.nowNs()
             this.ctx.client.write(ESocketMessage.OK)
             return
         }
         if (data.includes(ESocketMessage.TIME)) {
-            this.pingCurrentEndTime = Time.nowNs()
             const timeMatches = data.toString().split(" ")
             const pingServer = timeMatches?.[1] ? Number(timeMatches[1]) : -1
             const pingClient = this.getClientPing()
@@ -89,14 +89,14 @@ export class PingMessageHandler implements IMessageHandler {
                     time_ns: this.getDuration(),
                 })
             }
-        }
-        if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
             if (this.pingCounter < (this.ctx.params.test_numpings ?? 1)) {
                 this.writeData()
             } else {
                 this.stopMessaging()
             }
             return
+        }
+        if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
         }
     }
 

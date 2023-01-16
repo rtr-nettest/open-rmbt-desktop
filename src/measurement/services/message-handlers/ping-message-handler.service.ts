@@ -83,7 +83,6 @@ export class PingMessageHandler implements IMessageHandler {
                     value_server: pingServer,
                     time_ns: this.getDuration(),
                 })
-                Logger.I.info(`Server pings: %o`, this.serverPings)
             }
         }
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {

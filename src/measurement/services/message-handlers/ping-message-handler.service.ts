@@ -76,13 +76,15 @@ export class PingMessageHandler implements IMessageHandler {
             const timeMatches = data.toString().split(" ")
             const pingServer = timeMatches?.[1] ? Number(timeMatches[1]) : -1
             const pingClient = this.getClientPing()
-            this.serverPings.push(pingServer)
-            this.ctx.threadResult.pings.push({
-                value: pingClient,
-                value_server: pingServer,
-                time_ns: this.getDuration(),
-            })
-            Logger.I.info(`Server pings: %o`, this.serverPings)
+            if (pingServer) {
+                this.serverPings.push(pingServer)
+                this.ctx.threadResult.pings.push({
+                    value: pingClient,
+                    value_server: pingServer,
+                    time_ns: this.getDuration(),
+                })
+                Logger.I.info(`Server pings: %o`, this.serverPings)
+            }
         }
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
             if (

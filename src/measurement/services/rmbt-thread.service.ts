@@ -170,6 +170,7 @@ export class RMBTThread implements IMessageHandlerContext {
             this.phase = "init"
             this.initMessageHandler = new InitMessageHandler(this, (result) => {
                 this.initMessageHandler = undefined
+                this.phase = undefined
                 Logger.I.info(`Resolving thread ${this.index} init.`)
                 if (result) {
                     resolve(result)
@@ -188,6 +189,7 @@ export class RMBTThread implements IMessageHandlerContext {
                 this,
                 () => {
                     this.preDownloadMessageHandler = undefined
+                    this.phase = undefined
                     Logger.I.info(
                         `Resolving thread ${this.index} pre-download.`
                     )
@@ -206,6 +208,7 @@ export class RMBTThread implements IMessageHandlerContext {
             this.phase = "ping"
             this.pingMessageHandler = new PingMessageHandler(this, (result) => {
                 this.pingMessageHandler = undefined
+                this.phase = undefined
                 Logger.I.info(`Resolving thread ${this.index} ping.`)
                 resolve(result)
             })
@@ -225,6 +228,7 @@ export class RMBTThread implements IMessageHandlerContext {
                 this,
                 (result) => {
                     this.downloadMessageHandler = undefined
+                    this.phase = undefined
                     this.interimHandler = undefined
                     this.disconnect().then(() => {
                         Logger.I.info(
@@ -245,6 +249,7 @@ export class RMBTThread implements IMessageHandlerContext {
                 this,
                 () => {
                     this.preUploadMessageHandler = undefined
+                    this.phase = undefined
                     this.disconnect().then(() => {
                         Logger.I.info(
                             `Resolving thread ${this.index} pre-upload.`
@@ -266,6 +271,7 @@ export class RMBTThread implements IMessageHandlerContext {
                 this,
                 (result) => {
                     this.uploadMessageHandler = undefined
+                    this.phase = undefined
                     this.interimHandler = undefined
                     this.disconnect().then(() => {
                         Logger.I.info(`Resolving thread ${this.index} upload.`)

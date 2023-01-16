@@ -84,7 +84,10 @@ export class PingMessageHandler implements IMessageHandler {
             })
         }
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
-            if (this.pingCounter < (this.ctx.params.test_numpings ?? 0)) {
+            if (
+                this.pingCounter < (this.ctx.params.test_numpings ?? 1) ||
+                this.getDuration() < 1e9
+            ) {
                 this.writeData()
             } else {
                 this.stopMessaging()

@@ -77,7 +77,10 @@ export class PingMessageHandler implements IMessageHandler {
             this.ctx.client.write(ESocketMessage.OK)
             return
         }
-        if (data.includes(ESocketMessage.TIME)) {
+        if (
+            data.includes(ESocketMessage.TIME) &&
+            data.includes(ESocketMessage.ACCEPT_GETCHUNKS)
+        ) {
             const timeMatches = data.toString().split(" ")
             const pingServer = timeMatches?.[1] ? Number(timeMatches[1]) : -1
             const pingClient = this.getClientPing()
@@ -95,8 +98,6 @@ export class PingMessageHandler implements IMessageHandler {
                 this.stopMessaging()
             }
             return
-        }
-        if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
         }
     }
 

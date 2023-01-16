@@ -10,8 +10,7 @@ import { Time } from "../time.service"
 export class PingMessageHandler implements IMessageHandler {
     private serverPings: number[] = []
     private pingStartTime = Time.nowNs()
-    private pingCurrentStartTimes: number[] = []
-    private pingCurrentEndTimes: number[] = []
+    private pingTimes: { start: number; end: number }[] = []
     private pingCounter = 0
     private isStopped = false
 
@@ -40,7 +39,10 @@ export class PingMessageHandler implements IMessageHandler {
             if (this.pingCounter === 0) {
                 this.pingStartTime = Time.nowNs()
             }
-            this.pingCurrentStartTimes.push(Time.nowNs())
+            this.pingTimes.push({
+                start: Time.nowNs(),
+                end: 0,
+            })
             Logger.I.info(
                 `Thread ${this.ctx.index} sent ${ESocketMessage.PING.replace(
                     "\n",
@@ -59,7 +61,7 @@ export class PingMessageHandler implements IMessageHandler {
             Logger.I.info(
                 `Thread ${this.ctx.index} received an error. Terminating.`
             )
-            this.pingCurrentEndTimes.push(Time.nowNs())
+            this.pingTimes[this.pingCounter - 1].end = Time.nowNs()
             const pingClient = this.getClientPing()
             this.serverPings.push(pingClient)
             this.ctx.threadResult.pings.push({
@@ -74,8 +76,9 @@ export class PingMessageHandler implements IMessageHandler {
             Logger.I.info(
                 `Thread ${this.ctx.index} received a PONG. Continuing.`
             )
-            this.pingCurrentEndTimes.push(Time.nowNs())
-            this.ctx.client.write(ESocketMessage.OK)
+            this.ctx.client.write(ESocketMessage.OK, () => {
+                this.pingTimes[this.pingCounter - 1].end = Time.nowNs()
+            })
             return
         }
         if (data.includes(ESocketMessage.TIME)) {
@@ -103,8 +106,8 @@ export class PingMessageHandler implements IMessageHandler {
 
     private getClientPing() {
         return (
-            this.pingCurrentEndTimes[this.pingCounter - 1] -
-            this.pingCurrentStartTimes[this.pingCounter - 1]
+            this.pingTimes[this.pingCounter - 1].end -
+            this.pingTimes[this.pingCounter - 1].start
         )
     }
 

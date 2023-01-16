@@ -10,8 +10,8 @@ import { Time } from "../time.service"
 export class PingMessageHandler implements IMessageHandler {
     private serverPings: number[] = []
     private pingStartTime = Time.nowNs()
-    private pingCurrentStartTime = Time.nowNs()
-    private pingCurrentEndTime = Time.nowNs()
+    private pingCurrentStartTimes: number[] = []
+    private pingCurrentEndTimes: number[] = []
     private pingCounter = 0
     private isStopped = false
 
@@ -39,7 +39,7 @@ export class PingMessageHandler implements IMessageHandler {
         if (this.pingCounter === 0) {
             this.pingStartTime = Time.nowNs()
         }
-        this.pingCurrentStartTime = Time.nowNs()
+        this.pingCurrentStartTimes.push(Time.nowNs())
         this.ctx.client.write(ESocketMessage.PING)
         Logger.I.info(
             `Thread ${this.ctx.index} sent ${ESocketMessage.PING.replace(
@@ -58,7 +58,7 @@ export class PingMessageHandler implements IMessageHandler {
             Logger.I.info(
                 `Thread ${this.ctx.index} received an error. Terminating.`
             )
-            this.pingCurrentEndTime = Time.nowNs()
+            this.pingCurrentEndTimes.push(Time.nowNs())
             const pingClient = this.getClientPing()
             this.serverPings.push(pingClient)
             this.ctx.threadResult.pings.push({
@@ -73,7 +73,7 @@ export class PingMessageHandler implements IMessageHandler {
             Logger.I.info(
                 `Thread ${this.ctx.index} received a PONG. Continuing.`
             )
-            this.pingCurrentEndTime = Time.nowNs()
+            this.pingCurrentEndTimes.push(Time.nowNs())
             this.ctx.client.write(ESocketMessage.OK)
             return
         }
@@ -89,7 +89,6 @@ export class PingMessageHandler implements IMessageHandler {
                     time_ns: this.getDuration(),
                 })
             }
-            return
         }
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
             if (this.pingCounter < (this.ctx.params.test_numpings ?? 1)) {
@@ -102,7 +101,10 @@ export class PingMessageHandler implements IMessageHandler {
     }
 
     private getClientPing() {
-        return this.pingCurrentEndTime - this.pingCurrentStartTime
+        return (
+            this.pingCurrentEndTimes[this.pingCounter - 1] -
+            this.pingCurrentStartTimes[this.pingCounter - 1]
+        )
     }
 
     private getDuration() {

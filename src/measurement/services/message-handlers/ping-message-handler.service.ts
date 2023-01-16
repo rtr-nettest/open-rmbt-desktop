@@ -34,8 +34,10 @@ export class PingMessageHandler implements IMessageHandler {
     }
 
     writeData() {
-        this.pingStartTime = Time.nowNs()
-        this.pingCurrentStartTime = this.pingStartTime
+        if (this.pingCounter === 0) {
+            this.pingStartTime = Time.nowNs()
+        }
+        this.pingCurrentStartTime = Time.nowNs()
         this.ctx.client.write(ESocketMessage.PING)
         Logger.I.info(
             `Thread ${this.ctx.index} sent ${ESocketMessage.PING.replace(
@@ -53,14 +55,12 @@ export class PingMessageHandler implements IMessageHandler {
             )
             this.pingCurrentEndTime = Time.nowNs()
             const pingClient = this.getClientPing()
-            if (pingClient > 0) {
-                this.serverPings.push(pingClient)
-                this.ctx.threadResult.pings.push({
-                    value_server: pingClient,
-                    value: pingClient,
-                    time_ns: this.getDuration(),
-                })
-            }
+            this.serverPings.push(pingClient)
+            this.ctx.threadResult.pings.push({
+                value_server: pingClient,
+                value: pingClient,
+                time_ns: this.getDuration(),
+            })
             this.stopMessaging()
             return
         }
@@ -76,14 +76,12 @@ export class PingMessageHandler implements IMessageHandler {
             const timeMatches = data.toString().split(" ")
             const pingServer = timeMatches?.[1] ? Number(timeMatches[1]) : -1
             const pingClient = this.getClientPing()
-            if (pingServer > 0 && pingClient > 0) {
-                this.serverPings.push(pingServer)
-                this.ctx.threadResult.pings.push({
-                    value: pingClient,
-                    value_server: pingServer,
-                    time_ns: this.getDuration(),
-                })
-            }
+            this.serverPings.push(pingServer)
+            this.ctx.threadResult.pings.push({
+                value: pingClient,
+                value_server: pingServer,
+                time_ns: this.getDuration(),
+            })
         }
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
             if (this.pingCounter < (this.ctx.params.test_numpings ?? 0)) {

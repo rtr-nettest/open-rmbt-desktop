@@ -36,18 +36,19 @@ export class PingMessageHandler implements IMessageHandler {
     }
 
     writeData() {
-        if (this.pingCounter === 0) {
-            this.pingStartTime = Time.nowNs()
-        }
-        this.pingCurrentStartTimes.push(Time.nowNs())
-        this.ctx.client.write(ESocketMessage.PING)
-        Logger.I.info(
-            `Thread ${this.ctx.index} sent ${ESocketMessage.PING.replace(
-                "\n",
-                ""
-            )} #${this.pingCounter + 1}`
-        )
-        this.pingCounter += 1
+        this.ctx.client.write(ESocketMessage.PING, () => {
+            if (this.pingCounter === 0) {
+                this.pingStartTime = Time.nowNs()
+            }
+            this.pingCurrentStartTimes.push(Time.nowNs())
+            Logger.I.info(
+                `Thread ${this.ctx.index} sent ${ESocketMessage.PING.replace(
+                    "\n",
+                    ""
+                )} #${this.pingCounter + 1}`
+            )
+            this.pingCounter += 1
+        })
     }
 
     readData(data: Buffer) {

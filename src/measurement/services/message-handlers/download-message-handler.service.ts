@@ -87,6 +87,7 @@ export class DownloadMessageHandler implements IMessageHandler {
 
             this.ctx.currentTime = this.nsec
             this.ctx.currentTransfer = this.downloadBytesRead
+            this.ctx.threadResult.down = this.result
             this.ctx.interimHandler?.({
                 ...this.ctx.threadResult,
                 currentTime: this.ctx.currentTime,

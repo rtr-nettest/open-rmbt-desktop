@@ -3,7 +3,6 @@ import { IMeasurementRegistrationResponse } from "../interfaces/measurement-regi
 import {
     IMeasurementResult,
     IMeasurementThreadResult,
-    IMeasurementThreadResultList,
     IPing,
     ISpeedItem,
 } from "../interfaces/measurement-result.interface"

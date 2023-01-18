@@ -13,7 +13,7 @@ export class PingMessageHandler implements IMessageHandler {
     private pingStartTime = Time.nowNs()
     private pingTimes: { start: bigint; end: bigint }[] = []
     private pingCounter = 0
-    private maxPingCounter = 1000
+    private maxPingCounter = 200
 
     constructor(
         private ctx: IMessageHandlerContext,

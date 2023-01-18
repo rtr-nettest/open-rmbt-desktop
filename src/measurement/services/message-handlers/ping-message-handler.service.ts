@@ -13,6 +13,7 @@ export class PingMessageHandler implements IMessageHandler {
     private pingStartTime = Time.nowNs()
     private pingTimes: { start: bigint; end: bigint }[] = []
     private pingCounter = 0
+    private maxPingCounter = 200
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -91,7 +92,11 @@ export class PingMessageHandler implements IMessageHandler {
             }
         }
         if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
-            if (this.pingCounter < (this.ctx.params.test_numpings ?? 1)) {
+            if (
+                this.pingCounter < (this.ctx.params.test_numpings ?? 1) ||
+                (this.getDuration() < 1e9 &&
+                    this.pingCounter < this.maxPingCounter)
+            ) {
                 this.writeData()
             } else {
                 this.stopMessaging()

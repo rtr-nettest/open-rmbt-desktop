@@ -110,6 +110,9 @@ export class MeasurementResult implements IMeasurementResult {
         map: { [key: number]: ISpeedItem },
         speedItem: ISpeedItem
     ) {
+        if (!speedItem.time) {
+            return map
+        }
         if (!map[speedItem.time]) {
             map[speedItem.time] = speedItem
         }

@@ -21,12 +21,7 @@ export class MeasurementThreadResultList
             const prevNsec = this.nsec[this.resultsCounter - 1]
             nsecDiff = newNsec - prevNsec
         }
-        if (
-            newBytes >= 0 &&
-            newNsec >= 0 &&
-            this.resultsCounter < this.maxStoredResults &&
-            nsecDiff >= expectedNsecDiff
-        ) {
+        if (nsecDiff >= expectedNsecDiff) {
             this.bytes[this.resultsCounter] = newBytes
             this.nsec[this.resultsCounter] = newNsec
             this.resultsCounter += 1

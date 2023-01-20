@@ -15,7 +15,6 @@ import { Time } from "./time.service"
 import path from "path"
 import { IOverallResult } from "../interfaces/overall-result.interface"
 import { IPreDownloadResult } from "./rmbt-thread.service"
-import osu from "node-os-utils"
 
 export class RMBTClient {
     measurementLastUpdate?: number
@@ -54,7 +53,6 @@ export class RMBTClient {
         [EMeasurementStatus.INIT_UP]: -1,
         [EMeasurementStatus.UP]: -1,
     }
-    private cpuUsageInterval?: NodeJS.Timer
 
     get downloadSpeedTotalMbps() {
         return (this.overallResultDown?.speed ?? 0) / 1e6
@@ -72,11 +70,6 @@ export class RMBTClient {
         this.estimatePhaseDuration[EMeasurementStatus.UP] = Number(
             params.test_duration
         )
-        this.cpuUsageInterval = setInterval(() => {
-            osu.cpu.usage().then((percent) => {
-                Logger.I.info(`CPU usage is ${percent}%`)
-            })
-        }, 1000)
     }
 
     getPhaseDuration(phase: string) {
@@ -126,7 +119,6 @@ export class RMBTClient {
                         w.terminate()
                     }
                     clearInterval(this.activityInterval)
-                    clearInterval(this.cpuUsageInterval)
                     finishMeasurement([
                         ...this.downThreadResults,
                         ...this.upThreadResults,

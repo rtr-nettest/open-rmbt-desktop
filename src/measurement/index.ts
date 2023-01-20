@@ -7,6 +7,7 @@ import { IMeasurementPhaseState } from "./interfaces/measurement-phase-state.int
 import { ControlServer } from "./services/control-server.service"
 import { Logger } from "./services/logger.service"
 import { RMBTClient } from "./services/rmbt-client.service"
+import osu from "node-os-utils"
 
 let rmbtClient: RMBTClient | undefined
 
@@ -15,6 +16,12 @@ export interface MeasurementOptions {
 }
 
 export async function runMeasurement(options?: MeasurementOptions) {
+    const cpuUsageInterval = setInterval(() => {
+        osu.cpu.usage().then((percent) => {
+            Logger.I.info(`CPU usage is ${percent}%`)
+        })
+    }, 1000)
+
     rmbtClient = undefined
 
     const controlServer = ControlServer.instance
@@ -43,6 +50,7 @@ export async function runMeasurement(options?: MeasurementOptions) {
     )
     await controlServer.submitMeasurement(resultToSubmit)
     rmbtClient.measurementStatus = EMeasurementStatus.END
+    clearInterval(cpuUsageInterval)
 }
 
 export function getBasicNetworkInfo(): IBasicNetworkInfo {

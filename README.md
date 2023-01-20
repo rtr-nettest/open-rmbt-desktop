@@ -66,5 +66,6 @@ The variables used are:
     -   `LOG_TO_CONSOLE` - if set to `true` will output the client's logs to the stdout and stderr.
     -   `LOG_TO_FILE` - if set to `true` will output the client's logs to a file in the `log` folder in the root of the project.
     -   `LOG_WORKERS` - if set to `true` will output the client's worker's logs to files in the `log` folder in the root of the project. If set to another value or ommitted, only the main thread's output will be logged.
+    -   `LOG_CPU_USAGE` - if set to `true` will output the CPU usage in percent once a second during the measurement.
     -   `SSL_KEY_PATH` and `SSL_CERT_PATH` - paths to SSL key and certificate files which should be used by the client to establish a secure connection to a measurement server.
     -   `PLATFORM_CLI` - a short string to differentiate the CLI client from the Electron app on the BE.

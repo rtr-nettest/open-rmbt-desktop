@@ -15,10 +15,17 @@ export class MeasurementThreadResultList
 
     addResult(newBytes: number, newNsec: number) {
         Logger.I.info("New bytes: %d. New nsec: %d.", newBytes, newNsec)
+        // this.maxStoredResults / 7e9 ~= 10 results per 1e9 == 1 result per 1e8
+        let nsecDiff = newNsec
+        if (this.resultsCounter > 0) {
+            const prevNsec = this.nsec[this.resultsCounter - 1]
+            nsecDiff = newNsec - prevNsec
+        }
         if (
             newBytes >= 0 &&
             newNsec >= 0 &&
-            this.resultsCounter < this.maxStoredResults
+            this.resultsCounter < this.maxStoredResults &&
+            nsecDiff >= 1e8
         ) {
             this.bytes[this.resultsCounter] = newBytes
             this.nsec[this.resultsCounter] = newNsec

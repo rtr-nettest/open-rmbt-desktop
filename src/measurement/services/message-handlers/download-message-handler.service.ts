@@ -1,3 +1,4 @@
+import { hrtime } from "process"
 import { MeasurementThreadResultList } from "../../dto/measurement-thread-result-list.dto"
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import { IMeasurementThreadResult } from "../../interfaces/measurement-result.interface"
@@ -10,8 +11,8 @@ import { Time } from "../time.service"
 
 export class DownloadMessageHandler implements IMessageHandler {
     static minDiffTime = 100000000
-    private downloadStartTime = Time.nowNs()
-    private downloadEndTime = Time.nowNs()
+    private downloadStartTime = hrtime.bigint()
+    private downloadEndTime = hrtime.bigint()
     private downloadBytesRead = 0
     private activityInterval?: NodeJS.Timer
     private inactivityTimeout = 1000
@@ -41,12 +42,13 @@ export class DownloadMessageHandler implements IMessageHandler {
     }
 
     writeData(): void {
-        this.downloadStartTime = Time.nowNs()
+        this.downloadStartTime = hrtime.bigint()
         this.downloadEndTime =
-            this.downloadStartTime + Number(this.ctx.params.test_duration) * 1e9
+            this.downloadStartTime +
+            BigInt(+this.ctx.params.test_duration * 1e9)
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
-            if (Time.nowNs() >= this.downloadEndTime) {
+            if (hrtime.bigint() >= this.downloadEndTime) {
                 Logger.I.info(`Thread ${this.ctx.index} download timed out.`)
                 this.requestFinish()
             }
@@ -78,7 +80,7 @@ export class DownloadMessageHandler implements IMessageHandler {
         if (data.length > 0) {
             this.downloadBytesRead = this.downloadBytesRead + data.byteLength
 
-            this.nsec = Time.nowNs() - this.downloadStartTime
+            this.nsec = Number(hrtime.bigint() - this.downloadStartTime)
             this.result.addResult(this.downloadBytesRead, this.nsec)
 
             isFullChunk = this.downloadBytesRead % this.ctx.chunkSize === 0

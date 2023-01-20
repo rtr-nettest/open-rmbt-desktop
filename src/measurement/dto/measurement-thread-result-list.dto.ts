@@ -15,7 +15,9 @@ export class MeasurementThreadResultList
 
     addResult(newBytes: number, newNsec: number) {
         Logger.I.info("New bytes: %d. New nsec: %d.", newBytes, newNsec)
-        const expectedNsecDiff = (10 * 8e9) / this.maxStoredResults
+        // Download and upload usually takes between 7e9 and 8e9 nsec,
+        // so we spread the stored results evenly up to the maximal time
+        const expectedNsecDiff = 8e9 / this.maxStoredResults
         let nsecDiff = newNsec
         if (this.resultsCounter > 0) {
             const prevNsec = this.nsec[this.resultsCounter - 1]

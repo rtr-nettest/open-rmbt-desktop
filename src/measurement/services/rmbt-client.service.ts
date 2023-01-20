@@ -398,13 +398,13 @@ export class RMBTClient {
         }
     }
 
+    // From https://github.com/rtr-nettest/rmbtws/blob/master/src/WebsockettestDatastructures.js#L177
     private getOverallResult(
         threads: IMeasurementThreadResult[],
         phaseResults: (
             thread: IMeasurementThreadResult
         ) => IMeasurementThreadResultList
     ) {
-        //TotalTestResult.java:118 (Commit 7d5519ce6ad9121896866d4d8f30299c7c19910d)
         let numThreads = threads.length
         let targetTime = Infinity
 
@@ -419,7 +419,6 @@ export class RMBTClient {
                 }
             }
         }
-        Logger.I.info(`Target time is ${targetTime}`)
 
         let totalBytes = 0
 
@@ -465,8 +464,6 @@ export class RMBTClient {
                 totalBytes += calcBytes
             }
         }
-        Logger.I.info(`Total bytes is ${totalBytes}`)
-
         return {
             bytes: totalBytes,
             nsec: targetTime,
@@ -474,7 +471,6 @@ export class RMBTClient {
         }
     }
 
-    // from RMBTws client
     private getChunkSize() {
         const bytesPerSecTotal = this.bytesPerSecPreDownload.reduce(
             (acc, bytes) => acc + bytes,

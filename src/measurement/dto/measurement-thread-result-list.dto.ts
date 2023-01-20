@@ -7,18 +7,19 @@ import { Logger } from "../services/logger.service"
 export class MeasurementThreadResultList
     implements IMeasurementThreadResultList
 {
-    bytes: number[]
-    nsec: number[]
+    bytes: number[] = []
+    nsec: number[] = []
     private resultsCounter = 0
 
-    constructor(private maxStoredResults: number) {
-        this.bytes = new Array(maxStoredResults)
-        this.nsec = new Array(maxStoredResults)
-    }
+    constructor(private maxStoredResults: number = Infinity) {}
 
     addResult(newBytes: number, newNsec: number) {
         Logger.I.info("New bytes: %d. New nsec: %d.", newBytes, newNsec)
-        if (this.resultsCounter < this.maxStoredResults) {
+        if (
+            newBytes >= 0 &&
+            newNsec >= 0 &&
+            this.resultsCounter < this.maxStoredResults
+        ) {
             this.bytes[this.resultsCounter] = newBytes
             this.nsec[this.resultsCounter] = newNsec
             this.resultsCounter += 1

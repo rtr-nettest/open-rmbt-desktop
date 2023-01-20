@@ -87,37 +87,19 @@ export class MeasurementResult implements IMeasurementResult {
     }
 
     private getSpeedDetail(threadResults: IMeasurementThreadResult[]) {
-        const speedItemsDownMap: { [key: number]: ISpeedItem } = {}
-        const speedItemsUpMap: { [key: number]: ISpeedItem } = {}
+        const speedItemsDown = []
+        const speedItemsUp = []
         for (const threadResult of threadResults) {
             for (const speedItem of threadResult.speedItems) {
                 if (speedItem.direction === "download") {
-                    this.dedupeTime(speedItemsDownMap, speedItem)
+                    speedItemsDown.push(speedItem)
                 } else {
-                    this.dedupeTime(speedItemsUpMap, speedItem)
+                    speedItemsUp.push(speedItem)
                 }
             }
         }
-        const speedItemsDown = Object.values(speedItemsDownMap)
-        const speedItemsUp = Object.values(speedItemsUpMap)
         speedItemsDown.sort((a, b) => a.thread - b.thread)
         speedItemsUp.sort((a, b) => a.thread - b.thread)
         return [...speedItemsDown, ...speedItemsUp]
-    }
-
-    private dedupeTime(
-        map: { [key: number]: ISpeedItem },
-        speedItem: ISpeedItem
-    ) {
-        if (!speedItem.time) {
-            return map
-        }
-        if (!map[speedItem.time]) {
-            map[speedItem.time] = speedItem
-        }
-        if (speedItem.bytes > map[speedItem.time].bytes) {
-            map[speedItem.time] = speedItem
-        }
-        return map
     }
 }

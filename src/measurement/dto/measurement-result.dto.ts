@@ -3,7 +3,6 @@ import { IMeasurementRegistrationResponse } from "../interfaces/measurement-regi
 import {
     IMeasurementResult,
     IMeasurementThreadResult,
-    IMeasurementThreadResultList,
     IPing,
     ISpeedItem,
 } from "../interfaces/measurement-result.interface"
@@ -88,19 +87,37 @@ export class MeasurementResult implements IMeasurementResult {
     }
 
     private getSpeedDetail(threadResults: IMeasurementThreadResult[]) {
-        const speedItemsDown = []
-        const speedItemsUp = []
+        const speedItemsDownMap: { [key: number]: ISpeedItem } = {}
+        const speedItemsUpMap: { [key: number]: ISpeedItem } = {}
         for (const threadResult of threadResults) {
             for (const speedItem of threadResult.speedItems) {
                 if (speedItem.direction === "download") {
-                    speedItemsDown.push(speedItem)
+                    this.dedupeTime(speedItemsDownMap, speedItem)
                 } else {
-                    speedItemsUp.push(speedItem)
+                    this.dedupeTime(speedItemsUpMap, speedItem)
                 }
             }
         }
+        const speedItemsDown = Object.values(speedItemsDownMap)
+        const speedItemsUp = Object.values(speedItemsUpMap)
         speedItemsDown.sort((a, b) => a.thread - b.thread)
         speedItemsUp.sort((a, b) => a.thread - b.thread)
         return [...speedItemsDown, ...speedItemsUp]
+    }
+
+    private dedupeTime(
+        map: { [key: number]: ISpeedItem },
+        speedItem: ISpeedItem
+    ) {
+        if (!speedItem.time) {
+            return map
+        }
+        if (!map[speedItem.time]) {
+            map[speedItem.time] = speedItem
+        }
+        if (speedItem.bytes > map[speedItem.time].bytes) {
+            map[speedItem.time] = speedItem
+        }
+        return map
     }
 }

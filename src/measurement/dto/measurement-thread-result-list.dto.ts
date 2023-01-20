@@ -7,18 +7,26 @@ import { Logger } from "../services/logger.service"
 export class MeasurementThreadResultList
     implements IMeasurementThreadResultList
 {
-    bytes: number[]
-    nsec: number[]
+    bytes: number[] = []
+    nsec: number[] = []
     private resultsCounter = 0
 
-    constructor(private maxStoredResults: number) {
-        this.bytes = new Array(maxStoredResults)
-        this.nsec = new Array(maxStoredResults)
-    }
+    constructor(private maxStoredResults: number = Infinity) {}
 
     addResult(newBytes: number, newNsec: number) {
         Logger.I.info("New bytes: %d. New nsec: %d.", newBytes, newNsec)
-        if (this.resultsCounter < this.maxStoredResults) {
+        // Download and upload usually takes between 7e9 and 8e9 nsec,
+        // so we spread the stored results evenly up to the maximal time
+        const expectedNsecDiff = 8e9 / this.maxStoredResults
+        let nsecDiff = newNsec
+        if (this.resultsCounter > 0) {
+            const prevNsec = this.nsec[this.resultsCounter - 1]
+            nsecDiff = newNsec - prevNsec
+        }
+        if (
+            this.resultsCounter < this.maxStoredResults &&
+            (nsecDiff >= expectedNsecDiff || this.resultsCounter === 0)
+        ) {
             this.bytes[this.resultsCounter] = newBytes
             this.nsec[this.resultsCounter] = newNsec
             this.resultsCounter += 1

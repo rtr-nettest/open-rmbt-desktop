@@ -1,7 +1,10 @@
 import { MeasurementThreadResult } from "../dto/measurement-thread-result.dto"
 import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
-import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
+import {
+    IMeasurementThreadResult,
+    IMeasurementThreadResultList,
+} from "../interfaces/measurement-result.interface"
 import {
     IncomingMessageWithData,
     RMBTWorker,
@@ -104,7 +107,8 @@ export class RMBTClient {
                     Date.now() - this.measurementStart >= 60000
                 ) {
                     this.overallResultUp = this.getOverallResult(
-                        this.threadResults
+                        this.threadResults,
+                        (threadResult) => threadResult?.up
                     )
                     this.upThreadResults = [...this.threadResults]
                     this.threadResults = []
@@ -251,7 +255,8 @@ export class RMBTClient {
                             this.interimThreadResults[index] =
                                 message.data! as IMeasurementThreadResult
                             this.overallResultDown = this.getOverallResult(
-                                this.interimThreadResults
+                                this.interimThreadResults,
+                                (threadResult) => threadResult?.down
                             )
                             break
                         case "downloadFinished":
@@ -263,7 +268,8 @@ export class RMBTClient {
                                 this.measurementTasks.length
                             ) {
                                 this.overallResultDown = this.getOverallResult(
-                                    this.threadResults
+                                    this.threadResults,
+                                    (threadResult) => threadResult?.down
                                 )
                                 this.downThreadResults = [...this.threadResults]
                                 this.threadResults = []
@@ -351,7 +357,8 @@ export class RMBTClient {
                             this.interimThreadResults[index] =
                                 message.data! as IMeasurementThreadResult
                             this.overallResultUp = this.getOverallResult(
-                                this.interimThreadResults
+                                this.interimThreadResults,
+                                (threadResult) => threadResult?.up
                             )
                             break
                         case "uploadFinished":
@@ -391,33 +398,79 @@ export class RMBTClient {
         }
     }
 
-    // in bits per nano
+    // From https://github.com/rtr-nettest/rmbtws/blob/master/src/WebsockettestDatastructures.js#L177
     private getOverallResult(
-        threadResults: IMeasurementThreadResult[]
-    ): IOverallResult {
-        let bytes = 0
-        let nsec = 0
+        threads: IMeasurementThreadResult[],
+        phaseResults: (
+            thread: IMeasurementThreadResult
+        ) => IMeasurementThreadResultList
+    ) {
+        let numThreads = threads.length
+        let targetTime = Infinity
 
-        for (const task of threadResults) {
-            if (!task) {
+        for (let i = 0; i < numThreads; i++) {
+            if (!phaseResults(threads[i])) {
                 continue
             }
-            if (task.currentTime > nsec) {
-                nsec = task.currentTime
+            let nsecs = phaseResults(threads[i]).nsec
+            if (nsecs.length > 0) {
+                if (nsecs[nsecs.length - 1] < targetTime) {
+                    targetTime = nsecs[nsecs.length - 1]
+                }
             }
-            bytes += task.currentTransfer
         }
 
-        let speed = (bytes / nsec) * 1e9 * 8.0
-        speed = nsec === 0 ? 0 : isNaN(speed) ? 0 : speed
+        let totalBytes = 0
+
+        for (let _i = 0; _i < numThreads; _i++) {
+            if (!phaseResults(threads[_i])) {
+                continue
+            }
+            let thread = threads[_i]
+            let phasedThreadNsec = phaseResults(thread).nsec
+            let phasedThreadBytes = phaseResults(thread).bytes
+            let phasedLength = phasedThreadNsec.length
+
+            if (thread !== null && phasedLength > 0) {
+                let targetIdx = phasedLength
+                for (let j = 0; j < phasedLength; j++) {
+                    if (phasedThreadNsec[j] >= targetTime) {
+                        targetIdx = j
+                        break
+                    }
+                }
+                let calcBytes = 0
+                if (phasedThreadNsec[targetIdx] === targetTime) {
+                    // nsec[max] == targetTime
+                    calcBytes = phasedThreadBytes[phasedLength - 1]
+                } else {
+                    let bytes1 =
+                        targetIdx === 0 ? 0 : phasedThreadBytes[targetIdx - 1]
+                    let bytes2 = phasedThreadBytes[targetIdx]
+                    let bytesDiff = bytes2 - bytes1
+                    let nsec1 =
+                        targetIdx === 0 ? 0 : phasedThreadNsec[targetIdx - 1]
+                    let nsec2 = phasedThreadNsec[targetIdx]
+                    let nsecDiff = nsec2 - nsec1
+                    let nsecCompensation = targetTime - nsec1
+                    let factor = nsecCompensation / nsecDiff
+                    let compensation = Math.round(bytesDiff * factor)
+
+                    if (compensation < 0) {
+                        compensation = 0
+                    }
+                    calcBytes = bytes1 + compensation
+                }
+                totalBytes += calcBytes
+            }
+        }
         return {
-            bytes,
-            nsec,
-            speed,
+            bytes: totalBytes,
+            nsec: targetTime,
+            speed: (totalBytes * 8) / (targetTime / 1e9),
         }
     }
 
-    // from RMBTws client
     private getChunkSize() {
         const bytesPerSecTotal = this.bytesPerSecPreDownload.reduce(
             (acc, bytes) => acc + bytes,

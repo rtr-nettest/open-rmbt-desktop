@@ -16,11 +16,14 @@ export interface MeasurementOptions {
 }
 
 export async function runMeasurement(options?: MeasurementOptions) {
-    const cpuUsageInterval = setInterval(() => {
-        osu.cpu.usage().then((percent) => {
-            Logger.I.info(`CPU usage is ${percent}%`)
-        })
-    }, 1000)
+    let cpuUsageInterval: NodeJS.Timer | undefined
+    if (process.env.LOG_CPU_USAGE === "true") {
+        cpuUsageInterval = setInterval(() => {
+            osu.cpu.usage().then((percent) => {
+                Logger.I.info(`CPU usage is ${percent}%`)
+            })
+        }, 1000)
+    }
 
     rmbtClient = undefined
 
@@ -50,7 +53,7 @@ export async function runMeasurement(options?: MeasurementOptions) {
     )
     await controlServer.submitMeasurement(resultToSubmit)
     rmbtClient.measurementStatus = EMeasurementStatus.END
-    clearInterval(cpuUsageInterval)
+    if (cpuUsageInterval) clearInterval(cpuUsageInterval)
 }
 
 export function getBasicNetworkInfo(): IBasicNetworkInfo {

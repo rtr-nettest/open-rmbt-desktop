@@ -3,7 +3,7 @@ const path = require("path")
 
 module.exports = {
     packagerConfig: {
-        icon: path.join(process.env.CONFIG_FOLDER, "app-icon", "icon"),
+        icon: path.join(process.env.ASSETS_FOLDER, "app-icon", "icon"),
         ignore: [
             "src/",
             "log/",

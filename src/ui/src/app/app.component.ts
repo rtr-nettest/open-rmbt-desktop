@@ -1,10 +1,13 @@
-import { Component } from '@angular/core';
+import { Component } from "@angular/core"
+import { CoreStore } from "./store/core.store"
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+    selector: "app-root",
+    templateUrl: "./app.component.html",
+    styleUrls: ["./app.component.scss"],
 })
 export class AppComponent {
-  title = 'ui';
+    constructor(private coreStore: CoreStore) {
+        this.coreStore.init()
+    }
 }

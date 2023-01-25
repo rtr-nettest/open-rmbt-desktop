@@ -11,24 +11,10 @@ import {
 } from "rxjs"
 import { TestVisualizationState } from "../dto/test-visualization-state.dto"
 import { ITestVisualizationState } from "../interfaces/test-visualization-state.interface"
-import { IMeasurementPhaseState } from "../../../../measurement/interfaces/measurement-phase-state.interface"
 import { IBasicNetworkInfo } from "../../../../measurement/interfaces/basic-network-info.interface"
 import { BasicNetworkInfo } from "../dto/basic-network-info.dto"
 import { ISimpleHistoryResult } from "../../../../measurement/interfaces/simple-history-result.interface"
 
-declare global {
-    interface Window {
-        electronAPI: {
-            runMeasurement: () => Promise<void>
-            getBasicNetworkInfo: () => Promise<IBasicNetworkInfo>
-            getMeasurementState: () => Promise<IMeasurementPhaseState>
-            getMeasurementResult: (
-                testUuid: string
-            ) => Promise<ISimpleHistoryResult>
-            onError: (callback: (error: Error) => any) => Promise<any>
-        }
-    }
-}
 const STATE_UPDATE_TIMEOUT = 200
 
 @Injectable({

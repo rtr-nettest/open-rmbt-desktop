@@ -80,6 +80,10 @@ ipcMain.on(Events.RUN_MEASUREMENT, (event) => {
     })
 })
 
+ipcMain.on(Events.GET_ENV, () => {
+    return process.env
+})
+
 ipcMain.handle(Events.GET_BASIC_NETWORK_INFO, () => {
     return getBasicNetworkInfo()
 })

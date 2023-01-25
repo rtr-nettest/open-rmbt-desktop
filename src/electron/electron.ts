@@ -7,7 +7,7 @@ import {
     getMeasurementResult,
     runMeasurement,
 } from "../measurement"
-import { Events } from "./events"
+import { Events } from "./enums/events.enum"
 import Protocol from "./protocol"
 
 config({
@@ -80,8 +80,10 @@ ipcMain.on(Events.RUN_MEASUREMENT, (event) => {
     })
 })
 
-ipcMain.on(Events.GET_ENV, () => {
-    return process.env
+ipcMain.handle(Events.GET_ENV, () => {
+    return {
+        FLAVOR: process.env.FLAVOR,
+    }
 })
 
 ipcMain.handle(Events.GET_BASIC_NETWORK_INFO, () => {

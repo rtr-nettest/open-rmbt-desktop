@@ -16,7 +16,7 @@ import { SpacerComponent } from "./widgets/spacer/spacer.component"
 import { IBasicNetworkInfo } from "../../../measurement/interfaces/basic-network-info.interface"
 import { IMeasurementPhaseState } from "../../../measurement/interfaces/measurement-phase-state.interface"
 import { ISimpleHistoryResult } from "../../../measurement/interfaces/simple-history-result.interface"
-import { IEnv } from "./interfaces/env.interface"
+import { IEnv } from "../../../electron/interfaces/env.interface"
 
 declare global {
     interface Window {

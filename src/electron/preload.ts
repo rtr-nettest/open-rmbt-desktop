@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron"
-import { Events } from "./events"
+import { Events } from "./enums/events.enum"
 
 contextBridge.exposeInMainWorld("electronAPI", {
     runMeasurement: () => ipcRenderer.send(Events.RUN_MEASUREMENT),

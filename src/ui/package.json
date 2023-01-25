@@ -3,11 +3,11 @@
     "version": "0.0.0",
     "scripts": {
         "ng": "ng",
-        "start": "ng serve",
-        "build": "ng build",
-        "build-for-packaging": "ng build --base-href ./ && node scripts/rewrite-asset-paths-for-packaging",
-        "watch": "ng build --watch --configuration development",
-        "test": "ng test"
+        "start": "node scripts/copy-assets && ng serve",
+        "build": "node scripts/copy-assets && ng build",
+        "build-for-packaging": "node scripts/copy-assets && ng build --base-href ./ && node scripts/rewrite-asset-paths-for-packaging",
+        "watch": "node scripts/copy-assets && ng build --watch --configuration development",
+        "test": "node scripts/copy-assets && ng test"
     },
     "private": true,
     "dependencies": {
@@ -28,6 +28,8 @@
         "@angular/cli": "~15.0.3",
         "@angular/compiler-cli": "^15.0.0",
         "@types/jasmine": "~4.3.0",
+        "dotenv": "^16.0.3",
+        "fs-extra": "^11.1.0",
         "jasmine-core": "~4.5.0",
         "karma": "~6.4.0",
         "karma-chrome-launcher": "~3.1.0",

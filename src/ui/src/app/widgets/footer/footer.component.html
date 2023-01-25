@@ -1,1 +1,7 @@
-<footer class="app-footer">Developed by Specure</footer>
+<footer class="app-footer">
+    <img
+        *ngIf="(env$ | async)?.FLAVOR === 'ont'"
+        src="/assets/images/logo-footer.svg"
+        class="app-logo"
+    />Developed by Specure
+</footer>

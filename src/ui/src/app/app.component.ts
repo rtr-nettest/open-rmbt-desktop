@@ -1,5 +1,5 @@
 import { Component } from "@angular/core"
-import { CoreStore } from "./store/core.store"
+import { MainStore } from "./store/main.store"
 
 @Component({
     selector: "app-root",
@@ -7,7 +7,7 @@ import { CoreStore } from "./store/core.store"
     styleUrls: ["./app.component.scss"],
 })
 export class AppComponent {
-    constructor(private coreStore: CoreStore) {
-        this.coreStore.init()
+    constructor(private mainStore: MainStore) {
+        this.mainStore.init()
     }
 }

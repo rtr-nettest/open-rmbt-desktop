@@ -19,9 +19,8 @@ app-footer {
 }
 
 .app-main {
-    justify-content: center;
+    align-items: center;
     display: flex;
-    flex-direction: column;
     height: 100%;
     padding: rem(30);
 
@@ -37,8 +36,18 @@ app-footer {
 }
 
 .app-link {
+    display: flex;
     .mat-icon {
+        flex: 0 0 rem(24);
         margin-right: rem(9);
         vertical-align: middle;
+    }
+}
+
+.app-aside {
+    margin-left: rem(130);
+
+    @include screen-small {
+        display: none;
     }
 }

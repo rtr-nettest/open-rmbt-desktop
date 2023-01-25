@@ -1,3 +1,5 @@
 export interface IEnv {
-    FLAVOR: "rtr" | "ont"
+    CMS_URL: string
+    FLAVOR: string
+    X_NETTEST_CLIENT: string
 }

@@ -8,6 +8,7 @@ import {
     runMeasurement,
 } from "../measurement"
 import { Events } from "./enums/events.enum"
+import { IEnv } from "./interfaces/env.interface"
 import Protocol from "./protocol"
 
 config({
@@ -80,9 +81,11 @@ ipcMain.on(Events.RUN_MEASUREMENT, (event) => {
     })
 })
 
-ipcMain.handle(Events.GET_ENV, () => {
+ipcMain.handle(Events.GET_ENV, (): IEnv => {
     return {
-        FLAVOR: process.env.FLAVOR,
+        CMS_URL: process.env.CMS_URL || "",
+        FLAVOR: process.env.FLAVOR || "rtr",
+        X_NETTEST_CLIENT: process.env.X_NETTEST_CLIENT || "",
     }
 })
 

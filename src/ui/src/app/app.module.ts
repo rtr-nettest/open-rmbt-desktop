@@ -19,6 +19,7 @@ import { ISimpleHistoryResult } from "../../../measurement/interfaces/simple-his
 import { IEnv } from "../../../electron/interfaces/env.interface"
 import { MatIconModule } from "@angular/material/icon"
 import { MatButtonModule } from "@angular/material/button"
+import { HttpClientModule } from "@angular/common/http"
 
 declare global {
     interface Window {
@@ -49,7 +50,13 @@ declare global {
         DlComponent,
         SpacerComponent,
     ],
-    imports: [BrowserModule, AppRoutingModule, MatIconModule, MatButtonModule],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        MatIconModule,
+        MatButtonModule,
+        HttpClientModule,
+    ],
     providers: [],
     bootstrap: [AppComponent],
 })

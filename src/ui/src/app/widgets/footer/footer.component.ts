@@ -1,5 +1,5 @@
 import { Component } from "@angular/core"
-import { CoreStore } from "src/app/store/core.store"
+import { MainStore } from "src/app/store/main.store"
 
 @Component({
     selector: "app-footer",
@@ -7,7 +7,7 @@ import { CoreStore } from "src/app/store/core.store"
     styleUrls: ["./footer.component.scss"],
 })
 export class FooterComponent {
-    env$ = this.coreStore.env$
+    env$ = this.mainStore.env$
 
-    constructor(private coreStore: CoreStore) {}
+    constructor(private mainStore: MainStore) {}
 }

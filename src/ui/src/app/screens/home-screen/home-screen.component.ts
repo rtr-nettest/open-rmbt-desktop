@@ -1,5 +1,8 @@
 import { Component } from "@angular/core"
-import { CoreStore } from "src/app/store/core.store"
+import { switchMap, tap, withLatestFrom } from "rxjs"
+import { IMainAsset } from "src/app/interfaces/main-asset.interface"
+import { CMSService } from "src/app/services/cms.service"
+import { MainStore } from "src/app/store/main.store"
 
 @Component({
     selector: "app-home-screen",
@@ -7,7 +10,14 @@ import { CoreStore } from "src/app/store/core.store"
     styleUrls: ["./home-screen.component.scss"],
 })
 export class HomeScreenComponent {
-    env$ = this.coreStore.env$
+    env$ = this.mainStore.env$
+    testInviteImg$ = this.mainStore.env$.pipe(
+        switchMap((env) =>
+            this.cmsService.getAssetByName(
+                `test-invite-img.${env?.X_NETTEST_CLIENT}.svg`
+            )
+        )
+    )
 
-    constructor(private coreStore: CoreStore) {}
+    constructor(private mainStore: MainStore, private cmsService: CMSService) {}
 }

@@ -8,7 +8,10 @@
         <app-start-test-button></app-start-test-button>
         <div class="app-link-wrapper" *ngIf="(env$ | async)?.FLAVOR === 'ont'">
             <!-- TODO: take the href and the text from the CMS -->
-            <a class="app-link" href="https://nettest.com/en/methodology"
+            <a
+                class="app-link"
+                href="https://nettest.com/en/methodology"
+                target="_blank"
                 ><mat-icon>info</mat-icon
                 ><span
                     >Learn more about the methodology of the measurement</span

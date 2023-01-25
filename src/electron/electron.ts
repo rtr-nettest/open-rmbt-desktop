@@ -35,10 +35,9 @@ const createWindow = () => {
     })
 
     win.webContents.setWindowOpenHandler(({ url }) => {
-        if (
-            process.env.FULL_HISTORY_RESUlT_URL &&
-            url.startsWith(process.env.FULL_HISTORY_RESUlT_URL)
-        ) {
+        const historyUrl = new URL(process.env.FULL_HISTORY_RESUlT_URL ?? "")
+        const thisUrl = new URL(url)
+        if (thisUrl.hostname === historyUrl.hostname) {
             shell.openExternal(url)
         }
         return { action: "deny" }

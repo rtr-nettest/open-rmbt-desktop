@@ -17,6 +17,8 @@ import { IBasicNetworkInfo } from "../../../measurement/interfaces/basic-network
 import { IMeasurementPhaseState } from "../../../measurement/interfaces/measurement-phase-state.interface"
 import { ISimpleHistoryResult } from "../../../measurement/interfaces/simple-history-result.interface"
 import { IEnv } from "../../../electron/interfaces/env.interface"
+import { MatIconModule } from "@angular/material/icon"
+import { MatButtonModule } from "@angular/material/button"
 
 declare global {
     interface Window {
@@ -47,7 +49,7 @@ declare global {
         DlComponent,
         SpacerComponent,
     ],
-    imports: [BrowserModule, AppRoutingModule],
+    imports: [BrowserModule, AppRoutingModule, MatIconModule, MatButtonModule],
     providers: [],
     bootstrap: [AppComponent],
 })

@@ -1,0 +1,10 @@
+@import "../core.scss";
+
+a:default,
+a:hover,
+a:focus,
+a:visited,
+a:active {
+    color: $color-link;
+    text-decoration: none;
+}

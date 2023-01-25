@@ -4,7 +4,7 @@
     align-items: center;
     display: flex;
     height: rem(108);
-    font-size: $font-size-sm;
+    font-size: rem($font-size-sm);
     padding: rem(30);
 
     img {

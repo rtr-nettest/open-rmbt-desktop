@@ -1,5 +1,14 @@
 <app-header></app-header>
 <main class="app-main">
+    <h1 class="app-title" *ngIf="(env$ | async)?.FLAVOR === 'ont'">
+        Test the speed of your internet.
+    </h1>
     <app-start-test-button></app-start-test-button>
+    <div class="app-link-wrapper" *ngIf="(env$ | async)?.FLAVOR === 'ont'">
+        <a class="app-link" href=""
+            ><mat-icon>info</mat-icon
+            ><span>Learn more about the methodology of the measurement</span></a
+        >
+    </div>
 </main>
 <app-footer></app-footer>

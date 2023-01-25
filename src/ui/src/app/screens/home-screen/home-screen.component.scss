@@ -14,15 +14,31 @@ app-footer {
     position: absolute;
 }
 
+.app-title {
+    margin-bottom: rem(40);
+}
+
 .app-main {
-    align-items: center;
+    justify-content: center;
     display: flex;
+    flex-direction: column;
     height: 100%;
     padding: rem(30);
 
     app-start-test-button {
-        flex: auto;
-        height: rem(200);
+        flex: 0 0 auto;
         max-width: rem(560);
+        width: 100%;
+    }
+}
+
+.app-link-wrapper {
+    margin-top: rem(40);
+}
+
+.app-link {
+    .mat-icon {
+        margin-right: rem(9);
+        vertical-align: middle;
     }
 }

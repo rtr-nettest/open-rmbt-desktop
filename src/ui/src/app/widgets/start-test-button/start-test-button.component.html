@@ -1,12 +1,26 @@
 <a
+    *ngIf="(env$ | async)?.FLAVOR === 'ont'; else rtr"
     routerLink="/test"
-    class="uk-card uk-card-primary uk-card-hover uk-card-body"
+    mat-flat-button
+    class="app-start-button"
+    color="primary"
+    >Start Speed Measurement</a
 >
-    <div class="uk-card-media-top">
-        <span class="uk-icon-button uk-icon" uk-icon="icon: play; ratio: 1.5">
-            <img src="/assets/images/start-button-icon.svg" />
-        </span>
-    </div>
-    <p>Start Test</p>
-    <h3 class="uk-card-title uk-margin-top">Start RTR-NetTest</h3>
-</a>
+
+<ng-template #rtr>
+    <a
+        routerLink="/test"
+        class="uk-card uk-card-primary uk-card-hover uk-card-body"
+    >
+        <div class="uk-card-media-top">
+            <span
+                class="uk-icon-button uk-icon"
+                uk-icon="icon: play; ratio: 1.5"
+            >
+                <img src="/assets/images/start-button-icon.svg" />
+            </span>
+        </div>
+        <p>Start Test</p>
+        <h3 class="uk-card-title uk-margin-top">Start RTR-NetTest</h3>
+    </a>
+</ng-template>

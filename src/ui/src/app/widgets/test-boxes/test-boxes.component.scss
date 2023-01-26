@@ -3,6 +3,7 @@
 $run-again-btn-width: rem(190);
 
 .nt-container__row {
+    align-items: center;
     display: flex;
     margin-bottom: rem(20);
 
@@ -131,7 +132,7 @@ $run-again-btn-width: rem(190);
         @include screen-small {
             flex-direction: row;
             justify-content: center;
-            margin-left: 0;
+            margin-left: rem(20);
             margin-top: rem(40);
 
             .nt-container__col {
@@ -139,11 +140,6 @@ $run-again-btn-width: rem(190);
                 justify-content: flex-start;
                 padding: 0 rem(10);
             }
-        }
-
-        @include screen-xs {
-            align-items: center;
-            flex-direction: column;
         }
     }
 
@@ -202,6 +198,7 @@ $run-again-btn-width: rem(190);
     }
 
     @include screen-xs {
+        flex-direction: column;
         .nt-test-indicator {
             width: auto;
 
@@ -210,8 +207,13 @@ $run-again-btn-width: rem(190);
             }
         }
 
+        .nt-test-info {
+            margin-left: 0;
+            margin-bottom: rem(20);
+            margin-top: rem(20);
+        }
+
         &.nt-indicators {
-            flex-direction: column;
             margin: rem(24);
         }
     }

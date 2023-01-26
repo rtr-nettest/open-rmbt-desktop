@@ -7,14 +7,14 @@ export class PlatformService {
         if (!isPlatformBrowser(this.platformId)) {
             return false
         }
-        return window.innerWidth <= 375
+        return window.innerWidth <= 475
     }
 
     get isMobile(): boolean {
         if (!isPlatformBrowser(this.platformId)) {
             return false
         }
-        return window.innerWidth > 375 && window.innerWidth <= 768
+        return window.innerWidth > 475 && window.innerWidth <= 768
     }
 
     get isTab(): boolean {

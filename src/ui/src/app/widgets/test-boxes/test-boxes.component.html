@@ -1,0 +1,24 @@
+<div
+    *ngIf="visualization$ | async as visualization"
+    class="nt-container__row nt-indicators"
+>
+    <div class="nt-container__col">
+        <div class="nt-container__row">
+            <nt-test-indicator
+                id="ping_indicator"
+                class="nt-test-indicator"
+                [data]="getPing(visualization)"
+            ></nt-test-indicator>
+            <nt-test-indicator
+                id="download_indicator"
+                class="nt-test-indicator"
+                [data]="getDownload(visualization)"
+            ></nt-test-indicator>
+            <nt-test-indicator
+                id="upload_indicator"
+                class="nt-test-indicator"
+                [data]="getUpload(visualization)"
+            ></nt-test-indicator>
+        </div>
+    </div>
+</div>

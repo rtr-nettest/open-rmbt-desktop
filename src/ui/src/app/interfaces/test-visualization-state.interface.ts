@@ -5,7 +5,14 @@ export interface ITestVisualizationState {
     phases: {
         [key: string]: ITestItemState
     }
-    currentPhase: EMeasurementStatus
+    currentPhaseName: EMeasurementStatus
+
+    setCounter(
+        newPhase: EMeasurementStatus,
+        newTestItemState: ITestItemState
+    ): void
+
+    setDone(newPhase: EMeasurementStatus): void
 
     extendChart?(
         key: "download" | "upload",

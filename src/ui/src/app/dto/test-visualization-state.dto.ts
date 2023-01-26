@@ -3,20 +3,9 @@ import { ITestItemState } from "../interfaces/test-item-state.interface"
 import { EMeasurementStatus } from "../../../../measurement/enums/measurement-status.enum"
 import { IMeasurementPhaseState } from "../../../../measurement/interfaces/measurement-phase-state.interface"
 import { extend } from "../helpers/extend"
+import { TestItemState } from "./test-item-state.dto"
 import { ETestStatuses } from "../enums/test-statuses.enum"
-
-export class TestItemState implements ITestItemState {
-    testUuid: string = ""
-    down: number = -1
-    up: number = -1
-    ping: number = -1
-    chart?: { x: number; y: number }[] | undefined
-    container?: ETestStatuses | undefined
-    label?: string | undefined
-    duration: number = 0
-    progress: number = 0
-    phase: EMeasurementStatus = EMeasurementStatus.NOT_STARTED
-}
+import { ETestLabels } from "../enums/test-labels.enum"
 
 export class TestVisualizationState implements ITestVisualizationState {
     phases: {
@@ -26,15 +15,15 @@ export class TestVisualizationState implements ITestVisualizationState {
         [EMeasurementStatus.WAIT]: new TestItemState(),
         [EMeasurementStatus.INIT]: new TestItemState(),
         [EMeasurementStatus.INIT_DOWN]: new TestItemState(),
-        [EMeasurementStatus.PING]: new TestItemState(),
-        [EMeasurementStatus.DOWN]: new TestItemState(),
+        [EMeasurementStatus.PING]: new TestItemState(ETestLabels.PING),
+        [EMeasurementStatus.DOWN]: new TestItemState(ETestLabels.DOWNLOAD),
         [EMeasurementStatus.INIT_UP]: new TestItemState(),
-        [EMeasurementStatus.UP]: new TestItemState(),
+        [EMeasurementStatus.UP]: new TestItemState(ETestLabels.UPLOAD),
         [EMeasurementStatus.SPEEDTEST_END]: new TestItemState(),
         [EMeasurementStatus.SUBMITTING_RESULTS]: new TestItemState(),
         [EMeasurementStatus.END]: new TestItemState(),
     }
-    currentPhase: EMeasurementStatus = EMeasurementStatus.NOT_STARTED
+    currentPhaseName: EMeasurementStatus = EMeasurementStatus.NOT_STARTED
 
     static from(
         initialState: ITestVisualizationState,
@@ -42,16 +31,36 @@ export class TestVisualizationState implements ITestVisualizationState {
     ) {
         const newState = extend<ITestVisualizationState>(initialState)
         if (newState.phases[phaseState.phase]) {
-            newState.phases[phaseState.phase] = extend<ITestItemState>(
+            const newTestItemState = extend<ITestItemState>(
                 newState.phases[phaseState.phase],
                 phaseState
             )
-            if (phaseState.phase !== newState.currentPhase) {
-                newState.phases[newState.currentPhase].progress = 1
-            }
-            newState.currentPhase = phaseState.phase
+            newState.phases[phaseState.phase] = newTestItemState
+            newState.setCounter(phaseState.phase, newTestItemState)
+            newState.setDone(phaseState.phase)
         }
         return newState
+    }
+
+    setCounter(
+        newPhaseName: EMeasurementStatus,
+        newTestItemState: ITestItemState
+    ) {
+        if (newPhaseName === EMeasurementStatus.DOWN) {
+            this.phases[EMeasurementStatus.PING].counter = newTestItemState.ping
+            this.phases[EMeasurementStatus.DOWN].counter = newTestItemState.down
+        } else if (newPhaseName === EMeasurementStatus.UP) {
+            this.phases[EMeasurementStatus.UP].counter = newTestItemState.up
+        }
+    }
+
+    setDone(newPhaseName: EMeasurementStatus) {
+        if (newPhaseName !== this.currentPhaseName) {
+            this.phases[this.currentPhaseName].progress = 1
+            this.phases[this.currentPhaseName].container = ETestStatuses.DONE
+            this.phases[newPhaseName].container = ETestStatuses.ACTIVE
+            this.currentPhaseName = newPhaseName
+        }
     }
 
     extendChart(key: string, counter: string | number, progress: number) {

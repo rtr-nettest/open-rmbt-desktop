@@ -23,6 +23,8 @@ import { MatTooltipModule } from "@angular/material/tooltip"
 import { HttpClientModule } from "@angular/common/http"
 import { TranslocoRootModule } from "./transloco-root.module"
 import { TestHeaderComponent } from "./widgets/test-header/test-header.component"
+import { TestIndicatorComponent } from "./widgets/test-indicator/test-indicator.component"
+import { TestBoxesComponent } from "./widgets/test-boxes/test-boxes.component"
 
 declare global {
     interface Window {
@@ -53,6 +55,8 @@ declare global {
         DlComponent,
         SpacerComponent,
         TestHeaderComponent,
+        TestIndicatorComponent,
+        TestBoxesComponent,
     ],
     imports: [
         BrowserModule,

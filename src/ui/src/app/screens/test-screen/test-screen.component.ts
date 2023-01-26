@@ -15,8 +15,10 @@ export class TestScreenComponent {
     visualization$ = this.store.launchTest().pipe(
         withLatestFrom(this.store.error$),
         tap(([state, error]) => {
-            if (state.currentPhase === EMeasurementStatus.END || error) {
-                this.goToResultScreen(state.phases[state.currentPhase].testUuid)
+            if (state.currentPhaseName === EMeasurementStatus.END || error) {
+                this.goToResultScreen(
+                    state.phases[state.currentPhaseName].testUuid
+                )
             }
         })
     )

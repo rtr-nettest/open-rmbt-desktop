@@ -24,8 +24,8 @@ export class TestHeaderComponent implements OnDestroy {
     progress$ = this.store.visualization$.pipe(
         tap((s) => {
             const stages = this.stages.map((stage) => stage.stage)
-            if (stages.includes(s.currentPhase)) {
-                this.currentStage = s.currentPhase
+            if (stages.includes(s.currentPhaseName)) {
+                this.currentStage = s.currentPhaseName
             }
         })
     )

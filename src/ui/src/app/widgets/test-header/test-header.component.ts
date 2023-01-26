@@ -95,7 +95,7 @@ export class TestHeaderComponent implements OnDestroy {
         .subscribe()
 
     get isMobile() {
-        return this.platform.isSmallMobile
+        return this.platform.isMobile || this.platform.isSmallMobile
     }
 
     get totalStages() {

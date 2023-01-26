@@ -14,8 +14,8 @@ $run-again-btn-width: rem(190);
         width: 100%;
     }
 
-    .nt-indicators {
-        margin: rem(100) auto rem(70);
+    &.nt-indicators {
+        margin: rem(70) auto;
         mat-select {
             mat-select-trigger {
                 p {
@@ -33,10 +33,6 @@ $run-again-btn-width: rem(190);
                 background-color: #63961c !important;
             }
         }
-    }
-
-    .nt-container {
-        background: inherit;
     }
 
     .gap-text {
@@ -174,11 +170,6 @@ $run-again-btn-width: rem(190);
     @include screen-small {
         margin-bottom: 0;
 
-        .nt-indicators {
-            margin: rem(24) 0 0;
-            width: 100%;
-        }
-
         .nt-test {
             &-progress {
                 width: 100%;
@@ -202,17 +193,6 @@ $run-again-btn-width: rem(190);
         .nt-container {
             min-height: rem(290);
 
-            .nt-test-invite {
-                margin: 0 0;
-                &__image {
-                    margin-left: rem(100);
-                    height: rem(127);
-                    img {
-                        height: 100%;
-                    }
-                }
-            }
-
             &__col {
                 section:last-of-type {
                     margin-bottom: rem(32);
@@ -226,13 +206,13 @@ $run-again-btn-width: rem(190);
             width: auto;
 
             &:not(:last-child) {
-                margin-right: rem(10);
+                margin-bottom: rem(10);
             }
         }
 
-        .nt-indicators {
+        &.nt-indicators {
             flex-direction: column;
-            margin-top: 0;
+            margin: rem(24);
         }
     }
 }

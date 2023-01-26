@@ -12,6 +12,11 @@
     position: relative;
     width: rem(152);
 
+    @include screen-small {
+        height: rem(100);
+        width: rem(100);
+    }
+
     &__row {
         color: scale-color($color-secondary, $alpha: -50%);
         font-size: rem(14);

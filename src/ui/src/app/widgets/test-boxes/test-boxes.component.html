@@ -1,9 +1,6 @@
-<div
-    *ngIf="visualization$ | async as visualization"
-    class="nt-container__row nt-indicators"
->
+<div *ngIf="visualization$ | async as visualization" class="nt-container__row">
     <div class="nt-container__col">
-        <div class="nt-container__row">
+        <div class="nt-container__row nt-indicators">
             <nt-test-indicator
                 id="ping_indicator"
                 class="nt-test-indicator"

@@ -1,5 +1,6 @@
 import { Component } from "@angular/core"
 import { ITestVisualizationState } from "src/app/interfaces/test-visualization-state.interface"
+import { PlatformService } from "src/app/services/platform.service"
 import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
 
@@ -10,18 +11,29 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
 })
 export class TestChartsComponent {
     visualization$ = this.store.visualization$
-    margin = 24
 
-    get chartWidth() {
-        return Math.round(
-            (globalThis.document?.querySelector(".nt-test-header")
-                ?.clientWidth ?? 0) /
-                2 -
-                this.margin
-        )
+    get isMobile() {
+        return this.platform.isMobile || this.platform.isSmallMobile
     }
 
-    constructor(private store: TestStore) {}
+    get margin() {
+        return this.isMobile ? 0 : 24
+    }
+
+    get chartHeight() {
+        return this.isMobile ? 100 : 192
+    }
+
+    get chartWidth() {
+        const headerWidth =
+            globalThis.document?.querySelector(".nt-test-header")
+                ?.clientWidth ?? 0
+        return this.isMobile
+            ? headerWidth
+            : Math.round(headerWidth / 2 - this.margin)
+    }
+
+    constructor(private platform: PlatformService, private store: TestStore) {}
 
     shouldShow(visualization: ITestVisualizationState | null) {
         return (

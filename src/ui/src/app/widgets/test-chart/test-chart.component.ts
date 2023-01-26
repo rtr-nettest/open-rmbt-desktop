@@ -21,6 +21,7 @@ import { TestChart } from "../../dto/test-chart.dto"
 export class TestChartComponent {
     @Input() direction: "download" | "upload" = "download"
     @Input() width = 0
+    @Input() height = 0
 
     chart: TestChart | undefined
     visualization$: Observable<ITestVisualizationState> =

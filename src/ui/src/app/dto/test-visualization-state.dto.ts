@@ -46,6 +46,9 @@ export class TestVisualizationState implements ITestVisualizationState {
                 newState.phases[phaseState.phase],
                 phaseState
             )
+            if (phaseState.phase !== newState.currentPhase) {
+                newState.phases[newState.currentPhase].progress = 1
+            }
             newState.currentPhase = phaseState.phase
         }
         return newState

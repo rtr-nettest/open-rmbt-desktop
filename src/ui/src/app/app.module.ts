@@ -19,8 +19,10 @@ import { ISimpleHistoryResult } from "../../../measurement/interfaces/simple-his
 import { IEnv } from "../../../electron/interfaces/env.interface"
 import { MatIconModule } from "@angular/material/icon"
 import { MatButtonModule } from "@angular/material/button"
+import { MatTooltipModule } from "@angular/material/tooltip"
 import { HttpClientModule } from "@angular/common/http"
 import { TranslocoRootModule } from "./transloco-root.module"
+import { TestHeaderComponent } from "./widgets/test-header/test-header.component"
 
 declare global {
     interface Window {
@@ -50,12 +52,14 @@ declare global {
         InterimResultsComponent,
         DlComponent,
         SpacerComponent,
+        TestHeaderComponent,
     ],
     imports: [
         BrowserModule,
         AppRoutingModule,
         MatIconModule,
         MatButtonModule,
+        MatTooltipModule,
         HttpClientModule,
         TranslocoRootModule,
     ],

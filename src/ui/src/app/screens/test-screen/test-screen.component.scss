@@ -19,4 +19,13 @@
     @include screen-small {
         padding: rem(40);
     }
+
+    &--ont {
+        flex-direction: column;
+        margin-left: auto;
+
+        & > * {
+            flex: auto;
+        }
+    }
 }

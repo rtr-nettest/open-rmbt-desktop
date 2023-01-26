@@ -25,6 +25,8 @@ import { TranslocoRootModule } from "./transloco-root.module"
 import { TestHeaderComponent } from "./widgets/test-header/test-header.component"
 import { TestIndicatorComponent } from "./widgets/test-indicator/test-indicator.component"
 import { TestBoxesComponent } from "./widgets/test-boxes/test-boxes.component"
+import { TestChartComponent } from "./widgets/test-chart/test-chart.component"
+import { TestChartsComponent } from "./widgets/test-charts/test-charts.component"
 
 declare global {
     interface Window {
@@ -57,6 +59,8 @@ declare global {
         TestHeaderComponent,
         TestIndicatorComponent,
         TestBoxesComponent,
+        TestChartComponent,
+        TestChartsComponent,
     ],
     imports: [
         BrowserModule,

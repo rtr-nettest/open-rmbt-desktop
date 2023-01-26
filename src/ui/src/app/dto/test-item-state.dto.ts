@@ -14,5 +14,9 @@ export class TestItemState implements ITestItemState {
     progress: number = 0
     phase: EMeasurementStatus = EMeasurementStatus.NOT_STARTED
 
-    constructor(public label?: string) {}
+    constructor(options?: Partial<ITestItemState>) {
+        if (options) {
+            Object.assign(options)
+        }
+    }
 }

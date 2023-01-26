@@ -14,9 +14,5 @@ export interface ITestVisualizationState {
 
     setDone(newPhase: EMeasurementStatus): void
 
-    extendChart?(
-        key: "download" | "upload",
-        counter: string | number,
-        progress: number
-    ): { x: number; y: number }[]
+    extendChart(newPhase: EMeasurementStatus): void
 }

@@ -15,13 +15,20 @@ export class TestVisualizationState implements ITestVisualizationState {
         [EMeasurementStatus.WAIT]: new TestItemState(),
         [EMeasurementStatus.INIT]: new TestItemState(),
         [EMeasurementStatus.INIT_DOWN]: new TestItemState(),
-        [EMeasurementStatus.PING]: new TestItemState(ETestLabels.PING),
-        [EMeasurementStatus.DOWN]: new TestItemState(ETestLabels.DOWNLOAD),
+        [EMeasurementStatus.PING]: new TestItemState({
+            label: ETestLabels.PING,
+        }),
+        [EMeasurementStatus.DOWN]: new TestItemState({
+            label: ETestLabels.DOWNLOAD,
+        }),
         [EMeasurementStatus.INIT_UP]: new TestItemState(),
-        [EMeasurementStatus.UP]: new TestItemState(ETestLabels.UPLOAD),
+        [EMeasurementStatus.UP]: new TestItemState({
+            label: ETestLabels.UPLOAD,
+        }),
         [EMeasurementStatus.SPEEDTEST_END]: new TestItemState(),
         [EMeasurementStatus.SUBMITTING_RESULTS]: new TestItemState(),
         [EMeasurementStatus.END]: new TestItemState(),
+        [EMeasurementStatus.SHOWING_RESULTS]: new TestItemState(),
     }
     currentPhaseName: EMeasurementStatus = EMeasurementStatus.NOT_STARTED
 
@@ -37,6 +44,7 @@ export class TestVisualizationState implements ITestVisualizationState {
             )
             newState.phases[phaseState.phase] = newTestItemState
             newState.setCounter(phaseState.phase, newTestItemState)
+            newState.extendChart(phaseState.phase)
             newState.setDone(phaseState.phase)
         }
         return newState
@@ -63,12 +71,13 @@ export class TestVisualizationState implements ITestVisualizationState {
         }
     }
 
-    extendChart(key: string, counter: string | number, progress: number) {
-        return [
-            ...(this.phases[key]?.chart || []),
+    extendChart(newPhaseName: EMeasurementStatus) {
+        const newPhase = this.phases[newPhaseName]
+        this.phases[newPhaseName].chart = [
+            ...(newPhase?.chart || []),
             {
-                x: progress,
-                y: counter === "-" ? 0 : (counter as number),
+                x: newPhase.progress * 100,
+                y: Math.max(0, newPhase.counter),
             },
         ]
     }

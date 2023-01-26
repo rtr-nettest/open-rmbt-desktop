@@ -1,5 +1,13 @@
 <main *ngIf="visualization$ | async" class="app-main">
+    <ng-container
+        [ngTemplateOutlet]="(env$ | async)?.FLAVOR === 'ont' ? ont : rtr"
+    ></ng-container>
+</main>
+
+<ng-template #ont></ng-template>
+
+<ng-template #rtr>
     <app-gauge></app-gauge>
     <app-spacer></app-spacer>
     <app-interim-results></app-interim-results>
-</main>
+</ng-template>

@@ -20,6 +20,7 @@ import { IEnv } from "../../../electron/interfaces/env.interface"
 import { MatIconModule } from "@angular/material/icon"
 import { MatButtonModule } from "@angular/material/button"
 import { HttpClientModule } from "@angular/common/http"
+import { TranslocoRootModule } from "./transloco-root.module"
 
 declare global {
     interface Window {
@@ -56,6 +57,7 @@ declare global {
         MatIconModule,
         MatButtonModule,
         HttpClientModule,
+        TranslocoRootModule,
     ],
     providers: [],
     bootstrap: [AppComponent],

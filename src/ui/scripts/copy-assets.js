@@ -18,6 +18,13 @@ async function main() {
         fs.copySync(path.join(srcAssets, folder), path.join(dstAssets, folder))
         console.log(`Done.`)
     }
+    const srcSourceFiles = path.join(srcAssets, "src")
+    const dstSourceFiles = path.join(__dirname, "..", "src")
+    if (fs.existsSync(srcSourceFiles)) {
+        console.log(`Copying ${srcSourceFiles} to ${dstSourceFiles}...`)
+        fs.copySync(srcSourceFiles, dstSourceFiles)
+        console.log(`Done.`)
+    }
 }
 
 main()

@@ -1,15 +1,15 @@
 import { EMeasurementStatus } from "../../../../measurement/enums/measurement-status.enum"
-import { ITestItemState } from "./test-item-state.interface"
+import { ITestPhaseState } from "./test-phase-state.interface"
 
 export interface ITestVisualizationState {
     phases: {
-        [key: string]: ITestItemState
+        [key: string]: ITestPhaseState
     }
     currentPhaseName: EMeasurementStatus
 
     setCounter(
         newPhase: EMeasurementStatus,
-        newTestItemState: ITestItemState
+        newTestPhaseState: ITestPhaseState
     ): void
 
     setDone(newPhase: EMeasurementStatus): void

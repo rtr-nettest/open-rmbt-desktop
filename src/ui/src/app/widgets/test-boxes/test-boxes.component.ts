@@ -1,7 +1,6 @@
 import { Component } from "@angular/core"
 import { tap } from "rxjs"
-import { ITestItemState } from "src/app/interfaces/test-item-state.interface"
-import { ITestVisualizationState } from "src/app/interfaces/test-visualization-state.interface"
+import { ITestPhaseState } from "src/app/interfaces/test-phase-state.interface"
 import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
 
@@ -26,9 +25,9 @@ export class TestBoxesComponent {
         })
     )
 
-    ping: ITestItemState | undefined
-    download: ITestItemState | undefined
-    upload: ITestItemState | undefined
+    ping: ITestPhaseState | undefined
+    download: ITestPhaseState | undefined
+    upload: ITestPhaseState | undefined
 
     serverName: string = "-"
     ipAddress: string = "-"

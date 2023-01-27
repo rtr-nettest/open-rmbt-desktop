@@ -1,7 +1,4 @@
-<div
-    *ngIf="visualization$ | async"
-    [style.height.px]="height"
-    [style.width.px]="width"
->
+<div [style.height.px]="height" [style.width.px]="width">
     <canvas [id]="id"></canvas>
 </div>
+<ng-container *ngIf="visualization$ | async"></ng-container>

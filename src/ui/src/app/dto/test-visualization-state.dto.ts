@@ -1,34 +1,34 @@
 import { ITestVisualizationState } from "../interfaces/test-visualization-state.interface"
-import { ITestItemState } from "../interfaces/test-item-state.interface"
+import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
 import { EMeasurementStatus } from "../../../../measurement/enums/measurement-status.enum"
 import { IMeasurementPhaseState } from "../../../../measurement/interfaces/measurement-phase-state.interface"
 import { extend } from "../helpers/extend"
-import { TestItemState } from "./test-item-state.dto"
+import { TestPhaseState } from "./test-phase-state.dto"
 import { ETestStatuses } from "../enums/test-statuses.enum"
 import { ETestLabels } from "../enums/test-labels.enum"
 
 export class TestVisualizationState implements ITestVisualizationState {
     phases: {
-        [key: string]: ITestItemState
+        [key: string]: ITestPhaseState
     } = {
-        [EMeasurementStatus.NOT_STARTED]: new TestItemState(),
-        [EMeasurementStatus.WAIT]: new TestItemState(),
-        [EMeasurementStatus.INIT]: new TestItemState(),
-        [EMeasurementStatus.INIT_DOWN]: new TestItemState(),
-        [EMeasurementStatus.PING]: new TestItemState({
+        [EMeasurementStatus.NOT_STARTED]: new TestPhaseState(),
+        [EMeasurementStatus.WAIT]: new TestPhaseState(),
+        [EMeasurementStatus.INIT]: new TestPhaseState(),
+        [EMeasurementStatus.INIT_DOWN]: new TestPhaseState(),
+        [EMeasurementStatus.PING]: new TestPhaseState({
             label: ETestLabels.PING,
         }),
-        [EMeasurementStatus.DOWN]: new TestItemState({
+        [EMeasurementStatus.DOWN]: new TestPhaseState({
             label: ETestLabels.DOWNLOAD,
         }),
-        [EMeasurementStatus.INIT_UP]: new TestItemState(),
-        [EMeasurementStatus.UP]: new TestItemState({
+        [EMeasurementStatus.INIT_UP]: new TestPhaseState(),
+        [EMeasurementStatus.UP]: new TestPhaseState({
             label: ETestLabels.UPLOAD,
         }),
-        [EMeasurementStatus.SPEEDTEST_END]: new TestItemState(),
-        [EMeasurementStatus.SUBMITTING_RESULTS]: new TestItemState(),
-        [EMeasurementStatus.END]: new TestItemState(),
-        [EMeasurementStatus.SHOWING_RESULTS]: new TestItemState(),
+        [EMeasurementStatus.SPEEDTEST_END]: new TestPhaseState(),
+        [EMeasurementStatus.SUBMITTING_RESULTS]: new TestPhaseState(),
+        [EMeasurementStatus.END]: new TestPhaseState(),
+        [EMeasurementStatus.SHOWING_RESULTS]: new TestPhaseState(),
     }
     currentPhaseName: EMeasurementStatus = EMeasurementStatus.NOT_STARTED
 
@@ -38,12 +38,12 @@ export class TestVisualizationState implements ITestVisualizationState {
     ) {
         const newState = extend<ITestVisualizationState>(initialState)
         if (newState.phases[phaseState.phase]) {
-            const newTestItemState = extend<ITestItemState>(
+            const newTestPhaseState = extend<ITestPhaseState>(
                 newState.phases[phaseState.phase],
                 phaseState
             )
-            newState.phases[phaseState.phase] = newTestItemState
-            newState.setCounter(phaseState.phase, newTestItemState)
+            newState.phases[phaseState.phase] = newTestPhaseState
+            newState.setCounter(phaseState.phase, newTestPhaseState)
             newState.extendChart(phaseState.phase)
             newState.setDone(phaseState.phase)
         }
@@ -52,23 +52,41 @@ export class TestVisualizationState implements ITestVisualizationState {
 
     setCounter(
         newPhaseName: EMeasurementStatus,
-        newTestItemState: ITestItemState
+        newTestPhaseState: ITestPhaseState
     ) {
         if (newPhaseName === EMeasurementStatus.DOWN) {
-            this.phases[EMeasurementStatus.PING].counter = newTestItemState.ping
-            this.phases[EMeasurementStatus.DOWN].counter = newTestItemState.down
+            this.phases[EMeasurementStatus.PING].counter =
+                newTestPhaseState.ping
+            this.phases[EMeasurementStatus.DOWN].counter =
+                newTestPhaseState.down
         } else if (newPhaseName === EMeasurementStatus.UP) {
-            this.phases[EMeasurementStatus.UP].counter = newTestItemState.up
+            this.phases[EMeasurementStatus.UP].counter = newTestPhaseState.up
+        } else if (newPhaseName === EMeasurementStatus.SHOWING_RESULTS) {
+            this.phases[EMeasurementStatus.PING].counter =
+                newTestPhaseState.ping
+            this.phases[EMeasurementStatus.DOWN].counter =
+                newTestPhaseState.down
+            this.phases[EMeasurementStatus.UP].counter = newTestPhaseState.up
         }
     }
 
     setDone(newPhaseName: EMeasurementStatus) {
-        if (newPhaseName !== this.currentPhaseName) {
+        if (newPhaseName === EMeasurementStatus.SHOWING_RESULTS) {
+            const containerPhases = [
+                EMeasurementStatus.DOWN,
+                EMeasurementStatus.UP,
+                EMeasurementStatus.PING,
+            ]
+            for (const phase of containerPhases) {
+                this.phases[phase].progress = 1
+                this.phases[phase].container = ETestStatuses.DONE
+            }
+        } else if (newPhaseName !== this.currentPhaseName) {
             this.phases[this.currentPhaseName].progress = 1
             this.phases[this.currentPhaseName].container = ETestStatuses.DONE
             this.phases[newPhaseName].container = ETestStatuses.ACTIVE
-            this.currentPhaseName = newPhaseName
         }
+        this.currentPhaseName = newPhaseName
     }
 
     extendChart(newPhaseName: EMeasurementStatus) {

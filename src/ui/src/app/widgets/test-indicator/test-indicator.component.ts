@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core"
-import { ITestItemState } from "../../interfaces/test-item-state.interface"
+import { ITestPhaseState } from "../../interfaces/test-phase-state.interface"
 import { ETestStatuses } from "../../enums/test-statuses.enum"
 import { TranslocoService } from "@ngneat/transloco"
 import { convertMs } from "src/app/helpers/convert-ms"
@@ -10,7 +10,7 @@ import { convertMs } from "src/app/helpers/convert-ms"
     styleUrls: ["./test-indicator.component.scss"],
 })
 export class TestIndicatorComponent {
-    @Input() data: ITestItemState | undefined
+    @Input() data: ITestPhaseState | undefined
 
     get counter() {
         let parsedVal = Number(this.data?.counter)

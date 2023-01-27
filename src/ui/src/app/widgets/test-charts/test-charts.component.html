@@ -10,19 +10,22 @@
                 <nt-test-chart
                     class="nt-canvas__wrapper"
                     direction="download"
-                    [height]="chartHeight"
-                    [width]="chartWidth"
+                    [height]="(chartHeight$ | async) ?? 0"
+                    [width]="(chartWidth$ | async) ?? 0"
                 ></nt-test-chart>
             </dd>
         </dl>
-        <dl class="app-chart-wrapper" [style.margin-left.px]="margin * 2">
+        <dl
+            class="app-chart-wrapper"
+            [style.margin-left.px]="(margin$ | async) ?? 0 * 2"
+        >
             <dt class="app-title">{{ t("test.upload.label") }}</dt>
             <dd>
                 <nt-test-chart
                     class="nt-canvas__wrapper"
                     direction="upload"
-                    [height]="chartHeight"
-                    [width]="chartWidth"
+                    [height]="(chartHeight$ | async) ?? 0"
+                    [width]="(chartWidth$ | async) ?? 0"
                 ></nt-test-chart>
             </dd>
         </dl>

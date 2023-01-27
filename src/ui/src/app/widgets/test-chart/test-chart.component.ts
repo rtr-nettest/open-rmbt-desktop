@@ -52,53 +52,39 @@ export class TestChartComponent {
         units: string
     ) {
         this.ngZone.runOutsideAngular(async () => {
-            if (
-                visualization.currentPhaseName === EMeasurementStatus.PING ||
-                visualization.currentPhaseName ===
-                    EMeasurementStatus.SHOWING_RESULTS
-            ) {
-                this.initChart(label, units)
-            }
-            if (
-                visualization.currentPhaseName === EMeasurementStatus.INIT &&
-                this.chart
-            ) {
-                this.chart.resetData()
-            }
-            if (this.chart) {
-                if (
-                    visualization.currentPhaseName ===
-                        EMeasurementStatus.DOWN &&
-                    this.direction === "download"
-                ) {
-                    this.chart.updateData(
-                        visualization.phases[EMeasurementStatus.DOWN]
-                    )
-                }
-
-                if (
-                    visualization.currentPhaseName === EMeasurementStatus.UP &&
-                    this.direction === "upload"
-                ) {
-                    this.chart.updateData(
-                        visualization.phases[EMeasurementStatus.UP]
-                    )
-                }
-
-                if (
-                    visualization.currentPhaseName ===
-                    EMeasurementStatus.SHOWING_RESULTS
-                ) {
+            switch (visualization.currentPhaseName) {
+                case EMeasurementStatus.INIT:
+                    this.chart?.resetData()
+                    break
+                case EMeasurementStatus.PING:
+                    this.initChart(label, units)
+                    break
+                case EMeasurementStatus.DOWN:
                     if (this.direction === "download") {
-                        this.chart.setData(
+                        this.chart?.updateData(
                             visualization.phases[EMeasurementStatus.DOWN]
                         )
-                    } else {
-                        this.chart.setData(
+                    }
+                    break
+                case EMeasurementStatus.UP:
+                    if (this.direction === "upload") {
+                        this.chart?.updateData(
                             visualization.phases[EMeasurementStatus.UP]
                         )
                     }
-                }
+                    break
+                case EMeasurementStatus.SHOWING_RESULTS:
+                    this.initChart(label, units)
+                    if (this.direction === "download") {
+                        this.chart?.setData(
+                            visualization.phases[EMeasurementStatus.DOWN]
+                        )
+                    } else if (this.direction === "upload") {
+                        this.chart?.setData(
+                            visualization.phases[EMeasurementStatus.UP]
+                        )
+                    }
+                    break
             }
         })
     }
@@ -107,9 +93,8 @@ export class TestChartComponent {
         if (this.chart) {
             return
         }
-        const ctx = (
-            document.getElementById(this.id) as HTMLCanvasElement
-        )?.getContext("2d")
+        const canvas = document.getElementById(this.id) as HTMLCanvasElement
+        const ctx = canvas?.getContext("2d")
         if (ctx) {
             this.chart = new TestChart(ctx!, label, units)
         }

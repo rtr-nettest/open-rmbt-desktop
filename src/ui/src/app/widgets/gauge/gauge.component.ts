@@ -1,7 +1,7 @@
 import { Component, NgZone } from "@angular/core"
 import { tap } from "rxjs"
 import { getSignificantDigits } from "src/app/helpers/number"
-import { ITestItemState } from "src/app/interfaces/test-item-state.interface"
+import { ITestPhaseState } from "src/app/interfaces/test-phase-state.interface"
 import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
 
@@ -101,7 +101,7 @@ export class GaugeComponent {
         }
     }
 
-    private drawLoop(phaseState: ITestItemState) {
+    private drawLoop(phaseState: ITestPhaseState) {
         let { phase: status, progress, counter } = phaseState
         let barSelector = null
         let directionSymbol = null

@@ -1,4 +1,5 @@
 import { Component } from "@angular/core"
+import { from, fromEvent, map, startWith, tap } from "rxjs"
 import { ITestVisualizationState } from "src/app/interfaces/test-visualization-state.interface"
 import { PlatformService } from "src/app/services/platform.service"
 import { TestStore } from "src/app/store/test.store"
@@ -11,26 +12,45 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
 })
 export class TestChartsComponent {
     visualization$ = this.store.visualization$
+    margin$ = fromEvent(window, "resize").pipe(
+        startWith(this.margin),
+        map(() => this.margin)
+    )
+    chartHeight$ = fromEvent(window, "resize").pipe(
+        startWith(this.chartHeight),
+        map(() => this.chartHeight)
+    )
+    chartWidth$ = fromEvent(window, "resize").pipe(
+        startWith(this.chartWidth),
+        map(() => this.chartWidth)
+    )
 
-    get isMobile() {
+    private get isMobile() {
         return this.platform.isMobile || this.platform.isSmallMobile
     }
 
-    get margin() {
+    private get margin() {
         return this.isMobile ? 0 : 24
     }
 
-    get chartHeight() {
+    private get chartHeight() {
         return this.isMobile ? 100 : 192
     }
 
-    get chartWidth() {
-        const headerWidth =
-            globalThis.document?.querySelector(".nt-test-header")
-                ?.clientWidth ?? 0
+    private get chartWidth() {
+        const container =
+            globalThis.document?.querySelector("main.app-main--ont")
+        if (!container) {
+            return 0
+        }
+
+        const containerWidth =
+            parseInt(window.getComputedStyle(container).width) -
+            parseInt(window.getComputedStyle(container).paddingLeft) -
+            parseInt(window.getComputedStyle(container).paddingRight)
         return this.isMobile
-            ? headerWidth
-            : Math.round(headerWidth / 2 - this.margin)
+            ? containerWidth
+            : Math.round(containerWidth / 2 - this.margin)
     }
 
     constructor(private platform: PlatformService, private store: TestStore) {}

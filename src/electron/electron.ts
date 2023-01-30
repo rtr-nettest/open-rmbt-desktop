@@ -7,7 +7,8 @@ import {
     getMeasurementResult,
     runMeasurement,
 } from "../measurement"
-import { Events } from "./events"
+import { Events } from "./enums/events.enum"
+import { IEnv } from "./interfaces/env.interface"
 import Protocol from "./protocol"
 
 config({
@@ -34,10 +35,9 @@ const createWindow = () => {
     })
 
     win.webContents.setWindowOpenHandler(({ url }) => {
-        if (
-            process.env.FULL_HISTORY_RESUlT_URL &&
-            url.startsWith(process.env.FULL_HISTORY_RESUlT_URL)
-        ) {
+        const historyUrl = new URL(process.env.FULL_HISTORY_RESUlT_URL ?? "")
+        const thisUrl = new URL(url)
+        if (thisUrl.hostname === historyUrl.hostname) {
             shell.openExternal(url)
         }
         return { action: "deny" }
@@ -78,6 +78,14 @@ ipcMain.on(Events.RUN_MEASUREMENT, (event) => {
     runMeasurement().catch((e) => {
         webContents.send(Events.ERROR, e)
     })
+})
+
+ipcMain.handle(Events.GET_ENV, (): IEnv => {
+    return {
+        CMS_URL: process.env.CMS_URL || "",
+        FLAVOR: process.env.FLAVOR || "rtr",
+        X_NETTEST_CLIENT: process.env.X_NETTEST_CLIENT || "",
+    }
 })
 
 ipcMain.handle(Events.GET_BASIC_NETWORK_INFO, () => {

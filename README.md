@@ -59,12 +59,15 @@ The variables used are:
     -   `HISTORY_RESULT_PATH_METHOD` - an HTTP method used to receive the result from the `HISTORY_RESULT_PATH` endpoint, either `GET` (when using the app with Specure servers) or `POST` (when using the app with RTR servers).
     -   `HISTORY_RESULT_STATS_PATH` - a control server endpoint starting with `/`, from which we can receive a measurement result by its `open_test_uuid`. Required when using the app with RTR servers, otherwise optional.
     -   `FULL_HISTORY_RESUlT_URL` - a full URL, without `test_uuid`, of a webpage, which contains a detailed measurement result.
-    -   `CONFIG_FOLDER` - a path to a folder that contains flavor specific files, such as icons and styles.
+    -   `FLAVOR` - `rtr` or `ont`, determines the type of UI used for the Electron app. Defaults to `rtr` if not set.
+    -   `ASSETS_FOLDER` - a path to a folder that contains flavor specific files, such as icons and styles.
 -   Optional:
     -   `X_NETTEST_CLIENT` - an identificator sent to the control server in an `X-Nettest-Client` HTTP header and used by Specure control servers to internally differentiate between the app's flavors.
     -   `MEASUREMENT_SERVERS_PATH` - a control server endpoint starting with `/` which returns a list of measurement servers from which the client will try to pick one to run a measurement against.
     -   `LOG_TO_CONSOLE` - if set to `true` will output the client's logs to the stdout and stderr.
     -   `LOG_TO_FILE` - if set to `true` will output the client's logs to a file in the `log` folder in the root of the project.
     -   `LOG_WORKERS` - if set to `true` will output the client's worker's logs to files in the `log` folder in the root of the project. If set to another value or ommitted, only the main thread's output will be logged.
+    -   `LOG_CPU_USAGE` - if set to `true` will output the CPU usage in percent once a second during the measurement.
     -   `SSL_KEY_PATH` and `SSL_CERT_PATH` - paths to SSL key and certificate files which should be used by the client to establish a secure connection to a measurement server.
     -   `PLATFORM_CLI` - a short string to differentiate the CLI client from the Electron app on the BE.
+    -   `CMS_URL` - a CMS instance to use for the `ont` flavor.

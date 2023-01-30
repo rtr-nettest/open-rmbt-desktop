@@ -1,0 +1,64 @@
+@import "src/assets/styles/core";
+
+:host {
+    width: 100%;
+}
+.nt-test-header {
+    width: 100%;
+
+    &__list {
+        width: 100%;
+        display: flex;
+        list-style: none;
+    }
+
+    &__item {
+        position: relative;
+        flex-grow: 1;
+        padding: rem(16) 0;
+        margin-bottom: rem(16);
+
+        @include screen-small {
+            font-size: rem(12);
+            margin-bottom: rem(14);
+        }
+
+        &--active {
+            .nt-test-header__progress {
+                background-color: $color-secondary;
+            }
+        }
+
+        &:first-child {
+            .nt-test-header__progress-container {
+                border-top-left-radius: 4px;
+                border-bottom-left-radius: 4px;
+            }
+        }
+
+        &:last-child {
+            .nt-test-header__progress-container {
+                border-top-right-radius: 4px;
+                border-bottom-right-radius: 4px;
+            }
+        }
+    }
+
+    &__progress-container {
+        width: 100%;
+        position: absolute;
+        overflow: hidden;
+        height: 4px;
+        background-color: scale-color($color: $color-secondary, $alpha: -95%);
+        bottom: 0;
+    }
+
+    &__progress {
+        width: 100%;
+        position: absolute;
+        left: -100%;
+        height: 4px;
+        background-color: scale-color($color: $color-secondary, $alpha: -95%);
+        transition: all 333ms linear;
+    }
+}

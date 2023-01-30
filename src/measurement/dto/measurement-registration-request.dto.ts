@@ -7,8 +7,9 @@ export class MeasurementRegistrationRequest
 {
     client = EMeasurementServerType.RMBT
     language = ""
+    measurement_server_id: number | undefined
     measurement_type_flag = "regular"
-    prefer_server?: number | undefined
+    prefer_server: number | undefined
     time = new Date().getTime()
     timezone = ""
     type = ""
@@ -21,6 +22,7 @@ export class MeasurementRegistrationRequest
     ) {
         if (typeof measurementServerId === "number") {
             this.prefer_server = measurementServerId
+            this.measurement_server_id = measurementServerId
             this.user_server_selection = true
         }
         if (settingsRequest) {

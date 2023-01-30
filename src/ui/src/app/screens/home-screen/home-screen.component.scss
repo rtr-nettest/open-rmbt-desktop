@@ -1,28 +1,49 @@
 @import "../../../assets/styles/core.scss";
 
-app-header {
-    top: 0;
-    left: 0;
-    right: 0;
-    position: absolute;
+:host {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
 }
 
-app-footer {
-    bottom: 0;
-    left: 0;
-    right: 0;
-    position: absolute;
+.app-title {
+    margin-bottom: rem(40);
 }
 
 .app-main {
     align-items: center;
     display: flex;
-    height: 100%;
+    flex: 1;
     padding: rem(30);
 
-    app-start-test-button {
-        flex: auto;
-        height: rem(200);
-        max-width: rem(560);
+    &--ont {
+        justify-content: space-around;
+    }
+}
+
+.app-link-wrapper {
+    margin-top: rem(40);
+}
+
+.app-link {
+    display: flex;
+    .mat-icon {
+        flex: 0 0 rem(24);
+        margin-right: rem(9);
+        vertical-align: middle;
+    }
+}
+
+.app-aside {
+    flex: 0 0 40%;
+    margin-left: 6%;
+
+    img {
+        height: auto;
+        width: 100%;
+    }
+
+    @include screen-small {
+        display: none;
     }
 }

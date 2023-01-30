@@ -14,11 +14,14 @@ import { InitMessageHandler } from "./message-handlers/init-message-handler.serv
 import { UploadMessageHandler } from "./message-handlers/upload-message-handler.service"
 import { IMessageHandlerContext } from "../interfaces/message-handler.interface"
 
+export interface IPreDownloadResult {
+    chunkSize: number
+    bytesPerSec: number
+}
+
 export class RMBTThread implements IMessageHandlerContext {
     static interimUpdatesIntervalMs = 100
     bytesPerSecPretest: number[] = []
-    minChunkSize = 0
-    maxChunkSize = 4194304
     defaultChunkSize = 4096
     chunkSize: number = 0
     client: net.Socket = new net.Socket()
@@ -107,6 +110,9 @@ export class RMBTThread implements IMessageHandlerContext {
         if (dataString.includes(ESocketMessage.ERR)) {
             this.hadError = true
         }
+        if (dataString.length) {
+            Logger.I.info(`Thread ${this.index} received message ${dataString}`)
+        }
         switch (true) {
             case this.phase === "init":
                 this.initMessageHandler?.readData(data)
@@ -159,11 +165,22 @@ export class RMBTThread implements IMessageHandlerContext {
         }
     }
 
+    private dropHandlers() {
+        this.initMessageHandler = undefined
+        this.preDownloadMessageHandler = undefined
+        this.pingMessageHandler = undefined
+        this.downloadMessageHandler = undefined
+        this.preUploadMessageHandler = undefined
+        this.uploadMessageHandler = undefined
+    }
+
     async manageInit(): Promise<boolean> {
         return new Promise((resolve) => {
             this.phase = "init"
+            this.dropHandlers()
             this.initMessageHandler = new InitMessageHandler(this, (result) => {
-                this.initMessageHandler = undefined
+                this.phase = undefined
+                this.dropHandlers()
                 Logger.I.info(`Resolving thread ${this.index} init.`)
                 if (result) {
                     resolve(result)
@@ -175,17 +192,22 @@ export class RMBTThread implements IMessageHandlerContext {
         })
     }
 
-    async managePreDownload(): Promise<number> {
+    async managePreDownload(): Promise<IPreDownloadResult> {
         return new Promise((resolve) => {
             this.phase = "predownload"
+            this.dropHandlers()
             this.preDownloadMessageHandler = new PreDownloadMessageHandler(
                 this,
                 () => {
-                    this.preDownloadMessageHandler = undefined
+                    this.dropHandlers()
+                    this.phase = undefined
                     Logger.I.info(
                         `Resolving thread ${this.index} pre-download.`
                     )
-                    resolve(this.chunkSize)
+                    resolve({
+                        chunkSize: this.chunkSize,
+                        bytesPerSec: Math.max(...this.bytesPerSecPretest),
+                    })
                 }
             )
             this.preDownloadMessageHandler.writeData()
@@ -195,8 +217,10 @@ export class RMBTThread implements IMessageHandlerContext {
     async managePing(): Promise<IMeasurementThreadResult> {
         return new Promise((resolve) => {
             this.phase = "ping"
+            this.dropHandlers()
             this.pingMessageHandler = new PingMessageHandler(this, (result) => {
-                this.pingMessageHandler = undefined
+                this.dropHandlers()
+                this.phase = undefined
                 Logger.I.info(`Resolving thread ${this.index} ping.`)
                 resolve(result)
             })
@@ -204,14 +228,20 @@ export class RMBTThread implements IMessageHandlerContext {
         })
     }
 
-    async manageDownload(): Promise<IMeasurementThreadResult> {
+    async manageDownload(
+        chunkSize?: number
+    ): Promise<IMeasurementThreadResult> {
         return new Promise((resolve) => {
             this.phase = "download"
-            this.setChunkSize()
+            if (chunkSize) {
+                this.chunkSize = chunkSize
+            }
+            this.dropHandlers()
             this.downloadMessageHandler = new DownloadMessageHandler(
                 this,
                 (result) => {
-                    this.downloadMessageHandler = undefined
+                    this.dropHandlers()
+                    this.phase = undefined
                     this.interimHandler = undefined
                     this.disconnect().then(() => {
                         Logger.I.info(
@@ -228,10 +258,12 @@ export class RMBTThread implements IMessageHandlerContext {
     async managePreUpload(): Promise<number> {
         return new Promise((resolve) => {
             this.phase = "preupload"
+            this.dropHandlers()
             this.preUploadMessageHandler = new PreUploadMessageHandler(
                 this,
                 () => {
-                    this.preUploadMessageHandler = undefined
+                    this.dropHandlers()
+                    this.phase = undefined
                     this.disconnect().then(() => {
                         Logger.I.info(
                             `Resolving thread ${this.index} pre-upload.`
@@ -247,12 +279,14 @@ export class RMBTThread implements IMessageHandlerContext {
     async manageUpload(): Promise<IMeasurementThreadResult> {
         return new Promise((resolve) => {
             this.phase = "upload"
+            this.dropHandlers()
             this.currentTransfer = 0
             this.currentTime = 0
             this.uploadMessageHandler = new UploadMessageHandler(
                 this,
                 (result) => {
-                    this.uploadMessageHandler = undefined
+                    this.dropHandlers()
+                    this.phase = undefined
                     this.interimHandler = undefined
                     this.disconnect().then(() => {
                         Logger.I.info(`Resolving thread ${this.index} upload.`)
@@ -262,20 +296,5 @@ export class RMBTThread implements IMessageHandlerContext {
             )
             this.uploadMessageHandler.writeData()
         })
-    }
-    // from RMBTws client
-    private setChunkSize() {
-        // set chunk size to accordingly 1 chunk every n/2 ms on average with n threads
-        this.chunkSize = this.preDownloadChunks
-
-        //but min 4KiB
-        this.chunkSize = Math.max(this.minChunkSize, this.chunkSize)
-
-        //and max MAX_CHUNKSIZE
-        this.chunkSize = Math.min(this.maxChunkSize, this.chunkSize)
-
-        Logger.I.warn(
-            `Thread ${this.index} is setting chunk size to ${this.chunkSize}`
-        )
     }
 }

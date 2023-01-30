@@ -1,0 +1,4 @@
+<div [style.height.px]="height" [style.width.px]="width">
+    <canvas [id]="id"></canvas>
+</div>
+<ng-container *ngIf="visualization$ | async"></ng-container>

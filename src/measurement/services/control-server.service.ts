@@ -10,6 +10,7 @@ import { Logger } from "./logger.service"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import tz from "dayjs/plugin/timezone"
+import { RMBTClient } from "./rmbt-client.service"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -132,17 +133,30 @@ export class ControlServer {
                         { headers: this.headers }
                     )
                 ).data
-                Logger.I.info("Response is: %o", retVal)
+                Logger.I.info("Response is: %o", response)
                 if (response) {
                     retVal = {
                         measurementDate: response.measurement_date,
-                        measurementServerName: response.measurementServerName,
+                        measurementServerName:
+                            response.measurementServerName ??
+                            response.measurement_server_name,
                         downloadKbit: response.speed_download,
                         uploadKbit: response.speed_upload,
-                        ping: response.ping,
-                        providerName: response.operator,
+                        ping: response.ping ?? response.ping_median,
+                        providerName:
+                            response.operator ?? response.client_provider,
                         ipAddress: response.ip_address,
                         fullResultLink,
+                        downloadOverTime:
+                            RMBTClient.getOverallResultsFromSpeedItems(
+                                response.speed_detail,
+                                "download"
+                            ),
+                        uploadOverTime:
+                            RMBTClient.getOverallResultsFromSpeedItems(
+                                response.speed_detail,
+                                "upload"
+                            ),
                     }
                 }
             } else if (process.env.HISTORY_RESULT_PATH_METHOD === "POST") {
@@ -209,7 +223,7 @@ export class ControlServer {
         if (e.response) {
             Logger.I.error(e.response)
             if (e.response.data?.error?.length) {
-                throw new Error(e.response.data.error.json(". "))
+                throw new Error(e.response.data.error.join(". "))
             } else {
                 throw e.response.data
             }

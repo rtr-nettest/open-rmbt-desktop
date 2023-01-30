@@ -15,4 +15,5 @@ export enum EMeasurementStatus {
     ERROR = "ERROR",
     ABORTED = "ABORTED",
     PACKET_LOSS_AND_JITTER = "PACKET_LOSS_AND_JITTER",
+    SHOWING_RESULTS = "SHOWING_RESULTS",
 }

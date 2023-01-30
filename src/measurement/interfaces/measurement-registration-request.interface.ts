@@ -17,6 +17,7 @@ export interface IMeasurementRegistrationRequest {
         text_counter: number
         uid: number
     }
+    measurement_server_id?: number
     measurement_type_flag: string
     ndt?: boolean
     num_threads?: number

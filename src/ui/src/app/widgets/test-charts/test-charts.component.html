@@ -1,0 +1,33 @@
+<div
+    class="nt-container__row"
+    id="test-charts"
+    *ngIf="shouldShow(visualization$ | async)"
+>
+    <ng-container *transloco="let t">
+        <dl class="app-chart-wrapper">
+            <dt class="app-title">{{ t("test.download.label") }}</dt>
+            <dd>
+                <nt-test-chart
+                    class="nt-canvas__wrapper"
+                    direction="download"
+                    [height]="(chartHeight$ | async) ?? 0"
+                    [width]="(chartWidth$ | async) ?? 0"
+                ></nt-test-chart>
+            </dd>
+        </dl>
+        <dl
+            class="app-chart-wrapper"
+            [style.margin-left.px]="(margin$ | async) ?? 0 * 2"
+        >
+            <dt class="app-title">{{ t("test.upload.label") }}</dt>
+            <dd>
+                <nt-test-chart
+                    class="nt-canvas__wrapper"
+                    direction="upload"
+                    [height]="(chartHeight$ | async) ?? 0"
+                    [width]="(chartWidth$ | async) ?? 0"
+                ></nt-test-chart>
+            </dd>
+        </dl>
+    </ng-container>
+</div>

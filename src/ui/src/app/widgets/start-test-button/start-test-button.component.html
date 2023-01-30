@@ -1,12 +1,28 @@
-<a
-    routerLink="/test"
-    class="uk-card uk-card-primary uk-card-hover uk-card-body"
->
-    <div class="uk-card-media-top">
-        <span class="uk-icon-button uk-icon" uk-icon="icon: play; ratio: 1.5">
-            <img src="/assets/images/start-button-icon.svg" />
-        </span>
-    </div>
-    <p>Start Test</p>
-    <h3 class="uk-card-title uk-margin-top">Start RTR-NetTest</h3>
-</a>
+<ng-container *ngIf="(env$ | async)?.FLAVOR === 'ont'; else rtr">
+    <a
+        *transloco="let t"
+        routerLink="/test"
+        mat-flat-button
+        class="app-start-button"
+        color="primary"
+        >{{ t("test.start_test") }}</a
+    >
+</ng-container>
+
+<ng-template #rtr>
+    <a
+        routerLink="/test"
+        class="uk-card uk-card-primary uk-card-hover uk-card-body"
+    >
+        <div class="uk-card-media-top">
+            <span
+                class="uk-icon-button uk-icon"
+                uk-icon="icon: play; ratio: 1.5"
+            >
+                <img src="/assets/images/start-button-icon.svg" />
+            </span>
+        </div>
+        <p>Start Test</p>
+        <h3 class="uk-card-title uk-margin-top">Start RTR-NetTest</h3>
+    </a>
+</ng-template>

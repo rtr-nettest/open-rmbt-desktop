@@ -1,0 +1,42 @@
+<div *ngIf="visualization$ | async as visualization" class="nt-container__row">
+    <div class="nt-container__col">
+        <div class="nt-container__row nt-indicators">
+            <nt-test-indicator
+                id="ping_indicator"
+                class="nt-test-indicator"
+                [data]="ping"
+            ></nt-test-indicator>
+            <nt-test-indicator
+                id="download_indicator"
+                class="nt-test-indicator"
+                [data]="download"
+            ></nt-test-indicator>
+            <nt-test-indicator
+                id="upload_indicator"
+                class="nt-test-indicator"
+                [data]="upload"
+            ></nt-test-indicator>
+        </div>
+    </div>
+    <div class="nt-container__col nt-test-info">
+        <ng-container *ngIf="basicNetworkInfo$ | async">
+            <app-dl
+                [items]="{
+                    'test.server_name': serverName,
+                    'test.ip_address': ipAddress,
+                    'test.provider': providerName
+                }"
+            ></app-dl>
+            <ng-container *ngIf="isShowingResult">
+                <a
+                    *transloco="let t"
+                    routerLink="/test"
+                    mat-flat-button
+                    class="nt-run-again"
+                    color="primary"
+                    >{{ t("test.run_test_again") }}</a
+                >
+            </ng-container>
+        </ng-container>
+    </div>
+</div>

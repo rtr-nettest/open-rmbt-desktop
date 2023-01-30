@@ -66,8 +66,6 @@ export class InitMessageHandler implements IMessageHandler {
                 `Thread ${this.ctx.index} received chunksizes ${chunkSizes}.`
             )
             this.ctx.defaultChunkSize = +chunkSizes[1]
-            this.ctx.minChunkSize = +chunkSizes[2]
-            this.ctx.maxChunkSize = +chunkSizes[3]
             this.ctx.chunkSize = +chunkSizes[1]
             return
         }

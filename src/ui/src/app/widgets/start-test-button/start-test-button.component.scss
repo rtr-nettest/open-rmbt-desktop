@@ -3,12 +3,14 @@
 // Source: https://www.netztest.at/en/
 .uk-card {
     display: block;
-    height: 100%;
+    height: rem(200);
     padding: 40px 60px;
     transition: transform 0.15s ease-out;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.28);
     border: 1px solid #2f5f00;
     border-radius: 7px;
+    max-width: 40rem;
+    width: calc(100vw - 60px);
 
     &:hover {
         text-decoration: none;
@@ -54,4 +56,15 @@
         font-weight: 700;
         letter-spacing: 0.06px;
     }
+}
+
+.app-start-button {
+    background: linear-gradient(
+        45deg,
+        $color-button-gradient-1 0%,
+        $color-button-gradient-2 100%
+    );
+    border-radius: rem(30);
+    height: rem(48);
+    padding: rem(26);
 }

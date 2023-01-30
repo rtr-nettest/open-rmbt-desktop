@@ -11,24 +11,12 @@ import {
 } from "rxjs"
 import { TestVisualizationState } from "../dto/test-visualization-state.dto"
 import { ITestVisualizationState } from "../interfaces/test-visualization-state.interface"
-import { IMeasurementPhaseState } from "../../../../measurement/interfaces/measurement-phase-state.interface"
 import { IBasicNetworkInfo } from "../../../../measurement/interfaces/basic-network-info.interface"
 import { BasicNetworkInfo } from "../dto/basic-network-info.dto"
 import { ISimpleHistoryResult } from "../../../../measurement/interfaces/simple-history-result.interface"
+import { TestPhaseState } from "../dto/test-phase-state.dto"
+import { EMeasurementStatus } from "../../../../measurement/enums/measurement-status.enum"
 
-declare global {
-    interface Window {
-        electronAPI: {
-            runMeasurement: () => Promise<void>
-            getBasicNetworkInfo: () => Promise<IBasicNetworkInfo>
-            getMeasurementState: () => Promise<IMeasurementPhaseState>
-            getMeasurementResult: (
-                testUuid: string
-            ) => Promise<ISimpleHistoryResult>
-            onError: (callback: (error: Error) => any) => Promise<any>
-        }
-    }
-}
 const STATE_UPDATE_TIMEOUT = 200
 
 @Injectable({
@@ -53,14 +41,11 @@ export class TestStore {
         this.setErrorHandler()
         window.electronAPI.runMeasurement()
         return interval(STATE_UPDATE_TIMEOUT).pipe(
-            concatMap(() =>
-                from(window.electronAPI.getBasicNetworkInfo()).pipe(
-                    distinctUntilChanged(),
-                    tap((info) => {
-                        this.basicNetworkInfo$.next(info)
-                    })
-                )
-            ),
+            concatMap(() => from(window.electronAPI.getBasicNetworkInfo())),
+            distinctUntilChanged(),
+            tap((info) => {
+                this.basicNetworkInfo$.next(info)
+            }),
             concatMap(() => from(window.electronAPI.getMeasurementState())),
             map((phaseState) => {
                 const newState = TestVisualizationState.from(
@@ -81,6 +66,28 @@ export class TestStore {
         return from(window.electronAPI.getMeasurementResult(testUuid)).pipe(
             map((result) => {
                 this.simpleHistoryResult$.next(result)
+                const newPhase = new TestPhaseState({
+                    phase: EMeasurementStatus.SHOWING_RESULTS,
+                    down: result.downloadKbit / 1000,
+                    up: result.uploadKbit / 1000,
+                    ping: result.ping / 1e6,
+                })
+                const newState = TestVisualizationState.from(
+                    this.visualization$.value,
+                    newPhase
+                )
+                newState.phases[
+                    EMeasurementStatus.DOWN
+                ].setChartFromOverallResults?.(result.downloadOverTime ?? [])
+                newState.phases[
+                    EMeasurementStatus.UP
+                ].setChartFromOverallResults?.(result.uploadOverTime ?? [])
+                this.visualization$.next(newState)
+                this.basicNetworkInfo$.next({
+                    serverName: result.measurementServerName,
+                    ipAddress: result.ipAddress,
+                    providerName: result.providerName,
+                })
                 return result
             })
         )

@@ -24,9 +24,12 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
             )
             break
         case "preDownload":
-            chunks = await thread?.managePreDownload()
+            const preDownloadResult = await thread?.managePreDownload()
             parentPort?.postMessage(
-                new OutgoingMessageWithData("preDownloadFinished", chunks)
+                new OutgoingMessageWithData(
+                    "preDownloadFinished",
+                    preDownloadResult
+                )
             )
             break
         case "ping":
@@ -43,7 +46,7 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
                         interimResult
                     )
                 )
-            result = await thread!.manageDownload()
+            result = await thread!.manageDownload(message.data as number)
             if (result) {
                 result.currentTime = thread!.currentTime || 0
                 result.currentTransfer = thread!.currentTransfer || 0

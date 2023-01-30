@@ -1,3 +1,4 @@
+import { hrtime } from "process"
 import { MeasurementThreadResultList } from "../../dto/measurement-thread-result-list.dto"
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import { IMeasurementThreadResult } from "../../interfaces/measurement-result.interface"
@@ -10,13 +11,14 @@ import { Time } from "../time.service"
 
 export class DownloadMessageHandler implements IMessageHandler {
     static minDiffTime = 100000000
-    private downloadStartTime = Time.nowNs()
-    private downloadEndTime = Time.nowNs()
+    private downloadStartTime = hrtime.bigint()
+    private downloadEndTime = hrtime.bigint()
     private downloadBytesRead = 0
     private activityInterval?: NodeJS.Timer
-    private inactivityTimeout = 0
+    private inactivityTimeout = 1000
     private result = new MeasurementThreadResultList(0)
     private nsec = 0
+    private isFinishRequested = false
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -26,7 +28,6 @@ export class DownloadMessageHandler implements IMessageHandler {
             (Number(this.ctx.params.test_duration) * 1e9) /
             DownloadMessageHandler.minDiffTime
         this.result = new MeasurementThreadResultList(Number(maxStoredResults))
-        this.inactivityTimeout = Number(this.ctx.params.test_duration) * 1000
     }
 
     stopMessaging() {
@@ -41,12 +42,13 @@ export class DownloadMessageHandler implements IMessageHandler {
     }
 
     writeData(): void {
-        this.downloadStartTime = Time.nowNs()
+        this.downloadStartTime = hrtime.bigint()
         this.downloadEndTime =
-            this.downloadStartTime + Number(this.ctx.params.test_duration) * 1e9
+            this.downloadStartTime +
+            BigInt(+this.ctx.params.test_duration * 1e9)
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
-            if (Time.nowNs() > this.downloadEndTime) {
+            if (hrtime.bigint() >= this.downloadEndTime) {
                 Logger.I.info(`Thread ${this.ctx.index} download timed out.`)
                 this.requestFinish()
             }
@@ -61,10 +63,11 @@ export class DownloadMessageHandler implements IMessageHandler {
         Logger.I.info(`Thread ${this.ctx.index} is sending "${msg}"`)
         this.ctx.client.write(msg)
     }
+
     readData(data: Buffer): void {
         if (
             data.includes(ESocketMessage.ACCEPT_GETCHUNKS) &&
-            Time.nowNs() >= this.downloadEndTime - 1e9
+            this.isFinishRequested
         ) {
             this.stopMessaging()
             return
@@ -77,7 +80,7 @@ export class DownloadMessageHandler implements IMessageHandler {
         if (data.length > 0) {
             this.downloadBytesRead = this.downloadBytesRead + data.byteLength
 
-            this.nsec = Time.nowNs() - this.downloadStartTime
+            this.nsec = Number(hrtime.bigint() - this.downloadStartTime)
             this.result.addResult(this.downloadBytesRead, this.nsec)
 
             isFullChunk = this.downloadBytesRead % this.ctx.chunkSize === 0
@@ -86,6 +89,7 @@ export class DownloadMessageHandler implements IMessageHandler {
 
             this.ctx.currentTime = this.nsec
             this.ctx.currentTransfer = this.downloadBytesRead
+            this.ctx.threadResult.down = this.result
             this.ctx.interimHandler?.({
                 ...this.ctx.threadResult,
                 currentTime: this.ctx.currentTime,
@@ -103,6 +107,7 @@ export class DownloadMessageHandler implements IMessageHandler {
             this.stopMessaging.bind(this),
             this.inactivityTimeout
         )
+        this.isFinishRequested = true
         this.ctx.client.write(ESocketMessage.OK)
     }
 }

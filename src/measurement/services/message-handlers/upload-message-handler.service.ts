@@ -75,6 +75,7 @@ export class UploadMessageHandler implements IMessageHandler {
                     this.result.addResult(bytes, nanos)
                     this.ctx.currentTime = nanos
                     this.ctx.currentTransfer = bytes
+                    this.ctx.threadResult.up = this.result
                     this.ctx.interimHandler?.({
                         ...this.ctx.threadResult,
                         currentTime: this.ctx.currentTime,

@@ -1,7 +1,11 @@
 import { MeasurementThreadResult } from "../dto/measurement-thread-result.dto"
 import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
-import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
+import {
+    IMeasurementThreadResult,
+    IMeasurementThreadResultList,
+    ISpeedItem,
+} from "../interfaces/measurement-result.interface"
 import {
     IncomingMessageWithData,
     RMBTWorker,
@@ -11,11 +15,131 @@ import { RMBTWorkerFactory } from "./rmbt-worker-factory.service"
 import { Time } from "./time.service"
 import path from "path"
 import { IOverallResult } from "../interfaces/overall-result.interface"
+import { IPreDownloadResult } from "./rmbt-thread.service"
 
 export class RMBTClient {
+    static getOverallResultsFromSpeedItems(
+        speedItems: ISpeedItem[],
+        direction: "download" | "upload"
+    ): IOverallResult[] {
+        if (!speedItems) {
+            return []
+        }
+        const key = direction === "download" ? "down" : "up"
+        const threadResultsMap: { [key: number]: IMeasurementThreadResult } = {}
+        for (const speedItem of speedItems) {
+            const index = speedItem.thread
+            if (!threadResultsMap[index]) {
+                threadResultsMap[index] = new MeasurementThreadResult()
+            }
+            if (speedItem.direction === "download") {
+                threadResultsMap[index].down.bytes.push(speedItem.bytes)
+                threadResultsMap[index].down.nsec.push(speedItem.time)
+            } else if (speedItem.direction === "upload") {
+                threadResultsMap[index].up.bytes.push(speedItem.bytes)
+                threadResultsMap[index].up.nsec.push(speedItem.time)
+            }
+        }
+        const threadResults = Object.values(threadResultsMap)
+        const overallResults: IOverallResult[] = []
+        const shortestThread = threadResults.sort(
+            (a, b) => a[key].bytes.length - b[key].bytes.length
+        )[0]
+        for (let i = 1; i <= shortestThread[key].bytes.length; i++) {
+            const threadsSlice = threadResults.map((threadResult) => {
+                const newResult = new MeasurementThreadResult()
+                newResult[key].nsec = threadResult[key].nsec.slice(0, i)
+                newResult[key].bytes = threadResult[key].bytes.slice(0, i)
+                return newResult
+            })
+            overallResults.push(
+                this.getOverallResult(
+                    threadsSlice,
+                    (threadResult) => threadResult[key]
+                )
+            )
+        }
+        return overallResults
+    }
+
+    // From https://github.com/rtr-nettest/rmbtws/blob/master/src/WebsockettestDatastructures.js#L177
+    static getOverallResult(
+        threads: IMeasurementThreadResult[],
+        phaseResults: (
+            thread: IMeasurementThreadResult
+        ) => IMeasurementThreadResultList
+    ): IOverallResult {
+        let numThreads = threads.length
+        let targetTime = Infinity
+
+        for (let i = 0; i < numThreads; i++) {
+            if (!phaseResults(threads[i])) {
+                continue
+            }
+            let nsecs = phaseResults(threads[i]).nsec
+            if (nsecs.length > 0) {
+                if (nsecs[nsecs.length - 1] < targetTime) {
+                    targetTime = nsecs[nsecs.length - 1]
+                }
+            }
+        }
+
+        let totalBytes = 0
+
+        for (let _i = 0; _i < numThreads; _i++) {
+            if (!phaseResults(threads[_i])) {
+                continue
+            }
+            let thread = threads[_i]
+            let phasedThreadNsec = phaseResults(thread).nsec
+            let phasedThreadBytes = phaseResults(thread).bytes
+            let phasedLength = phasedThreadNsec.length
+
+            if (thread !== null && phasedLength > 0) {
+                let targetIdx = phasedLength
+                for (let j = 0; j < phasedLength; j++) {
+                    if (phasedThreadNsec[j] >= targetTime) {
+                        targetIdx = j
+                        break
+                    }
+                }
+                let calcBytes = 0
+                if (phasedThreadNsec[targetIdx] === targetTime) {
+                    // nsec[max] == targetTime
+                    calcBytes = phasedThreadBytes[phasedLength - 1]
+                } else {
+                    let bytes1 =
+                        targetIdx === 0 ? 0 : phasedThreadBytes[targetIdx - 1]
+                    let bytes2 = phasedThreadBytes[targetIdx]
+                    let bytesDiff = bytes2 - bytes1
+                    let nsec1 =
+                        targetIdx === 0 ? 0 : phasedThreadNsec[targetIdx - 1]
+                    let nsec2 = phasedThreadNsec[targetIdx]
+                    let nsecDiff = nsec2 - nsec1
+                    let nsecCompensation = targetTime - nsec1
+                    let factor = nsecCompensation / nsecDiff
+                    let compensation = Math.round(bytesDiff * factor)
+
+                    if (compensation < 0) {
+                        compensation = 0
+                    }
+                    calcBytes = bytes1 + compensation
+                }
+                totalBytes += calcBytes
+            }
+        }
+        return {
+            bytes: totalBytes,
+            nsec: targetTime,
+            speed: (totalBytes * 8) / (targetTime / 1e9),
+        }
+    }
+
     measurementLastUpdate?: number
     measurementStatus: EMeasurementStatus = EMeasurementStatus.WAIT
     measurementTasks: RMBTWorker[] = []
+    minChunkSize = 0
+    maxChunkSize = 4194304
     params: IMeasurementRegistrationResponse
     initializedThreads: number[] = []
     interimThreadResults: IMeasurementThreadResult[] = []
@@ -30,6 +154,7 @@ export class RMBTClient {
     activityInterval?: NodeJS.Timer
     overallResultDown?: IOverallResult
     overallResultUp?: IOverallResult
+    private bytesPerSecPreDownload: number[] = []
     private estimatePhaseDuration: { [key: string]: number } = {
         [EMeasurementStatus.INIT]: 0.5,
         [EMeasurementStatus.INIT_DOWN]: 2.5,
@@ -99,8 +224,9 @@ export class RMBTClient {
                     !this.isRunning ||
                     Date.now() - this.measurementStart >= 60000
                 ) {
-                    this.overallResultUp = this.getOverallResult(
-                        this.threadResults
+                    this.overallResultUp = RMBTClient.getOverallResult(
+                        this.threadResults,
+                        (threadResult) => threadResult?.up
                     )
                     this.upThreadResults = [...this.threadResults]
                     this.threadResults = []
@@ -192,9 +318,12 @@ export class RMBTClient {
                             }
                             break
                         case "preDownloadFinished":
-                            this.chunks.push(message.data as number)
+                            const { chunkSize, bytesPerSec } =
+                                message.data as IPreDownloadResult
+                            this.chunks.push(chunkSize)
+                            this.bytesPerSecPreDownload.push(bytesPerSec)
                             Logger.I.warn(
-                                `Worker ${index} finished pre-download with ${this.chunks} chunk sizes.`
+                                `Worker ${index} finished pre-download with ${this.chunks} speeds.`
                             )
                             if (
                                 this.chunks.length ===
@@ -220,9 +349,13 @@ export class RMBTClient {
                             this.pingMedian =
                                 ((message.data! as IMeasurementThreadResult)
                                     .ping_median ?? -1000000) / 1000000
+                            const calculatedChunkSize = this.getChunkSize()
                             for (const w of this.measurementTasks) {
                                 w.postMessage(
-                                    new IncomingMessageWithData("download")
+                                    new IncomingMessageWithData(
+                                        "download",
+                                        calculatedChunkSize
+                                    )
                                 )
                             }
                             this.measurementStatus = EMeasurementStatus.DOWN
@@ -239,9 +372,11 @@ export class RMBTClient {
                         case "downloadUpdated":
                             this.interimThreadResults[index] =
                                 message.data! as IMeasurementThreadResult
-                            this.overallResultDown = this.getOverallResult(
-                                this.interimThreadResults
-                            )
+                            this.overallResultDown =
+                                RMBTClient.getOverallResult(
+                                    this.interimThreadResults,
+                                    (threadResult) => threadResult?.down
+                                )
                             break
                         case "downloadFinished":
                             this.threadResults.push(
@@ -251,9 +386,11 @@ export class RMBTClient {
                                 this.threadResults.length ===
                                 this.measurementTasks.length
                             ) {
-                                this.overallResultDown = this.getOverallResult(
-                                    this.threadResults
-                                )
+                                this.overallResultDown =
+                                    RMBTClient.getOverallResult(
+                                        this.threadResults,
+                                        (threadResult) => threadResult?.down
+                                    )
                                 this.downThreadResults = [...this.threadResults]
                                 this.threadResults = []
                                 this.interimThreadResults = new Array(
@@ -339,8 +476,9 @@ export class RMBTClient {
                         case "uploadUpdated":
                             this.interimThreadResults[index] =
                                 message.data! as IMeasurementThreadResult
-                            this.overallResultUp = this.getOverallResult(
-                                this.interimThreadResults
+                            this.overallResultUp = RMBTClient.getOverallResult(
+                                this.interimThreadResults,
+                                (threadResult) => threadResult?.up
                             )
                             break
                         case "uploadFinished":
@@ -380,29 +518,27 @@ export class RMBTClient {
         }
     }
 
-    // in bits per nano
-    private getOverallResult(
-        threadResults: IMeasurementThreadResult[]
-    ): IOverallResult {
-        let bytes = 0
-        let nsec = 0
+    private getChunkSize() {
+        const bytesPerSecTotal = this.bytesPerSecPreDownload.reduce(
+            (acc, bytes) => acc + bytes,
+            0
+        )
 
-        for (const task of threadResults) {
-            if (!task) {
-                continue
-            }
-            if (task.currentTime > nsec) {
-                nsec = task.currentTime
-            }
-            bytes += task.currentTransfer
-        }
+        // set chunk size to accordingly 1 chunk every n/20 ms on average with n threads
+        let chunkSize = Math.floor(
+            bytesPerSecTotal / this.params.test_numthreads / (1000 / 20)
+        )
 
-        let speed = (bytes / nsec) * 1e9 * 8.0
-        speed = nsec === 0 ? 0 : isNaN(speed) ? 0 : speed
-        return {
-            bytes,
-            nsec,
-            speed,
-        }
+        Logger.I.warn(`Calculated chunk size is ${chunkSize}`)
+
+        //but min 4KiB
+        chunkSize = Math.max(this.minChunkSize, chunkSize)
+
+        //and max MAX_CHUNKSIZE
+        chunkSize = Math.min(this.maxChunkSize, chunkSize)
+
+        Logger.I.warn(`Setting chunk size to ${chunkSize}`)
+
+        return chunkSize
     }
 }

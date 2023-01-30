@@ -27,14 +27,6 @@ export class PreUploadMessageHandler implements IMessageHandler {
     }
 
     readData(data: Buffer): void {
-        if (data.includes(ESocketMessage.TIME)) {
-            const timeNs = Number(data.toString().split(" ")[1])
-            if (timeNs) {
-                this.ctx.bytesPerSecPretest.push(
-                    this.ctx.preUploadChunks / timeNs / 1e9
-                )
-            }
-        }
         if (data.includes(ESocketMessage.OK)) {
             this.putChunks()
             return

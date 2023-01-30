@@ -1,0 +1,28 @@
+@use "@angular/material" as mat;
+
+@include mat.core();
+
+//create palettes
+$app-primary: mat.define-palette($palette-primary);
+$app-accent: mat.define-palette($palette-accent);
+$app-warn: mat.define-palette($palette-warn);
+$app-typography: mat.define-typography-config(
+    $font-family: $base-font-family,
+);
+$app-theme: mat.define-light-theme(
+    (
+        color: (
+            primary: $app-primary,
+            accent: $app-accent,
+            warn: $app-warn,
+        ),
+        typography: $app-typography,
+    )
+);
+@include mat.all-component-themes($app-theme);
+@include mat.all-component-typographies($app-typography);
+
+.mdc-button[mat-flat-button] {
+    height: auto;
+    padding: 16px 24px;
+}

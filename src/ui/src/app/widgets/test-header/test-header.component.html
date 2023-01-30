@@ -1,0 +1,58 @@
+<div class="nt-test-header">
+    <ul class="nt-test-header__list">
+        <ng-container
+            *ngFor="let stage of stages; let i = index; trackBy: stageTitle"
+        >
+            <ng-container
+                *ngTemplateOutlet="
+                    progressItem;
+                    context: {
+                        $implicit: stage,
+                        index: i + 1,
+                        isVisible: isStageVisible(stage),
+                        progress: stage.progress(progress$ | async)
+                    }
+                "
+            ></ng-container>
+        </ng-container>
+    </ul>
+</div>
+
+<ng-template
+    #progressItem
+    let-stage
+    let-progress="progress"
+    let-isVisible="isVisible"
+    let-index="index"
+>
+    <ng-container *ngIf="isVisible">
+        <li
+            *transloco="let t"
+            class="nt-test-header__item"
+            [matTooltipClass]="'nt-test-header-tooltip'"
+            [matTooltip]="t(stage.title + '_tooltip')"
+            [ngClass]="{
+                'nt-test-header__item--active': progress > 0
+            }"
+        >
+            <header class="nt-test-header__title">
+                <span *ngIf="shouldShowPhaseCounter(index)"
+                    >{{ t("test.header_phase") }}
+                </span>
+                <span>{{ t(stage.title) }}</span>
+                <span
+                    *ngIf="shouldShowPhaseCounter(index)"
+                    class="nt-test-header__counter"
+                >
+                    ({{ index }}/{{ totalStages }})</span
+                >
+            </header>
+            <section class="nt-test-header__progress-container">
+                <div
+                    class="nt-test-header__progress"
+                    [style.transform]="'translateX(' + progress + '%)'"
+                ></div>
+            </section>
+        </li>
+    </ng-container>
+</ng-template>

@@ -1,0 +1,15 @@
+@import "src/assets/styles/core";
+
+.nt-container__row {
+    display: flex;
+
+    @include screen-small {
+        flex-direction: column;
+    }
+}
+
+.app-title {
+    font-size: rem($font-size-sm);
+    margin-bottom: rem(16);
+    text-transform: uppercase;
+}

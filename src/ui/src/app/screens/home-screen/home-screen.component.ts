@@ -1,6 +1,5 @@
-import { Component } from "@angular/core"
-import { switchMap, tap, withLatestFrom } from "rxjs"
-import { IMainAsset } from "src/app/interfaces/main-asset.interface"
+import { ChangeDetectionStrategy, Component } from "@angular/core"
+import { switchMap } from "rxjs"
 import { CMSService } from "src/app/services/cms.service"
 import { MainStore } from "src/app/store/main.store"
 
@@ -8,6 +7,7 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-home-screen",
     templateUrl: "./home-screen.component.html",
     styleUrls: ["./home-screen.component.scss"],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeScreenComponent {
     env$ = this.mainStore.env$

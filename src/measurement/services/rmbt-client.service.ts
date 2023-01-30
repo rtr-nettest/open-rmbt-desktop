@@ -41,11 +41,11 @@ export class RMBTClient {
             }
         }
         const threadResults = Object.values(threadResultsMap)
+            .filter((threadResult) => !!threadResult[key].bytes.length)
+            .sort((a, b) => b[key].bytes.length - a[key].bytes.length)
         const overallResults: IOverallResult[] = []
-        const shortestThread = threadResults.sort(
-            (a, b) => a[key].bytes.length - b[key].bytes.length
-        )[0]
-        for (let i = 1; i <= shortestThread[key].bytes.length; i++) {
+        const longestThread = threadResults[0]
+        for (let i = 1; i <= longestThread[key].bytes.length; i++) {
             const threadsSlice = threadResults.map((threadResult) => {
                 const newResult = new MeasurementThreadResult()
                 newResult[key].nsec = threadResult[key].nsec.slice(0, i)

@@ -1,4 +1,4 @@
-import { Component, NgZone } from "@angular/core"
+import { ChangeDetectionStrategy, Component, NgZone } from "@angular/core"
 import { tap } from "rxjs"
 import { getSignificantDigits } from "src/app/helpers/number"
 import { ITestPhaseState } from "src/app/interfaces/test-phase-state.interface"
@@ -9,6 +9,7 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
     selector: "app-gauge",
     templateUrl: "./gauge.component.html",
     styleUrls: ["./gauge.component.scss"],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GaugeComponent {
     visualization$ = this.store.visualization$.pipe(

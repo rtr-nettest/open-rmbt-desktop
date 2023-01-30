@@ -1,4 +1,4 @@
-import { Component } from "@angular/core"
+import { ChangeDetectionStrategy, Component } from "@angular/core"
 import { from, fromEvent, map, startWith, tap } from "rxjs"
 import { ITestVisualizationState } from "src/app/interfaces/test-visualization-state.interface"
 import { PlatformService } from "src/app/services/platform.service"
@@ -9,6 +9,7 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
     selector: "app-test-charts",
     templateUrl: "./test-charts.component.html",
     styleUrls: ["./test-charts.component.scss"],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestChartsComponent {
     visualization$ = this.store.visualization$

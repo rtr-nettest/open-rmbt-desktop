@@ -1,4 +1,4 @@
-import { Component } from "@angular/core"
+import { ChangeDetectionStrategy, Component } from "@angular/core"
 import { tap } from "rxjs"
 import { getSignificantDigits } from "src/app/helpers/number"
 import { TestStore } from "src/app/store/test.store"
@@ -8,6 +8,7 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
     selector: "app-interim-results",
     templateUrl: "./interim-results.component.html",
     styleUrls: ["./interim-results.component.scss"],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InterimResultsComponent {
     visualization$ = this.store.visualization$.pipe(

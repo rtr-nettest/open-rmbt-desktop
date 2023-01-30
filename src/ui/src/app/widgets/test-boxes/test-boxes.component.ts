@@ -1,7 +1,6 @@
-import { Component } from "@angular/core"
+import { ChangeDetectionStrategy, Component } from "@angular/core"
 import { tap } from "rxjs"
 import { ITestPhaseState } from "src/app/interfaces/test-phase-state.interface"
-import { ITestVisualizationState } from "src/app/interfaces/test-visualization-state.interface"
 import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
 
@@ -9,6 +8,7 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
     selector: "app-test-boxes",
     templateUrl: "./test-boxes.component.html",
     styleUrls: ["./test-boxes.component.scss"],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestBoxesComponent {
     visualization$ = this.store.visualization$.pipe(

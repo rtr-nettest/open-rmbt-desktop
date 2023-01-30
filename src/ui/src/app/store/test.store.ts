@@ -41,11 +41,14 @@ export class TestStore {
         this.setErrorHandler()
         window.electronAPI.runMeasurement()
         return interval(STATE_UPDATE_TIMEOUT).pipe(
-            concatMap(() => from(window.electronAPI.getBasicNetworkInfo())),
-            distinctUntilChanged(),
-            tap((info) => {
-                this.basicNetworkInfo$.next(info)
-            }),
+            concatMap(() =>
+                from(window.electronAPI.getBasicNetworkInfo()).pipe(
+                    distinctUntilChanged(),
+                    tap((info) => {
+                        this.basicNetworkInfo$.next(info)
+                    })
+                )
+            ),
             concatMap(() => from(window.electronAPI.getMeasurementState())),
             map((phaseState) => {
                 const newState = TestVisualizationState.from(

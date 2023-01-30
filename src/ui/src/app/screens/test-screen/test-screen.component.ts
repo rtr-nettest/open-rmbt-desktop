@@ -1,4 +1,4 @@
-import { Component } from "@angular/core"
+import { ChangeDetectionStrategy, Component } from "@angular/core"
 import { Router } from "@angular/router"
 import { tap, withLatestFrom } from "rxjs"
 import { MainStore } from "src/app/store/main.store"
@@ -9,6 +9,7 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
     selector: "app-test-screen",
     templateUrl: "./test-screen.component.html",
     styleUrls: ["./test-screen.component.scss"],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestScreenComponent {
     env$ = this.mainStore.env$

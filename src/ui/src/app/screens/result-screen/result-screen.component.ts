@@ -1,4 +1,4 @@
-import { Component } from "@angular/core"
+import { ChangeDetectionStrategy, Component } from "@angular/core"
 import { ActivatedRoute } from "@angular/router"
 import { getSignificantDigits } from "src/app/helpers/number"
 import { MainStore } from "src/app/store/main.store"
@@ -8,6 +8,7 @@ import { TestStore } from "src/app/store/test.store"
     selector: "app-result-screen",
     templateUrl: "./result-screen.component.html",
     styleUrls: ["./result-screen.component.scss"],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResultScreenComponent {
     env$ = this.mainStore.env$

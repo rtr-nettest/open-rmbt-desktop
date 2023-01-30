@@ -15,6 +15,10 @@ $container-width: 80%;
     flex-direction: column;
     justify-content: center;
     padding: rem(30);
+
+    &--ont {
+        padding: 0 rem(30) rem(30);
+    }
 }
 
 .app-wrapper {
@@ -50,4 +54,8 @@ $container-width: 80%;
     color: $color-primary;
     font-weight: bold;
     text-decoration: none !important;
+}
+
+app-test-boxes {
+    width: 100%;
 }

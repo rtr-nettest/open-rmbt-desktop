@@ -21,3 +21,8 @@ $app-theme: mat.define-light-theme(
 );
 @include mat.all-component-themes($app-theme);
 @include mat.all-component-typographies($app-typography);
+
+.mdc-button[mat-flat-button] {
+    height: auto;
+    padding: 16px 24px;
+}

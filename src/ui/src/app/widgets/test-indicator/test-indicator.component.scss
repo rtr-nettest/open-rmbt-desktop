@@ -7,8 +7,9 @@
     display: flex;
     flex-direction: column;
     height: rem(152);
-    justify-content: center;
+    justify-content: space-around;
     overflow: hidden;
+    padding: rem(8);
     position: relative;
     width: rem(152);
 
@@ -19,12 +20,20 @@
 
     &__row {
         color: scale-color($color-secondary, $alpha: -50%);
-        font-size: rem(14);
+        font-size: rem(12);
+
+        @include screen-small {
+            font-size: rem(10);
+        }
     }
 
     &__counter {
         color: $color-secondary;
         font-size: rem(28);
+
+        @include screen-small {
+            font-size: rem(21);
+        }
     }
 
     &__progress {

@@ -65,7 +65,6 @@ export class TestStore {
         this.setErrorHandler()
         return from(window.electronAPI.getMeasurementResult(testUuid)).pipe(
             map((result) => {
-                console.log("result", result)
                 this.simpleHistoryResult$.next(result)
                 const newPhase = new TestPhaseState({
                     phase: EMeasurementStatus.SHOWING_RESULTS,

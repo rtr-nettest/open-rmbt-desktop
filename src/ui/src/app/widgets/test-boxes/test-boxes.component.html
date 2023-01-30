@@ -27,6 +27,16 @@
                     'test.provider': providerName
                 }"
             ></app-dl>
+            <ng-container *ngIf="isShowingResult">
+                <a
+                    *transloco="let t"
+                    routerLink="/test"
+                    mat-flat-button
+                    class="nt-run-again"
+                    color="primary"
+                    >{{ t("test.run_test_again") }}</a
+                >
+            </ng-container>
         </ng-container>
     </div>
 </div>

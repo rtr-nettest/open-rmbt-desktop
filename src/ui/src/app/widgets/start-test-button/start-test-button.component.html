@@ -1,12 +1,13 @@
-<!-- TODO: take the text from the CMS -->
-<a
-    *ngIf="(env$ | async)?.FLAVOR === 'ont'; else rtr"
-    routerLink="/test"
-    mat-flat-button
-    class="app-start-button"
-    color="primary"
-    >Start Speed Measurement</a
->
+<ng-container *ngIf="(env$ | async)?.FLAVOR === 'ont'; else rtr">
+    <a
+        *transloco="let t"
+        routerLink="/test"
+        mat-flat-button
+        class="app-start-button"
+        color="primary"
+        >{{ t("test.start_test") }}</a
+    >
+</ng-container>
 
 <ng-template #rtr>
     <a

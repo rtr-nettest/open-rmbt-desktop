@@ -14,6 +14,7 @@
     align-items: center;
     display: flex;
     flex: 1;
+    justify-content: space-around;
     padding: rem(30);
 
     app-start-test-button {
@@ -37,7 +38,13 @@
 }
 
 .app-aside {
-    margin-left: rem(130);
+    flex: 0 0 40%;
+    margin-left: 6%;
+
+    img {
+        height: auto;
+        width: 100%;
+    }
 
     @include screen-small {
         display: none;

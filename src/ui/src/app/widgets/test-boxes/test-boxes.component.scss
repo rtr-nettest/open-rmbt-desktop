@@ -1,19 +1,12 @@
 @import "src/assets/styles/core";
 
-$run-again-btn-width: rem(190);
+$test-info-left-margin: 8%;
 
 .nt-container__row {
     align-items: center;
     display: flex;
+    justify-content: center;
     margin-bottom: rem(20);
-
-    &:last-child {
-        margin-bottom: rem(8);
-    }
-
-    & > * {
-        width: 100%;
-    }
 
     &.nt-indicators {
         margin: rem(70) auto;
@@ -127,20 +120,7 @@ $run-again-btn-width: rem(190);
     }
 
     .nt-test-info {
-        margin-left: rem(84);
-
-        @include screen-small {
-            flex-direction: row;
-            justify-content: center;
-            margin-left: rem(20);
-            margin-top: rem(40);
-
-            .nt-container__col {
-                flex: 0 0 rem(152);
-                justify-content: flex-start;
-                padding: 0 rem(10);
-            }
-        }
+        margin-left: $test-info-left-margin;
     }
 
     .nt-loading {
@@ -159,13 +139,10 @@ $run-again-btn-width: rem(190);
 
     .nt-run-again {
         color: white;
-        margin-top: rem(32);
-        width: $run-again-btn-width;
+        margin-top: rem(16);
     }
 
     @include screen-small {
-        margin-bottom: 0;
-
         .nt-test {
             &-progress {
                 width: 100%;
@@ -224,7 +201,6 @@ $run-again-btn-width: rem(190);
     justify-content: space-around;
     list-style: none;
     margin-top: rem(24);
-    width: $run-again-btn-width;
 
     &__item {
         flex: 0 0 rem(24);

@@ -25,6 +25,7 @@
         height: auto;
         margin-left: auto;
         min-height: calc(100% - 64px);
+        padding: rem(32) rem(64);
 
         & > * {
             flex: auto;

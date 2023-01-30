@@ -223,7 +223,7 @@ export class ControlServer {
         if (e.response) {
             Logger.I.error(e.response)
             if (e.response.data?.error?.length) {
-                throw new Error(e.response.data.error.json(". "))
+                throw new Error(e.response.data.error.join(". "))
             } else {
                 throw e.response.data
             }

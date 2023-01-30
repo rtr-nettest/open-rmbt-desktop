@@ -14,13 +14,10 @@
     align-items: center;
     display: flex;
     flex: 1;
-    justify-content: space-around;
     padding: rem(30);
 
-    app-start-test-button {
-        flex: 0 0 auto;
-        max-width: rem(560);
-        width: 100%;
+    &--ont {
+        justify-content: space-around;
     }
 }
 

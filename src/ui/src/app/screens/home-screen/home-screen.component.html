@@ -1,5 +1,10 @@
 <app-header></app-header>
-<main class="app-main" *transloco="let t">
+<main
+    class="app-main {{
+        (env$ | async)?.FLAVOR === 'ont' ? 'app-main--ont' : ''
+    }}"
+    *transloco="let t"
+>
     <div>
         <h1 class="app-title" *ngIf="(env$ | async)?.FLAVOR === 'ont'">
             {{ t("test.title") }}

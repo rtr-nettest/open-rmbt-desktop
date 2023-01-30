@@ -18,20 +18,20 @@ export class TranslocoHttpLoader implements TranslocoLoader {
 
     getTranslation(lang: string) {
         return this.mainStore.env$.pipe(
-            switchMap((env) =>
-                !env
-                    ? of([])
-                    : this.http.get<IUITranslation[]>(
-                          `${env?.CMS_URL}/ui-translations?locale.iso=${lang}&_limit=1000`,
-                          {
-                              headers: {
-                                  "Content-Type": "application/json",
-                                  "X-Nettest-Client":
-                                      env?.X_NETTEST_CLIENT ?? "",
-                              },
-                          }
-                      )
-            )
+            switchMap((env) => {
+                if (!env || env.FLAVOR === "rtr") {
+                    return of([])
+                }
+                return this.http.get<IUITranslation[]>(
+                    `${env?.CMS_URL}/ui-translations?locale.iso=${lang}&_limit=1000`,
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-Nettest-Client": env?.X_NETTEST_CLIENT ?? "",
+                        },
+                    }
+                )
+            })
         )
     }
 }

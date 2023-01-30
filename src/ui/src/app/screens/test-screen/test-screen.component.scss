@@ -5,7 +5,7 @@
     display: flex;
     justify-content: center;
     margin-left: 10%;
-    padding: rem(90);
+    padding: rem(64);
     height: 100%;
 
     & > * {
@@ -17,6 +17,18 @@
     }
 
     @include screen-small {
-        padding: rem(40);
+        padding: rem(32);
+    }
+
+    &--ont {
+        flex-direction: column;
+        height: auto;
+        margin-left: auto;
+        min-height: calc(100% - 64px);
+        padding: rem(32) rem(64);
+
+        & > * {
+            flex: auto;
+        }
     }
 }

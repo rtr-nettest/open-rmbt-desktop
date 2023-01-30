@@ -1,53 +1,71 @@
 <app-header></app-header>
-<main *ngIf="result$ | async as result; else noResult" class="app-main">
-    <header class="app-title">
-        Measurement result from {{ result.measurementDate | date }}
-    </header>
-    <div class="app-wrapper">
-        <app-dl
-            [items]="{
-                'Server name': result.measurementServerName,
-                'IP Address': result.ipAddress,
-                Provider: result.providerName
-            }"
-        ></app-dl>
-        <app-spacer></app-spacer>
-        <div>
+<ng-container
+    [ngTemplateOutlet]="(env$ | async)?.FLAVOR === 'ont' ? ont : rtr"
+></ng-container>
+
+<ng-template #ont>
+    <main
+        *ngIf="result$ | async as result; else noResult"
+        class="app-main app-main--ont"
+    >
+        <app-test-boxes></app-test-boxes>
+        <app-test-charts></app-test-charts>
+    </main>
+</ng-template>
+
+<ng-template #rtr>
+    <main *ngIf="result$ | async as result; else noResult" class="app-main">
+        <header class="app-title">
+            Measurement result from {{ result.measurementDate | date }}
+        </header>
+        <div class="app-wrapper">
             <app-dl
                 [items]="{
-                    Download: getSpeedInMbps(result.downloadKbit),
-                    Upload: getSpeedInMbps(result.uploadKbit),
-                    Ping: getPingInMs(result.ping)
+                    'Server name': result.measurementServerName,
+                    'IP Address': result.ipAddress,
+                    Provider: result.providerName
                 }"
-                [icons]="
-                    result.downloadClass &&
-                    result.uploadClass &&
-                    result.pingClass
-                        ? {
-                              Download: getIconStyleByClass(
-                                  result.downloadClass
-                              ),
-                              Upload: getIconStyleByClass(result.uploadClass),
-                              Ping: getIconStyleByClass(result.pingClass)
-                          }
-                        : undefined
-                "
             ></app-dl>
-            <div style="margin-top: 30px">
-                <a
-                    class="app-link"
-                    [href]="result.fullResultLink"
-                    target="_blank"
-                    >More results</a
-                >
+            <app-spacer></app-spacer>
+            <div>
+                <app-dl
+                    [items]="{
+                        Download: getSpeedInMbps(result.downloadKbit),
+                        Upload: getSpeedInMbps(result.uploadKbit),
+                        Ping: getPingInMs(result.ping)
+                    }"
+                    [icons]="
+                        result.downloadClass &&
+                        result.uploadClass &&
+                        result.pingClass
+                            ? {
+                                  Download: getIconStyleByClass(
+                                      result.downloadClass
+                                  ),
+                                  Upload: getIconStyleByClass(
+                                      result.uploadClass
+                                  ),
+                                  Ping: getIconStyleByClass(result.pingClass)
+                              }
+                            : undefined
+                    "
+                ></app-dl>
+                <div style="margin-top: 30px">
+                    <a
+                        class="app-link"
+                        [href]="result.fullResultLink"
+                        target="_blank"
+                        >More results</a
+                    >
+                </div>
             </div>
         </div>
-    </div>
-    <footer class="app-footer">
-        <a routerLink="/" class="app-btn">Start a new test</a>
-    </footer>
-</main>
-<app-footer></app-footer>
+        <footer class="app-footer">
+            <a routerLink="/test" class="app-btn">Start a new test</a>
+        </footer>
+    </main>
+    <app-footer></app-footer>
+</ng-template>
 
 <ng-template #noResult>
     <main *ngIf="error$ | async as error" class="app-main">

@@ -1,7 +1,7 @@
 import { Component, NgZone } from "@angular/core"
 import { tap } from "rxjs"
 import { getSignificantDigits } from "src/app/helpers/number"
-import { ITestItemState } from "src/app/interfaces/test-item-state.interface"
+import { ITestPhaseState } from "src/app/interfaces/test-phase-state.interface"
 import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
 
@@ -14,7 +14,7 @@ export class GaugeComponent {
     visualization$ = this.store.visualization$.pipe(
         tap((state) => {
             this.ngZone.runOutsideAngular(() => {
-                this.drawLoop(state.phases[state.currentPhase])
+                this.drawLoop(state.phases[state.currentPhaseName])
             })
         })
     )
@@ -101,8 +101,8 @@ export class GaugeComponent {
         }
     }
 
-    private drawLoop(phaseState: ITestItemState) {
-        let { phase: status, progress, down, up } = phaseState
+    private drawLoop(phaseState: ITestPhaseState) {
+        let { phase: status, progress, counter } = phaseState
         let barSelector = null
         let directionSymbol = null
         let speedMbit = -1
@@ -130,7 +130,7 @@ export class GaugeComponent {
                 this.setBarPercentage("#ping", 1)
                 barSelector = "#download"
                 //set symbol as unicode, since IE won't handle html entities
-                speedMbit = down
+                speedMbit = counter
                 directionSymbol = "\u21a7" //↧
                 break
             case EMeasurementStatus.INIT_UP:
@@ -142,7 +142,7 @@ export class GaugeComponent {
             case EMeasurementStatus.UP:
                 barSelector = "#upload"
                 progress = Math.min(0.95, progress * 0.9 + 0.1)
-                speedMbit = up
+                speedMbit = counter
                 directionSymbol = "\u21a5" //↥
                 break
             case EMeasurementStatus.SUBMITTING_RESULTS:

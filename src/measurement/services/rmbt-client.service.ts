@@ -4,6 +4,7 @@ import { IMeasurementRegistrationResponse } from "../interfaces/measurement-regi
 import {
     IMeasurementThreadResult,
     IMeasurementThreadResultList,
+    ISpeedItem,
 } from "../interfaces/measurement-result.interface"
 import {
     IncomingMessageWithData,
@@ -17,6 +18,123 @@ import { IOverallResult } from "../interfaces/overall-result.interface"
 import { IPreDownloadResult } from "./rmbt-thread.service"
 
 export class RMBTClient {
+    static getOverallResultsFromSpeedItems(
+        speedItems: ISpeedItem[],
+        direction: "download" | "upload"
+    ): IOverallResult[] {
+        if (!speedItems) {
+            return []
+        }
+        const key = direction === "download" ? "down" : "up"
+        const threadResultsMap: { [key: number]: IMeasurementThreadResult } = {}
+        for (const speedItem of speedItems) {
+            const index = speedItem.thread
+            if (!threadResultsMap[index]) {
+                threadResultsMap[index] = new MeasurementThreadResult()
+            }
+            if (speedItem.direction === "download") {
+                threadResultsMap[index].down.bytes.push(speedItem.bytes)
+                threadResultsMap[index].down.nsec.push(speedItem.time)
+            } else if (speedItem.direction === "upload") {
+                threadResultsMap[index].up.bytes.push(speedItem.bytes)
+                threadResultsMap[index].up.nsec.push(speedItem.time)
+            }
+        }
+        const threadResults = Object.values(threadResultsMap)
+        const overallResults: IOverallResult[] = []
+        const shortestThread = threadResults.sort(
+            (a, b) => a[key].bytes.length - b[key].bytes.length
+        )[0]
+        for (let i = 1; i <= shortestThread[key].bytes.length; i++) {
+            const threadsSlice = threadResults.map((threadResult) => {
+                const newResult = new MeasurementThreadResult()
+                newResult[key].nsec = threadResult[key].nsec.slice(0, i)
+                newResult[key].bytes = threadResult[key].bytes.slice(0, i)
+                return newResult
+            })
+            overallResults.push(
+                this.getOverallResult(
+                    threadsSlice,
+                    (threadResult) => threadResult[key]
+                )
+            )
+        }
+        return overallResults
+    }
+
+    // From https://github.com/rtr-nettest/rmbtws/blob/master/src/WebsockettestDatastructures.js#L177
+    static getOverallResult(
+        threads: IMeasurementThreadResult[],
+        phaseResults: (
+            thread: IMeasurementThreadResult
+        ) => IMeasurementThreadResultList
+    ): IOverallResult {
+        let numThreads = threads.length
+        let targetTime = Infinity
+
+        for (let i = 0; i < numThreads; i++) {
+            if (!phaseResults(threads[i])) {
+                continue
+            }
+            let nsecs = phaseResults(threads[i]).nsec
+            if (nsecs.length > 0) {
+                if (nsecs[nsecs.length - 1] < targetTime) {
+                    targetTime = nsecs[nsecs.length - 1]
+                }
+            }
+        }
+
+        let totalBytes = 0
+
+        for (let _i = 0; _i < numThreads; _i++) {
+            if (!phaseResults(threads[_i])) {
+                continue
+            }
+            let thread = threads[_i]
+            let phasedThreadNsec = phaseResults(thread).nsec
+            let phasedThreadBytes = phaseResults(thread).bytes
+            let phasedLength = phasedThreadNsec.length
+
+            if (thread !== null && phasedLength > 0) {
+                let targetIdx = phasedLength
+                for (let j = 0; j < phasedLength; j++) {
+                    if (phasedThreadNsec[j] >= targetTime) {
+                        targetIdx = j
+                        break
+                    }
+                }
+                let calcBytes = 0
+                if (phasedThreadNsec[targetIdx] === targetTime) {
+                    // nsec[max] == targetTime
+                    calcBytes = phasedThreadBytes[phasedLength - 1]
+                } else {
+                    let bytes1 =
+                        targetIdx === 0 ? 0 : phasedThreadBytes[targetIdx - 1]
+                    let bytes2 = phasedThreadBytes[targetIdx]
+                    let bytesDiff = bytes2 - bytes1
+                    let nsec1 =
+                        targetIdx === 0 ? 0 : phasedThreadNsec[targetIdx - 1]
+                    let nsec2 = phasedThreadNsec[targetIdx]
+                    let nsecDiff = nsec2 - nsec1
+                    let nsecCompensation = targetTime - nsec1
+                    let factor = nsecCompensation / nsecDiff
+                    let compensation = Math.round(bytesDiff * factor)
+
+                    if (compensation < 0) {
+                        compensation = 0
+                    }
+                    calcBytes = bytes1 + compensation
+                }
+                totalBytes += calcBytes
+            }
+        }
+        return {
+            bytes: totalBytes,
+            nsec: targetTime,
+            speed: (totalBytes * 8) / (targetTime / 1e9),
+        }
+    }
+
     measurementLastUpdate?: number
     measurementStatus: EMeasurementStatus = EMeasurementStatus.WAIT
     measurementTasks: RMBTWorker[] = []
@@ -106,7 +224,7 @@ export class RMBTClient {
                     !this.isRunning ||
                     Date.now() - this.measurementStart >= 60000
                 ) {
-                    this.overallResultUp = this.getOverallResult(
+                    this.overallResultUp = RMBTClient.getOverallResult(
                         this.threadResults,
                         (threadResult) => threadResult?.up
                     )
@@ -254,10 +372,11 @@ export class RMBTClient {
                         case "downloadUpdated":
                             this.interimThreadResults[index] =
                                 message.data! as IMeasurementThreadResult
-                            this.overallResultDown = this.getOverallResult(
-                                this.interimThreadResults,
-                                (threadResult) => threadResult?.down
-                            )
+                            this.overallResultDown =
+                                RMBTClient.getOverallResult(
+                                    this.interimThreadResults,
+                                    (threadResult) => threadResult?.down
+                                )
                             break
                         case "downloadFinished":
                             this.threadResults.push(
@@ -267,10 +386,11 @@ export class RMBTClient {
                                 this.threadResults.length ===
                                 this.measurementTasks.length
                             ) {
-                                this.overallResultDown = this.getOverallResult(
-                                    this.threadResults,
-                                    (threadResult) => threadResult?.down
-                                )
+                                this.overallResultDown =
+                                    RMBTClient.getOverallResult(
+                                        this.threadResults,
+                                        (threadResult) => threadResult?.down
+                                    )
                                 this.downThreadResults = [...this.threadResults]
                                 this.threadResults = []
                                 this.interimThreadResults = new Array(
@@ -356,7 +476,7 @@ export class RMBTClient {
                         case "uploadUpdated":
                             this.interimThreadResults[index] =
                                 message.data! as IMeasurementThreadResult
-                            this.overallResultUp = this.getOverallResult(
+                            this.overallResultUp = RMBTClient.getOverallResult(
                                 this.interimThreadResults,
                                 (threadResult) => threadResult?.up
                             )
@@ -395,79 +515,6 @@ export class RMBTClient {
                 },
                 [] as RMBTWorker[]
             )
-        }
-    }
-
-    // From https://github.com/rtr-nettest/rmbtws/blob/master/src/WebsockettestDatastructures.js#L177
-    private getOverallResult(
-        threads: IMeasurementThreadResult[],
-        phaseResults: (
-            thread: IMeasurementThreadResult
-        ) => IMeasurementThreadResultList
-    ) {
-        let numThreads = threads.length
-        let targetTime = Infinity
-
-        for (let i = 0; i < numThreads; i++) {
-            if (!phaseResults(threads[i])) {
-                continue
-            }
-            let nsecs = phaseResults(threads[i]).nsec
-            if (nsecs.length > 0) {
-                if (nsecs[nsecs.length - 1] < targetTime) {
-                    targetTime = nsecs[nsecs.length - 1]
-                }
-            }
-        }
-
-        let totalBytes = 0
-
-        for (let _i = 0; _i < numThreads; _i++) {
-            if (!phaseResults(threads[_i])) {
-                continue
-            }
-            let thread = threads[_i]
-            let phasedThreadNsec = phaseResults(thread).nsec
-            let phasedThreadBytes = phaseResults(thread).bytes
-            let phasedLength = phasedThreadNsec.length
-
-            if (thread !== null && phasedLength > 0) {
-                let targetIdx = phasedLength
-                for (let j = 0; j < phasedLength; j++) {
-                    if (phasedThreadNsec[j] >= targetTime) {
-                        targetIdx = j
-                        break
-                    }
-                }
-                let calcBytes = 0
-                if (phasedThreadNsec[targetIdx] === targetTime) {
-                    // nsec[max] == targetTime
-                    calcBytes = phasedThreadBytes[phasedLength - 1]
-                } else {
-                    let bytes1 =
-                        targetIdx === 0 ? 0 : phasedThreadBytes[targetIdx - 1]
-                    let bytes2 = phasedThreadBytes[targetIdx]
-                    let bytesDiff = bytes2 - bytes1
-                    let nsec1 =
-                        targetIdx === 0 ? 0 : phasedThreadNsec[targetIdx - 1]
-                    let nsec2 = phasedThreadNsec[targetIdx]
-                    let nsecDiff = nsec2 - nsec1
-                    let nsecCompensation = targetTime - nsec1
-                    let factor = nsecCompensation / nsecDiff
-                    let compensation = Math.round(bytesDiff * factor)
-
-                    if (compensation < 0) {
-                        compensation = 0
-                    }
-                    calcBytes = bytes1 + compensation
-                }
-                totalBytes += calcBytes
-            }
-        }
-        return {
-            bytes: totalBytes,
-            nsec: targetTime,
-            speed: (totalBytes * 8) / (targetTime / 1e9),
         }
     }
 

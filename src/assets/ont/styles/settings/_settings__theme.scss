@@ -1,0 +1,120 @@
+$base-font-family: "Open Sans", sans-serif;
+$base-font-size: 14;
+$base-line-height: 1.4;
+
+$font-size-xxl: 36;
+$font-size-xl: 24;
+$font-size-l: 18;
+$font-size-m: $base-font-size;
+$font-size-sm: 12;
+$font-size-xs: 10;
+
+$screen-xs: 475px;
+$screen-sm: 768px;
+$screen-md: 960px;
+$screen-lg: 1440px;
+
+$color-primary: #0958bd;
+$color-secondary: black;
+$color-pale: mix(#000000, #ffffff, 33%);
+$color-link: #0958bd;
+$color-button-gradient-1: #0958bd;
+$color-button-gradient-2: #00acb1;
+
+// http://mcg.mbitson.com/#!?mcgpalette0=%230958bd
+$palette-primary: (
+    50: #e1ebf7,
+    100: #b5cdeb,
+    200: #84acde,
+    300: #538ad1,
+    400: #2e71c7,
+    500: #0958bd,
+    600: #0850b7,
+    700: #0647ae,
+    800: #053da6,
+    900: #022d98,
+    A100: #c3d0ff,
+    A200: #90a8ff,
+    A400: #5d80ff,
+    A700: #446cff,
+    contrast: (
+        50: #000000,
+        100: #000000,
+        200: #000000,
+        300: #000000,
+        400: #ffffff,
+        500: #ffffff,
+        600: #ffffff,
+        700: #ffffff,
+        800: #ffffff,
+        900: #ffffff,
+        A100: #000000,
+        A200: #000000,
+        A400: #000000,
+        A700: #ffffff,
+    ),
+);
+$palette-accent: (
+    50: #aaa,
+    100: #999,
+    200: #777,
+    300: #666,
+    400: #555,
+    500: #000,
+    600: #333,
+    700: #222,
+    800: #111,
+    900: #000,
+    A100: #ffffff,
+    A200: #ffffff,
+    A400: #cfdaff,
+    A700: #b6c6ff,
+    contrast: (
+        50: rgba(black, 0.87),
+        100: rgba(black, 0.87),
+        200: rgba(black, 0.87),
+        300: rgba(black, 0.87),
+        400: rgba(black, 0.87),
+        500: white,
+        600: white,
+        700: white,
+        800: rgba(white, 0.87),
+        900: rgba(white, 0.87),
+        A100: rgba(black, 0.87),
+        A200: white,
+        A400: white,
+        A700: white,
+    ),
+);
+$palette-warn: (
+    50: #ffe5e8,
+    100: #febec6,
+    200: #fe93a0,
+    300: #fd677a,
+    400: #fc475e,
+    500: #fc2641,
+    600: #fc223b,
+    700: #fb1c32,
+    800: #fb172a,
+    900: #fa0d1c,
+    A100: #ffffff,
+    A200: #fff1f2,
+    A400: #ffbec1,
+    A700: #ffa5a9,
+    contrast: (
+        50: #000000,
+        100: #000000,
+        200: #000000,
+        300: #000000,
+        400: #ffffff,
+        500: #ffffff,
+        600: #ffffff,
+        700: #ffffff,
+        800: #ffffff,
+        900: #ffffff,
+        A100: #000000,
+        A200: #000000,
+        A400: #000000,
+        A700: #000000,
+    ),
+);

@@ -1,0 +1,67 @@
+@import "src/assets/styles/core";
+
+.nt-container {
+    align-items: center;
+    border-radius: rem(4);
+    border: rem(3) solid scale-color(black, $alpha: -90%);
+    display: flex;
+    flex-direction: column;
+    height: rem(152);
+    justify-content: space-around;
+    overflow: hidden;
+    padding: rem(8);
+    position: relative;
+    width: rem(152);
+
+    @include screen-small {
+        height: rem(100);
+        width: rem(100);
+    }
+
+    &__row {
+        color: scale-color($color-secondary, $alpha: -50%);
+        font-size: rem(12);
+
+        @include screen-small {
+            font-size: rem(10);
+        }
+    }
+
+    &__counter {
+        color: $color-secondary;
+        font-size: rem(28);
+
+        @include screen-small {
+            font-size: rem(21);
+        }
+    }
+
+    &__progress {
+        background: scale-color($color: black, $alpha: -95%);
+        bottom: 0;
+        left: -100%;
+        position: absolute;
+        transition: all 333ms linear;
+        width: 100%;
+        height: 100%;
+    }
+
+    &--active {
+        border: rem(3) solid $color-secondary;
+
+        .nt-container {
+            &__row {
+                color: $color-secondary;
+            }
+        }
+    }
+
+    &--done {
+        background: $color-secondary;
+        .nt-container {
+            &__row {
+                color: white;
+            }
+        }
+    }
+}

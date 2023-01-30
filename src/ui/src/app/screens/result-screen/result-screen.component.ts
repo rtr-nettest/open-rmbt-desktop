@@ -1,6 +1,7 @@
 import { Component } from "@angular/core"
 import { ActivatedRoute } from "@angular/router"
 import { getSignificantDigits } from "src/app/helpers/number"
+import { MainStore } from "src/app/store/main.store"
 import { TestStore } from "src/app/store/test.store"
 
 @Component({
@@ -9,12 +10,17 @@ import { TestStore } from "src/app/store/test.store"
     styleUrls: ["./result-screen.component.scss"],
 })
 export class ResultScreenComponent {
+    env$ = this.mainStore.env$
     result$ = this.store.getMeasurementResult(
         this.route.snapshot.paramMap.get("testUuid")
     )
     error$ = this.store.error$
 
-    constructor(private store: TestStore, private route: ActivatedRoute) {}
+    constructor(
+        private store: TestStore,
+        private mainStore: MainStore,
+        private route: ActivatedRoute
+    ) {}
 
     getIconStyleByClass(classification: number) {
         switch (classification) {

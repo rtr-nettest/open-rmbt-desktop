@@ -3,6 +3,7 @@ import { app, BrowserWindow, ipcMain, protocol, shell } from "electron"
 import path from "path"
 import {
     getBasicNetworkInfo,
+    getCPUUsage,
     getCurrentPhaseState,
     getMeasurementResult,
     runMeasurement,
@@ -90,6 +91,10 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
 
 ipcMain.handle(Events.GET_BASIC_NETWORK_INFO, () => {
     return getBasicNetworkInfo()
+})
+
+ipcMain.handle(Events.GET_CPU_USAGE, () => {
+    return getCPUUsage()
 })
 
 ipcMain.handle(Events.GET_MEASUREMENT_STATE, () => {

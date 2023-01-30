@@ -8,8 +8,12 @@ import { ControlServer } from "./services/control-server.service"
 import { Logger } from "./services/logger.service"
 import { RMBTClient } from "./services/rmbt-client.service"
 import osu from "node-os-utils"
+import { ICPUUsage } from "./interfaces/cpu-usage.interface"
 
 let rmbtClient: RMBTClient | undefined
+let cpuUsageMin = 0
+let cpuUsageMax = 0
+let cpuUsageAverage = 0
 
 export interface MeasurementOptions {
     platform?: string
@@ -28,6 +32,9 @@ export async function runMeasurement(options?: MeasurementOptions) {
     }
 
     rmbtClient = undefined
+    cpuUsageMin = 0
+    cpuUsageMax = 0
+    cpuUsageAverage = 0
 
     const controlServer = ControlServer.instance
     const settingsRequest = new UserSettingsRequest(options?.platform)
@@ -57,14 +64,22 @@ export async function runMeasurement(options?: MeasurementOptions) {
     rmbtClient.measurementStatus = EMeasurementStatus.END
     if (cpuUsageInterval) {
         clearInterval(cpuUsageInterval)
-        const cpuUsageMin = Math.min(...cpuUsageList)
-        const cpuUsageMax = Math.max(...cpuUsageList)
-        const cpuUsageAverage =
+        cpuUsageMin = Math.min(...cpuUsageList)
+        cpuUsageMax = Math.max(...cpuUsageList)
+        cpuUsageAverage =
             cpuUsageList.reduce((acc, stat) => acc + stat, 0) /
             cpuUsageList.length
         Logger.I.info(`CPU usage min is ${cpuUsageMin}%`)
         Logger.I.info(`CPU usage max is ${cpuUsageMax}%`)
         Logger.I.info(`CPU usage average is ${cpuUsageAverage}%`)
+    }
+}
+
+export function getCPUUsage(): ICPUUsage {
+    return {
+        cpuUsageAverage,
+        cpuUsageMax,
+        cpuUsageMin,
     }
 }
 

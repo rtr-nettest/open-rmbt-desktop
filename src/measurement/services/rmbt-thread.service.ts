@@ -99,9 +99,6 @@ export class RMBTThread implements IMessageHandlerContext {
             Logger.I.info(`Thread ${this.index} is connected.`)
             this.isConnected = true
             this.hadError = false
-            // this.threadResult.ip_local = this.client.localAddress
-            // this.threadResult.ip_server = this.client.remoteAddress
-            // this.threadResult.port_remote = this.client.remotePort
             resolve(this)
         }
 

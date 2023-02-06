@@ -1,6 +1,7 @@
 import { EMeasurementServerType } from "../enums/measurement-server-type.enum"
 import { IMeasurementRegistrationRequest } from "../interfaces/measurement-registration-request.interface"
 import { UserSettingsRequest } from "./user-settings-request.dto"
+const registry = require("../../../package.json")
 
 export class MeasurementRegistrationRequest
     implements IMeasurementRegistrationRequest
@@ -14,6 +15,7 @@ export class MeasurementRegistrationRequest
     timezone = ""
     type = ""
     user_server_selection = false
+    app_version = registry.version
 
     constructor(
         public uuid: string,

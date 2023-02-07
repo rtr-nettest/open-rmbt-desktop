@@ -20,7 +20,7 @@ export interface IMessageHandlerContext {
     params: IMeasurementRegistrationResponse
     preDownloadChunks: number
     preUploadChunks: number
-    threadResult: IMeasurementThreadResult
+    threadResult?: IMeasurementThreadResult
 
     interimHandler?: (interimResult: IMeasurementThreadResult) => void
 }

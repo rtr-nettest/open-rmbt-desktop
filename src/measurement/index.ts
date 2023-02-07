@@ -57,8 +57,8 @@ export async function runMeasurement(options?: MeasurementOptions) {
         registrationRequest,
         rmbtClient.params!,
         threadResults,
-        rmbtClient.overallResultDown!,
-        rmbtClient.overallResultUp!
+        rmbtClient.finalResultDown!,
+        rmbtClient.finalResultUp!
     )
     await controlServer.submitMeasurement(resultToSubmit)
     rmbtClient.measurementStatus = EMeasurementStatus.END
@@ -98,8 +98,8 @@ export function getCurrentPhaseState(): IMeasurementPhaseState {
         duration: rmbtClient?.getPhaseDuration(phase) ?? -1,
         progress: rmbtClient?.getPhaseProgress(phase) ?? -1,
         ping: rmbtClient?.pingMedian ?? -1,
-        down: rmbtClient?.downloadSpeedTotalMbps ?? -1,
-        up: rmbtClient?.uploadSpeedTotalMbps ?? -1,
+        down: rmbtClient?.interimDownMbps ?? -1,
+        up: rmbtClient?.interimUpMbps ?? -1,
         phase,
         testUuid: rmbtClient?.params?.test_uuid ?? "",
     }

@@ -62,6 +62,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     }
 
     private getChunks() {
+        Logger.I.info(`Thread ${this.ctx.index} is getting chunks.`)
         clearInterval(this.activityInterval)
         this.activityInterval = setInterval(() => {
             Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
@@ -82,6 +83,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     }
 
     private finishChunkPortion() {
+        Logger.I.info(`Thread ${this.ctx.index} is writing OK.`)
         clearInterval(this.activityInterval)
         this.ctx.client.write(ESocketMessage.OK)
     }

@@ -42,11 +42,12 @@ export class PreUploadMessageHandler implements IMessageHandler {
     }
 
     private putNoResult() {
-        Logger.I.info(`Thread ${this.ctx.index} sending PUTNORESULT.`)
+        Logger.I.info(`Thread ${this.ctx.index} is writing PUTNORESULT.`)
         this.ctx.client.write(`${ESocketMessage.PUTNORESULT}\n`)
     }
 
     private putChunks() {
+        Logger.I.info(`Thread ${this.ctx.index} is putting chunks.`)
         this.ctx.preUploadChunks = !this.ctx.preUploadChunks
             ? 1
             : this.ctx.preUploadChunks * 2

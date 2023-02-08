@@ -33,12 +33,8 @@ export class DownloadMessageHandler implements IMessageHandler {
     stopMessaging() {
         clearInterval(this.activityInterval)
         Logger.I.info(`Download is stopped for thread ${this.ctx.index}`)
-        this.ctx.threadResult.down = this.result
-        this.ctx.threadResult.speedItems = this.result.getSpeedItems(
-            "download",
-            this.ctx.index
-        )
-        this.onFinish?.(this.ctx.threadResult)
+        this.ctx.threadResult!.down = this.result
+        this.onFinish?.(this.ctx.threadResult!)
     }
 
     writeData(): void {
@@ -89,11 +85,17 @@ export class DownloadMessageHandler implements IMessageHandler {
 
             this.ctx.currentTime = this.nsec
             this.ctx.currentTransfer = this.downloadBytesRead
-            this.ctx.threadResult.down = this.result
+            this.ctx.threadResult!.down = this.result
             this.ctx.interimHandler?.({
-                ...this.ctx.threadResult,
-                currentTime: this.ctx.currentTime,
-                currentTransfer: this.ctx.currentTransfer,
+                ...this.ctx.threadResult!,
+                currentTime: {
+                    down: this.ctx.currentTime,
+                    up: 0,
+                },
+                currentTransfer: {
+                    down: this.ctx.currentTransfer,
+                    up: 0,
+                },
             })
         }
         if (isFullChunk && lastByte === 0xff) {

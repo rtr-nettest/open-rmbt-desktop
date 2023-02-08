@@ -39,12 +39,8 @@ export class UploadMessageHandler implements IMessageHandler {
     stopMessaging(): void {
         clearInterval(this.activityInterval)
         Logger.I.info(`Upload is finished for thread ${this.ctx.index}`)
-        this.ctx.threadResult.up = this.result
-        this.ctx.threadResult.speedItems = this.result.getSpeedItems(
-            "upload",
-            this.ctx.index
-        )
-        this.onFinish?.(this.ctx.threadResult)
+        this.ctx.threadResult!.up = this.result
+        this.onFinish?.(this.ctx.threadResult!)
     }
 
     writeData(): void {
@@ -75,11 +71,17 @@ export class UploadMessageHandler implements IMessageHandler {
                     this.result.addResult(bytes, nanos)
                     this.ctx.currentTime = nanos
                     this.ctx.currentTransfer = bytes
-                    this.ctx.threadResult.up = this.result
+                    this.ctx.threadResult!.up = this.result
                     this.ctx.interimHandler?.({
-                        ...this.ctx.threadResult,
-                        currentTime: this.ctx.currentTime,
-                        currentTransfer: this.ctx.currentTransfer,
+                        ...this.ctx.threadResult!,
+                        currentTime: {
+                            down: this.ctx.threadResult!.currentTime.down,
+                            up: this.ctx.currentTime,
+                        },
+                        currentTransfer: {
+                            down: this.ctx.threadResult!.currentTransfer.down,
+                            up: this.ctx.currentTransfer,
+                        },
                     })
                 }
                 if (

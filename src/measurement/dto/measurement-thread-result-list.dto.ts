@@ -31,17 +31,4 @@ export class MeasurementThreadResultList
             this.resultsCounter += 1
         }
     }
-
-    getSpeedItems(direction: "download" | "upload", thread: number) {
-        const speedItems: ISpeedItem[] = new Array(this.maxStoredResults)
-        for (let i = 0; i < this.maxStoredResults; i++) {
-            speedItems[i] = {
-                direction,
-                thread,
-                time: this.nsec[i],
-                bytes: this.bytes[i],
-            }
-        }
-        return speedItems
-    }
 }

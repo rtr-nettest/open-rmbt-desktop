@@ -7,6 +7,7 @@ import {
     ISpeedItem,
 } from "../interfaces/measurement-result.interface"
 import { IOverallResult } from "../interfaces/overall-result.interface"
+import { TransferDirection } from "../services/rmbt-client.service"
 
 export class MeasurementResult implements IMeasurementResult {
     client_name?: string
@@ -90,13 +91,8 @@ export class MeasurementResult implements IMeasurementResult {
         const speedItemsDownMap: { [key: number]: ISpeedItem } = {}
         const speedItemsUpMap: { [key: number]: ISpeedItem } = {}
         for (const threadResult of threadResults) {
-            for (const speedItem of threadResult.speedItems) {
-                if (speedItem.direction === "download") {
-                    this.dedupeTime(speedItemsDownMap, speedItem)
-                } else {
-                    this.dedupeTime(speedItemsUpMap, speedItem)
-                }
-            }
+            this.getThreadSpeedItems(speedItemsDownMap, threadResult, "down")
+            this.getThreadSpeedItems(speedItemsUpMap, threadResult, "up")
         }
         const speedItemsDown = Object.values(speedItemsDownMap)
         const speedItemsUp = Object.values(speedItemsUpMap)
@@ -105,18 +101,32 @@ export class MeasurementResult implements IMeasurementResult {
         return [...speedItemsDown, ...speedItemsUp]
     }
 
-    private dedupeTime(
+    private getThreadSpeedItems(
         map: { [key: number]: ISpeedItem },
-        speedItem: ISpeedItem
+        threadResult: IMeasurementThreadResult,
+        direction: TransferDirection
     ) {
-        if (!speedItem.time) {
+        if (!threadResult[direction]) {
             return map
         }
-        if (!map[speedItem.time]) {
-            map[speedItem.time] = speedItem
-        }
-        if (speedItem.bytes > map[speedItem.time].bytes) {
-            map[speedItem.time] = speedItem
+        for (let i = 0; i < threadResult[direction].nsec.length; i++) {
+            const thisNsec = Number(threadResult[direction].nsec[i])
+            const thisBytes = Number(threadResult[direction].bytes[i])
+            if (isNaN(thisNsec) || isNaN(thisBytes)) {
+                continue
+            }
+            const speedItem: ISpeedItem = {
+                direction: direction === "down" ? "download" : "upload",
+                thread: threadResult.index,
+                time: thisNsec,
+                bytes: thisBytes,
+            }
+            if (!map[thisNsec]) {
+                map[thisNsec] = speedItem
+            }
+            if (speedItem.bytes > map[thisNsec].bytes) {
+                map[thisNsec] = speedItem
+            }
         }
         return map
     }

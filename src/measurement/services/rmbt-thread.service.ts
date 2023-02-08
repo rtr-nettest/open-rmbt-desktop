@@ -1,7 +1,6 @@
 import net from "net"
 import tls from "tls"
 import fs from "fs"
-import { MeasurementThreadResult } from "../dto/measurement-thread-result.dto"
 import { ESocketMessage } from "../enums/socket-message.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
@@ -28,7 +27,7 @@ export class RMBTThread implements IMessageHandlerContext {
     currentTime: number = -1
     currentTransfer: number = -1
     interimHandler?: (interimResult: IMeasurementThreadResult) => void
-    threadResult: IMeasurementThreadResult = new MeasurementThreadResult()
+    threadResult?: IMeasurementThreadResult
     preDownloadChunks: number = 1
     preUploadChunks: number = 1
     private phase?:

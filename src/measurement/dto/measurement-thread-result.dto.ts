@@ -2,7 +2,6 @@ import {
     IMeasurementThreadResult,
     IMeasurementThreadResultList,
     IPing,
-    ISpeedItem,
 } from "../interfaces/measurement-result.interface"
 
 export class MeasurementThreadResult implements IMeasurementThreadResult {
@@ -15,9 +14,16 @@ export class MeasurementThreadResult implements IMeasurementThreadResult {
         nsec: [],
     }
     pings: IPing[] = []
-    speedItems: ISpeedItem[] = []
-    currentTime = 0
-    currentTransfer = 0
+    currentTime = {
+        down: 0,
+        up: 0,
+    }
+    currentTransfer = {
+        down: 0,
+        up: 0,
+    }
     ping_median = -1
     ping_shortest = -1
+
+    constructor(public index: number) {}
 }

@@ -25,12 +25,18 @@ export interface IMeasurementResult {
 }
 
 export interface IMeasurementThreadResult {
+    index: number
     down: IMeasurementThreadResultList
     up: IMeasurementThreadResultList
     chunkSize?: number
-    currentTime: number
-    currentTransfer: number
-    speedItems: ISpeedItem[]
+    currentTime: {
+        down: number
+        up: number
+    }
+    currentTransfer: {
+        down: number
+        up: number
+    }
     pings: IPing[]
     ping_median: number
     ping_shortest: number

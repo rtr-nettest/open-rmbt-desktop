@@ -26,12 +26,12 @@ export class PingMessageHandler implements IMessageHandler {
         if (this.serverPings.length % 2 === 0) {
             const medianA = this.serverPings[middle]
             const medianB = this.serverPings[middle - 1]
-            this.ctx.threadResult.ping_median = (medianA + medianB) / 2
+            this.ctx.threadResult!.ping_median = (medianA + medianB) / 2
         } else {
-            this.ctx.threadResult.ping_median =
+            this.ctx.threadResult!.ping_median =
                 this.serverPings[Math.floor(middle)]
         }
-        this.onFinish?.(this.ctx.threadResult)
+        this.onFinish?.(this.ctx.threadResult!)
     }
 
     writeData() {
@@ -61,7 +61,7 @@ export class PingMessageHandler implements IMessageHandler {
             this.pingTimes[this.pingCounter - 1].end = hrtime.bigint()
             const pingClient = this.getClientPing()
             this.serverPings.push(pingClient)
-            this.ctx.threadResult.pings.push({
+            this.ctx.threadResult!.pings.push({
                 value_server: pingClient,
                 value: pingClient,
                 time_ns: this.getDuration(),
@@ -84,7 +84,7 @@ export class PingMessageHandler implements IMessageHandler {
             const pingClient = this.getClientPing()
             if (pingServer) {
                 this.serverPings.push(pingServer)
-                this.ctx.threadResult.pings.push({
+                this.ctx.threadResult!.pings.push({
                     value: pingClient,
                     value_server: pingServer,
                     time_ns: this.getDuration(),

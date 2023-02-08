@@ -69,7 +69,13 @@ export class RMBTClient {
         let maxNsec = 0
 
         for (const task of threads) {
-            if (!(task && task.currentTime && task.currentTransfer)) {
+            if (
+                !(
+                    task &&
+                    task.currentTime?.[resultKey] >= 0 &&
+                    task.currentTransfer?.[resultKey] >= 0
+                )
+            ) {
                 continue
             }
             if (task.currentTime[resultKey] < minNsec) {

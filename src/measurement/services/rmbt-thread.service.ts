@@ -88,7 +88,7 @@ export class RMBTThread implements IMessageHandlerContext {
             }
             Logger.I.info(`Thread ${this.index} is disconnecting.`)
             this.isConnected = false
-            this.client.end()
+            this.client.destroy()
             resolve(this)
         })
     }

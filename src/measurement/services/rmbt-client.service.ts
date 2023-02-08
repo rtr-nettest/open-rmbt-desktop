@@ -172,7 +172,7 @@ export class RMBTClient {
     measurementLastUpdate?: number
     measurementStatus: EMeasurementStatus = EMeasurementStatus.WAIT
     measurementTasks: RMBTWorker[] = []
-    minChunkSize = 0
+    minChunkSize = 4096
     maxChunkSize = 4194304
     params: IMeasurementRegistrationResponse
     initializedThreads: number[] = []

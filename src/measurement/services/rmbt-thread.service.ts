@@ -147,7 +147,11 @@ export class RMBTThread implements IMessageHandlerContext {
     private closeListener(hadError: boolean) {
         Logger.I.info(
             `Connection was closed for the thread ${this.index}%s.`,
-            hadError || this.hadError ? " with error" : ""
+            hadError
+                ? " with error"
+                : this.hadError
+                ? " with the ERR message"
+                : ""
         )
         this.isConnected = false
 

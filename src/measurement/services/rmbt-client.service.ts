@@ -369,7 +369,7 @@ export class RMBTClient {
                             this.chunks.push(chunkSize)
                             this.bytesPerSecPreDownload.push(bytesPerSec)
                             Logger.I.warn(
-                                `Worker ${index} finished pre-download with ${this.chunks} speeds.`
+                                `Worker ${index} finished pre-download with speed ${bytesPerSec} and chunk size ${chunkSize}.`
                             )
                             if (
                                 this.chunks.length ===

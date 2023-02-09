@@ -71,3 +71,4 @@ The variables used are:
     -   `SSL_KEY_PATH` and `SSL_CERT_PATH` - paths to SSL key and certificate files which should be used by the client to establish a secure connection to a measurement server.
     -   `PLATFORM_CLI` - a short string to differentiate the CLI client from the Electron app on the BE.
     -   `CMS_URL` - a CMS instance to use for the `ont` flavor.
+    -   `ALLOWED_INACTIVITY_MS` - configures a period of inactivity allowed, in milliseconds, before the measurement is terminated. Default is 10 seconds.

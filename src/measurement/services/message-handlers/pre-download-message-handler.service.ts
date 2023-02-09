@@ -54,9 +54,10 @@ export class PreDownloadMessageHandler implements IMessageHandler {
         if (data.length > 0) {
             this.preDownloadBytesRead =
                 this.preDownloadBytesRead + data.byteLength
+            isFullChunk = this.preDownloadBytesRead % this.ctx.chunkSize === 0
             lastByte = data[data.length - 1]
         }
-        if (lastByte === this.ctx.chunkSize && lastByte === 0xff) {
+        if (isFullChunk && lastByte === 0xff) {
             this.finishChunkPortion()
         }
     }

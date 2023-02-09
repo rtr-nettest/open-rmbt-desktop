@@ -79,6 +79,7 @@ export class DownloadMessageHandler implements IMessageHandler {
             this.nsec = Number(hrtime.bigint() - this.downloadStartTime)
             this.result.addResult(this.downloadBytesRead, this.nsec)
 
+            isFullChunk = this.downloadBytesRead % this.ctx.chunkSize === 0
             lastByte = data[data.length - 1]
 
             this.ctx.currentTime = this.nsec
@@ -96,7 +97,7 @@ export class DownloadMessageHandler implements IMessageHandler {
                 },
             })
         }
-        if (lastByte === this.ctx.chunkSize && lastByte === 0xff) {
+        if (isFullChunk && lastByte === 0xff) {
             this.requestFinish()
         }
     }

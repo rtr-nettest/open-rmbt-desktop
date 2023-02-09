@@ -13,8 +13,6 @@ export interface IMessageHandlerContext {
     bytesPerSecPretest: number[]
     chunkSize: number
     client: Socket
-    currentTime: number
-    currentTransfer: number
     defaultChunkSize: number
     index: number
     params: IMeasurementRegistrationResponse

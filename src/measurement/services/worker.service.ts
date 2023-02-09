@@ -47,10 +47,6 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
                     )
                 )
             result = await thread!.manageDownload(message.data as number)
-            if (result) {
-                result.currentTime.down = thread!.currentTime || 0
-                result.currentTransfer.down = thread!.currentTransfer || 0
-            }
             parentPort?.postMessage(
                 new OutgoingMessageWithData("downloadFinished", result)
             )
@@ -78,10 +74,6 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
                     new OutgoingMessageWithData("uploadUpdated", interimResult)
                 )
             result = await thread!.manageUpload()
-            if (result) {
-                result.currentTime.up = thread?.currentTime || 0
-                result.currentTransfer.up = thread?.currentTransfer || 0
-            }
             parentPort?.postMessage(
                 new OutgoingMessageWithData("uploadFinished", result)
             )

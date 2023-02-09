@@ -24,8 +24,6 @@ export class RMBTThread implements IMessageHandlerContext {
     defaultChunkSize = 4096
     chunkSize: number = 0
     client: net.Socket = new net.Socket()
-    currentTime: number = -1
-    currentTransfer: number = -1
     interimHandler?: (interimResult: IMeasurementThreadResult) => void
     threadResult?: IMeasurementThreadResult
     preDownloadChunks: number = 1
@@ -147,7 +145,11 @@ export class RMBTThread implements IMessageHandlerContext {
     private closeListener(hadError: boolean) {
         Logger.I.info(
             `Connection was closed for the thread ${this.index}%s.`,
-            hadError || this.hadError ? " with error" : ""
+            hadError
+                ? " with error"
+                : this.hadError
+                ? " with the ERR message"
+                : ""
         )
         this.isConnected = false
 
@@ -276,8 +278,6 @@ export class RMBTThread implements IMessageHandlerContext {
         return new Promise((resolve) => {
             this.phase = "upload"
             this.dropHandlers()
-            this.currentTransfer = 0
-            this.currentTime = 0
             this.uploadMessageHandler = new UploadMessageHandler(
                 this,
                 (result) => {

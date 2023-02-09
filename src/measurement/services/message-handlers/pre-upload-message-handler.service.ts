@@ -10,11 +10,18 @@ import { Time } from "../time.service"
 export class PreUploadMessageHandler implements IMessageHandler {
     private preUploadEndTime = Time.nowNs()
     private preUploadDuration = 2000000000
+    private buffers: Buffer[] = []
 
     constructor(
         private ctx: IMessageHandlerContext,
         public onFinish: () => void
-    ) {}
+    ) {
+        let maxStoredResults = 3
+        while (maxStoredResults > 0) {
+            this.buffers.push(randomBytes(this.ctx.chunkSize))
+            maxStoredResults--
+        }
+    }
 
     stopMessaging(): void {
         this.onFinish?.()
@@ -51,8 +58,14 @@ export class PreUploadMessageHandler implements IMessageHandler {
         this.ctx.preUploadChunks = !this.ctx.preUploadChunks
             ? 1
             : this.ctx.preUploadChunks * 2
+        let bufferIndex = 0
         for (let i = 0; i < this.ctx.preUploadChunks; i++) {
-            const buffer = randomBytes(this.ctx.chunkSize)
+            let buffer = this.buffers[bufferIndex]!
+            if (bufferIndex >= this.buffers.length - 1) {
+                bufferIndex = 0
+            } else {
+                bufferIndex++
+            }
             if (i == this.ctx.preUploadChunks - 1) {
                 buffer[buffer.length - 1] = 0xff
             }

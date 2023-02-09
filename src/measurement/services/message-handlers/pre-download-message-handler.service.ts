@@ -12,6 +12,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     private preDownloadBytesRead = -1
     private activityInterval?: NodeJS.Timer
     private inactivityTimeout = 1000
+    private isChunkPortionFinished = false
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -80,11 +81,16 @@ export class PreDownloadMessageHandler implements IMessageHandler {
         this.ctx.client.write(
             `${ESocketMessage.GETCHUNKS} ${this.ctx.preDownloadChunks}\n`
         )
+        this.isChunkPortionFinished = false
     }
 
     private finishChunkPortion() {
+        if (this.isChunkPortionFinished) {
+            return
+        }
         Logger.I.info(`Thread ${this.ctx.index} is writing OK.`)
         clearInterval(this.activityInterval)
         this.ctx.client.write(ESocketMessage.OK)
+        this.isChunkPortionFinished = true
     }
 }

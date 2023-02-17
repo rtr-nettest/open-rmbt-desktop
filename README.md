@@ -14,7 +14,7 @@ The project requires Node.js v18 or later.
 
 ## Simple setup
 
-Install packages by running `npm i` or `yarn install` in the root folder and in the `src/react-ui` folder. Rename `.env.example` file into `.env` (look into the [Configuration](#configuration) section of this document for details).
+Install packages by running `npm i` or `yarn install` in the root folder and in the `src/ui` folder. Rename `.env.example` file into `.env` (look into the [Configuration](#configuration) section of this document for details).
 
 ## Compilation and running
 

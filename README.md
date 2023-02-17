@@ -44,6 +44,12 @@ or
 
 The app will be placed in the `out` folder at the root of the project.
 
+To build the installer of the Electron app in the prod mode use
+
+    npm run make
+
+The installer will be placed in the `out/make` folder at the root of the project.
+
 ## Configuration
 
 The project contains a `.env.example` file. You can use it as an example to configure the variables needed to successfully run a measurement. The path to your custom `.env` file can be passed through an environment variable `RMBT_DESKTOP_DOTENV_CONFIG_PATH`. Otherwise the client will read the variables from a `.env` file in the root of the project, if such exists.

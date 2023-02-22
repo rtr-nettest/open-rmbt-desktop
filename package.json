@@ -32,7 +32,7 @@
         "@vercel/webpack-asset-relocator-loader": "^1.7.3",
         "cross-env": "^7.0.3",
         "dotenv-webpack": "^8.0.1",
-        "electron": "^21.2.0",
+        "electron": "^23.1.0",
         "node-loader": "^2.0.0",
         "shx": "^0.3.4",
         "start-server-and-test": "^1.14.0",

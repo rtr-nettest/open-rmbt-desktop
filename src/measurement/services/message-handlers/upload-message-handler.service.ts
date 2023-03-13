@@ -56,12 +56,12 @@ export class UploadMessageHandler implements IMessageHandler {
     }
 
     readData(data: Buffer): void {
-        if (data.includes(ESocketMessage.OK)) {
+        if (data.indexOf(ESocketMessage.OK) === 0) {
             this.setActivityInterval()
             this.putChunks()
             return
         }
-        if (data.includes(ESocketMessage.TIME)) {
+        if (data.indexOf(ESocketMessage.TIME) === 0) {
             const dataArr = data.toString().trim().split(" ")
             if (dataArr.length === 4) {
                 const nanos = +dataArr[1]
@@ -90,12 +90,6 @@ export class UploadMessageHandler implements IMessageHandler {
         }
     }
 
-    private writeToSocketNextTick(buffer: Buffer) {
-        process.nextTick(() => {
-            this.ctx.client.write(buffer)
-        })
-    }
-
     private putChunks() {
         let bufferIndex = 0
         while (true) {
@@ -108,7 +102,7 @@ export class UploadMessageHandler implements IMessageHandler {
             const nowNs = Time.nowNs()
             if (nowNs >= this.uploadEndTimeNs) {
                 buffer[buffer.length - 1] = 0xff
-                this.writeToSocketNextTick(buffer)
+                this.ctx.client.write(buffer)
                 if (!this.finalTimeout) {
                     this.finalTimeout = setTimeout(
                         () => this.stopMessaging.bind(this),
@@ -118,7 +112,7 @@ export class UploadMessageHandler implements IMessageHandler {
                 break
             } else {
                 buffer[buffer.length - 1] = 0x00
-                this.writeToSocketNextTick(buffer)
+                this.ctx.client.write(buffer)
                 this.bytesWritten += buffer.length
                 if (
                     this.bytesWritten >= this.ctx.client.writableHighWaterMark

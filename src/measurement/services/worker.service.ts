@@ -62,8 +62,11 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
             )
             break
         case "reconnectForUpload":
-            await thread?.connect(workerData.result)
-            isConnected = (await thread?.manageInit()) || false
+            isConnected = thread?.isConnected || false
+            if (!isConnected) {
+                await thread?.connect(workerData.result)
+                isConnected = (await thread?.manageInit()) || false
+            }
             parentPort?.postMessage(
                 new OutgoingMessageWithData("reconnectedForUpload", isConnected)
             )

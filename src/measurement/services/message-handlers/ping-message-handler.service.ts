@@ -78,7 +78,7 @@ export class PingMessageHandler implements IMessageHandler {
             })
             return
         }
-        if (data.includes(ESocketMessage.TIME)) {
+        if (data.indexOf(ESocketMessage.TIME) === 0) {
             const timeMatches = data.toString().split(" ")
             const pingServer = timeMatches?.[1] ? Number(timeMatches[1]) : -1
             const pingClient = this.getClientPing()

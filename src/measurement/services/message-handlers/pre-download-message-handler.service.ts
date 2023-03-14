@@ -42,7 +42,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
             }
             return
         }
-        if (data.includes(ESocketMessage.TIME)) {
+        if (data.indexOf(ESocketMessage.TIME) === 0) {
             const timeNs = Number(data.toString().split(" ")[1])
             this.ctx.bytesPerSecPretest.push(
                 this.preDownloadBytesRead / (timeNs / 1e9)

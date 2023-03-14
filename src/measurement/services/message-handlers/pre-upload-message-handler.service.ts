@@ -5,12 +5,12 @@ import {
     IMessageHandlerContext,
 } from "../../interfaces/message-handler.interface"
 import { Logger } from "../logger.service"
-import { Time } from "../time.service"
 
 export class PreUploadMessageHandler implements IMessageHandler {
-    private preUploadEndTime = Time.nowNs()
-    private preUploadDuration = 2000000000
+    private preUploadDuration = 8 * 1e8
     private buffers: Buffer[] = []
+    private deliveryTimes: number[] = []
+    private totalDeliveryTime = 0
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -28,18 +28,27 @@ export class PreUploadMessageHandler implements IMessageHandler {
     }
 
     writeData(): void {
-        this.preUploadEndTime = Time.nowNs() + this.preUploadDuration
         Logger.I.info(`Thread ${this.ctx.index} starts sending chunks.`)
+        this.ctx.preUploadChunks = 0
         this.putNoResult()
     }
 
     readData(data: Buffer): void {
-        if (data.includes(ESocketMessage.OK)) {
+        if (data.indexOf(ESocketMessage.OK) === 0) {
             this.putChunks()
             return
         }
-        if (data.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
-            if (Time.nowNs() < this.preUploadEndTime) {
+        if (data.indexOf(ESocketMessage.TIME) === 0) {
+            let timestamp = Number(data.toString().split(" ")[1])
+            timestamp = isNaN(timestamp) ? 0 : timestamp
+            this.deliveryTimes.push(timestamp)
+            this.totalDeliveryTime += timestamp
+            const averageDeliveryTime =
+                this.totalDeliveryTime / this.deliveryTimes.length
+            if (
+                this.totalDeliveryTime + averageDeliveryTime * 2 <
+                this.preUploadDuration
+            ) {
                 this.putNoResult()
             } else {
                 this.stopMessaging()
@@ -49,15 +58,18 @@ export class PreUploadMessageHandler implements IMessageHandler {
     }
 
     private putNoResult() {
-        Logger.I.info(`Thread ${this.ctx.index} is writing PUTNORESULT.`)
+        this.ctx.preUploadChunks =
+            !this.ctx.preUploadChunks || this.ctx.preUploadChunks <= 0
+                ? 1
+                : this.ctx.preUploadChunks * 2
+        Logger.I.info(
+            `Thread ${this.ctx.index} is writing ${ESocketMessage.PUTNORESULT}.`
+        )
         this.ctx.client.write(`${ESocketMessage.PUTNORESULT}\n`)
     }
 
     private putChunks() {
         Logger.I.info(`Thread ${this.ctx.index} is putting chunks.`)
-        this.ctx.preUploadChunks = !this.ctx.preUploadChunks
-            ? 1
-            : this.ctx.preUploadChunks * 2
         let bufferIndex = 0
         for (let i = 0; i < this.ctx.preUploadChunks; i++) {
             let buffer = this.buffers[bufferIndex]!
@@ -66,10 +78,13 @@ export class PreUploadMessageHandler implements IMessageHandler {
             } else {
                 bufferIndex++
             }
-            if (i == this.ctx.preUploadChunks - 1) {
+            if (i < this.ctx.preUploadChunks - 1) {
+                buffer[buffer.length - 1] = 0x00
+            } else {
                 buffer[buffer.length - 1] = 0xff
             }
             this.ctx.client.write(buffer)
         }
+        Logger.I.info(`Thread ${this.ctx.index} has finished putting chunks.`)
     }
 }

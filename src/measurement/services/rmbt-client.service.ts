@@ -506,7 +506,9 @@ export class RMBTClient {
                                 )
                                 setImmediate(() => {
                                     worker.postMessage(
-                                        new IncomingMessageWithData("connect")
+                                        new IncomingMessageWithData(
+                                            "reconnectForUpload"
+                                        )
                                     )
                                 })
                             }

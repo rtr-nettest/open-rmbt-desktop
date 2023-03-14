@@ -25,6 +25,7 @@ export class RMBTThread implements IMessageHandlerContext {
     chunkSize: number = 0
     client: net.Socket = new net.Socket()
     interimHandler?: (interimResult: IMeasurementThreadResult) => void
+    isConnected = false
     threadResult?: IMeasurementThreadResult
     preDownloadChunks: number = 1
     preUploadChunks: number = 1
@@ -42,7 +43,6 @@ export class RMBTThread implements IMessageHandlerContext {
     private preUploadMessageHandler?: PreUploadMessageHandler
     private uploadMessageHandler?: UploadMessageHandler
     private hadError = false
-    private isConnected = false
 
     constructor(
         public params: IMeasurementRegistrationResponse,
@@ -262,12 +262,8 @@ export class RMBTThread implements IMessageHandlerContext {
                 () => {
                     this.dropHandlers()
                     this.phase = undefined
-                    this.disconnect().then(() => {
-                        Logger.I.info(
-                            `Resolving thread ${this.index} pre-upload.`
-                        )
-                        resolve(this.chunkSize)
-                    })
+                    Logger.I.info(`Resolving thread ${this.index} pre-upload.`)
+                    resolve(this.chunkSize)
                 }
             )
             this.preUploadMessageHandler.writeData()

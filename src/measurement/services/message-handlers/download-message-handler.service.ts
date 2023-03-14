@@ -68,7 +68,7 @@ export class DownloadMessageHandler implements IMessageHandler {
             this.stopMessaging()
             return
         }
-        if (data.includes(ESocketMessage.TIME)) {
+        if (data.indexOf(ESocketMessage.TIME) === 0) {
             return
         }
         let lastByte = 0

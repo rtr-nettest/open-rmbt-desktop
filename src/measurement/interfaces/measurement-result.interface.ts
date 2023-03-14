@@ -1,7 +1,10 @@
+import { ICPU } from "./cpu.interface"
+
 export interface IMeasurementResult {
     client_uuid: string
     client_name?: string
     client_version?: string
+    cpu?: ICPU
     model?: string
     network_type: number
     operating_system: string

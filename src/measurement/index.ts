@@ -8,33 +8,32 @@ import { ControlServer } from "./services/control-server.service"
 import { Logger } from "./services/logger.service"
 import { RMBTClient } from "./services/rmbt-client.service"
 import osu from "node-os-utils"
-import { ICPUUsage } from "./interfaces/cpu-usage.interface"
+import os from "os"
+import { ICPU } from "./interfaces/cpu.interface"
 
 let rmbtClient: RMBTClient | undefined
-let cpuUsageMin = 0
-let cpuUsageMax = 0
-let cpuUsageAverage = 0
+let cpuInfo: ICPU | undefined
+
+const rounded = (num: number) => Math.round(num * 1000) / 1000
 
 export interface MeasurementOptions {
     platform?: string
 }
 
 export async function runMeasurement(options?: MeasurementOptions) {
-    let cpuUsageInterval: NodeJS.Timer | undefined
-    let cpuUsageList: number[] = []
+    let cpuInfoInterval: NodeJS.Timer | undefined
+    let cpuInfoList: number[] = []
     if (process.env.LOG_CPU_USAGE === "true") {
-        cpuUsageInterval = setInterval(() => {
+        cpuInfoInterval = setInterval(() => {
             osu.cpu.usage().then((percent) => {
                 Logger.I.info(`CPU usage is ${percent}%`)
-                cpuUsageList.push(percent)
+                cpuInfoList.push(percent)
             })
         }, 1000)
     }
 
     rmbtClient = undefined
-    cpuUsageMin = 0
-    cpuUsageMax = 0
-    cpuUsageAverage = 0
+    cpuInfo = undefined
 
     const controlServer = ControlServer.instance
     const settingsRequest = new UserSettingsRequest(options?.platform)
@@ -53,34 +52,42 @@ export async function runMeasurement(options?: MeasurementOptions) {
     rmbtClient = new RMBTClient(measurementRegistration)
     const threadResults = await rmbtClient.scheduleMeasurement()
     rmbtClient.measurementStatus = EMeasurementStatus.SUBMITTING_RESULTS
+    if (cpuInfoInterval) {
+        clearInterval(cpuInfoInterval)
+        cpuInfo = {
+            load_min: rounded(Math.min(...cpuInfoList) / 100),
+            load_max: rounded(Math.max(...cpuInfoList) / 100),
+            load_avg: rounded(
+                cpuInfoList.reduce((acc, stat) => acc + stat, 0) /
+                    cpuInfoList.length /
+                    100
+            ),
+            model: osu.cpu.model(),
+            cores: osu.cpu.count(),
+            speed: os.cpus()[0].speed,
+        }
+    }
     const resultToSubmit = new MeasurementResult(
         registrationRequest,
         rmbtClient.params!,
         threadResults,
         rmbtClient.finalResultDown!,
-        rmbtClient.finalResultUp!
+        rmbtClient.finalResultUp!,
+        cpuInfo
     )
     await controlServer.submitMeasurement(resultToSubmit)
-    rmbtClient.measurementStatus = EMeasurementStatus.END
-    if (cpuUsageInterval) {
-        clearInterval(cpuUsageInterval)
-        cpuUsageMin = Math.min(...cpuUsageList)
-        cpuUsageMax = Math.max(...cpuUsageList)
-        cpuUsageAverage =
-            cpuUsageList.reduce((acc, stat) => acc + stat, 0) /
-            cpuUsageList.length
-        Logger.I.info(`CPU usage min is ${cpuUsageMin}%`)
-        Logger.I.info(`CPU usage max is ${cpuUsageMax}%`)
-        Logger.I.info(`CPU usage average is ${cpuUsageAverage}%`)
+    if (cpuInfo) {
+        Logger.I.info(`CPU usage min is ${rounded(cpuInfo.load_min * 100)}%`)
+        Logger.I.info(`CPU usage max is ${rounded(cpuInfo.load_max * 100)}%`)
+        Logger.I.info(
+            `CPU usage average is ${rounded(cpuInfo.load_avg * 100)}%`
+        )
     }
+    rmbtClient.measurementStatus = EMeasurementStatus.END
 }
 
-export function getCPUUsage(): ICPUUsage {
-    return {
-        cpuUsageAverage,
-        cpuUsageMax,
-        cpuUsageMin,
-    }
+export function getCPUUsage(): ICPU | undefined {
+    return cpuInfo
 }
 
 export function getBasicNetworkInfo(): IBasicNetworkInfo {

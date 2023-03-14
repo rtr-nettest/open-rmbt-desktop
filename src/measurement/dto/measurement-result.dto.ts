@@ -1,3 +1,4 @@
+import { ICPU } from "../interfaces/cpu.interface"
 import { IMeasurementRegistrationRequest } from "../interfaces/measurement-registration-request.interface"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import {
@@ -13,6 +14,7 @@ export class MeasurementResult implements IMeasurementResult {
     client_name?: string
     client_version?: string
     client_uuid: string
+    cpu?: ICPU
     network_type = 0 // TODO: detect the real one, 0 == Unknown
     operating_system: string
     pings: IPing[]
@@ -38,7 +40,8 @@ export class MeasurementResult implements IMeasurementResult {
         registrationResponse: IMeasurementRegistrationResponse,
         threadResults: IMeasurementThreadResult[],
         overallResultDown: IOverallResult,
-        overallResultUp: IOverallResult
+        overallResultUp: IOverallResult,
+        cpu?: ICPU
     ) {
         this.client_name = registrationRequest.client
         this.client_version = threadResults[0].client_version ?? ""
@@ -63,6 +66,7 @@ export class MeasurementResult implements IMeasurementResult {
         this.test_bytes_upload = overallResultUp.bytes
         this.test_nsec_upload = overallResultUp.nsec
         this.test_speed_upload = overallResultUp.speed / 1e3
+        this.cpu = cpu
     }
 
     private getPings(threadResults: IMeasurementThreadResult[]) {

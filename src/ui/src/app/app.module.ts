@@ -27,7 +27,7 @@ import { TestIndicatorComponent } from "./widgets/test-indicator/test-indicator.
 import { TestBoxesComponent } from "./widgets/test-boxes/test-boxes.component"
 import { TestChartComponent } from "./widgets/test-chart/test-chart.component"
 import { TestChartsComponent } from "./widgets/test-charts/test-charts.component"
-import { ICPUUsage } from "../../../measurement/interfaces/cpu-usage.interface"
+import { ICPU } from "../../../measurement/interfaces/cpu.interface"
 
 declare global {
     interface Window {
@@ -35,7 +35,7 @@ declare global {
             runMeasurement: () => Promise<void>
             getEnv: () => Promise<IEnv>
             getBasicNetworkInfo: () => Promise<IBasicNetworkInfo>
-            getCPUUsage: () => Promise<ICPUUsage>
+            getCPUUsage: () => Promise<ICPU>
             getMeasurementState: () => Promise<IMeasurementPhaseState>
             getMeasurementResult: (
                 testUuid: string

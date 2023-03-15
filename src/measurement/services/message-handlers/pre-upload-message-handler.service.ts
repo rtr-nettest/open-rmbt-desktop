@@ -45,7 +45,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
             } else if (this.ctx.preUploadChunks < this.maxChunksCount) {
                 this.putNoResult()
                 this.putChunks()
-            } else if (this.ctx.chunkSize < RMBTClient.maxChunkSize) {
+            } else {
                 this.putNoResultIncreasingChunkSize()
                 this.putChunks()
             }

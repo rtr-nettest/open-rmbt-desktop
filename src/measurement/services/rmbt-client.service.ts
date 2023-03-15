@@ -19,6 +19,9 @@ import { IPreDownloadResult } from "./rmbt-thread.service"
 export type TransferDirection = "down" | "up"
 
 export class RMBTClient {
+    static minChunkSize = 4096
+    static maxChunkSize = 4194304
+
     static getOverallResultsFromSpeedItems(
         speedItems: ISpeedItem[],
         direction: "download" | "upload"
@@ -172,8 +175,6 @@ export class RMBTClient {
     measurementLastUpdate?: number
     measurementStatus: EMeasurementStatus = EMeasurementStatus.WAIT
     measurementTasks: RMBTWorker[] = []
-    minChunkSize = 4096
-    maxChunkSize = 4194304
     params: IMeasurementRegistrationResponse
     initializedThreads: number[] = []
     interimThreadResults: IMeasurementThreadResult[] = []
@@ -579,10 +580,10 @@ export class RMBTClient {
         Logger.I.warn(`Calculated chunk size is ${chunkSize}`)
 
         //but min 4KiB
-        chunkSize = Math.max(this.minChunkSize, chunkSize)
+        chunkSize = Math.max(RMBTClient.minChunkSize, chunkSize)
 
         //and max MAX_CHUNKSIZE
-        chunkSize = Math.min(this.maxChunkSize, chunkSize)
+        chunkSize = Math.min(RMBTClient.maxChunkSize, chunkSize)
 
         Logger.I.warn(`Setting chunk size to ${chunkSize}`)
 

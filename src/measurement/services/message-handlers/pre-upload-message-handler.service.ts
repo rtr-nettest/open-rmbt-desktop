@@ -15,11 +15,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
         private ctx: IMessageHandlerContext,
         public onFinish: () => void
     ) {
-        let maxStoredResults = 3
-        while (maxStoredResults > 0) {
-            this.buffers.push(randomBytes(this.ctx.chunkSize))
-            maxStoredResults--
-        }
+        this.generateBuffers()
     }
 
     stopMessaging(): void {
@@ -48,6 +44,15 @@ export class PreUploadMessageHandler implements IMessageHandler {
         }
     }
 
+    private generateBuffers() {
+        let maxStoredResults = 3
+        this.buffers = []
+        while (maxStoredResults > 0) {
+            this.buffers.push(randomBytes(this.ctx.chunkSize))
+            maxStoredResults--
+        }
+    }
+
     private putNoResult() {
         this.ctx.preUploadChunks =
             !this.ctx.preUploadChunks || this.ctx.preUploadChunks <= 0
@@ -64,6 +69,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
             RMBTClient.maxChunkSize,
             this.ctx.chunkSize * 2
         )
+        this.generateBuffers()
         Logger.I.info(
             `Thread ${this.ctx.index} is writing ${ESocketMessage.PUTNORESULT} ${this.ctx.chunkSize}.`
         )

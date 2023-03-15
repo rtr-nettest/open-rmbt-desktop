@@ -37,7 +37,10 @@ export class PreUploadMessageHandler implements IMessageHandler {
 
     readData(data: Buffer): void {
         if (data.indexOf(ESocketMessage.ACCEPT_GETCHUNKS) === 0) {
-            if (Time.nowNs() >= this.preUploadEndTime) {
+            if (
+                Time.nowNs() >= this.preUploadEndTime ||
+                this.ctx.chunkSize >= RMBTClient.maxChunkSize
+            ) {
                 this.stopMessaging()
             } else if (this.ctx.preUploadChunks < this.maxChunksCount) {
                 this.putNoResult()

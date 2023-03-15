@@ -5,12 +5,11 @@ import {
     IMessageHandlerContext,
 } from "../../interfaces/message-handler.interface"
 import { Logger } from "../logger.service"
+import { RMBTClient } from "../rmbt-client.service"
 
 export class PreUploadMessageHandler implements IMessageHandler {
-    private preUploadDuration = 8 * 1e8
+    private maxChunksCount = 8
     private buffers: Buffer[] = []
-    private deliveryTimes: number[] = []
-    private totalDeliveryTime = 0
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -31,25 +30,17 @@ export class PreUploadMessageHandler implements IMessageHandler {
         Logger.I.info(`Thread ${this.ctx.index} starts sending chunks.`)
         this.ctx.preUploadChunks = 0
         this.putNoResult()
+        this.putChunks()
     }
 
     readData(data: Buffer): void {
-        if (data.indexOf(ESocketMessage.OK) === 0) {
-            this.putChunks()
-            return
-        }
-        if (data.indexOf(ESocketMessage.TIME) === 0) {
-            let timestamp = Number(data.toString().split(" ")[1])
-            timestamp = isNaN(timestamp) ? 0 : timestamp
-            this.deliveryTimes.push(timestamp)
-            this.totalDeliveryTime += timestamp
-            const averageDeliveryTime =
-                this.totalDeliveryTime / this.deliveryTimes.length
-            if (
-                this.totalDeliveryTime + averageDeliveryTime * 2 <
-                this.preUploadDuration
-            ) {
+        if (data.indexOf(ESocketMessage.ACCEPT_GETCHUNKS) === 0) {
+            if (this.ctx.preUploadChunks < this.maxChunksCount) {
                 this.putNoResult()
+                this.putChunks()
+            } else if (this.ctx.chunkSize < RMBTClient.maxChunkSize) {
+                this.putNoResultIncreasingChunkSize()
+                this.putChunks()
             } else {
                 this.stopMessaging()
             }
@@ -66,6 +57,19 @@ export class PreUploadMessageHandler implements IMessageHandler {
             `Thread ${this.ctx.index} is writing ${ESocketMessage.PUTNORESULT}.`
         )
         this.ctx.client.write(`${ESocketMessage.PUTNORESULT}\n`)
+    }
+
+    private putNoResultIncreasingChunkSize() {
+        this.ctx.chunkSize = Math.min(
+            RMBTClient.maxChunkSize,
+            this.ctx.chunkSize * 2
+        )
+        Logger.I.info(
+            `Thread ${this.ctx.index} is writing ${ESocketMessage.PUTNORESULT} ${this.ctx.chunkSize}.`
+        )
+        this.ctx.client.write(
+            `${ESocketMessage.PUTNORESULT} ${this.ctx.chunkSize}\n`
+        )
     }
 
     private putChunks() {

@@ -6,16 +6,21 @@ import {
 } from "../../interfaces/message-handler.interface"
 import { Logger } from "../logger.service"
 import { RMBTClient } from "../rmbt-client.service"
+import { Time } from "../time.service"
 
 export class PreUploadMessageHandler implements IMessageHandler {
     private maxChunksCount = 8
-    private buffers: Buffer[] = []
+    private minChunkSize = 0
+    private preUploadEndTime = Infinity
+    private buffersMap: { [key: string]: Buffer[] } = {}
 
     constructor(
         private ctx: IMessageHandlerContext,
         public onFinish: () => void
     ) {
-        this.generateBuffers()
+        for (let i = this.ctx.chunkSize; i <= RMBTClient.maxChunkSize; i *= 2) {
+            this.buffersMap[i] = this.generateBuffers(i)
+        }
     }
 
     stopMessaging(): void {
@@ -25,32 +30,33 @@ export class PreUploadMessageHandler implements IMessageHandler {
     writeData(): void {
         Logger.I.info(`Thread ${this.ctx.index} starts sending chunks.`)
         this.ctx.preUploadChunks = 0
+        this.preUploadEndTime = Time.nowNs() + 2 * 1e9
         this.putNoResult()
         this.putChunks()
     }
 
     readData(data: Buffer): void {
         if (data.indexOf(ESocketMessage.ACCEPT_GETCHUNKS) === 0) {
-            if (this.ctx.preUploadChunks < this.maxChunksCount) {
+            if (Time.nowNs() >= this.preUploadEndTime) {
+                this.stopMessaging()
+            } else if (this.ctx.preUploadChunks < this.maxChunksCount) {
                 this.putNoResult()
                 this.putChunks()
             } else if (this.ctx.chunkSize < RMBTClient.maxChunkSize) {
                 this.putNoResultIncreasingChunkSize()
                 this.putChunks()
-            } else {
-                this.stopMessaging()
             }
-            return
         }
     }
 
-    private generateBuffers() {
+    private generateBuffers(chunkSize: number) {
         let maxStoredResults = 3
-        this.buffers = []
+        const buffers = []
         while (maxStoredResults > 0) {
-            this.buffers.push(randomBytes(this.ctx.chunkSize))
+            buffers.push(randomBytes(chunkSize))
             maxStoredResults--
         }
+        return buffers
     }
 
     private putNoResult() {
@@ -58,18 +64,26 @@ export class PreUploadMessageHandler implements IMessageHandler {
             !this.ctx.preUploadChunks || this.ctx.preUploadChunks <= 0
                 ? 1
                 : this.ctx.preUploadChunks * 2
+        this.minChunkSize = this.ctx.preUploadChunks * this.ctx.chunkSize
         Logger.I.info(
-            `Thread ${this.ctx.index} is writing ${ESocketMessage.PUTNORESULT}.`
+            `Thread ${this.ctx.index} is writing ${
+                ESocketMessage.PUTNORESULT
+            } ${this.ctx.chunkSize * this.ctx.preUploadChunks}.`
         )
-        this.ctx.client.write(`${ESocketMessage.PUTNORESULT}\n`)
+        this.ctx.client.write(
+            `${ESocketMessage.PUTNORESULT} ${
+                this.ctx.chunkSize * this.ctx.preUploadChunks
+            }\n`
+        )
     }
 
     private putNoResultIncreasingChunkSize() {
         this.ctx.chunkSize = Math.min(
             RMBTClient.maxChunkSize,
-            this.ctx.chunkSize * 2
+            Math.max(this.minChunkSize * 2, this.ctx.chunkSize * 2)
         )
-        this.generateBuffers()
+        this.ctx.preUploadChunks = 1
+        this.maxChunksCount = 1
         Logger.I.info(
             `Thread ${this.ctx.index} is writing ${ESocketMessage.PUTNORESULT} ${this.ctx.chunkSize}.`
         )
@@ -79,11 +93,14 @@ export class PreUploadMessageHandler implements IMessageHandler {
     }
 
     private putChunks() {
-        Logger.I.info(`Thread ${this.ctx.index} is putting chunks.`)
+        Logger.I.info(
+            `Thread ${this.ctx.index} is putting ${this.ctx.preUploadChunks} chunks.`
+        )
         let bufferIndex = 0
+        const buffers = this.buffersMap[this.ctx.chunkSize]
         for (let i = 0; i < this.ctx.preUploadChunks; i++) {
-            let buffer = this.buffers[bufferIndex]!
-            if (bufferIndex >= this.buffers.length - 1) {
+            let buffer = buffers[bufferIndex]!
+            if (bufferIndex >= buffers.length - 1) {
                 bufferIndex = 0
             } else {
                 bufferIndex++

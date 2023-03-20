@@ -270,9 +270,12 @@ export class RMBTThread implements IMessageHandlerContext {
         })
     }
 
-    async manageUpload(): Promise<IMeasurementThreadResult> {
+    async manageUpload(chunkSize?: number): Promise<IMeasurementThreadResult> {
         return new Promise((resolve) => {
             this.phase = "upload"
+            if (chunkSize) {
+                this.chunkSize = chunkSize
+            }
             this.dropHandlers()
             this.uploadMessageHandler = new UploadMessageHandler(
                 this,

@@ -9,7 +9,7 @@ import { RMBTClient } from "../rmbt-client.service"
 import { Time } from "../time.service"
 
 export class PreUploadMessageHandler implements IMessageHandler {
-    private chunkSize: number = 0
+    private chunkSize: number = RMBTClient.minChunkSize
     private maxChunksCount = 8
     private minChunkSize = 0
     private preUploadEndTime = Infinity
@@ -19,7 +19,6 @@ export class PreUploadMessageHandler implements IMessageHandler {
         private ctx: IMessageHandlerContext,
         public onFinish: () => void
     ) {
-        this.chunkSize = this.ctx.chunkSize
         for (let i = this.chunkSize; i <= RMBTClient.maxChunkSize; i *= 2) {
             this.buffersMap[i] = this.generateBuffers(i)
         }

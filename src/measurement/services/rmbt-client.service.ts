@@ -513,6 +513,7 @@ export class RMBTClient {
                                     )
                                 })
                             }
+                            const calculatedUpChunkSize = this.getChunkSize()
                             if (
                                 this.initializedThreads.length ===
                                 this.measurementTasks.length
@@ -520,7 +521,10 @@ export class RMBTClient {
                                 this.initializedThreads = []
                                 for (const w of this.measurementTasks) {
                                     w.postMessage(
-                                        new IncomingMessageWithData("upload")
+                                        new IncomingMessageWithData(
+                                            "upload",
+                                            calculatedUpChunkSize
+                                        )
                                     )
                                 }
                             }

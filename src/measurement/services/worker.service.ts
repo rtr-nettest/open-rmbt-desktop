@@ -76,7 +76,7 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
                 parentPort?.postMessage(
                     new OutgoingMessageWithData("uploadUpdated", interimResult)
                 )
-            result = await thread!.manageUpload()
+            result = await thread!.manageUpload(message.data as number)
             parentPort?.postMessage(
                 new OutgoingMessageWithData("uploadFinished", result)
             )

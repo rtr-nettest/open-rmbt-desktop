@@ -234,6 +234,9 @@ export class RMBTThread implements IMessageHandlerContext {
             if (chunkSize) {
                 this.chunkSize = chunkSize
             }
+            Logger.I.info(
+                `Thread ${this.index} download using chunk size ${this.chunkSize}`
+            )
             this.dropHandlers()
             this.downloadMessageHandler = new DownloadMessageHandler(
                 this,
@@ -276,6 +279,9 @@ export class RMBTThread implements IMessageHandlerContext {
             if (chunkSize) {
                 this.chunkSize = chunkSize
             }
+            Logger.I.info(
+                `Thread ${this.index} upload using chunk size ${this.chunkSize}`
+            )
             this.dropHandlers()
             this.uploadMessageHandler = new UploadMessageHandler(
                 this,

@@ -513,11 +513,12 @@ export class RMBTClient {
                                     )
                                 })
                             }
-                            const calculatedUpChunkSize = this.getChunkSize()
                             if (
                                 this.initializedThreads.length ===
                                 this.measurementTasks.length
                             ) {
+                                const calculatedUpChunkSize =
+                                    this.getChunkSize()
                                 this.initializedThreads = []
                                 for (const w of this.measurementTasks) {
                                     w.postMessage(

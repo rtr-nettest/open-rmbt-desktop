@@ -262,11 +262,11 @@ export class RMBTThread implements IMessageHandlerContext {
             this.dropHandlers()
             this.preUploadMessageHandler = new PreUploadMessageHandler(
                 this,
-                () => {
+                (chunkSize: number) => {
                     this.dropHandlers()
                     this.phase = undefined
                     Logger.I.info(`Resolving thread ${this.index} pre-upload.`)
-                    resolve(this.chunkSize)
+                    resolve(chunkSize)
                 }
             )
             this.preUploadMessageHandler.writeData()

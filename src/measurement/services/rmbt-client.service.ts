@@ -469,7 +469,7 @@ export class RMBTClient {
                         case "preUploadFinished":
                             this.chunks.push(message.data as number)
                             Logger.I.warn(
-                                `Worker ${index} finished pre-upload with ${this.chunks} chunks.`
+                                `Worker ${index} finished pre-upload with ${this.chunks} chunk sizes.`
                             )
                             if (
                                 this.chunks.length ===
@@ -498,7 +498,7 @@ export class RMBTClient {
                             const isReconnected = message.data as boolean
                             if (isReconnected) {
                                 Logger.I.warn(
-                                    `Worker ${index} is reconnected for upload.`
+                                    `Worker ${index} is ready for upload.`
                                 )
                                 this.initializedThreads.push(index)
                             } else {

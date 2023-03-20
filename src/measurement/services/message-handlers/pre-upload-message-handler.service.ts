@@ -17,7 +17,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
 
     constructor(
         private ctx: IMessageHandlerContext,
-        public onFinish: () => void
+        public onFinish: (chunkSize: number) => void
     ) {
         for (let i = this.chunkSize; i <= RMBTClient.maxChunkSize; i *= 2) {
             this.buffersMap[i] = this.generateBuffers(i)
@@ -25,7 +25,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
     }
 
     stopMessaging(): void {
-        this.onFinish?.()
+        this.onFinish?.(this.chunkSize)
     }
 
     writeData(): void {

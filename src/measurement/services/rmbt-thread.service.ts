@@ -234,6 +234,9 @@ export class RMBTThread implements IMessageHandlerContext {
             if (chunkSize) {
                 this.chunkSize = chunkSize
             }
+            Logger.I.info(
+                `Thread ${this.index} download using chunk size ${this.chunkSize}`
+            )
             this.dropHandlers()
             this.downloadMessageHandler = new DownloadMessageHandler(
                 this,
@@ -259,20 +262,26 @@ export class RMBTThread implements IMessageHandlerContext {
             this.dropHandlers()
             this.preUploadMessageHandler = new PreUploadMessageHandler(
                 this,
-                () => {
+                (chunkSize: number) => {
                     this.dropHandlers()
                     this.phase = undefined
                     Logger.I.info(`Resolving thread ${this.index} pre-upload.`)
-                    resolve(this.chunkSize)
+                    resolve(chunkSize)
                 }
             )
             this.preUploadMessageHandler.writeData()
         })
     }
 
-    async manageUpload(): Promise<IMeasurementThreadResult> {
+    async manageUpload(chunkSize?: number): Promise<IMeasurementThreadResult> {
         return new Promise((resolve) => {
             this.phase = "upload"
+            if (chunkSize) {
+                this.chunkSize = chunkSize
+            }
+            Logger.I.info(
+                `Thread ${this.index} upload using chunk size ${this.chunkSize}`
+            )
             this.dropHandlers()
             this.uploadMessageHandler = new UploadMessageHandler(
                 this,

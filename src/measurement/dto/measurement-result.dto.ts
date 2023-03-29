@@ -1,3 +1,4 @@
+import { EMeasurementServerType } from "../enums/measurement-server-type.enum"
 import { ICPU } from "../interfaces/cpu.interface"
 import { IMeasurementRegistrationRequest } from "../interfaces/measurement-registration-request.interface"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
@@ -35,6 +36,13 @@ export class MeasurementResult implements IMeasurementResult {
     type: string
     user_server_selection: number
 
+    get isRTR() {
+        return (
+            process.env.FLAVOR === "rtr" ||
+            process.env.HISTORY_RESULT_PATH_METHOD === "POST"
+        )
+    }
+
     constructor(
         registrationRequest: IMeasurementRegistrationRequest,
         registrationResponse: IMeasurementRegistrationResponse,
@@ -43,7 +51,9 @@ export class MeasurementResult implements IMeasurementResult {
         overallResultUp: IOverallResult,
         cpu?: ICPU
     ) {
-        this.client_name = registrationRequest.client
+        this.client_name = this.isRTR
+            ? EMeasurementServerType.RMBTel
+            : registrationRequest.client
         this.client_version = threadResults[0].client_version ?? ""
         this.client_uuid = registrationRequest.uuid ?? ""
         this.operating_system = registrationRequest.operating_system ?? ""

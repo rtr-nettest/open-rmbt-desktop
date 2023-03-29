@@ -96,6 +96,7 @@ export class ControlServer {
         if (response?.error?.length) {
             throw new Error(response.error.join(" "))
         }
+        Logger.I.error(`Registration response: %o`, response)
         throw new Error("Measurement was not registered")
     }
 

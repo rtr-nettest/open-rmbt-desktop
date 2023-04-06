@@ -1,5 +1,6 @@
-import { config } from "dotenv"
 import { app, BrowserWindow, ipcMain, protocol, shell } from "electron"
+if (require("electron-squirrel-startup")) app.quit()
+import { config } from "dotenv"
 import path from "path"
 import {
     getBasicNetworkInfo,

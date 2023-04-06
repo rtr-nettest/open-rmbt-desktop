@@ -25,6 +25,7 @@
         "@electron-forge/maker-rpm": "^6.0.0",
         "@electron-forge/maker-squirrel": "^6.0.0",
         "@electron-forge/maker-zip": "^6.0.0",
+        "@electron-forge/maker-dmg": "^6.0.0",
         "@electron-forge/plugin-webpack": "^6.0.0",
         "@tsconfig/node18": "^1.0.0",
         "@types/node": "^17.0.34",

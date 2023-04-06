@@ -20,11 +20,18 @@ module.exports = {
                 name: "open-rmbt-desktop",
                 authors: "Specure GmbH",
                 description: "Open Nettest Desktop app",
+                loadingGif: path.join(
+                    process.env.ASSETS_FOLDER,
+                    "images",
+                    "splash.gif"
+                ),
             },
         },
         {
-            name: "@electron-forge/maker-zip",
-            platforms: ["darwin"],
+            name: "@electron-forge/maker-dmg",
+            config: {
+                format: "ULFO",
+            },
         },
         {
             name: "@electron-forge/maker-deb",

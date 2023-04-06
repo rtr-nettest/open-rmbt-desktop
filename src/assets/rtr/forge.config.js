@@ -22,11 +22,18 @@ module.exports = {
                 description: "RTR Desktop app",
                 // https://www.files.certum.eu/documents/manual_en/Code-Signing-signing-the-code-using-tools-like-Singtool-and-Jarsigner_v2.3.pdf
                 signWithParams: "/fd sha256 /a /t http://time.certum.pl/",
+                loadingGif: path.join(
+                    process.env.ASSETS_FOLDER,
+                    "images",
+                    "splash.gif"
+                ),
             },
         },
         {
-            name: "@electron-forge/maker-zip",
-            platforms: ["darwin"],
+            name: "@electron-forge/maker-dmg",
+            config: {
+                format: "ULFO",
+            },
         },
         {
             name: "@electron-forge/maker-deb",

@@ -10,7 +10,7 @@ import { Time } from "../time.service"
 
 export class PreUploadMessageHandler implements IMessageHandler {
     private chunkSize: number = RMBTClient.minChunkSize
-    private maxChunksCount = 8
+    private maxChunksCount = 16
     private minChunkSize = 0
     private preUploadEndTime = Infinity
     private buffersMap: { [key: string]: Buffer[] } = {}
@@ -38,10 +38,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
 
     readData(data: Buffer): void {
         if (data.indexOf(ESocketMessage.ACCEPT_GETCHUNKS) === 0) {
-            if (
-                Time.nowNs() >= this.preUploadEndTime ||
-                this.chunkSize >= RMBTClient.maxChunkSize
-            ) {
+            if (Time.nowNs() >= this.preUploadEndTime) {
                 this.stopMessaging()
             } else if (this.ctx.preUploadChunks < this.maxChunksCount) {
                 this.putNoResult()

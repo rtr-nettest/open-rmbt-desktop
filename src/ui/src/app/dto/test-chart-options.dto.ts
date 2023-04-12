@@ -10,57 +10,61 @@ export class TestChartOptions {
             right: 0,
         },
     }
-    legend = {
-        display: false,
-    }
     maintainAspectRatio = false
     normalized = true
-    parsing = false
+    parsing = false as const
     scales = {
-        xAxes: [
-            {
-                gridLines: {
-                    display: false,
-                },
-                scaleLabel: {
-                    display: true,
-                    fontColor: EColors.SECONDARY_50,
-                    fontSize: 12,
-                },
-                ticks: {
-                    display: false,
+        x: {
+            grid: {
+                display: false,
+            },
+            title: {
+                display: true,
+                color: EColors.SECONDARY_50,
+                font: {
+                    size: 12,
                 },
             },
-        ],
-        yAxes: [
-            {
-                minRotation: 0,
-                maxRotation: 0,
-                gridLines: {
-                    color: EColors.SECONDARY_10,
-                },
-                scaleLabel: {
-                    display: true,
-                    fontColor: EColors.SECONDARY_50,
-                    fontSize: 12,
-                    labelString: "Mbps",
-                },
-                position: "right",
-                ticks: {
-                    fontColor: EColors.SECONDARY_50,
-                    fontSize: 12,
-                    maxTicksLimit: 6,
-                    stepSize: 1,
-                    beginAtZero: true,
-                },
+            ticks: {
+                display: false,
             },
-        ],
+        },
+        y: {
+            beginAtZero: true,
+            minRotation: 0,
+            maxRotation: 0,
+            grid: {
+                color: EColors.SECONDARY_10,
+            },
+            title: {
+                display: true,
+                color: EColors.SECONDARY_50,
+                font: {
+                    size: 12,
+                },
+                labelString: "Mbps",
+            },
+            position: "right",
+            ticks: {
+                color: EColors.SECONDARY_50,
+                font: {
+                    size: 12,
+                },
+                maxTicksLimit: 6,
+                stepSize: 1,
+            },
+        },
     }
-    tooltips = {
-        enabled: false,
+    plugins = {
+        legend: {
+            display: false,
+        },
+        tooltip: {
+            enabled: false,
+        },
     }
 
     constructor(yLabel: string) {
-        this.scales.yAxes[0].scaleLabel.labelString = yLabel
+        this.scales.y.title.labelString = yLabel
     }
 }

@@ -17,6 +17,7 @@
                 "build": {
                     "builder": "@angular-devkit/build-angular:browser",
                     "options": {
+                        "allowedCommonJsDependencies": ["flat"],
                         "outputPath": "dist/ui",
                         "index": "src/index.html",
                         "main": "src/main.ts",
@@ -87,6 +88,6 @@
         }
     },
     "cli": {
-      "analytics": false
+        "analytics": false
     }
 }

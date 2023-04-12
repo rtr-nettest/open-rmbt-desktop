@@ -28,6 +28,40 @@ import { TestBoxesComponent } from "./widgets/test-boxes/test-boxes.component"
 import { TestChartComponent } from "./widgets/test-chart/test-chart.component"
 import { TestChartsComponent } from "./widgets/test-charts/test-charts.component"
 import { ICPU } from "../../../measurement/interfaces/cpu.interface"
+import {
+    Chart,
+    // ArcElement,
+    LineElement,
+    BarElement,
+    PointElement,
+    BarController,
+    // BubbleController,
+    // DoughnutController,
+    LineController,
+    // PieController,
+    // PolarAreaController,
+    // RadarController,
+    // ScatterController,
+    CategoryScale,
+    LinearScale,
+    // LogarithmicScale,
+    // RadialLinearScale,
+    // TimeScale,
+    // TimeSeriesScale,
+    // Decimation,
+    Filler,
+    // Title,
+} from "chart.js"
+Chart.register(
+    BarElement,
+    BarController,
+    LineElement,
+    PointElement,
+    LineController,
+    CategoryScale,
+    LinearScale,
+    Filler
+)
 
 declare global {
     interface Window {

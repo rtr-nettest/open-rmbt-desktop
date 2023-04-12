@@ -26,5 +26,9 @@ export class TestPhaseState implements ITestPhaseState {
             x: (r.nsec * 100) / overallResults[overallResults.length - 1].nsec,
             y: r.speed / 1e6,
         }))
+        // Always start at 0
+        if (this.chart[0].x != 0) {
+            this.chart.unshift({ x: 0, y: 0 })
+        }
     }
 }

@@ -112,3 +112,4 @@ ipcMain.handle(Events.GET_MEASUREMENT_RESULT, async (event, testUuid) => {
 })
 
 app.whenReady().then(() => createWindow())
+app.disableHardwareAcceleration()

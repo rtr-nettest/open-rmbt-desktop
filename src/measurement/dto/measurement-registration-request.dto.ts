@@ -6,7 +6,7 @@ const registry = require("../../../package.json")
 export class MeasurementRegistrationRequest
     implements IMeasurementRegistrationRequest
 {
-    client = EMeasurementServerType.RMBT
+    client = EMeasurementServerType.RMBTel
     language = ""
     measurement_server_id: number | undefined
     measurement_type_flag = "regular"
@@ -30,7 +30,6 @@ export class MeasurementRegistrationRequest
         if (settingsRequest) {
             Object.assign(this, {
                 capabilities: settingsRequest.capabilities,
-                client: settingsRequest.name,
                 language: settingsRequest.language,
                 operating_system: settingsRequest.operating_system,
                 platform: settingsRequest.platform,

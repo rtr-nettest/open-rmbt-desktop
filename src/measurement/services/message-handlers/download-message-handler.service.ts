@@ -7,7 +7,6 @@ import {
     IMessageHandlerContext,
 } from "../../interfaces/message-handler.interface"
 import { Logger } from "../logger.service"
-import { Time } from "../time.service"
 
 export class DownloadMessageHandler implements IMessageHandler {
     static minDiffTime = 100000000
@@ -75,12 +74,12 @@ export class DownloadMessageHandler implements IMessageHandler {
         let isFullChunk = false
         if (data.length > 0) {
             this.downloadBytesRead = this.downloadBytesRead + data.byteLength
+            this.nsec = Number(hrtime.bigint() - this.downloadStartTime)
+            this.result.addResult(this.downloadBytesRead, this.nsec)
             lastByte = data[data.length - 1]
             isFullChunk = this.downloadBytesRead % this.ctx.chunkSize === 0
         }
         if (isFullChunk && (lastByte === 0x00 || lastByte === 0xff)) {
-            this.nsec = Number(hrtime.bigint() - this.downloadStartTime)
-            this.result.addResult(this.downloadBytesRead, this.nsec)
             this.ctx.threadResult!.down = this.result
             this.ctx.threadResult!.currentTime.down = this.nsec
             this.ctx.threadResult!.currentTransfer.down = this.downloadBytesRead

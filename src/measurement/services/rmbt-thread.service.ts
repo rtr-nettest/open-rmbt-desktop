@@ -68,14 +68,11 @@ export class RMBTThread implements IMessageHandlerContext {
             } else {
                 this.client = net.createConnection(options)
             }
-            this.client.on("data", this.dataListener.bind(this))
-            this.client.on("error", this.errorListener.bind(this))
-            this.client.on("end", this.endListener.bind(this))
-            this.client.on("close", this.closeListener.bind(this))
-            this.client.on(
-                "connect",
-                this.connectionListener.call(this, resolve)
-            )
+            this.client.on("data", this.dataListener)
+            this.client.on("error", this.errorListener)
+            this.client.on("end", this.endListener)
+            this.client.on("close", this.closeListener)
+            this.client.on("connect", this.connectionListener(resolve))
         })
     }
 
@@ -99,7 +96,7 @@ export class RMBTThread implements IMessageHandlerContext {
             resolve(this)
         }
 
-    private dataListener(data: Buffer) {
+    private dataListener = (data: Buffer) => {
         const dataString = data.length < 128 ? data.toString().trim() : ""
         if (dataString.includes(ESocketMessage.ERR)) {
             this.hadError = true
@@ -131,18 +128,18 @@ export class RMBTThread implements IMessageHandlerContext {
         }
     }
 
-    private errorListener(err: Error) {
+    private errorListener = (err: Error) => {
         Logger.I.error(
             `Thread ${this.index} reported an error: %s`,
             err.message
         )
     }
 
-    private endListener() {
+    private endListener = () => {
         Logger.I.info(`Transmission was ended on the thread ${this.index}.`)
     }
 
-    private closeListener(hadError: boolean) {
+    private closeListener = (hadError: boolean) => {
         Logger.I.info(
             `Connection was closed for the thread ${this.index}%s.`,
             hadError
@@ -161,6 +158,9 @@ export class RMBTThread implements IMessageHandlerContext {
                 this.uploadMessageHandler?.stopMessaging()
                 break
         }
+
+        this.client.removeAllListeners()
+        this.client.destroy()
     }
 
     private dropHandlers() {

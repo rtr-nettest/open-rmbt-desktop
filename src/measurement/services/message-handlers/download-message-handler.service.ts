@@ -75,13 +75,13 @@ export class DownloadMessageHandler implements IMessageHandler {
         let isFullChunk = false
         if (data.length > 0) {
             this.downloadBytesRead = this.downloadBytesRead + data.byteLength
-
+            lastByte = data[data.length - 1]
+        }
+        if (lastByte === 0x00 || lastByte === 0xff) {
             this.nsec = Number(hrtime.bigint() - this.downloadStartTime)
             this.result.addResult(this.downloadBytesRead, this.nsec)
 
             isFullChunk = this.downloadBytesRead % this.ctx.chunkSize === 0
-            lastByte = data[data.length - 1]
-
             this.ctx.threadResult!.down = this.result
             this.ctx.threadResult!.currentTime.down = this.nsec
             this.ctx.threadResult!.currentTransfer.down = this.downloadBytesRead

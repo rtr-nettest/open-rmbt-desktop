@@ -11,6 +11,7 @@ import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import tz from "dayjs/plugin/timezone"
 import { RMBTClient } from "./rmbt-client.service"
+import { ELoggerMessage } from "../enums/logger-message.enum"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -36,7 +37,10 @@ export class ControlServer {
         if (!process.env.MEASUREMENT_SERVERS_PATH) {
             return undefined
         }
-        Logger.I.info("GET: %s", process.env.MEASUREMENT_SERVERS_PATH)
+        Logger.I.info(
+            ELoggerMessage.GET_REQUEST,
+            process.env.MEASUREMENT_SERVERS_PATH
+        )
         const servers = (
             await axios.get(
                 `${process.env.CONTROL_SERVER_URL}${process.env.MEASUREMENT_SERVERS_PATH}`,
@@ -61,7 +65,11 @@ export class ControlServer {
     }
 
     async getUserSettings(request: IUserSettingsRequest) {
-        Logger.I.info("POST: %s", process.env.SETTINGS_PATH)
+        Logger.I.info(
+            ELoggerMessage.POST_REQUEST,
+            process.env.SETTINGS_PATH,
+            request
+        )
         const response = (
             await axios.post(
                 `${process.env.CONTROL_SERVER_URL}${process.env.SETTINGS_PATH}`,
@@ -80,8 +88,11 @@ export class ControlServer {
     }
 
     async registerMeasurement(request: IMeasurementRegistrationRequest) {
-        Logger.I.info("Registration request: %o", request)
-        Logger.I.info("POST: %s", process.env.MESUREMENT_REGISTRATION_PATH)
+        Logger.I.info(
+            ELoggerMessage.POST_REQUEST,
+            process.env.MESUREMENT_REGISTRATION_PATH,
+            request
+        )
         const response = (
             await axios.post(
                 `${process.env.CONTROL_SERVER_URL}${process.env.MESUREMENT_REGISTRATION_PATH}`,
@@ -101,8 +112,11 @@ export class ControlServer {
     }
 
     async submitMeasurement(result: IMeasurementResult) {
-        Logger.I.info("Submitting result: %o", result)
-        Logger.I.info("POST: %s", process.env.RESULT_SUBMISSION_PATH)
+        Logger.I.info(
+            ELoggerMessage.POST_REQUEST,
+            process.env.RESULT_SUBMISSION_PATH,
+            result
+        )
         try {
             const response = (
                 await axios.post(
@@ -127,14 +141,14 @@ export class ControlServer {
         try {
             if (process.env.HISTORY_RESULT_PATH_METHOD === "GET") {
                 // as used by Specure
-                Logger.I.info("GET: %s", fullResultLink)
+                Logger.I.info(ELoggerMessage.GET_REQUEST, fullResultLink)
                 response = (
                     await axios.get(
                         `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}/${uuid}`,
                         { headers: this.headers }
                     )
                 ).data
-                Logger.I.info("Response is: %o", response)
+                Logger.I.info(ELoggerMessage.RESPONSE, response)
                 if (response) {
                     retVal = {
                         measurementDate: response.measurement_date,
@@ -162,20 +176,24 @@ export class ControlServer {
                 }
             } else if (process.env.HISTORY_RESULT_PATH_METHOD === "POST") {
                 // as used by RTR
-                Logger.I.info("POST: %s", process.env.HISTORY_RESULT_PATH)
-                const timezone = dayjs.tz.guess()
+                const body = {
+                    test_uuid: uuid,
+                    timezone: dayjs.tz.guess(),
+                    capabilities: { classification: { count: 4 } },
+                }
+                Logger.I.info(
+                    ELoggerMessage.POST_REQUEST,
+                    process.env.HISTORY_RESULT_PATH,
+                    body
+                )
                 response = (
                     await axios.post(
                         `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}`,
-                        {
-                            test_uuid: uuid,
-                            timezone,
-                            capabilities: { classification: { count: 4 } },
-                        },
+                        body,
                         { headers: this.headers }
                     )
                 ).data
-                Logger.I.info("Response is: %o", response)
+                Logger.I.info(ELoggerMessage.RESPONSE, response)
                 if (response?.testresult?.length) {
                     response = response.testresult[0]
                     let openTestsResponse: any

@@ -10,6 +10,7 @@ import { RMBTClient } from "./services/rmbt-client.service"
 import osu from "node-os-utils"
 import os from "os"
 import { ICPU } from "./interfaces/cpu.interface"
+import { ELoggerMessage } from "./enums/logger-message.enum"
 
 let rmbtClient: RMBTClient | undefined
 let cpuInfo: ICPU | undefined
@@ -26,7 +27,7 @@ export async function runMeasurement(options?: MeasurementOptions) {
     if (process.env.LOG_CPU_USAGE === "true") {
         cpuInfoInterval = setInterval(() => {
             osu.cpu.usage().then((percent) => {
-                Logger.I.info("CPU usage is %d", percent)
+                Logger.I.info(ELoggerMessage.CPU_USAGE, percent)
                 cpuInfoList.push(percent)
             })
         }, 1000)
@@ -77,10 +78,16 @@ export async function runMeasurement(options?: MeasurementOptions) {
     )
     await controlServer.submitMeasurement(resultToSubmit)
     if (cpuInfo) {
-        Logger.I.info("CPU usage min is %d", rounded(cpuInfo.load_min * 100))
-        Logger.I.info("CPU usage max is %d", rounded(cpuInfo.load_max * 100))
         Logger.I.info(
-            "CPU usage average is %d",
+            ELoggerMessage.CPU_USAGE_MIN,
+            rounded(cpuInfo.load_min * 100)
+        )
+        Logger.I.info(
+            ELoggerMessage.CPU_USAGE_MAX,
+            rounded(cpuInfo.load_max * 100)
+        )
+        Logger.I.info(
+            ELoggerMessage.CPU_USAGE_AVG,
             rounded(cpuInfo.load_avg * 100)
         )
     }

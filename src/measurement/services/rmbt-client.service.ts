@@ -285,11 +285,10 @@ export class RMBTClient {
         this.phaseStartTimeNs[EMeasurementStatus.SPEEDTEST_END] = Time.nowNs()
         this.isRunning = false
         Logger.I.info(
-            `Upload is finished in ${this.getPhaseDuration(
-                EMeasurementStatus.UP
-            )}s`
+            "Upload is finished in %ds",
+            this.getPhaseDuration(EMeasurementStatus.UP)
         )
-        Logger.I.info(`The total upload speed is ${this.finalUpMbps}Mbps`)
+        Logger.I.info("The total upload speed is %dMbps", this.finalUpMbps)
         Logger.I.info("Measurement is finished")
     }
 
@@ -336,11 +335,12 @@ export class RMBTClient {
                         case "connected":
                             const isInitialized = message.data as boolean
                             if (isInitialized) {
-                                Logger.I.warn(`Worker ${index} is ready`)
+                                Logger.I.warn("Worker %d is ready", index)
                                 this.initializedThreads.push(index)
                             } else {
                                 Logger.I.warn(
-                                    `Worker ${index} errored out. Reattempting connection.`
+                                    "Worker %d errored out. Reattempting connection.",
+                                    index
                                 )
                                 setImmediate(() => {
                                     worker.postMessage(
@@ -379,7 +379,10 @@ export class RMBTClient {
                             this.chunks.push(chunkSize)
                             this.bytesPerSecPreDownload.push(bytesPerSec)
                             Logger.I.warn(
-                                `Worker ${index} finished pre-download with speed ${bytesPerSec} and chunk size ${chunkSize}.`
+                                "Worker %d finished pre-download with speed %d and chunk size %d.",
+                                index,
+                                bytesPerSec,
+                                chunkSize
                             )
                             if (
                                 this.chunks.length ===
@@ -418,7 +421,8 @@ export class RMBTClient {
                             this.phaseStartTimeNs[EMeasurementStatus.DOWN] =
                                 Time.nowNs()
                             Logger.I.info(
-                                `The ping median is ${this.pingMedian}ms.`
+                                "The ping median is %dms.",
+                                this.pingMedian
                             )
                             Logger.I.warn(
                                 "Ping is finished in %d s",
@@ -457,19 +461,23 @@ export class RMBTClient {
                                     EMeasurementStatus.INIT_UP
                                 ] = Time.nowNs()
                                 Logger.I.info(
-                                    `Download is finished in ${this.getPhaseDuration(
+                                    "Download is finished in %ds",
+                                    this.getPhaseDuration(
                                         EMeasurementStatus.DOWN
-                                    )}s`
+                                    )
                                 )
                                 Logger.I.info(
-                                    `The total download speed is ${this.finalDownMbps}Mbps`
+                                    "The total download speed is %dMbps",
+                                    this.finalDownMbps
                                 )
                             }
                             break
                         case "preUploadFinished":
                             this.chunks.push(message.data as number)
                             Logger.I.warn(
-                                `Worker ${index} finished pre-upload with ${this.chunks} chunk sizes.`
+                                "Worker %d finished pre-upload with %o chunk sizes.",
+                                index,
+                                this.chunks
                             )
                             if (
                                 this.chunks.length ===
@@ -488,9 +496,10 @@ export class RMBTClient {
                                 this.phaseStartTimeNs[EMeasurementStatus.UP] =
                                     Time.nowNs()
                                 Logger.I.info(
-                                    `Pre-upload is finished in ${this.getPhaseDuration(
+                                    "Pre-upload is finished in %ds",
+                                    this.getPhaseDuration(
                                         EMeasurementStatus.INIT_UP
-                                    )}s`
+                                    )
                                 )
                             }
                             break
@@ -498,12 +507,14 @@ export class RMBTClient {
                             const isReconnected = message.data as boolean
                             if (isReconnected) {
                                 Logger.I.warn(
-                                    `Worker ${index} is ready for upload.`
+                                    "Worker %d is ready for upload.",
+                                    index
                                 )
                                 this.initializedThreads.push(index)
                             } else {
                                 Logger.I.warn(
-                                    `Worker ${index} errored out. Reattempting connection.`
+                                    "Worker %d errored out. Reattempting connection.",
+                                    index
                                 )
                                 setImmediate(() => {
                                     worker.postMessage(
@@ -582,7 +593,7 @@ export class RMBTClient {
             bytesPerSecTotal / this.params.test_numthreads / (1000 / 20)
         )
 
-        Logger.I.warn(`Calculated chunk size is ${chunkSize}`)
+        Logger.I.warn("Calculated chunk size is %d", chunkSize)
 
         //but min 4KiB
         chunkSize = Math.max(RMBTClient.minChunkSize, chunkSize)
@@ -590,7 +601,7 @@ export class RMBTClient {
         //and max MAX_CHUNKSIZE
         chunkSize = Math.min(RMBTClient.maxChunkSize, chunkSize)
 
-        Logger.I.warn(`Setting chunk size to ${chunkSize}`)
+        Logger.I.warn("Setting chunk size to %d", chunkSize)
 
         return chunkSize
     }

@@ -29,7 +29,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
     }
 
     writeData(): void {
-        Logger.I.info(`Thread ${this.ctx.index} starts sending chunks.`)
+        Logger.I.info("Thread %d starts sending chunks.", this.ctx.index)
         this.ctx.preUploadChunks = 0
         this.preUploadEndTime = Time.nowNs() + 2 * 1e9
         this.putNoResult()
@@ -67,9 +67,10 @@ export class PreUploadMessageHandler implements IMessageHandler {
                 : this.ctx.preUploadChunks * 2
         this.minChunkSize = this.ctx.preUploadChunks * this.chunkSize
         Logger.I.info(
-            `Thread ${this.ctx.index} is writing ${
-                ESocketMessage.PUTNORESULT
-            } ${this.chunkSize * this.ctx.preUploadChunks}.`
+            "Thread %d is writing %s %d.",
+            this.ctx.index,
+            ESocketMessage.PUTNORESULT,
+            this.chunkSize * this.ctx.preUploadChunks
         )
         this.ctx.client.write(
             `${ESocketMessage.PUTNORESULT} ${
@@ -86,7 +87,10 @@ export class PreUploadMessageHandler implements IMessageHandler {
         this.ctx.preUploadChunks = 1
         this.maxChunksCount = 1
         Logger.I.info(
-            `Thread ${this.ctx.index} is writing ${ESocketMessage.PUTNORESULT} ${this.chunkSize}.`
+            "Thread %d is writing %s $%d.",
+            this.ctx.index,
+            ESocketMessage.PUTNORESULT,
+            this.chunkSize
         )
         this.ctx.client.write(
             `${ESocketMessage.PUTNORESULT} ${this.chunkSize}\n`
@@ -95,7 +99,9 @@ export class PreUploadMessageHandler implements IMessageHandler {
 
     private putChunks() {
         Logger.I.info(
-            `Thread ${this.ctx.index} is putting ${this.ctx.preUploadChunks} chunks.`
+            "Thread %d is putting %d chunks.",
+            this.ctx.index,
+            this.ctx.preUploadChunks
         )
         let bufferIndex = 0
         const buffers = this.buffersMap[this.chunkSize]
@@ -113,6 +119,6 @@ export class PreUploadMessageHandler implements IMessageHandler {
             }
             this.ctx.client.write(buffer)
         }
-        Logger.I.info(`Thread ${this.ctx.index} has finished putting chunks.`)
+        Logger.I.info("Thread %d has finished putting chunks.", this.ctx.index)
     }
 }

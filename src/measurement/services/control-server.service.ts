@@ -36,7 +36,7 @@ export class ControlServer {
         if (!process.env.MEASUREMENT_SERVERS_PATH) {
             return undefined
         }
-        Logger.I.info(`GET: ${process.env.MEASUREMENT_SERVERS_PATH}`)
+        Logger.I.info("GET: %s", process.env.MEASUREMENT_SERVERS_PATH)
         const servers = (
             await axios.get(
                 `${process.env.CONTROL_SERVER_URL}${process.env.MEASUREMENT_SERVERS_PATH}`,
@@ -61,7 +61,7 @@ export class ControlServer {
     }
 
     async getUserSettings(request: IUserSettingsRequest) {
-        Logger.I.info(`POST: ${process.env.SETTINGS_PATH}`)
+        Logger.I.info("POST: %s", process.env.SETTINGS_PATH)
         const response = (
             await axios.post(
                 `${process.env.CONTROL_SERVER_URL}${process.env.SETTINGS_PATH}`,
@@ -70,7 +70,7 @@ export class ControlServer {
             )
         ).data as IUserSetingsResponse
         if (response?.settings?.length) {
-            Logger.I.info(`Using settings: %o`, response.settings[0])
+            Logger.I.info("Using settings: %o", response.settings[0])
             return response.settings[0]
         }
         if (response?.error?.length) {
@@ -81,7 +81,7 @@ export class ControlServer {
 
     async registerMeasurement(request: IMeasurementRegistrationRequest) {
         Logger.I.info("Registration request: %o", request)
-        Logger.I.info(`POST: ${process.env.MESUREMENT_REGISTRATION_PATH}`)
+        Logger.I.info("POST: %s", process.env.MESUREMENT_REGISTRATION_PATH)
         const response = (
             await axios.post(
                 `${process.env.CONTROL_SERVER_URL}${process.env.MESUREMENT_REGISTRATION_PATH}`,
@@ -90,19 +90,19 @@ export class ControlServer {
             )
         ).data as IMeasurementRegistrationResponse
         if (response?.test_token && response?.test_uuid) {
-            Logger.I.info(`Registered measurement: %o`, response)
+            Logger.I.info("Registered measurement: %o", response)
             return response
         }
         if (response?.error?.length) {
             throw new Error(response.error.join(" "))
         }
-        Logger.I.error(`Registration response: %o`, response)
+        Logger.I.error("Registration response: %o", response)
         throw new Error("Measurement was not registered")
     }
 
     async submitMeasurement(result: IMeasurementResult) {
         Logger.I.info("Submitting result: %o", result)
-        Logger.I.info(`POST: ${process.env.RESULT_SUBMISSION_PATH}`)
+        Logger.I.info("POST: %s", process.env.RESULT_SUBMISSION_PATH)
         try {
             const response = (
                 await axios.post(
@@ -127,7 +127,7 @@ export class ControlServer {
         try {
             if (process.env.HISTORY_RESULT_PATH_METHOD === "GET") {
                 // as used by Specure
-                Logger.I.info(`GET: ${process.env.HISTORY_RESULT_PATH}/${uuid}`)
+                Logger.I.info("GET: %s", fullResultLink)
                 response = (
                     await axios.get(
                         `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}/${uuid}`,
@@ -162,7 +162,7 @@ export class ControlServer {
                 }
             } else if (process.env.HISTORY_RESULT_PATH_METHOD === "POST") {
                 // as used by RTR
-                Logger.I.info(`POST: ${process.env.HISTORY_RESULT_PATH}`)
+                Logger.I.info("POST: %s", process.env.HISTORY_RESULT_PATH)
                 const timezone = dayjs.tz.guess()
                 response = (
                     await axios.post(

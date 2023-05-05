@@ -20,7 +20,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     ) {}
 
     stopMessaging(): void {
-        Logger.I.info(`Predownload is finished for thread ${this.ctx.index}`)
+        Logger.I.info("Predownload is finished for thread %d", this.ctx.index)
         clearInterval(this.activityInterval)
         this.onFinish?.()
     }
@@ -43,7 +43,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
             return
         }
         if (data.indexOf(ESocketMessage.TIME) === 0) {
-            const timeNs = Number(data.toString().split(" ")[1])
+            const timeNs = Number(data.slice(5))
             this.ctx.bytesPerSecPretest.push(
                 this.preDownloadBytesRead / (timeNs / 1e9)
             )
@@ -63,13 +63,14 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     }
 
     private getChunks() {
-        Logger.I.info(`Thread ${this.ctx.index} is getting chunks.`)
+        Logger.I.info("Thread %d is getting chunks.", this.ctx.index)
         clearInterval(this.activityInterval)
         this.activityInterval = setInterval(() => {
-            Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
+            Logger.I.info("Checking activity on thread %d...", this.ctx.index)
             if (Time.nowNs() >= this.preDownloadEndTime) {
                 Logger.I.info(
-                    `Thread ${this.ctx.index} pre-download timed out.`
+                    "Thread %d pre-download timed out.",
+                    this.ctx.index
                 )
                 this.finishChunkPortion()
                 this.activityInterval = setInterval(
@@ -88,7 +89,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
         if (this.isChunkPortionFinished) {
             return
         }
-        Logger.I.info(`Thread ${this.ctx.index} is writing OK.`)
+        Logger.I.info("Thread %d is writing OK.", this.ctx.index)
         clearInterval(this.activityInterval)
         this.ctx.client.write(ESocketMessage.OK)
         this.isChunkPortionFinished = true

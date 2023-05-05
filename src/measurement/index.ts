@@ -26,7 +26,7 @@ export async function runMeasurement(options?: MeasurementOptions) {
     if (process.env.LOG_CPU_USAGE === "true") {
         cpuInfoInterval = setInterval(() => {
             osu.cpu.usage().then((percent) => {
-                Logger.I.info(`CPU usage is ${percent}%`)
+                Logger.I.info("CPU usage is %d", percent)
                 cpuInfoList.push(percent)
             })
         }, 1000)
@@ -77,10 +77,11 @@ export async function runMeasurement(options?: MeasurementOptions) {
     )
     await controlServer.submitMeasurement(resultToSubmit)
     if (cpuInfo) {
-        Logger.I.info(`CPU usage min is ${rounded(cpuInfo.load_min * 100)}%`)
-        Logger.I.info(`CPU usage max is ${rounded(cpuInfo.load_max * 100)}%`)
+        Logger.I.info("CPU usage min is %d", rounded(cpuInfo.load_min * 100))
+        Logger.I.info("CPU usage max is %d", rounded(cpuInfo.load_max * 100))
         Logger.I.info(
-            `CPU usage average is ${rounded(cpuInfo.load_avg * 100)}%`
+            "CPU usage average is %d",
+            rounded(cpuInfo.load_avg * 100)
         )
     }
     rmbtClient.measurementStatus = EMeasurementStatus.END

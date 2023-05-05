@@ -18,9 +18,9 @@ export class InitMessageHandler implements IMessageHandler {
 
     stopMessaging(): void {
         Logger.I.info(
-            `Thread ${this.ctx.index} finished initialization ${
-                this.isInitialized ? "successfully" : "with error"
-            }.`
+            "Thread %d finished initialization %s.",
+            this.ctx.index,
+            this.isInitialized ? "successfully" : "with error"
         )
         this.onFinish?.(this.isInitialized)
     }
@@ -28,14 +28,15 @@ export class InitMessageHandler implements IMessageHandler {
     writeData(): void {
         if (this.ctx.params.test_server_type === "RMBThttp") {
             Logger.I.info(
-                `Thread ${this.ctx.index} is requesting HTTP upgrade...`
+                "Thread %d is requesting HTTP upgrade...",
+                this.ctx.index
             )
             this.ctx.client.write(ESocketMessage.HTTP_UPGRADE, "ascii")
         }
         setTimeout(() => {
-            Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
+            Logger.I.info("Checking activity on thread %d...", this.ctx.index)
             if (!this.isInitialized) {
-                Logger.I.info(`Thread ${this.ctx.index} init timed out.`)
+                Logger.I.info("Thread %d init timed out.", this.ctx.index)
                 this.stopMessaging()
             }
         }, this.inactivityTimeout)
@@ -51,7 +52,8 @@ export class InitMessageHandler implements IMessageHandler {
         }
         if (dataString.includes(ESocketMessage.ACCEPT_TOKEN)) {
             Logger.I.info(
-                `Thread ${this.ctx.index} sends token: %s`,
+                "Thread %d sends token: %s",
+                this.ctx.index,
                 this.ctx.params.test_token
             )
             this.ctx.client.write(
@@ -63,7 +65,9 @@ export class InitMessageHandler implements IMessageHandler {
         if (dataString.includes(ESocketMessage.CHUNKSIZE)) {
             const chunkSizes = dataString.split(" ")
             Logger.I.info(
-                `Thread ${this.ctx.index} received chunksizes ${chunkSizes}.`
+                "Thread %d received chunksizes %o.",
+                this.ctx.index,
+                chunkSizes
             )
             this.ctx.defaultChunkSize = +chunkSizes[1]
             this.ctx.chunkSize = +chunkSizes[1]

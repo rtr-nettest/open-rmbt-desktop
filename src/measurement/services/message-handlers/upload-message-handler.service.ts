@@ -38,7 +38,7 @@ export class UploadMessageHandler implements IMessageHandler {
 
     stopMessaging(): void {
         clearInterval(this.activityInterval)
-        Logger.I.info(`Upload is finished for thread ${this.ctx.index}`)
+        Logger.I.info("Upload is finished for thread %d", this.ctx.index)
         this.ctx.threadResult!.up = this.result
         this.onFinish?.(this.ctx.threadResult!)
     }
@@ -50,7 +50,7 @@ export class UploadMessageHandler implements IMessageHandler {
                 ? "\n"
                 : ` ${this.ctx.chunkSize}\n`
         }`
-        Logger.I.info(`Thread ${this.ctx.index} is sending "${msg}"`)
+        Logger.I.info('Thread %d is sending "%s"', this.ctx.index, msg)
         this.ctx.client.write(msg)
         this.ctx.client.on("drain", this.putChunks.bind(this))
     }
@@ -129,9 +129,9 @@ export class UploadMessageHandler implements IMessageHandler {
         const uploadDuration = Number(this.ctx.params.test_duration) * 1e9
         this.uploadEndTimeNs = Time.nowNs() + uploadDuration
         this.activityInterval = setInterval(() => {
-            Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
+            Logger.I.info("Checking activity on thread %d...", this.ctx.index)
             if (Time.nowNs() > this.uploadEndTimeNs) {
-                Logger.I.info(`Thread ${this.ctx.index} upload timed out.`)
+                Logger.I.info("Thread %d upload timed out.", this.ctx.index)
                 this.stopMessaging()
             }
         }, this.inactivityTimeoutMs)

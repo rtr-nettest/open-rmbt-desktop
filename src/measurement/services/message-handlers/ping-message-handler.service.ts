@@ -44,10 +44,10 @@ export class PingMessageHandler implements IMessageHandler {
                 end: 0n,
             })
             Logger.I.info(
-                `Thread ${this.ctx.index} sent ${ESocketMessage.PING.replace(
-                    "\n",
-                    ""
-                )} #${this.pingCounter + 1}`
+                "Thread %d sent %s #%d",
+                this.ctx.index,
+                ESocketMessage.PING.replace("\n", ""),
+                this.pingCounter + 1
             )
             this.pingCounter += 1
         })
@@ -56,7 +56,8 @@ export class PingMessageHandler implements IMessageHandler {
     readData(data: Buffer) {
         if (data.includes(ESocketMessage.ERR)) {
             Logger.I.info(
-                `Thread ${this.ctx.index} received an error. Terminating.`
+                "Thread %d received an error. Terminating.",
+                this.ctx.index
             )
             this.pingTimes[this.pingCounter - 1].end = hrtime.bigint()
             const pingClient = this.getClientPing()
@@ -71,7 +72,8 @@ export class PingMessageHandler implements IMessageHandler {
         }
         if (data.includes(ESocketMessage.PONG)) {
             Logger.I.info(
-                `Thread ${this.ctx.index} received a PONG. Continuing.`
+                "Thread %d received a PONG. Continuing.",
+                this.ctx.index
             )
             this.ctx.client.write(ESocketMessage.OK, () => {
                 this.pingTimes[this.pingCounter - 1].end = hrtime.bigint()

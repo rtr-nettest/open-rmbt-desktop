@@ -7,6 +7,7 @@ import {
     IMessageHandlerContext,
 } from "../../interfaces/message-handler.interface"
 import { Logger } from "../logger.service"
+import { ELoggerMessage } from "../../enums/logger-message.enum"
 
 export class DownloadMessageHandler implements IMessageHandler {
     static minDiffTime = 100000000
@@ -31,7 +32,11 @@ export class DownloadMessageHandler implements IMessageHandler {
 
     stopMessaging() {
         clearInterval(this.activityInterval)
-        Logger.I.info("Download is stopped for thread %d", this.ctx.index)
+        Logger.I.info(
+            ELoggerMessage.T_PHASE_FINISHED,
+            this.ctx.phase,
+            this.ctx.index
+        )
         this.ctx.threadResult!.down = this.result
         this.onFinish?.(this.ctx.threadResult!)
     }
@@ -42,9 +47,9 @@ export class DownloadMessageHandler implements IMessageHandler {
             this.downloadStartTime +
             BigInt(+this.ctx.params.test_duration * 1e9)
         this.activityInterval = setInterval(() => {
-            Logger.I.info("Checking activity on thread %d...", this.ctx.index)
+            Logger.I.info(ELoggerMessage.T_CHECKING_ACTIVITY, this.ctx.index)
             if (hrtime.bigint() >= this.downloadEndTime) {
-                Logger.I.info("Thread %d download timed out.", this.ctx.index)
+                Logger.I.info(ELoggerMessage.T_TIMEOUT, this.ctx.index)
                 this.requestFinish()
             }
         }, this.inactivityTimeout)
@@ -55,7 +60,7 @@ export class DownloadMessageHandler implements IMessageHandler {
                 ? "\n"
                 : ` ${this.ctx.chunkSize}\n`
         }`
-        Logger.I.info('Thread %d is sending "%s"', this.ctx.index, msg)
+        Logger.I.info(ELoggerMessage.T_SENDING_MESSAGE, this.ctx.index, msg)
         this.ctx.client.write(msg)
     }
 

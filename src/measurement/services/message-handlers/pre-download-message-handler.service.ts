@@ -1,3 +1,4 @@
+import { ELoggerMessage } from "../../enums/logger-message.enum"
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import {
     IMessageHandler,
@@ -20,7 +21,11 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     ) {}
 
     stopMessaging(): void {
-        Logger.I.info("Predownload is finished for thread %d", this.ctx.index)
+        Logger.I.info(
+            ELoggerMessage.T_PHASE_FINISHED,
+            this.ctx.phase,
+            this.ctx.index
+        )
         clearInterval(this.activityInterval)
         this.onFinish?.()
     }
@@ -63,15 +68,12 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     }
 
     private getChunks() {
-        Logger.I.info("Thread %d is getting chunks.", this.ctx.index)
+        Logger.I.info(ELoggerMessage.T_GETTING_CHUNKS, this.ctx.index)
         clearInterval(this.activityInterval)
         this.activityInterval = setInterval(() => {
-            Logger.I.info("Checking activity on thread %d...", this.ctx.index)
+            Logger.I.info(ELoggerMessage.T_CHECKING_ACTIVITY, this.ctx.index)
             if (Time.nowNs() >= this.preDownloadEndTime) {
-                Logger.I.info(
-                    "Thread %d pre-download timed out.",
-                    this.ctx.index
-                )
+                Logger.I.info(ELoggerMessage.T_TIMEOUT, this.ctx.index)
                 this.finishChunkPortion()
                 this.activityInterval = setInterval(
                     this.stopMessaging.bind(this),
@@ -89,7 +91,11 @@ export class PreDownloadMessageHandler implements IMessageHandler {
         if (this.isChunkPortionFinished) {
             return
         }
-        Logger.I.info("Thread %d is writing OK.", this.ctx.index)
+        Logger.I.info(
+            ELoggerMessage.T_SENDING_MESSAGE,
+            this.ctx.index,
+            ESocketMessage.OK
+        )
         clearInterval(this.activityInterval)
         this.ctx.client.write(ESocketMessage.OK)
         this.isChunkPortionFinished = true

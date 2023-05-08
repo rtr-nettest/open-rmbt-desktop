@@ -1,3 +1,4 @@
+import { ELoggerMessage } from "../../enums/logger-message.enum"
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import {
     IMessageHandler,
@@ -17,26 +18,26 @@ export class InitMessageHandler implements IMessageHandler {
     }
 
     stopMessaging(): void {
-        Logger.I.info(
-            "Thread %d finished initialization %s.",
-            this.ctx.index,
-            this.isInitialized ? "successfully" : "with error"
-        )
+        if (this.isInitialized) {
+            Logger.I.info(ELoggerMessage.T_INIT_FINISHED, this.ctx.index)
+        } else {
+            Logger.I.info(
+                ELoggerMessage.T_INIT_FINISHED_WITH_ERROR,
+                this.ctx.index
+            )
+        }
         this.onFinish?.(this.isInitialized)
     }
 
     writeData(): void {
         if (this.ctx.params.test_server_type === "RMBThttp") {
-            Logger.I.info(
-                "Thread %d is requesting HTTP upgrade...",
-                this.ctx.index
-            )
+            Logger.I.info(ELoggerMessage.T_REQUESTING_UPGRADE, this.ctx.index)
             this.ctx.client.write(ESocketMessage.HTTP_UPGRADE, "ascii")
         }
         setTimeout(() => {
-            Logger.I.info("Checking activity on thread %d...", this.ctx.index)
+            Logger.I.info(ELoggerMessage.T_CHECKING_ACTIVITY, this.ctx.index)
             if (!this.isInitialized) {
-                Logger.I.info("Thread %d init timed out.", this.ctx.index)
+                Logger.I.info(ELoggerMessage.T_TIMEOUT, this.ctx.index)
                 this.stopMessaging()
             }
         }, this.inactivityTimeout)
@@ -52,7 +53,7 @@ export class InitMessageHandler implements IMessageHandler {
         }
         if (dataString.includes(ESocketMessage.ACCEPT_TOKEN)) {
             Logger.I.info(
-                "Thread %d sends token: %s",
+                ELoggerMessage.T_SENDING_TOKEN,
                 this.ctx.index,
                 this.ctx.params.test_token
             )
@@ -65,7 +66,7 @@ export class InitMessageHandler implements IMessageHandler {
         if (dataString.includes(ESocketMessage.CHUNKSIZE)) {
             const chunkSizes = dataString.split(" ")
             Logger.I.info(
-                "Thread %d received chunksizes %o.",
+                ELoggerMessage.T_RECEIVED_CHUNK_SIZES,
                 this.ctx.index,
                 chunkSizes
             )

@@ -16,6 +16,13 @@ export interface IMessageHandlerContext {
     defaultChunkSize: number
     index: number
     params: IMeasurementRegistrationResponse
+    phase?:
+        | "init"
+        | "predownload"
+        | "ping"
+        | "download"
+        | "preupload"
+        | "upload"
     preDownloadChunks: number
     preUploadChunks: number
     threadResult?: IMeasurementThreadResult

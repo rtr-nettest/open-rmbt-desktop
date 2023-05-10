@@ -182,13 +182,13 @@ export class RMBTThread implements IMessageHandlerContext {
             this.phase = "init"
             this.dropHandlers()
             this.initMessageHandler = new InitMessageHandler(this, (result) => {
-                this.phase = undefined
-                this.dropHandlers()
                 Logger.I.info(
                     ELoggerMessage.T_RESOLVING_PHASE,
                     this.index,
                     this.phase
                 )
+                this.phase = undefined
+                this.dropHandlers()
                 if (result) {
                     resolve(result)
                 } else {
@@ -206,13 +206,13 @@ export class RMBTThread implements IMessageHandlerContext {
             this.preDownloadMessageHandler = new PreDownloadMessageHandler(
                 this,
                 () => {
-                    this.dropHandlers()
-                    this.phase = undefined
                     Logger.I.info(
                         ELoggerMessage.T_RESOLVING_PHASE,
                         this.index,
                         this.phase
                     )
+                    this.dropHandlers()
+                    this.phase = undefined
                     resolve({
                         chunkSize: this.chunkSize,
                         bytesPerSec: Math.max(...this.bytesPerSecPretest),
@@ -228,13 +228,13 @@ export class RMBTThread implements IMessageHandlerContext {
             this.phase = "ping"
             this.dropHandlers()
             this.pingMessageHandler = new PingMessageHandler(this, (result) => {
-                this.dropHandlers()
-                this.phase = undefined
                 Logger.I.info(
                     ELoggerMessage.T_RESOLVING_PHASE,
                     this.index,
                     this.phase
                 )
+                this.dropHandlers()
+                this.phase = undefined
                 resolve(result)
             })
             this.pingMessageHandler.writeData()
@@ -265,7 +265,7 @@ export class RMBTThread implements IMessageHandlerContext {
                         Logger.I.info(
                             ELoggerMessage.T_RESOLVING_PHASE,
                             this.index,
-                            this.phase
+                            "download"
                         )
                         resolve(result)
                     })
@@ -282,13 +282,13 @@ export class RMBTThread implements IMessageHandlerContext {
             this.preUploadMessageHandler = new PreUploadMessageHandler(
                 this,
                 (chunkSize: number) => {
-                    this.dropHandlers()
-                    this.phase = undefined
                     Logger.I.info(
                         ELoggerMessage.T_RESOLVING_PHASE,
                         this.index,
                         this.phase
                     )
+                    this.dropHandlers()
+                    this.phase = undefined
                     resolve(chunkSize)
                 }
             )
@@ -318,7 +318,7 @@ export class RMBTThread implements IMessageHandlerContext {
                         Logger.I.info(
                             ELoggerMessage.T_RESOLVING_PHASE,
                             this.index,
-                            this.phase
+                            "upload"
                         )
                         resolve(result)
                     })

@@ -19,7 +19,7 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
             if (!thread) {
                 thread = new RMBTThread(workerData.params, workerData.index)
                 thread.errorHandler = (error) => {
-                    error.message = `[THREAD ${workerData.index}] ${error.message}`
+                    error.message = `Thread ${workerData.index} reported an error. ${error.message}`
                     parentPort?.postMessage(
                         new OutgoingMessageWithData("error", error)
                     )

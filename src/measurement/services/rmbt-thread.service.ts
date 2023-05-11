@@ -25,6 +25,7 @@ export class RMBTThread implements IMessageHandlerContext {
     chunkSize: number = 0
     client: net.Socket = new net.Socket()
     interimHandler?: (interimResult: IMeasurementThreadResult) => void
+    errorHandler?: (error: Error) => void
     isConnected = false
     threadResult?: IMeasurementThreadResult
     preDownloadChunks: number = 1
@@ -97,12 +98,12 @@ export class RMBTThread implements IMessageHandlerContext {
         }
 
     private dataListener = (data: Buffer) => {
-        const dataString = data.length < 128 ? data.toString().trim() : ""
-        if (dataString.includes(ESocketMessage.ERR)) {
+        if (data.includes(ESocketMessage.ERR)) {
             this.hadError = true
+            this.errorListener(new Error(data.toString()))
         }
-        if (dataString.length) {
-            Logger.I.info(`Thread ${this.index} received message ${dataString}`)
+        if (data.length < 128) {
+            Logger.I.info(`Thread ${this.index} received message ${data}`)
         }
         switch (true) {
             case this.phase === "init":
@@ -133,6 +134,7 @@ export class RMBTThread implements IMessageHandlerContext {
             `Thread ${this.index} reported an error: %s`,
             err.message
         )
+        this.errorHandler?.(err)
     }
 
     private endListener = () => {

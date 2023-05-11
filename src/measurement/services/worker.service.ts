@@ -18,6 +18,12 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
         case "connect":
             if (!thread) {
                 thread = new RMBTThread(workerData.params, workerData.index)
+                thread.errorHandler = (error) => {
+                    error.message = `[THREAD ${workerData.index}] ${error.message}`
+                    parentPort?.postMessage(
+                        new OutgoingMessageWithData("error", error)
+                    )
+                }
             }
             await thread.connect(workerData.result)
             isConnected = await thread.manageInit()

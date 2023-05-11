@@ -333,6 +333,9 @@ export class RMBTClient {
                 worker.on("message", (message) => {
                     this.lastMessageReceivedAt = Date.now()
                     switch (message.message) {
+                        case "error":
+                            Logger.I.error(message.data)
+                            break
                         case "connected":
                             const isInitialized = message.data as boolean
                             if (isInitialized) {

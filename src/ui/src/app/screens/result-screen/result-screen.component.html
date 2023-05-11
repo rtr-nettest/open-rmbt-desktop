@@ -69,7 +69,7 @@
 
 <ng-template #noResult>
     <main *ngIf="error$ | async as error" class="app-main">
-        There was an error while processing the result. {{ error.message }}
+        Measurement failed. {{ error.message }}
     </main>
     <main *ngIf="(error$ | async) === null" class="app-main">
         Fetching the result...

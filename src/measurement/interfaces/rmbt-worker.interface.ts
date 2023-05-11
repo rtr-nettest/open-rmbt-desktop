@@ -28,6 +28,7 @@ export type OutgoingMessage =
     | "reconnectedForUpload"
     | "uploadUpdated"
     | "uploadFinished"
+    | "error"
 export class OutgoingMessageWithData {
     constructor(
         public message: OutgoingMessage,
@@ -37,6 +38,7 @@ export class OutgoingMessageWithData {
             | boolean
             | IBuffer
             | IPreDownloadResult
+            | Error
     ) {}
 }
 export class IncomingMessageWithData {

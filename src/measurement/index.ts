@@ -21,6 +21,7 @@ export interface MeasurementOptions {
 }
 
 export async function runMeasurement(options?: MeasurementOptions) {
+    Logger.init()
     let cpuInfoInterval: NodeJS.Timer | undefined
     let cpuInfoList: number[] = []
     if (process.env.LOG_CPU_USAGE === "true") {

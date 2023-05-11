@@ -10,7 +10,7 @@ export class Logger {
     private constructor() {}
 
     static get I(): pino.Logger {
-        return this.instance
+        return this.instance ?? console
     }
 
     static init(index?: number) {

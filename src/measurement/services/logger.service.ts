@@ -10,6 +10,10 @@ export class Logger {
     private constructor() {}
 
     static get I(): pino.Logger {
+        return this.instance
+    }
+
+    static init(index?: number) {
         if (!this.instance) {
             const streams: pino.StreamEntry[] = []
 
@@ -28,9 +32,9 @@ export class Logger {
                         stream: fs.createWriteStream(
                             path.join(
                                 logDir,
-                                `${new Date().getTime()}${
+                                `${this.formattedTime}${
                                     isMainThread ? "-main" : "-worker"
-                                }.log`
+                                }${index ?? ""}.log`
                             )
                         ),
                     })
@@ -41,13 +45,19 @@ export class Logger {
 
             if (streams.length) {
                 this.instance = pino(
-                    { level: "info" },
+                    {
+                        level: "info",
+                        timestamp: () => `,"time":"${this.formattedTime}"`,
+                    },
                     pino.multistream(streams)
                 )
             } else {
                 this.instance = pino({ enabled: false })
             }
         }
-        return this.instance
+    }
+
+    private static get formattedTime() {
+        return new Date(Date.now()).toISOString()
     }
 }

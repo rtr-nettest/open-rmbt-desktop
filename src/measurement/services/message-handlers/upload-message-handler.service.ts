@@ -16,8 +16,6 @@ export class UploadMessageHandler implements IMessageHandler {
     static clientTimeOffsetNs = 1e9
     private uploadEndTimeNs = 0
     private result = new MeasurementThreadResultList(0)
-    private activityInterval?: NodeJS.Timer
-    private inactivityTimeoutMs = 1000
     private finalTimeout?: NodeJS.Timeout
     private buffers: Buffer[] = []
     private bytesWritten = 0
@@ -38,7 +36,6 @@ export class UploadMessageHandler implements IMessageHandler {
     }
 
     stopMessaging(): void {
-        clearInterval(this.activityInterval)
         Logger.I.info(
             ELoggerMessage.T_PHASE_FINISHED,
             this.ctx.phase,
@@ -78,12 +75,7 @@ export class UploadMessageHandler implements IMessageHandler {
                     this.ctx.threadResult!.currentTime.up = nanos
                     this.ctx.threadResult!.currentTransfer.up = bytes
                     this.ctx.interimHandler?.(this.ctx.threadResult!)
-                }
-                if (
-                    nanos >=
-                    this.uploadEndTimeNs -
-                        UploadMessageHandler.clientTimeOffsetNs
-                ) {
+                } else if (nanos >= this.uploadEndTimeNs) {
                     this.stopMessaging()
                 }
             }
@@ -130,15 +122,7 @@ export class UploadMessageHandler implements IMessageHandler {
     }
 
     private setActivityInterval() {
-        clearInterval(this.activityInterval)
         const uploadDuration = Number(this.ctx.params.test_duration) * 1e9
         this.uploadEndTimeNs = Time.nowNs() + uploadDuration
-        this.activityInterval = setInterval(() => {
-            Logger.I.info(ELoggerMessage.T_CHECKING_ACTIVITY, this.ctx.index)
-            if (Time.nowNs() > this.uploadEndTimeNs) {
-                Logger.I.info(ELoggerMessage.T_TIMEOUT, this.ctx.index)
-                this.stopMessaging()
-            }
-        }, this.inactivityTimeoutMs)
     }
 }

@@ -101,11 +101,11 @@ export class RMBTThread implements IMessageHandlerContext {
         }
 
     private dataListener = (data: Buffer) => {
-        if (data.includes(ESocketMessage.ERR)) {
-            this.hadError = true
-        }
         if (data.length < 128) {
             Logger.I.info(ELoggerMessage.T_RECEIVED_MESSAGE, this.index, data)
+            if (data.includes(ESocketMessage.ERR)) {
+                this.hadError = true
+            }
         }
         switch (true) {
             case this.phase === "init":

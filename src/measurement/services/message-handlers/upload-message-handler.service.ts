@@ -75,7 +75,7 @@ export class UploadMessageHandler implements IMessageHandler {
                     this.ctx.threadResult!.currentTime.up = nanos
                     this.ctx.threadResult!.currentTransfer.up = bytes
                     this.ctx.interimHandler?.(this.ctx.threadResult!)
-                } else if (nanos >= this.uploadEndTimeNs) {
+                } else {
                     this.stopMessaging()
                 }
             }

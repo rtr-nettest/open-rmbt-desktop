@@ -13,6 +13,7 @@ import { InitMessageHandler } from "./message-handlers/init-message-handler.serv
 import { UploadMessageHandler } from "./message-handlers/upload-message-handler.service"
 import { IMessageHandlerContext } from "../interfaces/message-handler.interface"
 import { ELoggerMessage } from "../enums/logger-message.enum"
+import { RMBTClient } from "./rmbt-client.service"
 
 export interface IPreDownloadResult {
     chunkSize: number
@@ -26,6 +27,7 @@ export class RMBTThread implements IMessageHandlerContext {
     chunkSize: number = 0
     client: net.Socket = new net.Socket()
     interimHandler?: (interimResult: IMeasurementThreadResult) => void
+    errorHandler?: (error: Error) => void
     isConnected = false
     threadResult?: IMeasurementThreadResult
     preDownloadChunks: number = 1
@@ -101,10 +103,11 @@ export class RMBTThread implements IMessageHandlerContext {
         }
 
     private dataListener = (data: Buffer) => {
-        if (data.length < 128) {
+        if (data.length < RMBTClient.minChunkSize) {
             Logger.I.info(ELoggerMessage.T_RECEIVED_MESSAGE, this.index, data)
             if (data.includes(ESocketMessage.ERR)) {
                 this.hadError = true
+                this.errorListener(new Error(data.toString()))
             }
         }
         switch (true) {
@@ -133,6 +136,7 @@ export class RMBTThread implements IMessageHandlerContext {
 
     private errorListener = (err: Error) => {
         Logger.I.error(ELoggerMessage.T_REPORTED_ERROR, this.index, err.message)
+        this.errorHandler?.(err)
     }
 
     private endListener = () => {

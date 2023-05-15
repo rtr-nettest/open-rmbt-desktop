@@ -62,7 +62,7 @@ export class TestStore {
     }
 
     getMeasurementResult(testUuid: string | null) {
-        if (!testUuid) {
+        if (!testUuid || this.error$.value) {
             return of(null)
         }
         this.setErrorHandler()

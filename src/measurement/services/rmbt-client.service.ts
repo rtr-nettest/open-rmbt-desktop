@@ -292,10 +292,26 @@ export class RMBTClient {
         Logger.I.info("Measurement is finished")
     }
 
+    private cancelMeasurement(reject: (reason: any) => void, error: Error) {
+        if (!this.isRunning) {
+            return
+        }
+        Logger.I.error(error)
+        this.threadResults = []
+        this.interimThreadResults = new Array(this.params.test_numthreads)
+        this.measurementStatus = EMeasurementStatus.ERROR
+        this.isRunning = false
+        for (const w of this.measurementTasks) {
+            w.terminate()
+        }
+        clearInterval(this.activityInterval)
+        reject(error)
+    }
+
     private async runMeasurement(): Promise<IMeasurementThreadResult[]> {
         this.isRunning = true
         this.measurementStart = Date.now()
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             Logger.I.info("Running measurement...")
             let allowedInactivityMs = Number(process.env.ALLOWED_INACTIVITY_MS)
             if (isNaN(allowedInactivityMs)) {
@@ -306,7 +322,10 @@ export class RMBTClient {
                     Date.now() - this.lastMessageReceivedAt >=
                     allowedInactivityMs
                 ) {
-                    this.finishMeasurement(resolve)
+                    this.cancelMeasurement(
+                        reject,
+                        new Error("Measurement timed out")
+                    )
                 }
             }, allowedInactivityMs)
             this.measurementStatus = EMeasurementStatus.INIT
@@ -332,6 +351,12 @@ export class RMBTClient {
                 worker.on("message", (message) => {
                     this.lastMessageReceivedAt = Date.now()
                     switch (message.message) {
+                        case "error":
+                            this.cancelMeasurement(
+                                reject,
+                                message.data as Error
+                            )
+                            break
                         case "connected":
                             const isInitialized = message.data as boolean
                             if (isInitialized) {

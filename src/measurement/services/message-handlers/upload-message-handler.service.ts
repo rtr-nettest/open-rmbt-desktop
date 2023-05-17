@@ -19,6 +19,7 @@ export class UploadMessageHandler implements IMessageHandler {
     private finalTimeout?: NodeJS.Timeout
     private buffers: Buffer[] = []
     private bytesWritten = 0
+    private interimHandlerInterval?: NodeJS.Timer
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -41,6 +42,7 @@ export class UploadMessageHandler implements IMessageHandler {
             this.ctx.phase,
             this.ctx.index
         )
+        clearInterval(this.interimHandlerInterval)
         this.ctx.threadResult!.up = this.result
         this.onFinish?.(this.ctx.threadResult!)
     }
@@ -55,6 +57,10 @@ export class UploadMessageHandler implements IMessageHandler {
         Logger.I.info(ELoggerMessage.T_SENDING_MESSAGE, this.ctx.index, msg)
         this.ctx.client.write(msg)
         this.ctx.client.on("drain", this.putChunks.bind(this))
+        this.interimHandlerInterval = setInterval(() => {
+            if (this.ctx.threadResult)
+                this.ctx.interimHandler?.(this.ctx.threadResult!)
+        }, 100)
     }
 
     readData(data: Buffer): void {
@@ -74,7 +80,6 @@ export class UploadMessageHandler implements IMessageHandler {
                     this.ctx.threadResult!.up = this.result
                     this.ctx.threadResult!.currentTime.up = nanos
                     this.ctx.threadResult!.currentTransfer.up = bytes
-                    this.ctx.interimHandler?.(this.ctx.threadResult!)
                 } else {
                     this.stopMessaging()
                 }

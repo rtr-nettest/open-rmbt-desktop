@@ -16,6 +16,7 @@ export class DownloadMessageHandler implements IMessageHandler {
     private result = new MeasurementThreadResultList(0)
     private nsec = 0
     private isFinishRequested = false
+    private interimHandlerInterval?: NodeJS.Timer
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -33,6 +34,7 @@ export class DownloadMessageHandler implements IMessageHandler {
             this.ctx.phase,
             this.ctx.index
         )
+        clearInterval(this.interimHandlerInterval)
         this.ctx.threadResult!.down = this.result
         this.onFinish?.(this.ctx.threadResult!)
     }
@@ -48,6 +50,10 @@ export class DownloadMessageHandler implements IMessageHandler {
         }`
         Logger.I.info(ELoggerMessage.T_SENDING_MESSAGE, this.ctx.index, msg)
         this.ctx.client.write(msg)
+        this.interimHandlerInterval = setInterval(() => {
+            if (this.ctx.threadResult)
+                this.ctx.interimHandler?.(this.ctx.threadResult!)
+        }, 100)
     }
 
     readData(data: Buffer): void {
@@ -74,7 +80,6 @@ export class DownloadMessageHandler implements IMessageHandler {
             this.ctx.threadResult!.down = this.result
             this.ctx.threadResult!.currentTime.down = this.nsec
             this.ctx.threadResult!.currentTransfer.down = this.downloadBytesRead
-            this.ctx.interimHandler?.(this.ctx.threadResult!)
         }
         if (isFullChunk && lastByte === 0xff) {
             this.requestFinish()

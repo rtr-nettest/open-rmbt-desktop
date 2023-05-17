@@ -87,6 +87,7 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         CMS_URL: process.env.CMS_URL || "",
         FLAVOR: process.env.FLAVOR || "rtr",
         X_NETTEST_CLIENT: process.env.X_NETTEST_CLIENT || "",
+        ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",
     }
 })
 

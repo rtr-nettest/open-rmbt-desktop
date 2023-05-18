@@ -37,7 +37,7 @@ export async function runMeasurement(options?: MeasurementOptions) {
             }, 1000)
         }
 
-        const controlServer = ControlServer.instance
+        const controlServer = ControlServer.I
         const settingsRequest = new UserSettingsRequest(options?.platform)
         const measurementServer =
             await controlServer.getMeasurementServerFromApi(settingsRequest)
@@ -135,5 +135,5 @@ export function getCurrentPhaseState(): IMeasurementPhaseState {
 }
 
 export async function getMeasurementResult(testUuid: string) {
-    return await ControlServer.instance.getMeasurementResult(testUuid)
+    return await ControlServer.I.getMeasurementResult(testUuid)
 }

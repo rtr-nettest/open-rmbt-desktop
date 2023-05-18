@@ -12,12 +12,17 @@ import utc from "dayjs/plugin/utc"
 import tz from "dayjs/plugin/timezone"
 import { RMBTClient } from "./rmbt-client.service"
 import { ELoggerMessage } from "../enums/logger-message.enum"
+import { Store } from "./store.service"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
 
 export class ControlServer {
-    static instance = new ControlServer()
+    private static instance = new ControlServer()
+
+    static get I() {
+        return this.instance
+    }
 
     private constructor() {}
 
@@ -79,6 +84,7 @@ export class ControlServer {
         ).data as IUserSetingsResponse
         if (response?.settings?.length) {
             Logger.I.info("Using settings: %o", response.settings[0])
+            Store.clientUuid = response.settings[0].uuid
             return response.settings[0]
         }
         if (response?.error?.length) {

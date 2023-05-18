@@ -17,6 +17,7 @@ import { ISimpleHistoryResult } from "../../../../measurement/interfaces/simple-
 import { TestPhaseState } from "../dto/test-phase-state.dto"
 import { EMeasurementStatus } from "../../../../measurement/enums/measurement-status.enum"
 import { Router } from "@angular/router"
+import { MainStore } from "./main.store"
 
 const STATE_UPDATE_TIMEOUT = 200
 
@@ -33,13 +34,11 @@ export class TestStore {
     simpleHistoryResult$ = new BehaviorSubject<ISimpleHistoryResult | null>(
         null
     )
-    error$ = new BehaviorSubject<Error | null>(null)
 
-    constructor(private router: Router) {}
+    constructor(private mainStore: MainStore, private router: Router) {}
 
     launchTest() {
         this.resetState()
-        this.setErrorHandler()
         window.electronAPI.runMeasurement()
         return interval(STATE_UPDATE_TIMEOUT).pipe(
             concatMap(() =>
@@ -63,10 +62,9 @@ export class TestStore {
     }
 
     getMeasurementResult(testUuid: string | null) {
-        if (!testUuid || this.error$.value) {
+        if (!testUuid || this.mainStore.error$.value) {
             return of(null)
         }
-        this.setErrorHandler()
         return from(window.electronAPI.getMeasurementResult(testUuid)).pipe(
             map((result) => {
                 this.simpleHistoryResult$.next(result)
@@ -93,7 +91,10 @@ export class TestStore {
                     providerName: result.providerName,
                 })
                 window.electronAPI.getEnv().then((env) => {
-                    if (env.ENABLE_LOOP_MODE === "true" && !this.error$.value) {
+                    if (
+                        env.ENABLE_LOOP_MODE === "true" &&
+                        !this.mainStore.error$.value
+                    ) {
                         setTimeout(
                             () => this.router.navigateByUrl("/test"),
                             1000
@@ -109,12 +110,6 @@ export class TestStore {
         this.basicNetworkInfo$.next(new BasicNetworkInfo())
         this.visualization$.next(new TestVisualizationState())
         this.simpleHistoryResult$.next(null)
-        this.error$.next(null)
-    }
-
-    private setErrorHandler() {
-        window.electronAPI.onError((error) => {
-            this.error$.next(error)
-        })
+        this.mainStore.error$.next(null)
     }
 }

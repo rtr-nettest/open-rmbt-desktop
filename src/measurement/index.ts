@@ -11,14 +11,30 @@ import osu from "node-os-utils"
 import os from "os"
 import { ICPU } from "./interfaces/cpu.interface"
 import { ELoggerMessage } from "./enums/logger-message.enum"
+import { IUserSettings } from "./interfaces/user-settings-response.interface"
 
 let rmbtClient: RMBTClient | undefined
 let cpuInfo: ICPU | undefined
+let settingsRequest: UserSettingsRequest
+let settings: IUserSettings
 
 const rounded = (num: number) => Math.round(num * 1000) / 1000
 
 export interface MeasurementOptions {
     platform?: string
+}
+
+export async function registerClient() {
+    Logger.init()
+    try {
+        settingsRequest = new UserSettingsRequest()
+        settings = await ControlServer.I.getUserSettings(settingsRequest)
+        return settings
+    } catch (e) {
+        throw new Error(
+            "The registration couldn't be completed. Please try again."
+        )
+    }
 }
 
 export async function runMeasurement(options?: MeasurementOptions) {
@@ -38,10 +54,12 @@ export async function runMeasurement(options?: MeasurementOptions) {
         }
 
         const controlServer = ControlServer.I
-        const settingsRequest = new UserSettingsRequest(options?.platform)
+        if (!settings) {
+            settingsRequest = new UserSettingsRequest(options?.platform)
+            settings = await controlServer.getUserSettings(settingsRequest)
+        }
         const measurementServer =
             await controlServer.getMeasurementServerFromApi(settingsRequest)
-        const settings = await controlServer.getUserSettings(settingsRequest)
         const registrationRequest = new MeasurementRegistrationRequest(
             settings.uuid,
             measurementServer?.id,

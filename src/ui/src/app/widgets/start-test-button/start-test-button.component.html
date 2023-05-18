@@ -13,6 +13,8 @@
     <a
         routerLink="/test"
         class="uk-card uk-card-primary uk-card-hover uk-card-body"
+        [ariaDisabled]="disabled$ | async"
+        (click)="preventNavigation($event)"
     >
         <div class="uk-card-media-top">
             <span

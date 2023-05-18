@@ -1,5 +1,6 @@
 import { NgModule } from "@angular/core"
 import { BrowserModule } from "@angular/platform-browser"
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations"
 
 import { AppRoutingModule } from "./app-routing.module"
 import { AppComponent } from "./app.component"
@@ -16,10 +17,12 @@ import { SpacerComponent } from "./widgets/spacer/spacer.component"
 import { IBasicNetworkInfo } from "../../../measurement/interfaces/basic-network-info.interface"
 import { IMeasurementPhaseState } from "../../../measurement/interfaces/measurement-phase-state.interface"
 import { ISimpleHistoryResult } from "../../../measurement/interfaces/simple-history-result.interface"
+import { IUserSettings } from "../../../measurement/interfaces/user-settings-response.interface"
 import { IEnv } from "../../../electron/interfaces/env.interface"
 import { MatIconModule } from "@angular/material/icon"
 import { MatButtonModule } from "@angular/material/button"
 import { MatTooltipModule } from "@angular/material/tooltip"
+import { MatSnackBarModule } from "@angular/material/snack-bar"
 import { HttpClientModule } from "@angular/common/http"
 import { TranslocoRootModule } from "./transloco-root.module"
 import { TestHeaderComponent } from "./widgets/test-header/test-header.component"
@@ -66,6 +69,7 @@ Chart.register(
 declare global {
     interface Window {
         electronAPI: {
+            registerClient: () => Promise<IUserSettings>
             runMeasurement: () => Promise<void>
             getEnv: () => Promise<IEnv>
             getBasicNetworkInfo: () => Promise<IBasicNetworkInfo>
@@ -100,10 +104,12 @@ declare global {
     ],
     imports: [
         BrowserModule,
+        BrowserAnimationsModule,
         AppRoutingModule,
         MatIconModule,
         MatButtonModule,
         MatTooltipModule,
+        MatSnackBarModule,
         HttpClientModule,
         TranslocoRootModule,
     ],

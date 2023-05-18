@@ -12,7 +12,7 @@
     max-width: 40rem;
     width: calc(100vw - 60px);
 
-    &:hover {
+    &[aria-disabled="false"]:hover {
         text-decoration: none;
         transform: translateY(0.4rem) scale(0.98);
     }
@@ -37,6 +37,19 @@
             width: 50px;
             & > * {
                 transform: translate(0, 0);
+            }
+        }
+
+        $disabled-color: mix(#2f5f00, white, 33%);
+
+        &[aria-disabled="true"] {
+            background-color: $disabled-color;
+            border-color: $disabled-color;
+            cursor: default;
+            pointer-events: none;
+            .uk-icon {
+                background-color: $disabled-color;
+                border-color: $disabled-color;
             }
         }
     }

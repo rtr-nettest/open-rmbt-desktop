@@ -7,6 +7,7 @@ import {
     getCPUUsage,
     getCurrentPhaseState,
     getMeasurementResult,
+    registerClient,
     runMeasurement,
 } from "../measurement"
 import { Events } from "./enums/events.enum"
@@ -46,8 +47,8 @@ const createWindow = () => {
     })
 
     if (process.env.DEV === "true") {
-        win.loadURL("http://localhost:4200/")
         win.webContents.openDevTools()
+        win.loadURL("http://localhost:4200/")
     } else {
         win.loadURL(`${Protocol.scheme}://index.html`)
     }
@@ -75,11 +76,22 @@ app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
-ipcMain.on(Events.RUN_MEASUREMENT, (event) => {
+ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
     const webContents = event.sender
-    runMeasurement().catch((e) => {
+    try {
+        return await registerClient()
+    } catch (e) {
         webContents.send(Events.ERROR, e)
-    })
+    }
+})
+
+ipcMain.on(Events.RUN_MEASUREMENT, async (event) => {
+    const webContents = event.sender
+    try {
+        await runMeasurement()
+    } catch (e) {
+        webContents.send(Events.ERROR, e)
+    }
 })
 
 ipcMain.handle(Events.GET_ENV, (): IEnv => {

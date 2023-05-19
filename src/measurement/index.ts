@@ -12,146 +12,179 @@ import os from "os"
 import { ICPU } from "./interfaces/cpu.interface"
 import { ELoggerMessage } from "./enums/logger-message.enum"
 import { IUserSettings } from "./interfaces/user-settings-response.interface"
+import { IMeasurementServerResponse } from "./interfaces/measurement-server-response.interface"
+import { config } from "dotenv"
 
-let rmbtClient: RMBTClient | undefined
-let cpuInfo: ICPU | undefined
-let settingsRequest: UserSettingsRequest
-let settings: IUserSettings
-
-const rounded = (num: number) => Math.round(num * 1000) / 1000
+config({
+    path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
+})
 
 export interface MeasurementOptions {
     platform?: string
 }
 
-export async function registerClient() {
-    Logger.init()
-    try {
-        settingsRequest = new UserSettingsRequest()
-        settings = await ControlServer.I.getUserSettings(settingsRequest)
-        return settings
-    } catch (e) {
-        throw new Error(
-            "The registration couldn't be completed. Please try again."
-        )
+export class MeasurementRunner {
+    private static instance = new MeasurementRunner()
+
+    static get I() {
+        return this.instance
     }
-}
 
-export async function runMeasurement(options?: MeasurementOptions) {
-    Logger.init()
-    let cpuInfoInterval: NodeJS.Timer | undefined
-    let cpuInfoList: number[] = []
-    rmbtClient = undefined
+    private measurementServer?: IMeasurementServerResponse
+    private registrationRequest?: MeasurementRegistrationRequest
+    private rmbtClient?: RMBTClient
+    private cpuInfoInterval?: NodeJS.Timer
+    private cpuInfoList: number[] = []
+    private cpuInfo?: ICPU
+    private settingsRequest?: UserSettingsRequest
+    private settings?: IUserSettings
 
-    try {
+    private constructor() {
+        Logger.init()
+    }
+
+    async registerClient(options?: MeasurementOptions) {
+        try {
+            this.settingsRequest = new UserSettingsRequest(options?.platform)
+            this.settings = await ControlServer.I.getUserSettings(
+                this.settingsRequest
+            )
+            return this.settings
+        } catch (e) {
+            throw new Error(
+                "The registration couldn't be completed. Please try again."
+            )
+        }
+    }
+
+    async runMeasurement(options?: MeasurementOptions) {
+        this.rmbtClient = undefined
+        try {
+            this.setCPUInfoInterval()
+            if (!this.settings) {
+                await this.registerClient(options)
+            }
+            await this.setMeasurementServer()
+            await this.registerMeasurement()
+
+            const threadResults = await this.rmbtClient!.scheduleMeasurement()
+            this.setCPUUsage()
+            await ControlServer.I.submitMeasurement(
+                new MeasurementResult(
+                    this.registrationRequest!,
+                    this.rmbtClient!.params!,
+                    threadResults,
+                    this.rmbtClient!.finalResultDown!,
+                    this.rmbtClient!.finalResultUp!,
+                    this.cpuInfo
+                )
+            )
+        } catch (e) {
+            throw e
+        } finally {
+            this.setCPUUsage()
+            if (this.cpuInfo) {
+                Logger.I.info(
+                    ELoggerMessage.CPU_USAGE_MIN,
+                    this.rounded(this.cpuInfo.load_min * 100)
+                )
+                Logger.I.info(
+                    ELoggerMessage.CPU_USAGE_MAX,
+                    this.rounded(this.cpuInfo.load_max * 100)
+                )
+                Logger.I.info(
+                    ELoggerMessage.CPU_USAGE_AVG,
+                    this.rounded(this.cpuInfo.load_avg * 100)
+                )
+            }
+            if (this.rmbtClient) {
+                ;(this.rmbtClient as RMBTClient).measurementStatus =
+                    EMeasurementStatus.END
+            }
+        }
+    }
+
+    getBasicNetworkInfo(): IBasicNetworkInfo {
+        return {
+            ipAddress: this.rmbtClient?.params.client_remote_ip ?? "-",
+            serverName: this.rmbtClient?.params.test_server_name ?? "-",
+            providerName: this.rmbtClient?.params.provider ?? "-",
+        }
+    }
+
+    getCurrentPhaseState(): IMeasurementPhaseState {
+        const phase =
+            this.rmbtClient?.measurementStatus ?? EMeasurementStatus.NOT_STARTED
+        return {
+            duration: this.rmbtClient?.getPhaseDuration(phase) ?? -1,
+            progress: this.rmbtClient?.getPhaseProgress(phase) ?? -1,
+            ping: this.rmbtClient?.pingMedian ?? -1,
+            down: this.rmbtClient?.interimDownMbps ?? -1,
+            up: this.rmbtClient?.interimUpMbps ?? -1,
+            phase,
+            testUuid: this.rmbtClient?.params?.test_uuid ?? "",
+        }
+    }
+
+    async getMeasurementResult(testUuid: string) {
+        return await ControlServer.I.getMeasurementResult(testUuid)
+    }
+
+    getCPUUsage(): ICPU | undefined {
+        return this.cpuInfo
+    }
+
+    private setCPUUsage() {
+        if (!this.cpuInfoInterval) {
+            this.cpuInfo = undefined
+            return
+        }
+        clearInterval(this.cpuInfoInterval)
+        this.cpuInfoInterval = undefined
+        this.cpuInfo = {
+            load_min: this.rounded(Math.min(...this.cpuInfoList) / 100),
+            load_max: this.rounded(Math.max(...this.cpuInfoList) / 100),
+            load_avg: this.rounded(
+                this.cpuInfoList.reduce((acc, stat) => acc + stat, 0) /
+                    this.cpuInfoList.length /
+                    100
+            ),
+            model: osu.cpu.model(),
+            cores: osu.cpu.count(),
+            speed: os.cpus()[0].speed,
+        }
+    }
+
+    private setCPUInfoInterval() {
+        this.cpuInfo = undefined
+        this.cpuInfoList = []
         if (process.env.LOG_CPU_USAGE === "true") {
-            cpuInfoInterval = setInterval(() => {
+            this.cpuInfoInterval = setInterval(() => {
                 osu.cpu.usage().then((percent) => {
                     Logger.I.info(ELoggerMessage.CPU_USAGE, percent)
-                    cpuInfoList.push(percent)
+                    this.cpuInfoList.push(percent)
                 })
             }, 1000)
         }
+    }
 
-        const controlServer = ControlServer.I
-        if (!settings) {
-            settingsRequest = new UserSettingsRequest(options?.platform)
-            settings = await controlServer.getUserSettings(settingsRequest)
-        }
-        const measurementServer =
-            await controlServer.getMeasurementServerFromApi(settingsRequest)
-        const registrationRequest = new MeasurementRegistrationRequest(
-            settings.uuid,
-            measurementServer?.id,
-            settingsRequest
-        )
-        let measurementRegistration = await controlServer.registerMeasurement(
-            registrationRequest
-        )
-        rmbtClient = new RMBTClient(measurementRegistration)
-        const threadResults = await rmbtClient.scheduleMeasurement()
-        rmbtClient.measurementStatus = EMeasurementStatus.SUBMITTING_RESULTS
-        setCPUInfo(cpuInfoList, cpuInfoInterval)
-        const resultToSubmit = new MeasurementResult(
-            registrationRequest,
-            rmbtClient.params!,
-            threadResults,
-            rmbtClient.finalResultDown!,
-            rmbtClient.finalResultUp!,
-            cpuInfo
-        )
-        await controlServer.submitMeasurement(resultToSubmit)
-    } catch (e) {
-        throw e
-    } finally {
-        setCPUInfo(cpuInfoList, cpuInfoInterval)
-        if (cpuInfo) {
-            Logger.I.info(
-                ELoggerMessage.CPU_USAGE_MIN,
-                rounded(cpuInfo.load_min * 100)
+    private async setMeasurementServer() {
+        this.measurementServer =
+            await ControlServer.I.getMeasurementServerFromApi(
+                this.settingsRequest!
             )
-            Logger.I.info(
-                ELoggerMessage.CPU_USAGE_MAX,
-                rounded(cpuInfo.load_max * 100)
-            )
-            Logger.I.info(
-                ELoggerMessage.CPU_USAGE_AVG,
-                rounded(cpuInfo.load_avg * 100)
-            )
-            cpuInfo = undefined
-        }
-        if (rmbtClient) {
-            rmbtClient.measurementStatus = EMeasurementStatus.END
-        }
     }
-}
 
-function setCPUInfo(cpuInfoList: number[], cpuInfoInterval?: NodeJS.Timer) {
-    if (!cpuInfoInterval) {
-        cpuInfo = undefined
-        return
+    private async registerMeasurement() {
+        this.registrationRequest = new MeasurementRegistrationRequest(
+            this.settings!.uuid,
+            this.measurementServer?.id,
+            this.settingsRequest
+        )
+        const measurementRegistration =
+            await ControlServer.I.registerMeasurement(this.registrationRequest)
+        this.rmbtClient = new RMBTClient(measurementRegistration)
     }
-    clearInterval(cpuInfoInterval)
-    cpuInfo = {
-        load_min: rounded(Math.min(...cpuInfoList) / 100),
-        load_max: rounded(Math.max(...cpuInfoList) / 100),
-        load_avg: rounded(
-            cpuInfoList.reduce((acc, stat) => acc + stat, 0) /
-                cpuInfoList.length /
-                100
-        ),
-        model: osu.cpu.model(),
-        cores: osu.cpu.count(),
-        speed: os.cpus()[0].speed,
-    }
-}
 
-export function getCPUUsage(): ICPU | undefined {
-    return cpuInfo
-}
-
-export function getBasicNetworkInfo(): IBasicNetworkInfo {
-    return {
-        ipAddress: rmbtClient?.params.client_remote_ip ?? "-",
-        serverName: rmbtClient?.params.test_server_name ?? "-",
-        providerName: rmbtClient?.params.provider ?? "-",
-    }
-}
-
-export function getCurrentPhaseState(): IMeasurementPhaseState {
-    const phase =
-        rmbtClient?.measurementStatus ?? EMeasurementStatus.NOT_STARTED
-    return {
-        duration: rmbtClient?.getPhaseDuration(phase) ?? -1,
-        progress: rmbtClient?.getPhaseProgress(phase) ?? -1,
-        ping: rmbtClient?.pingMedian ?? -1,
-        down: rmbtClient?.interimDownMbps ?? -1,
-        up: rmbtClient?.interimUpMbps ?? -1,
-        phase,
-        testUuid: rmbtClient?.params?.test_uuid ?? "",
-    }
-}
-
-export async function getMeasurementResult(testUuid: string) {
-    return await ControlServer.I.getMeasurementResult(testUuid)
+    private rounded = (num: number) => Math.round(num * 1000) / 1000
 }

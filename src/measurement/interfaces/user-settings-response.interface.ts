@@ -19,4 +19,8 @@ export interface IUserSettings {
             test_type: string
         }
     ]
+    privateIPv4?: string
+    privateIPv6?: string
+    publicIPv4?: string
+    publicIPv6?: string
 }

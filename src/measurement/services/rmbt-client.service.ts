@@ -290,6 +290,7 @@ export class RMBTClient {
         )
         Logger.I.info("The total upload speed is %dMbps", this.finalUpMbps)
         Logger.I.info("Measurement is finished")
+        this.measurementStatus = EMeasurementStatus.SUBMITTING_RESULTS
     }
 
     private cancelMeasurement(reject: (reason: any) => void, error: Error) {

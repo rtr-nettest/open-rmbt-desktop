@@ -10,6 +10,16 @@
             {{ t("test.title") }}
         </h1>
         <app-start-test-button></app-start-test-button>
+        <div
+            class="app-link-wrapper app-link-wrapper--metrics"
+            *ngIf="(env$ | async)?.FLAVOR === 'rtr'"
+        >
+            <app-home-metrics
+                *ngIf="ipInfo$ | async as ipInfo"
+                [list]="ipInfo"
+                title="Your IP address"
+            ></app-home-metrics>
+        </div>
         <div class="app-link-wrapper" *ngIf="(env$ | async)?.FLAVOR === 'ont'">
             <!-- TODO: take the href and the text from the CMS -->
             <a

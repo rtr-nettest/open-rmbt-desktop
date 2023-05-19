@@ -1,0 +1,10 @@
+<div class="app-wrapper" *transloco="let t">
+    <h4 *ngIf="title" class="app-title">{{ t(title) }}</h4>
+    <ul *ngIf="list" class="app-list">
+        <li
+            *ngFor="let item of list"
+            class="app-list-item"
+            [innerHtml]="item"
+        ></li>
+    </ul>
+</div>

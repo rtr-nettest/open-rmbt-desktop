@@ -23,6 +23,15 @@
 
 .app-link-wrapper {
     margin-top: rem(40);
+
+    &--metrics {
+        display: flex;
+        margin-top: rem(70);
+
+        & > * {
+            flex-basis: calc(50% - rem(35));
+        }
+    }
 }
 
 .app-link {

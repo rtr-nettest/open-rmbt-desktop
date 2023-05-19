@@ -54,7 +54,8 @@ import {
     // Decimation,
     Filler,
     // Title,
-} from "chart.js"
+} from "chart.js";
+import { HomeMetricsComponent } from './widgets/home-metrics/home-metrics.component'
 Chart.register(
     BarElement,
     BarController,
@@ -101,6 +102,7 @@ declare global {
         TestBoxesComponent,
         TestChartComponent,
         TestChartsComponent,
+        HomeMetricsComponent,
     ],
     imports: [
         BrowserModule,

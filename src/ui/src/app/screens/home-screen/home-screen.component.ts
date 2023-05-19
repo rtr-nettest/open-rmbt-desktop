@@ -1,6 +1,13 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from "@angular/core"
 import { MatSnackBar } from "@angular/material/snack-bar"
-import { Subject, distinctUntilChanged, switchMap, takeUntil, tap } from "rxjs"
+import {
+    Subject,
+    distinctUntilChanged,
+    map,
+    switchMap,
+    takeUntil,
+    tap,
+} from "rxjs"
 import { CMSService } from "src/app/services/cms.service"
 import { MainStore } from "src/app/store/main.store"
 
@@ -26,6 +33,23 @@ export class HomeScreenComponent implements OnDestroy {
             })
         )
         .subscribe()
+    ipInfo$ = this.mainStore.settings$.pipe(
+        map((settings) => {
+            if (settings?.ipInfo) {
+                const { publicV4, publicV6, privateV4, privateV6 } =
+                    settings?.ipInfo
+                return [
+                    `IPv4:&nbsp;${this.getIPIcon(publicV4, privateV4)}&nbsp;${
+                        publicV4 || "-"
+                    }`,
+                    `IPv6:&nbsp;${this.getIPIcon(publicV6, privateV6)}&nbsp;${
+                        publicV6 || "-"
+                    }`,
+                ]
+            }
+            return null
+        })
+    )
     testInviteImg$ = this.mainStore.env$.pipe(
         switchMap((env) =>
             this.cmsService.getAssetByName(
@@ -43,5 +67,17 @@ export class HomeScreenComponent implements OnDestroy {
     ngOnDestroy(): void {
         this.destroyed$.next()
         this.destroyed$.complete()
+    }
+
+    getIPIcon(publicAddress: string, privateAddress: string) {
+        if (!publicAddress) {
+            return '<i class="app-icon--class app-icon--class-red"></i>'
+        } else if (publicAddress !== privateAddress) {
+            return '<i class="app-icon--class app-icon--class-yellow"></i>'
+        } else if (publicAddress === privateAddress) {
+            return '<i class="app-icon--class app-icon--class-green"></i>'
+        } else {
+            return '<i class="app-icon--class"></i>'
+        }
     }
 }

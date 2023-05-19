@@ -14,6 +14,7 @@ import { ELoggerMessage } from "./enums/logger-message.enum"
 import { IUserSettings } from "./interfaces/user-settings-response.interface"
 import { IMeasurementServerResponse } from "./interfaces/measurement-server-response.interface"
 import { config } from "dotenv"
+import { IPInfoService } from "./services/ip-info.service"
 
 config({
     path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
@@ -43,13 +44,17 @@ export class MeasurementRunner {
         Logger.init()
     }
 
-    async registerClient(options?: MeasurementOptions) {
+    async registerClient(options?: MeasurementOptions): Promise<IUserSettings> {
         try {
             this.settingsRequest = new UserSettingsRequest(options?.platform)
             this.settings = await ControlServer.I.getUserSettings(
                 this.settingsRequest
             )
-            return this.settings
+            const ipInfo = await IPInfoService.I.getIPInfo(
+                this.settings,
+                this.settingsRequest
+            )
+            return { ...this.settings, ipInfo }
         } catch (e) {
             throw new Error(
                 "The registration couldn't be completed. Please try again."

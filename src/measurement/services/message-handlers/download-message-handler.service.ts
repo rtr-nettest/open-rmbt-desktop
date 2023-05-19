@@ -12,7 +12,10 @@ import { ELoggerMessage } from "../../enums/logger-message.enum"
 export class DownloadMessageHandler implements IMessageHandler {
     static minDiffTime = 100000000
     private downloadStartTime = hrtime.bigint()
+    private downloadEndTime = hrtime.bigint()
     private downloadBytesRead = 0
+    private activityInterval?: NodeJS.Timer
+    private inactivityTimeout = 1000
     private result = new MeasurementThreadResultList(0)
     private nsec = 0
     private isFinishRequested = false
@@ -35,12 +38,23 @@ export class DownloadMessageHandler implements IMessageHandler {
             this.ctx.index
         )
         clearInterval(this.interimHandlerInterval)
+        clearInterval(this.activityInterval)
         this.ctx.threadResult!.down = this.result
         this.onFinish?.(this.ctx.threadResult!)
     }
 
     writeData(): void {
         this.downloadStartTime = hrtime.bigint()
+        this.downloadEndTime =
+            this.downloadStartTime +
+            BigInt(+this.ctx.params.test_duration * 1e9)
+        this.activityInterval = setInterval(() => {
+            Logger.I.info(ELoggerMessage.T_CHECKING_ACTIVITY, this.ctx.index)
+            if (hrtime.bigint() >= this.downloadEndTime) {
+                Logger.I.info(ELoggerMessage.T_TIMEOUT, this.ctx.index)
+                this.requestFinish()
+            }
+        }, this.inactivityTimeout)
         const msg = `${ESocketMessage.GETTIME} ${
             this.ctx.params.test_duration
         }${
@@ -87,6 +101,11 @@ export class DownloadMessageHandler implements IMessageHandler {
     }
 
     private requestFinish() {
+        clearInterval(this.activityInterval)
+        this.activityInterval = setInterval(
+            this.stopMessaging.bind(this),
+            this.inactivityTimeout
+        )
         this.isFinishRequested = true
         this.ctx.client.write(ESocketMessage.OK)
     }

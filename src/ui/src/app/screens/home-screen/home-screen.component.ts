@@ -8,6 +8,7 @@ import {
     takeUntil,
     tap,
 } from "rxjs"
+import { UNKNOWN } from "src/app/constants/misc"
 import { CMSService } from "src/app/services/cms.service"
 import { MainStore } from "src/app/store/main.store"
 
@@ -39,15 +40,20 @@ export class HomeScreenComponent implements OnDestroy {
                 const { publicV4, publicV6, privateV4, privateV6 } =
                     settings?.ipInfo
                 return [
-                    `IPv4:&nbsp;${this.getIPIcon(publicV4, privateV4)}&nbsp;${
-                        publicV4 || "-"
-                    }`,
-                    `IPv6:&nbsp;${this.getIPIcon(publicV6, privateV6)}&nbsp;${
-                        publicV6 || "-"
-                    }`,
+                    `IPv4:&nbsp;${this.getIPIcon(
+                        publicV4,
+                        privateV4
+                    )}&nbsp;${publicV4}`,
+                    `IPv6:&nbsp;${this.getIPIcon(
+                        publicV6,
+                        privateV6
+                    )}&nbsp;${publicV6}`,
                 ]
             }
-            return null
+            return [
+                `IPv4:&nbsp;${this.getIPIcon(UNKNOWN, UNKNOWN)}`,
+                `IPv6:&nbsp;${this.getIPIcon(UNKNOWN, UNKNOWN)}`,
+            ]
         })
     )
     testInviteImg$ = this.mainStore.env$.pipe(
@@ -70,14 +76,14 @@ export class HomeScreenComponent implements OnDestroy {
     }
 
     getIPIcon(publicAddress: string, privateAddress: string) {
-        if (!publicAddress) {
+        if (publicAddress === UNKNOWN) {
+            return '<i class="app-icon--class app-icon--class-gray"></i>'
+        } else if (!publicAddress) {
             return '<i class="app-icon--class app-icon--class-red"></i>'
         } else if (publicAddress !== privateAddress) {
             return '<i class="app-icon--class app-icon--class-yellow"></i>'
-        } else if (publicAddress === privateAddress) {
-            return '<i class="app-icon--class app-icon--class-green"></i>'
         } else {
-            return '<i class="app-icon--class"></i>'
+            return '<i class="app-icon--class app-icon--class-green"></i>'
         }
     }
 }

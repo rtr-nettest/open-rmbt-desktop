@@ -15,8 +15,7 @@
             *ngIf="(env$ | async)?.FLAVOR === 'rtr'"
         >
             <app-home-metrics
-                *ngIf="ipInfo$ | async as ipInfo"
-                [list]="ipInfo"
+                [list]="ipInfo$ | async"
                 title="Your IP address"
             ></app-home-metrics>
         </div>

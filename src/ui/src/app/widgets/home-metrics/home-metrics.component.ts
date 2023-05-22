@@ -7,5 +7,5 @@ import { Component, Input } from "@angular/core"
 })
 export class HomeMetricsComponent {
     @Input() title?: string
-    @Input() list?: string[]
+    @Input() list?: string[] | null
 }

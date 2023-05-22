@@ -16,11 +16,15 @@ const createWindow = () => {
         )
     }
 
+    const { screen } = require("electron")
+    const primaryDisplay = screen.getPrimaryDisplay()
+    const { width, height } = primaryDisplay.workAreaSize
+
     const win = new BrowserWindow({
-        width: 1200,
+        width: 1280,
         height: 800,
-        minWidth: 1024,
-        minHeight: 768,
+        minWidth: Math.min(1024, width),
+        minHeight: Math.min(768, height),
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             nodeIntegration: true,

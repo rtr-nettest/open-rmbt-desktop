@@ -18,7 +18,7 @@
         padding: rem(16) 0;
         margin-bottom: rem(16);
 
-        @include screen-small {
+        @include screen-xs {
             font-size: rem(12);
             margin-bottom: rem(14);
         }

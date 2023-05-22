@@ -52,7 +52,7 @@
         width: 100%;
     }
 
-    @include screen-small {
+    @include screen-xs {
         display: none;
     }
 }

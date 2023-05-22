@@ -16,7 +16,7 @@
         flex: 0 0 10%;
     }
 
-    @include screen-small {
+    @include screen-xs {
         padding: rem(32);
     }
 

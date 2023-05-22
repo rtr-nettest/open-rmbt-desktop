@@ -1,0 +1,14 @@
+@import "../../../assets/styles/core.scss";
+
+:host {
+    align-self: start;
+    flex: 0 0 30%;
+
+    @include screen-sm {
+        flex: 0 0 rem(48);
+    }
+}
+
+.app-list {
+    list-style: none;
+}

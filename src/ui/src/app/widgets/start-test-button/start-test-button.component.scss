@@ -9,7 +9,7 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.28);
     border: 1px solid #2f5f00;
     border-radius: 7px;
-    width: calc(100vw - 60px);
+    width: 100%;
 
     &[aria-disabled="false"]:hover {
         text-decoration: none;

@@ -54,8 +54,12 @@ import {
     // Decimation,
     Filler,
     // Title,
-} from "chart.js";
-import { HomeMetricsComponent } from './widgets/home-metrics/home-metrics.component'
+} from "chart.js"
+import { HomeMetricsComponent } from "./widgets/home-metrics/home-metrics.component"
+import { MainMenuItemComponent } from "./widgets/main-menu-item/main-menu-item.component";
+import { MainMenuComponent } from './widgets/main-menu/main-menu.component';
+import { BodyComponent } from './widgets/body/body.component';
+import { MainComponent } from './widgets/main/main.component'
 Chart.register(
     BarElement,
     BarController,
@@ -95,6 +99,7 @@ declare global {
         StartTestButtonComponent,
         GaugeComponent,
         InterimResultsComponent,
+        MainMenuItemComponent,
         DlComponent,
         SpacerComponent,
         TestHeaderComponent,
@@ -103,6 +108,9 @@ declare global {
         TestChartComponent,
         TestChartsComponent,
         HomeMetricsComponent,
+        MainMenuComponent,
+        BodyComponent,
+        MainComponent,
     ],
     imports: [
         BrowserModule,

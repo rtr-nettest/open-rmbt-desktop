@@ -1,0 +1,56 @@
+@import "../../../assets/styles/core.scss";
+
+.app-menu-item {
+    border-radius: 0;
+    font-size: rem(18);
+    height: rem(48);
+    justify-content: start;
+    width: 100%;
+}
+
+.app-icon {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 56%;
+    display: inline-block;
+    height: rem(48);
+    width: rem(48);
+
+    & + span {
+        @include screen-sm {
+            display: none;
+        }
+    }
+
+    &[data-icon="test"] {
+        background-image: url("/assets/images/test-icon.svg");
+    }
+
+    &[data-icon="test"] {
+        background-image: url("/assets/images/test-icon.svg");
+    }
+
+    &[data-icon="loop"] {
+        background-image: url("/assets/images/loop-icon.svg");
+    }
+
+    &[data-icon="map"] {
+        background-image: url("/assets/images/map-icon.svg");
+    }
+
+    &[data-icon="history"] {
+        background-image: url("/assets/images/history-icon.svg");
+    }
+
+    &[data-icon="statistics"] {
+        background-image: url("/assets/images/statistics-icon.svg");
+    }
+
+    &[data-icon="help"] {
+        background-image: url("/assets/images/help-icon.svg");
+    }
+
+    &[data-icon="certified"] {
+        background-image: url("/assets/images/certified-icon.svg");
+    }
+}

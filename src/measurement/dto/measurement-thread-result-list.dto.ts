@@ -13,7 +13,6 @@ export class MeasurementThreadResultList
     constructor(private maxStoredResults: number) {}
 
     addResult(newBytes: number, newNsec: number) {
-        Logger.I.info(ELoggerMessage.NEW_BYTES, newBytes, newNsec)
         let nsecDiff = newNsec
         if (this.resultsCounter > 0) {
             const prevNsec = this.nsec[this.resultsCounter - 1]
@@ -24,6 +23,7 @@ export class MeasurementThreadResultList
             (nsecDiff >= DownloadMessageHandler.minDiffTime ||
                 this.resultsCounter === 0)
         ) {
+            Logger.I.info(ELoggerMessage.NEW_BYTES, newBytes, newNsec)
             this.bytes[this.resultsCounter] = newBytes
             this.nsec[this.resultsCounter] = newNsec
             this.resultsCounter += 1

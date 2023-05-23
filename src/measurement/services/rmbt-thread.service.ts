@@ -160,16 +160,6 @@ export class RMBTThread implements IMessageHandlerContext {
             Logger.I.info(ELoggerMessage.T_CLOSED_CONNECTION, this.index)
         }
         this.isConnected = false
-
-        switch (this.phase) {
-            case "preupload":
-                this.preUploadMessageHandler?.stopMessaging()
-                break
-            case "upload":
-                this.uploadMessageHandler?.stopMessaging()
-                break
-        }
-
         this.client.removeAllListeners()
         this.client.destroy()
     }

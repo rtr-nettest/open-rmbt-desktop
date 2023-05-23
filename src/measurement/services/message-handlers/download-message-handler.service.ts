@@ -20,6 +20,7 @@ export class DownloadMessageHandler implements IMessageHandler {
     private nsec = 0
     private isFinishRequested = false
     private interimHandlerInterval?: NodeJS.Timer
+    private interimHandlerTimeout = 200
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -67,7 +68,7 @@ export class DownloadMessageHandler implements IMessageHandler {
         this.interimHandlerInterval = setInterval(() => {
             if (this.ctx.threadResult)
                 this.ctx.interimHandler?.(this.ctx.threadResult!)
-        }, 100)
+        }, this.interimHandlerTimeout)
     }
 
     readData(data: Buffer): void {

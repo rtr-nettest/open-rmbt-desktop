@@ -10,7 +10,7 @@ import { Logger } from "../logger.service"
 import { ELoggerMessage } from "../../enums/logger-message.enum"
 
 export class DownloadMessageHandler implements IMessageHandler {
-    static minDiffTime = 100000000
+    static minDiffTime = 20000000
     private downloadStartTime = hrtime.bigint()
     private downloadEndTime = hrtime.bigint()
     private downloadBytesRead = 0

@@ -7,6 +7,7 @@ import {
 } from "../../interfaces/message-handler.interface"
 import { Logger } from "../logger.service"
 import { Time } from "../time.service"
+import { ELoggerMessage } from "../../enums/logger-message.enum"
 
 export class PingMessageHandler implements IMessageHandler {
     private serverPings: number[] = []
@@ -44,10 +45,9 @@ export class PingMessageHandler implements IMessageHandler {
                 end: 0n,
             })
             Logger.I.info(
-                `Thread ${this.ctx.index} sent ${ESocketMessage.PING.replace(
-                    "\n",
-                    ""
-                )} #${this.pingCounter + 1}`
+                ELoggerMessage.T_SENDING_MESSAGE,
+                this.ctx.index,
+                ESocketMessage.PING.replace("\n", " #" + (this.pingCounter + 1))
             )
             this.pingCounter += 1
         })
@@ -55,9 +55,7 @@ export class PingMessageHandler implements IMessageHandler {
 
     readData(data: Buffer) {
         if (data.includes(ESocketMessage.ERR)) {
-            Logger.I.info(
-                `Thread ${this.ctx.index} received an error. Terminating.`
-            )
+            Logger.I.info(ELoggerMessage.T_PING_ERROR, this.ctx.index)
             this.pingTimes[this.pingCounter - 1].end = hrtime.bigint()
             const pingClient = this.getClientPing()
             this.serverPings.push(pingClient)
@@ -70,9 +68,7 @@ export class PingMessageHandler implements IMessageHandler {
             return
         }
         if (data.includes(ESocketMessage.PONG)) {
-            Logger.I.info(
-                `Thread ${this.ctx.index} received a PONG. Continuing.`
-            )
+            Logger.I.info(ELoggerMessage.T_PING_PONG, this.ctx.index)
             this.ctx.client.write(ESocketMessage.OK, () => {
                 this.pingTimes[this.pingCounter - 1].end = hrtime.bigint()
             })

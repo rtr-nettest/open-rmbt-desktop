@@ -7,6 +7,7 @@ import {
 import { Logger } from "../logger.service"
 import { RMBTClient } from "../rmbt-client.service"
 import { Time } from "../time.service"
+import { ELoggerMessage } from "../../enums/logger-message.enum"
 
 export class PreUploadMessageHandler implements IMessageHandler {
     private chunkSize: number = RMBTClient.minChunkSize
@@ -29,7 +30,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
     }
 
     writeData(): void {
-        Logger.I.info(`Thread ${this.ctx.index} starts sending chunks.`)
+        Logger.I.info(ELoggerMessage.T_SENDING_CHUNKS, this.ctx.index)
         this.ctx.preUploadChunks = 0
         this.preUploadEndTime = Time.nowNs() + 2 * 1e9
         this.putNoResult()
@@ -67,9 +68,10 @@ export class PreUploadMessageHandler implements IMessageHandler {
                 : this.ctx.preUploadChunks * 2
         this.minChunkSize = this.ctx.preUploadChunks * this.chunkSize
         Logger.I.info(
-            `Thread ${this.ctx.index} is writing ${
-                ESocketMessage.PUTNORESULT
-            } ${this.chunkSize * this.ctx.preUploadChunks}.`
+            ELoggerMessage.T_WRITING_PUTNORESULT,
+            this.ctx.index,
+            ESocketMessage.PUTNORESULT,
+            this.chunkSize * this.ctx.preUploadChunks
         )
         this.ctx.client.write(
             `${ESocketMessage.PUTNORESULT} ${
@@ -86,7 +88,10 @@ export class PreUploadMessageHandler implements IMessageHandler {
         this.ctx.preUploadChunks = 1
         this.maxChunksCount = 1
         Logger.I.info(
-            `Thread ${this.ctx.index} is writing ${ESocketMessage.PUTNORESULT} ${this.chunkSize}.`
+            ELoggerMessage.T_WRITING_PUTNORESULT,
+            this.ctx.index,
+            ESocketMessage.PUTNORESULT,
+            this.chunkSize
         )
         this.ctx.client.write(
             `${ESocketMessage.PUTNORESULT} ${this.chunkSize}\n`
@@ -95,7 +100,9 @@ export class PreUploadMessageHandler implements IMessageHandler {
 
     private putChunks() {
         Logger.I.info(
-            `Thread ${this.ctx.index} is putting ${this.ctx.preUploadChunks} chunks.`
+            ELoggerMessage.T_WRITING_CHUNKS,
+            this.ctx.index,
+            this.ctx.preUploadChunks
         )
         let bufferIndex = 0
         const buffers = this.buffersMap[this.chunkSize]
@@ -113,6 +120,6 @@ export class PreUploadMessageHandler implements IMessageHandler {
             }
             this.ctx.client.write(buffer)
         }
-        Logger.I.info(`Thread ${this.ctx.index} has finished putting chunks.`)
+        Logger.I.info(ELoggerMessage.T_FINISHED_SENDING_CHUNKS, this.ctx.index)
     }
 }

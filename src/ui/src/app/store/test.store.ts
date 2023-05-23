@@ -16,6 +16,7 @@ import { BasicNetworkInfo } from "../dto/basic-network-info.dto"
 import { ISimpleHistoryResult } from "../../../../measurement/interfaces/simple-history-result.interface"
 import { TestPhaseState } from "../dto/test-phase-state.dto"
 import { EMeasurementStatus } from "../../../../measurement/enums/measurement-status.enum"
+import { Router } from "@angular/router"
 
 const STATE_UPDATE_TIMEOUT = 200
 
@@ -34,7 +35,7 @@ export class TestStore {
     )
     error$ = new BehaviorSubject<Error | null>(null)
 
-    constructor() {}
+    constructor(private router: Router) {}
 
     launchTest() {
         this.resetState()
@@ -90,6 +91,14 @@ export class TestStore {
                     serverName: result.measurementServerName,
                     ipAddress: result.ipAddress,
                     providerName: result.providerName,
+                })
+                window.electronAPI.getEnv().then((env) => {
+                    if (env.ENABLE_LOOP_MODE === "true" && !this.error$.value) {
+                        setTimeout(
+                            () => this.router.navigateByUrl("/test"),
+                            1000
+                        )
+                    }
                 })
                 return result
             })

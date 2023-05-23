@@ -1,7 +1,5 @@
-import {
-    IMeasurementThreadResultList,
-    ISpeedItem,
-} from "../interfaces/measurement-result.interface"
+import { ELoggerMessage } from "../enums/logger-message.enum"
+import { IMeasurementThreadResultList } from "../interfaces/measurement-result.interface"
 import { Logger } from "../services/logger.service"
 import { DownloadMessageHandler } from "../services/message-handlers/download-message-handler.service"
 
@@ -15,7 +13,7 @@ export class MeasurementThreadResultList
     constructor(private maxStoredResults: number) {}
 
     addResult(newBytes: number, newNsec: number) {
-        Logger.I.info("New bytes: %d. New nsec: %d.", newBytes, newNsec)
+        Logger.I.info(ELoggerMessage.NEW_BYTES, newBytes, newNsec)
         let nsecDiff = newNsec
         if (this.resultsCounter > 0) {
             const prevNsec = this.nsec[this.resultsCounter - 1]

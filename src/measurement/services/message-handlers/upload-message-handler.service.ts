@@ -9,6 +9,7 @@ import { DownloadMessageHandler } from "./download-message-handler.service"
 import { Logger } from "../logger.service"
 import { Time } from "../time.service"
 import { randomBytes } from "crypto"
+import { ELoggerMessage } from "../../enums/logger-message.enum"
 
 export class UploadMessageHandler implements IMessageHandler {
     static waitForAllChunksTimeMs = 3000
@@ -20,6 +21,7 @@ export class UploadMessageHandler implements IMessageHandler {
     private finalTimeout?: NodeJS.Timeout
     private buffers: Buffer[] = []
     private bytesWritten = 0
+    private interimHandlerInterval?: NodeJS.Timer
 
     constructor(
         private ctx: IMessageHandlerContext,
@@ -37,8 +39,13 @@ export class UploadMessageHandler implements IMessageHandler {
     }
 
     stopMessaging(): void {
+        Logger.I.info(
+            ELoggerMessage.T_PHASE_FINISHED,
+            this.ctx.phase,
+            this.ctx.index
+        )
+        clearInterval(this.interimHandlerInterval)
         clearInterval(this.activityInterval)
-        Logger.I.info(`Upload is finished for thread ${this.ctx.index}`)
         this.ctx.threadResult!.up = this.result
         this.onFinish?.(this.ctx.threadResult!)
     }
@@ -50,9 +57,13 @@ export class UploadMessageHandler implements IMessageHandler {
                 ? "\n"
                 : ` ${this.ctx.chunkSize}\n`
         }`
-        Logger.I.info(`Thread ${this.ctx.index} is sending "${msg}"`)
+        Logger.I.info(ELoggerMessage.T_SENDING_MESSAGE, this.ctx.index, msg)
         this.ctx.client.write(msg)
         this.ctx.client.on("drain", this.putChunks.bind(this))
+        this.interimHandlerInterval = setInterval(() => {
+            if (this.ctx.threadResult)
+                this.ctx.interimHandler?.(this.ctx.threadResult!)
+        }, 100)
     }
 
     readData(data: Buffer): void {
@@ -72,13 +83,7 @@ export class UploadMessageHandler implements IMessageHandler {
                     this.ctx.threadResult!.up = this.result
                     this.ctx.threadResult!.currentTime.up = nanos
                     this.ctx.threadResult!.currentTransfer.up = bytes
-                    this.ctx.interimHandler?.(this.ctx.threadResult!)
-                }
-                if (
-                    nanos >=
-                    this.uploadEndTimeNs -
-                        UploadMessageHandler.clientTimeOffsetNs
-                ) {
+                } else {
                     this.stopMessaging()
                 }
             }
@@ -129,9 +134,9 @@ export class UploadMessageHandler implements IMessageHandler {
         const uploadDuration = Number(this.ctx.params.test_duration) * 1e9
         this.uploadEndTimeNs = Time.nowNs() + uploadDuration
         this.activityInterval = setInterval(() => {
-            Logger.I.info(`Checking activity on thread ${this.ctx.index}...`)
+            Logger.I.info(ELoggerMessage.T_CHECKING_ACTIVITY, this.ctx.index)
             if (Time.nowNs() > this.uploadEndTimeNs) {
-                Logger.I.info(`Thread ${this.ctx.index} upload timed out.`)
+                Logger.I.info(ELoggerMessage.T_TIMEOUT, this.ctx.index)
                 this.stopMessaging()
             }
         }, this.inactivityTimeoutMs)

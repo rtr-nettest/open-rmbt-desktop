@@ -58,6 +58,6 @@ export class Logger {
     }
 
     private static get formattedTime() {
-        return new Date(Date.now()).toISOString()
+        return new Date(Date.now()).toISOString().replaceAll(":", "")
     }
 }

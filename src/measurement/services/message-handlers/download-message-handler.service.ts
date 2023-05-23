@@ -90,6 +90,14 @@ export class DownloadMessageHandler implements IMessageHandler {
             isFullChunk = this.downloadBytesRead % this.ctx.chunkSize === 0
         }
         if (isFullChunk && (lastByte === 0x00 || lastByte === 0xff)) {
+            if (
+                lastByte === 0xff &&
+                data.byteLength < this.ctx.chunkSize &&
+                data.byteLength < this.ctx.client.readableHighWaterMark
+            ) {
+                this.downloadBytesRead +=
+                    this.ctx.client.readableHighWaterMark - data.byteLength
+            }
             this.nsec = Number(hrtime.bigint() - this.downloadStartTime)
             this.result.addResult(this.downloadBytesRead, this.nsec)
             this.ctx.threadResult!.down = this.result

@@ -2,29 +2,29 @@
 
 h1,
 %h1 {
-    font-size: rem($font-size-xxl);
+    font-size: rem($font-size-3xl);
     font-weight: 300;
 }
 
 h2,
 %h2 {
-    font-size: rem($font-size-xl);
+    font-size: rem($font-size-xxl);
     font-weight: 300;
 }
 
 h3,
 %h3 {
-    font-size: rem($font-size-l);
+    font-size: rem($font-size-xl);
 }
 
 h4,
 %h4 {
-    font-size: rem($font-size-m);
+    font-size: rem($font-size-l);
 }
 
 h5,
 %h5 {
-    font-size: rem($font-size-xs);
+    font-size: rem($font-size-m);
 }
 
 h6,

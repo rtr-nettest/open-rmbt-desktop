@@ -56,10 +56,10 @@ import {
     // Title,
 } from "chart.js"
 import { HomeMetricsComponent } from "./widgets/home-metrics/home-metrics.component"
-import { MainMenuItemComponent } from "./widgets/main-menu-item/main-menu-item.component";
-import { MainMenuComponent } from './widgets/main-menu/main-menu.component';
-import { BodyComponent } from './widgets/body/body.component';
-import { MainComponent } from './widgets/main/main.component'
+import { MainContentComponent } from "./widgets/main-content/main-content.component"
+import { MainMenuComponent } from "./widgets/main-menu/main-menu.component"
+import { MainMenuItemComponent } from "./widgets/main-menu-item/main-menu-item.component"
+import { BodyComponent } from "./widgets/body/body.component"
 Chart.register(
     BarElement,
     BarController,
@@ -91,36 +91,36 @@ declare global {
 @NgModule({
     declarations: [
         AppComponent,
-        HomeScreenComponent,
-        TestScreenComponent,
-        ResultScreenComponent,
-        HeaderComponent,
-        FooterComponent,
-        StartTestButtonComponent,
-        GaugeComponent,
-        InterimResultsComponent,
-        MainMenuItemComponent,
+        BodyComponent,
         DlComponent,
+        FooterComponent,
+        GaugeComponent,
+        HeaderComponent,
+        HomeMetricsComponent,
+        HomeScreenComponent,
+        InterimResultsComponent,
+        MainContentComponent,
+        MainMenuComponent,
+        MainMenuItemComponent,
+        ResultScreenComponent,
         SpacerComponent,
-        TestHeaderComponent,
-        TestIndicatorComponent,
+        StartTestButtonComponent,
         TestBoxesComponent,
         TestChartComponent,
         TestChartsComponent,
-        HomeMetricsComponent,
-        MainMenuComponent,
-        BodyComponent,
-        MainComponent,
+        TestHeaderComponent,
+        TestIndicatorComponent,
+        TestScreenComponent,
     ],
     imports: [
-        BrowserModule,
-        BrowserAnimationsModule,
         AppRoutingModule,
-        MatIconModule,
-        MatButtonModule,
-        MatTooltipModule,
-        MatSnackBarModule,
+        BrowserAnimationsModule,
+        BrowserModule,
         HttpClientModule,
+        MatButtonModule,
+        MatIconModule,
+        MatSnackBarModule,
+        MatTooltipModule,
         TranslocoRootModule,
     ],
     providers: [],

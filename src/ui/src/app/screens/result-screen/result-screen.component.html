@@ -16,7 +16,7 @@
 <ng-template #rtr>
     <app-body>
         <app-main-menu></app-main-menu>
-        <app-main *ngIf="result$ | async as result; else noResult">
+        <app-main-content *ngIf="result$ | async as result; else noResult">
             <div class="app-main">
                 <header class="app-title">
                     Measurement result from {{ result.measurementDate | date }}
@@ -69,7 +69,7 @@
                     <a routerLink="/test" class="app-btn">Start a new test</a>
                 </footer>
             </div>
-        </app-main>
+        </app-main-content>
     </app-body>
     <app-footer></app-footer>
 </ng-template>

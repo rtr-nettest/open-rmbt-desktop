@@ -6,24 +6,25 @@ $color-pale: #545454;
     border: 1px solid $color-pale;
     border-radius: 7px;
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.28);
-    padding: rem(36) rem(28);
+    padding: rem(41) rem(31);
 }
 
 .app-title {
     color: $color-pale;
-    font-size: rem(13);
-    line-height: rem(18);
-    margin-bottom: rem(18);
+    font-size: rem($font-size-m);
+    margin-bottom: rem($font-size-m * 1.25);
 }
 
 .app-list {
     list-style: none;
-    &-item:not(:last-of-type) {
+    &-item {
         align-items: center;
         color: #222222;
         display: flex;
-        font-size: rem(13);
-        line-height: rem(18);
-        margin-bottom: rem(18);
+        font-size: rem($font-size-m);
+        line-height: rem($font-size-m * 1.25);
+    }
+    &-item:not(:last-of-type) {
+        margin-bottom: rem($font-size-m * 0.625);
     }
 }

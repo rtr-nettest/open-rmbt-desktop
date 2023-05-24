@@ -58,15 +58,14 @@
     }
 
     p {
-        font-size: rem(16);
+        font-size: rem($font-size-l);
         font-weight: 400;
-        margin: 20px 0;
+        margin: rem($font-size-l * 1.11) 0;
     }
 
     h3 {
-        font-size: rem(28);
+        font-size: rem($font-size-3xl);
         font-weight: 700;
-        letter-spacing: 0.06px;
     }
 }
 

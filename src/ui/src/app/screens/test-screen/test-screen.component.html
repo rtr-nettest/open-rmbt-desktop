@@ -14,13 +14,13 @@
 <ng-template #rtr>
     <app-body>
         <app-main-menu></app-main-menu>
-        <app-main *ngIf="visualization$ | async">
+        <app-main-content *ngIf="visualization$ | async">
             <div class="app-main">
                 <app-gauge></app-gauge>
                 <app-spacer></app-spacer>
                 <app-interim-results></app-interim-results>
             </div>
-        </app-main>
+        </app-main-content>
     </app-body>
     <app-footer></app-footer>
 </ng-template>

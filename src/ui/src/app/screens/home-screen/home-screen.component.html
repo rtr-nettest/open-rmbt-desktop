@@ -1,12 +1,7 @@
 <app-header></app-header>
 <app-body>
     <app-main-menu></app-main-menu>
-    <app-main
-        class="app-main {{
-            (env$ | async)?.FLAVOR === 'ont' ? 'app-main--ont' : ''
-        }}"
-        *transloco="let t"
-    >
+    <app-main-content *transloco="let t">
         <div style="width: 100%">
             <h1 class="app-title" *ngIf="(env$ | async)?.FLAVOR === 'ont'">
                 {{ t("test.title") }}
@@ -58,6 +53,6 @@
                 height="280"
             />
         </aside>
-    </app-main>
+    </app-main-content>
 </app-body>
 <app-footer></app-footer>

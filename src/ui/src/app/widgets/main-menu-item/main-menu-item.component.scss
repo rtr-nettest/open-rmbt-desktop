@@ -2,8 +2,8 @@
 
 .app-menu-item {
     border-radius: 0;
-    font-size: rem(18);
-    height: rem(48);
+    font-size: rem($font-size-xxl);
+    height: rem($font-size-xxl * 2.5);
     justify-content: start;
     width: 100%;
 }
@@ -13,8 +13,8 @@
     background-position: center;
     background-size: 56%;
     display: inline-block;
-    height: rem(48);
-    width: rem(48);
+    height: rem($font-size-xxl * 2.5);
+    width: rem($font-size-xxl * 2.5);
 
     & + span {
         @include screen-sm {

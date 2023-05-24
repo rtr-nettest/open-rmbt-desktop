@@ -65,15 +65,6 @@ export class DownloadMessageHandler implements IMessageHandler {
         }`
         Logger.I.info(ELoggerMessage.T_SENDING_MESSAGE, this.ctx.index, msg)
         this.ctx.client.write(msg)
-        this.interimHandlerInterval = setInterval(() => {
-            if (this.ctx.threadResult) {
-                this.ctx.threadResult!.down = this.result
-                this.ctx.threadResult!.currentTime.down = this.nsec
-                this.ctx.threadResult!.currentTransfer.down =
-                    this.downloadBytesRead
-                this.ctx.interimHandler?.(this.ctx.threadResult!)
-            }
-        }, this.interimHandlerTimeout)
     }
 
     readData(data: Buffer): void {
@@ -99,6 +90,19 @@ export class DownloadMessageHandler implements IMessageHandler {
             this.nsec = this.nsecStart - this.downloadStartTime
             this.nsecStart = Infinity
             this.result.addResult(this.downloadBytesRead, this.nsec)
+            if (!this.interimHandlerInterval) {
+                this.interimHandlerInterval = setInterval(() => {
+                    if (this.ctx.threadResult) {
+                        const lastIndex = this.result.nsec.length - 1
+                        this.ctx.threadResult!.down = this.result
+                        this.ctx.threadResult!.currentTime.down =
+                            this.result.nsec[lastIndex]
+                        this.ctx.threadResult!.currentTransfer.down =
+                            this.result.bytes[lastIndex]
+                        this.ctx.interimHandler?.(this.ctx.threadResult!)
+                    }
+                }, this.interimHandlerTimeout)
+            }
         }
         if (isFullChunk && lastByte === 0xff) {
             this.requestFinish()

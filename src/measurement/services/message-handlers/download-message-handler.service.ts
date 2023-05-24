@@ -1,4 +1,3 @@
-import { hrtime } from "process"
 import { MeasurementThreadResultList } from "../../dto/measurement-thread-result-list.dto"
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import { IMeasurementThreadResult } from "../../interfaces/measurement-result.interface"
@@ -52,7 +51,7 @@ export class DownloadMessageHandler implements IMessageHandler {
             this.downloadStartTime + Number(this.ctx.params.test_duration) * 1e9
         this.activityInterval = setInterval(() => {
             Logger.I.info(ELoggerMessage.T_CHECKING_ACTIVITY, this.ctx.index)
-            if (hrtime.bigint() >= this.downloadEndTime) {
+            if (Time.nowNs() >= this.downloadEndTime) {
                 Logger.I.info(ELoggerMessage.T_TIMEOUT, this.ctx.index)
                 this.requestFinish()
             }

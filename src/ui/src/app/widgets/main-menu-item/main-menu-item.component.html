@@ -12,6 +12,7 @@
 <ng-template #default let-item>
     <a
         mat-button
+        color="primary"
         class="app-menu-item {{ item.className }}"
         [routerLink]="item.route"
         routerLinkActive="app-menu-item--active"
@@ -27,6 +28,7 @@
 <ng-template #external let-item>
     <a
         mat-button
+        color="primary"
         class="app-menu-item {{ item.className }}"
         [href]="item.url"
         role="menuitem"
@@ -41,6 +43,7 @@
 <ng-template #noRoute let-item>
     <a
         mat-button
+        color="primary"
         href="javascript:;"
         class="app-menu-item {{ item.className }}"
         (click)="menuClick.emit($event)"

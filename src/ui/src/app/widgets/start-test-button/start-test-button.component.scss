@@ -7,7 +7,7 @@
     padding: 40px 60px;
     transition: transform 0.15s ease-out;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.28);
-    border: 1px solid #2f5f00;
+    border: 1px solid $color-primary;
     border-radius: 7px;
     width: 100%;
 
@@ -16,13 +16,13 @@
         transform: translateY(0.4rem) scale(0.98);
     }
     &.uk-card-primary {
-        background-color: #2f5f00;
+        background-color: $color-primary;
         color: white;
         .uk-icon {
             align-items: center;
-            background: #2f5f00;
+            background: $color-primary;
             border-radius: 500px;
-            border: 1px solid #2f5f00;
+            border: 1px solid $color-primary;
             bottom: 15px;
             color: white;
             display: inline-flex;
@@ -39,7 +39,7 @@
             }
         }
 
-        $disabled-color: mix(#2f5f00, white, 33%);
+        $disabled-color: mix($color-primary, white, 50%);
 
         &[aria-disabled="true"] {
             background-color: $disabled-color;

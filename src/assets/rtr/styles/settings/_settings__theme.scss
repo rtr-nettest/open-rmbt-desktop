@@ -1,7 +1,3 @@
-$base-font-family: "Open Sans", sans-serif;
-$base-font-size: 14;
-$base-line-height: 1.4;
-
 $font-size-3xl: 30;
 $font-size-xxl: 24;
 $font-size-xl: 20;
@@ -15,6 +11,26 @@ $screen-sm: 1024px;
 $screen-md: 1280px;
 $screen-lg: 1920px;
 $screen-xl: 2560px;
+
+$base-font-family: "Open Sans", sans-serif;
+$base-font-size: $font-size-m;
+$base-line-height: 1.4;
+
+html {
+    --base-font-size: #{$font-size-sm}px;
+
+    @media screen and (min-width: $screen-md) {
+        --base-font-size: #{$font-size-m}px;
+    }
+
+    @media screen and (min-width: $screen-lg) {
+        --base-font-size: #{$font-size-l}px;
+    }
+
+    @media screen and (min-width: $screen-xl) {
+        --base-font-size: #{$font-size-xl}px;
+    }
+}
 
 $color-primary: #2f5f00;
 $color-secondary: black;

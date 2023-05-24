@@ -11,10 +11,11 @@ import { MessageService } from "src/app/services/message.service"
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent {
+    private noGo = "javascript:;"
     link$ = this.activeRoute.url.pipe(
         map((segments) => {
             if (segments.join("/") === ERoutes.TEST) {
-                return null
+                return this.noGo
             }
             return "/"
         })
@@ -25,9 +26,8 @@ export class HeaderComponent {
         private message: MessageService
     ) {}
 
-    handleClick(event: MouseEvent) {
-        const link = event.target as HTMLAnchorElement
-        if (!link.href) {
+    handleClick(event: MouseEvent, link: string) {
+        if (link === this.noGo) {
             event.stopPropagation()
             event.preventDefault()
             this.message.openSnackbar(

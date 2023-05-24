@@ -26,3 +26,10 @@ $app-theme: mat.define-light-theme(
     height: auto;
     padding: 16px 24px;
 }
+
+.app-snackbar {
+    --mat-mdc-snack-bar-button-color: black;
+    --mdc-snackbar-container-color: white;
+    --mdc-snackbar-supporting-text-color: black;
+    text-align: center;
+}

@@ -3,6 +3,7 @@ import { ActivatedRoute } from "@angular/router"
 import { map, withLatestFrom } from "rxjs"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 import { CMSService } from "src/app/services/cms.service"
+import { MessageService } from "src/app/services/message.service"
 
 @Component({
     selector: "app-main-menu",
@@ -30,18 +31,19 @@ export class MainMenuComponent {
     )
 
     constructor(
+        private activeRoute: ActivatedRoute,
         private cmsService: CMSService,
-        private activeRoute: ActivatedRoute
+        private message: MessageService
     ) {}
 
     handleClick(event: MouseEvent, item: IMainMenuItem) {
         if (!item.route) {
-            console.log("DISABLED")
             event.stopPropagation()
-            event.preventDefault
-            return false
+            event.preventDefault()
+            this.message.openSnackbar(
+                "Navigation is impossible from this screen"
+            )
         }
-        return true
     }
 
     trackBy(index: number, item: any) {

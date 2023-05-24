@@ -1,6 +1,10 @@
 <header class="app-header app-header--large">
-    <a routerLink="/"><img src="/assets/images/logo-header.svg" /></a>
+    <a [routerLink]="link$ | async" (click)="handleClick($event)"
+        ><img src="/assets/images/logo-header.svg"
+    /></a>
 </header>
 <header class="app-header app-header--small">
-    <a routerLink="/"><img src="/assets/images/logo-header-small.svg" /></a>
+    <a [routerLink]="link$ | async" (click)="handleClick($event)"
+        ><img src="/assets/images/logo-header-small.svg"
+    /></a>
 </header>

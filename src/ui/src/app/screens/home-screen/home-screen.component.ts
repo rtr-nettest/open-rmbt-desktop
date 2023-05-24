@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from "@angular/core"
-import { MatSnackBar } from "@angular/material/snack-bar"
 import {
     Subject,
     distinctUntilChanged,
@@ -10,6 +9,7 @@ import {
 } from "rxjs"
 import { UNKNOWN } from "src/app/constants/misc"
 import { CMSService } from "src/app/services/cms.service"
+import { MessageService } from "src/app/services/message.service"
 import { MainStore } from "src/app/store/main.store"
 
 @Component({
@@ -27,9 +27,7 @@ export class HomeScreenComponent implements OnDestroy {
             takeUntil(this.destroyed$),
             tap((error) => {
                 if (error) {
-                    this.snackbar.open(error.message, undefined, {
-                        duration: 3000,
-                    })
+                    this.message.openSnackbar(error.message)
                 }
             })
         )
@@ -67,7 +65,7 @@ export class HomeScreenComponent implements OnDestroy {
     constructor(
         private mainStore: MainStore,
         private cmsService: CMSService,
-        private snackbar: MatSnackBar
+        private message: MessageService
     ) {}
 
     ngOnDestroy(): void {

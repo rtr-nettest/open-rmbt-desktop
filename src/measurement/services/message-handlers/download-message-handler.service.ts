@@ -11,7 +11,7 @@ import { ELoggerMessage } from "../../enums/logger-message.enum"
 import { Time } from "../time.service"
 
 export class DownloadMessageHandler implements IMessageHandler {
-    static minDiffTime = 100000000
+    static minDiffTime = 20000000
     private downloadStartTime = Time.nowNs()
     private downloadEndTime = Time.nowNs()
     private downloadBytesRead = 0

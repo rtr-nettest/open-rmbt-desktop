@@ -68,7 +68,6 @@ export class DownloadMessageHandler implements IMessageHandler {
         this.ctx.client.write(msg)
         this.interimHandlerInterval = setInterval(() => {
             if (this.ctx.threadResult) {
-                this.result.addResult(this.downloadBytesRead, this.nsec)
                 this.ctx.threadResult!.down = this.result
                 this.ctx.threadResult!.currentTime.down = this.nsec
                 this.ctx.threadResult!.currentTransfer.down =
@@ -100,6 +99,7 @@ export class DownloadMessageHandler implements IMessageHandler {
         if (isFullChunk && (lastByte === 0x00 || lastByte === 0xff)) {
             this.nsec = this.nsecStart - this.downloadStartTime
             this.nsecStart = Infinity
+            this.result.addResult(this.downloadBytesRead, this.nsec)
         }
         if (isFullChunk && lastByte === 0xff) {
             this.requestFinish()

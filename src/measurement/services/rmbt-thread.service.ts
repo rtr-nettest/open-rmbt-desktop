@@ -137,14 +137,15 @@ export class RMBTThread implements IMessageHandlerContext {
     }
 
     private errorListener = (err: Error) => {
-        if (
-            err.message.includes("ECONNRESET") &&
-            (this.phase === "preupload" ||
-                (this.phase === "upload" && this.threadResult?.up.bytes.length))
-        ) {
-            return
-        }
         Logger.I.error(ELoggerMessage.T_REPORTED_ERROR, this.index, err.message)
+        // TODO: enable before going to prod
+        // if (
+        //     err.message.includes("ECONNRESET") &&
+        //     (this.phase === "preupload" ||
+        //         (this.phase === "upload" && this.threadResult?.up.bytes.length))
+        // ) {
+        //     return
+        // }
         this.errorHandler?.(err)
     }
 

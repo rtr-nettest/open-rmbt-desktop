@@ -137,6 +137,13 @@ export class RMBTThread implements IMessageHandlerContext {
     }
 
     private errorListener = (err: Error) => {
+        if (
+            err.message.includes("ECONNRESET") &&
+            (this.phase === "preupload" ||
+                (this.phase === "upload" && this.threadResult?.up.bytes.length))
+        ) {
+            return
+        }
         Logger.I.error(ELoggerMessage.T_REPORTED_ERROR, this.index, err.message)
         this.errorHandler?.(err)
     }
@@ -160,16 +167,6 @@ export class RMBTThread implements IMessageHandlerContext {
             Logger.I.info(ELoggerMessage.T_CLOSED_CONNECTION, this.index)
         }
         this.isConnected = false
-
-        switch (this.phase) {
-            case "preupload":
-                this.preUploadMessageHandler?.stopMessaging()
-                break
-            case "upload":
-                this.uploadMessageHandler?.stopMessaging()
-                break
-        }
-
         this.client.removeAllListeners()
         this.client.destroy()
     }
@@ -193,7 +190,7 @@ export class RMBTThread implements IMessageHandlerContext {
                     this.index,
                     this.phase
                 )
-                this.phase = undefined
+
                 this.dropHandlers()
                 if (result) {
                     resolve(result)
@@ -218,7 +215,6 @@ export class RMBTThread implements IMessageHandlerContext {
                         this.phase
                     )
                     this.dropHandlers()
-                    this.phase = undefined
                     resolve({
                         chunkSize: this.chunkSize,
                         bytesPerSec: Math.max(...this.bytesPerSecPretest),
@@ -240,7 +236,6 @@ export class RMBTThread implements IMessageHandlerContext {
                     this.phase
                 )
                 this.dropHandlers()
-                this.phase = undefined
                 resolve(result)
             })
             this.pingMessageHandler.writeData()
@@ -265,7 +260,6 @@ export class RMBTThread implements IMessageHandlerContext {
                 this,
                 (result) => {
                     this.dropHandlers()
-                    this.phase = undefined
                     this.interimHandler = undefined
                     this.disconnect().then(() => {
                         Logger.I.info(
@@ -294,7 +288,6 @@ export class RMBTThread implements IMessageHandlerContext {
                         this.phase
                     )
                     this.dropHandlers()
-                    this.phase = undefined
                     resolve(chunkSize)
                 }
             )
@@ -318,7 +311,6 @@ export class RMBTThread implements IMessageHandlerContext {
                 this,
                 (result) => {
                     this.dropHandlers()
-                    this.phase = undefined
                     this.interimHandler = undefined
                     this.disconnect().then(() => {
                         Logger.I.info(

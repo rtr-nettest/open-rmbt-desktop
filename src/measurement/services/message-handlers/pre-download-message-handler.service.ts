@@ -8,16 +8,21 @@ import { Logger } from "../logger.service"
 import { Time } from "../time.service"
 
 export class PreDownloadMessageHandler implements IMessageHandler {
+    private messagesPer10Gb = 5 * 1e6
     private preDownloadEndTime = Time.nowNs()
     private preDownloadDuration = 2000000000
     private preDownloadBytesRead = -1
-    private inactivityTimeout = 1000
     private isChunkPortionFinished = false
+    private chunkMessages: Map<number, string> = new Map()
 
     constructor(
         private ctx: IMessageHandlerContext,
         public onFinish: () => void
-    ) {}
+    ) {
+        for (let i = 1; i <= this.messagesPer10Gb; i *= 2) {
+            this.chunkMessages.set(i, `${ESocketMessage.GETCHUNKS} ${i}\n`)
+        }
+    }
 
     stopMessaging(): void {
         Logger.I.info(
@@ -68,7 +73,7 @@ export class PreDownloadMessageHandler implements IMessageHandler {
     private getChunks() {
         Logger.I.info(ELoggerMessage.T_GETTING_CHUNKS, this.ctx.index)
         this.ctx.client.write(
-            `${ESocketMessage.GETCHUNKS} ${this.ctx.preDownloadChunks}\n`
+            this.chunkMessages.get(this.ctx.preDownloadChunks)!
         )
         this.isChunkPortionFinished = false
     }

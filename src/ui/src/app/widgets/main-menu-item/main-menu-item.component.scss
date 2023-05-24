@@ -7,6 +7,19 @@
     height: rem($font-size-xxl * 2.5);
     justify-content: start;
     width: 100%;
+
+    &--active {
+        background: #737373;
+        color: white !important;
+
+        .app-icon {
+            filter: invert(1);
+        }
+    }
+
+    &--disabled {
+        opacity: 0.5;
+    }
 }
 
 .app-icon {

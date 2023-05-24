@@ -13,7 +13,7 @@
 
 <ng-template #rtr>
     <app-body>
-        <app-main-menu></app-main-menu>
+        <app-main-menu [disabled]="true"></app-main-menu>
         <app-main-content *ngIf="visualization$ | async">
             <div class="app-main">
                 <app-gauge></app-gauge>

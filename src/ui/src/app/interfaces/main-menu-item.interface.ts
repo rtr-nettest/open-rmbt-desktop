@@ -5,7 +5,7 @@ export interface IMainMenuItem extends ITranslatable {
     className?: string
     icon?: string
     label: string
-    route: string
+    route?: string
     id?: string
     children?: IMainMenuItem[]
     createdAt?: string
@@ -14,6 +14,5 @@ export interface IMainMenuItem extends ITranslatable {
     parent?: string
     url?: string
     content?: string
-    disabled?: boolean
     hidden?: boolean
 }

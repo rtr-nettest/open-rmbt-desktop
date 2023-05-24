@@ -2,11 +2,23 @@
 
 .app-header {
     height: rem(108);
-    padding: rem(30);
+    padding: rem(24) rem(12);
 
     img {
         height: auto;
         max-height: 100%;
         width: auto;
+    }
+
+    &--large {
+        @include screen-sm {
+            display: none;
+        }
+    }
+
+    &--small {
+        @media screen and (min-width: 1025px) {
+            display: none;
+        }
     }
 }

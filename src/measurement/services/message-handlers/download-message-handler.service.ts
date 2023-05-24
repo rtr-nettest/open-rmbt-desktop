@@ -17,8 +17,7 @@ export class DownloadMessageHandler implements IMessageHandler {
     private activityInterval?: NodeJS.Timer
     private inactivityTimeout = 1000
     private result = new MeasurementThreadResultList(0)
-    private nsec = 0
-    private nsecStart = Infinity
+    private nsec = Infinity
     private isFinishRequested = false
     private interimHandlerInterval?: NodeJS.Timer
     private interimHandlerTimeout = 200
@@ -93,17 +92,16 @@ export class DownloadMessageHandler implements IMessageHandler {
         let isFullChunk = false
         if (data.length > 0) {
             this.downloadBytesRead = this.downloadBytesRead + data.byteLength
-            this.nsecStart = Math.min(
-                this.nsecStart,
+            this.nsec = Math.min(
+                this.nsec,
                 Time.nowNs() - this.downloadStartTime
             )
             lastByte = data[data.length - 1]
             isFullChunk = this.downloadBytesRead % this.ctx.chunkSize === 0
         }
         if (isFullChunk && (lastByte === 0x00 || lastByte === 0xff)) {
-            this.nsec = this.nsecStart - this.downloadStartTime
-            this.nsecStart = Infinity
             this.result.addResult(this.downloadBytesRead, this.nsec)
+            this.nsec = Infinity
         }
         if (isFullChunk && lastByte === 0xff) {
             this.requestFinish()

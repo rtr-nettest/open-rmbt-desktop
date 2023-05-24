@@ -190,7 +190,7 @@ export class RMBTThread implements IMessageHandlerContext {
                     this.index,
                     this.phase
                 )
-                this.phase = undefined
+
                 this.dropHandlers()
                 if (result) {
                     resolve(result)
@@ -215,7 +215,6 @@ export class RMBTThread implements IMessageHandlerContext {
                         this.phase
                     )
                     this.dropHandlers()
-                    this.phase = undefined
                     resolve({
                         chunkSize: this.chunkSize,
                         bytesPerSec: Math.max(...this.bytesPerSecPretest),
@@ -237,7 +236,6 @@ export class RMBTThread implements IMessageHandlerContext {
                     this.phase
                 )
                 this.dropHandlers()
-                this.phase = undefined
                 resolve(result)
             })
             this.pingMessageHandler.writeData()
@@ -262,7 +260,6 @@ export class RMBTThread implements IMessageHandlerContext {
                 this,
                 (result) => {
                     this.dropHandlers()
-                    this.phase = undefined
                     this.interimHandler = undefined
                     this.disconnect().then(() => {
                         Logger.I.info(
@@ -291,7 +288,6 @@ export class RMBTThread implements IMessageHandlerContext {
                         this.phase
                     )
                     this.dropHandlers()
-                    this.phase = undefined
                     resolve(chunkSize)
                 }
             )
@@ -315,7 +311,6 @@ export class RMBTThread implements IMessageHandlerContext {
                 this,
                 (result) => {
                     this.dropHandlers()
-                    this.phase = undefined
                     this.interimHandler = undefined
                     this.disconnect().then(() => {
                         Logger.I.info(

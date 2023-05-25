@@ -88,6 +88,10 @@ ipcMain.on(Events.RUN_MEASUREMENT, async (event) => {
     }
 })
 
+ipcMain.on(Events.ABORT_MEASUREMENT, () => {
+    MeasurementRunner.I.abortMeasurement()
+})
+
 ipcMain.handle(Events.GET_ENV, (): IEnv => {
     return {
         CMS_URL: process.env.CMS_URL || "",

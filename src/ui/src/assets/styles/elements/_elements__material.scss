@@ -2,6 +2,8 @@
 
 @include mat.core();
 
+@import "../core.scss";
+
 //create palettes
 $app-primary: mat.define-palette($palette-primary);
 $app-accent: mat.define-palette($palette-accent);
@@ -22,9 +24,10 @@ $app-theme: mat.define-light-theme(
 @include mat.all-component-themes($app-theme);
 @include mat.all-component-typographies($app-typography);
 
-.mdc-button[mat-flat-button] {
+.mdc-button[mat-flat-button],
+.mdc-button[mat-button] {
     height: auto;
-    padding: 16px 24px;
+    padding: rem(12) rem(18);
 }
 
 .app-snackbar {

@@ -1,6 +1,7 @@
 import { Component, Input } from "@angular/core"
-import { ActivatedRoute } from "@angular/router"
+import { ActivatedRoute, Router } from "@angular/router"
 import { map, withLatestFrom } from "rxjs"
+import { THIS_INTERRUPTS_ACTION } from "src/app/constants/strings"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 import { CMSService } from "src/app/services/cms.service"
 import { MessageService } from "src/app/services/message.service"
@@ -25,6 +26,10 @@ export class MainMenuComponent {
                             ? "app-menu-item--active"
                             : "",
                     ].join(" "),
+                    action: () => {
+                        window.electronAPI.abortMeasurement()
+                        this.router.navigate([item.route])
+                    },
                 }
             })
         })
@@ -33,16 +38,18 @@ export class MainMenuComponent {
     constructor(
         private activeRoute: ActivatedRoute,
         private cmsService: CMSService,
-        private message: MessageService
+        private message: MessageService,
+        private router: Router
     ) {}
 
     handleClick(event: MouseEvent, item: IMainMenuItem) {
         if (!item.route) {
             event.stopPropagation()
             event.preventDefault()
-            this.message.openSnackbar(
-                "Navigation is impossible from this screen"
-            )
+            if (!item.className?.includes("app-menu-item--active"))
+                this.message.openConfirmDialog(THIS_INTERRUPTS_ACTION, () => {
+                    item.action?.(event)
+                })
         }
     }
 

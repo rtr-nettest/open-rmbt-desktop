@@ -85,7 +85,9 @@ export class MeasurementRunner {
                 )
             )
         } catch (e) {
-            throw e
+            if (e) {
+                throw e
+            }
         } finally {
             this.setCPUUsage()
             if (this.cpuInfo) {
@@ -107,6 +109,10 @@ export class MeasurementRunner {
                     EMeasurementStatus.END
             }
         }
+    }
+
+    abortMeasurement() {
+        this.rmbtClient?.abortMeasurement()
     }
 
     getBasicNetworkInfo(): IBasicNetworkInfo {

@@ -60,6 +60,8 @@ import { MainContentComponent } from "./widgets/main-content/main-content.compon
 import { MainMenuComponent } from "./widgets/main-menu/main-menu.component"
 import { MainMenuItemComponent } from "./widgets/main-menu-item/main-menu-item.component"
 import { BodyComponent } from "./widgets/body/body.component"
+import { ConfirmDialogComponent } from "./widgets/confirm-dialog/confirm-dialog.component"
+import { MatDialogModule } from "@angular/material/dialog"
 Chart.register(
     BarElement,
     BarController,
@@ -76,6 +78,7 @@ declare global {
         electronAPI: {
             registerClient: () => Promise<IUserSettings>
             runMeasurement: () => Promise<void>
+            abortMeasurement: () => Promise<void>
             getEnv: () => Promise<IEnv>
             getBasicNetworkInfo: () => Promise<IBasicNetworkInfo>
             getCPUUsage: () => Promise<ICPU>
@@ -111,6 +114,7 @@ declare global {
         TestHeaderComponent,
         TestIndicatorComponent,
         TestScreenComponent,
+        ConfirmDialogComponent,
     ],
     imports: [
         AppRoutingModule,
@@ -118,6 +122,7 @@ declare global {
         BrowserModule,
         HttpClientModule,
         MatButtonModule,
+        MatDialogModule,
         MatIconModule,
         MatSnackBarModule,
         MatTooltipModule,

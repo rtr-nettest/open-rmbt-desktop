@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core"
-import { ActivatedRoute } from "@angular/router"
+import { ActivatedRoute, Router } from "@angular/router"
 import { map } from "rxjs"
+import { THIS_INTERRUPTS_ACTION } from "src/app/constants/strings"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { MessageService } from "src/app/services/message.service"
 
@@ -23,16 +24,18 @@ export class HeaderComponent {
 
     constructor(
         private activeRoute: ActivatedRoute,
-        private message: MessageService
+        private message: MessageService,
+        private router: Router
     ) {}
 
     handleClick(event: MouseEvent, link: string) {
         if (link === this.noGo) {
             event.stopPropagation()
             event.preventDefault()
-            this.message.openSnackbar(
-                "Navigation is impossible from this screen"
-            )
+            this.message.openConfirmDialog(THIS_INTERRUPTS_ACTION, () => {
+                window.electronAPI.abortMeasurement()
+                this.router.navigate(["/"])
+            })
         }
     }
 }

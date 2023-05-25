@@ -4,6 +4,7 @@ import { Events } from "./enums/events.enum"
 contextBridge.exposeInMainWorld("electronAPI", {
     registerClient: () => ipcRenderer.invoke(Events.REGISTER_CLIENT),
     runMeasurement: () => ipcRenderer.send(Events.RUN_MEASUREMENT),
+    abortMeasurement: () => ipcRenderer.send(Events.ABORT_MEASUREMENT),
     getEnv: () => ipcRenderer.invoke(Events.GET_ENV),
     getBasicNetworkInfo: () =>
         ipcRenderer.invoke(Events.GET_BASIC_NETWORK_INFO),

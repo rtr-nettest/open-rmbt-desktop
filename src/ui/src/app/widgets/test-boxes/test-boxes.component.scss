@@ -142,7 +142,7 @@ $test-info-left-margin: 8%;
         margin-top: rem(16);
     }
 
-    @include screen-small {
+    @include screen-xs {
         .nt-test {
             &-progress {
                 width: 100%;

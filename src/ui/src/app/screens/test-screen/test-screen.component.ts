@@ -14,7 +14,7 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
 export class TestScreenComponent {
     env$ = this.mainStore.env$
     visualization$ = this.store.launchTest().pipe(
-        withLatestFrom(this.store.error$),
+        withLatestFrom(this.mainStore.error$),
         tap(([state, error]) => {
             if (state.currentPhaseName === EMeasurementStatus.END || error) {
                 this.goToResultScreen(

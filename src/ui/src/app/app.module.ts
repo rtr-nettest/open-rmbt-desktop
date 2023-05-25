@@ -1,5 +1,6 @@
 import { NgModule } from "@angular/core"
 import { BrowserModule } from "@angular/platform-browser"
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations"
 
 import { AppRoutingModule } from "./app-routing.module"
 import { AppComponent } from "./app.component"
@@ -16,10 +17,12 @@ import { SpacerComponent } from "./widgets/spacer/spacer.component"
 import { IBasicNetworkInfo } from "../../../measurement/interfaces/basic-network-info.interface"
 import { IMeasurementPhaseState } from "../../../measurement/interfaces/measurement-phase-state.interface"
 import { ISimpleHistoryResult } from "../../../measurement/interfaces/simple-history-result.interface"
+import { IUserSettings } from "../../../measurement/interfaces/user-settings-response.interface"
 import { IEnv } from "../../../electron/interfaces/env.interface"
 import { MatIconModule } from "@angular/material/icon"
 import { MatButtonModule } from "@angular/material/button"
 import { MatTooltipModule } from "@angular/material/tooltip"
+import { MatSnackBarModule } from "@angular/material/snack-bar"
 import { HttpClientModule } from "@angular/common/http"
 import { TranslocoRootModule } from "./transloco-root.module"
 import { TestHeaderComponent } from "./widgets/test-header/test-header.component"
@@ -52,6 +55,13 @@ import {
     Filler,
     // Title,
 } from "chart.js"
+import { HomeMetricsComponent } from "./widgets/home-metrics/home-metrics.component"
+import { MainContentComponent } from "./widgets/main-content/main-content.component"
+import { MainMenuComponent } from "./widgets/main-menu/main-menu.component"
+import { MainMenuItemComponent } from "./widgets/main-menu-item/main-menu-item.component"
+import { BodyComponent } from "./widgets/body/body.component"
+import { ConfirmDialogComponent } from "./widgets/confirm-dialog/confirm-dialog.component"
+import { MatDialogModule } from "@angular/material/dialog"
 Chart.register(
     BarElement,
     BarController,
@@ -66,7 +76,9 @@ Chart.register(
 declare global {
     interface Window {
         electronAPI: {
+            registerClient: () => Promise<IUserSettings>
             runMeasurement: () => Promise<void>
+            abortMeasurement: () => Promise<void>
             getEnv: () => Promise<IEnv>
             getBasicNetworkInfo: () => Promise<IBasicNetworkInfo>
             getCPUUsage: () => Promise<ICPU>
@@ -82,29 +94,38 @@ declare global {
 @NgModule({
     declarations: [
         AppComponent,
-        HomeScreenComponent,
-        TestScreenComponent,
-        ResultScreenComponent,
-        HeaderComponent,
-        FooterComponent,
-        StartTestButtonComponent,
-        GaugeComponent,
-        InterimResultsComponent,
+        BodyComponent,
         DlComponent,
+        FooterComponent,
+        GaugeComponent,
+        HeaderComponent,
+        HomeMetricsComponent,
+        HomeScreenComponent,
+        InterimResultsComponent,
+        MainContentComponent,
+        MainMenuComponent,
+        MainMenuItemComponent,
+        ResultScreenComponent,
         SpacerComponent,
-        TestHeaderComponent,
-        TestIndicatorComponent,
+        StartTestButtonComponent,
         TestBoxesComponent,
         TestChartComponent,
         TestChartsComponent,
+        TestHeaderComponent,
+        TestIndicatorComponent,
+        TestScreenComponent,
+        ConfirmDialogComponent,
     ],
     imports: [
-        BrowserModule,
         AppRoutingModule,
-        MatIconModule,
-        MatButtonModule,
-        MatTooltipModule,
+        BrowserAnimationsModule,
+        BrowserModule,
         HttpClientModule,
+        MatButtonModule,
+        MatDialogModule,
+        MatIconModule,
+        MatSnackBarModule,
+        MatTooltipModule,
         TranslocoRootModule,
     ],
     providers: [],

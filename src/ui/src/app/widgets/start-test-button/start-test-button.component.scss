@@ -7,23 +7,22 @@
     padding: 40px 60px;
     transition: transform 0.15s ease-out;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.28);
-    border: 1px solid #2f5f00;
+    border: 1px solid $color-primary;
     border-radius: 7px;
-    max-width: 40rem;
-    width: calc(100vw - 60px);
+    width: 100%;
 
-    &:hover {
+    &[aria-disabled="false"]:hover {
         text-decoration: none;
         transform: translateY(0.4rem) scale(0.98);
     }
     &.uk-card-primary {
-        background-color: #2f5f00;
+        background-color: $color-primary;
         color: white;
         .uk-icon {
             align-items: center;
-            background: #2f5f00;
+            background: $color-primary;
             border-radius: 500px;
-            border: 1px solid #2f5f00;
+            border: 1px solid $color-primary;
             bottom: 15px;
             color: white;
             display: inline-flex;
@@ -39,6 +38,19 @@
                 transform: translate(0, 0);
             }
         }
+
+        $disabled-color: mix($color-primary, white, 50%);
+
+        &[aria-disabled="true"] {
+            background-color: $disabled-color;
+            border-color: $disabled-color;
+            cursor: default;
+            pointer-events: none;
+            .uk-icon {
+                background-color: $disabled-color;
+                border-color: $disabled-color;
+            }
+        }
     }
 
     .uk-card-media-top {
@@ -46,15 +58,14 @@
     }
 
     p {
-        font-size: rem(16);
+        font-size: rem($font-size-l);
         font-weight: 400;
-        margin: 20px 0;
+        margin: rem($font-size-l * 1.11) 0;
     }
 
     h3 {
-        font-size: rem(28);
+        font-size: rem($font-size-3xl);
         font-weight: 700;
-        letter-spacing: 0.06px;
     }
 }
 

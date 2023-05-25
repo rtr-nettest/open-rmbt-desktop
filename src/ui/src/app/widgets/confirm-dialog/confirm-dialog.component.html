@@ -1,0 +1,16 @@
+<div class="app-dialog" *transloco="let t">
+    <p>{{ t(text) }}</p>
+    <footer class="app-footer">
+        <button mat-button color="primary" (click)="close()">
+            {{ t("Cancel") }}
+        </button>
+        <button
+            mat-flat-button
+            type="submit"
+            color="primary"
+            (click)="close(true)"
+        >
+            {{ t("Proceed") }}
+        </button>
+    </footer>
+</div>

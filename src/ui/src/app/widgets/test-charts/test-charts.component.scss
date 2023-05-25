@@ -3,7 +3,7 @@
 .nt-container__row {
     display: flex;
 
-    @include screen-small {
+    @include screen-xs {
         flex-direction: column;
     }
 }

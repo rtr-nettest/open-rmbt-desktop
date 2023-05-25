@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core"
+import { lastValueFrom, map } from "rxjs"
 import { MainStore } from "src/app/store/main.store"
 
 @Component({
@@ -9,6 +10,15 @@ import { MainStore } from "src/app/store/main.store"
 })
 export class StartTestButtonComponent {
     env$ = this.mainStore.env$
+    disabled$ = this.mainStore.settings$.pipe(
+        map((settings) => !settings?.uuid)
+    )
 
     constructor(private mainStore: MainStore) {}
+
+    async preventNavigation(e: Event) {
+        if ((await lastValueFrom(this.disabled$)) === true) {
+            e.preventDefault()
+        }
+    }
 }

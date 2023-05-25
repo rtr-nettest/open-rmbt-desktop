@@ -9,3 +9,10 @@ a:active {
     color: $color-link;
     text-decoration: none;
 }
+
+.app-menu-item {
+    .mdc-button__label {
+        align-items: center;
+        display: flex;
+    }
+}

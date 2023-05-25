@@ -187,6 +187,7 @@ export class RMBTClient {
     measurementStart: number = 0
     isRunning = false
     activityInterval?: NodeJS.Timer
+    aborter = new AbortController()
     private bytesPerSecPreDownload: number[] = []
     private estimatePhaseDuration: { [key: string]: number } = {
         [EMeasurementStatus.INIT]: 0.5,
@@ -290,22 +291,33 @@ export class RMBTClient {
         )
         Logger.I.info("The total upload speed is %dMbps", this.finalUpMbps)
         Logger.I.info("Measurement is finished")
+        this.measurementStatus = EMeasurementStatus.SUBMITTING_RESULTS
     }
 
-    private cancelMeasurement(reject: (reason: any) => void, error: Error) {
+    abortMeasurement() {
+        this.aborter.abort()
+    }
+
+    private cancelMeasurement(reject: (reason: any) => void, error?: Error) {
         if (!this.isRunning) {
             return
         }
-        Logger.I.error(error)
         this.threadResults = []
         this.interimThreadResults = new Array(this.params.test_numthreads)
-        this.measurementStatus = EMeasurementStatus.ERROR
         this.isRunning = false
         for (const w of this.measurementTasks) {
             w.terminate()
         }
         clearInterval(this.activityInterval)
-        reject(error)
+
+        if (error) {
+            Logger.I.error(error)
+            this.measurementStatus = EMeasurementStatus.ERROR
+            reject(error)
+        } else {
+            this.measurementStatus = EMeasurementStatus.ABORTED
+            reject(null)
+        }
     }
 
     private async runMeasurement(): Promise<IMeasurementThreadResult[]> {
@@ -349,6 +361,10 @@ export class RMBTClient {
             for (const [index, worker] of this.measurementTasks.entries()) {
                 worker.postMessage(new IncomingMessageWithData("connect"))
                 worker.on("message", (message) => {
+                    if (this.aborter.signal.aborted) {
+                        this.cancelMeasurement(reject)
+                        return
+                    }
                     this.lastMessageReceivedAt = Date.now()
                     switch (message.message) {
                         case "error":

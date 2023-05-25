@@ -12,10 +12,10 @@ import { TestStore } from "src/app/store/test.store"
 })
 export class ResultScreenComponent {
     env$ = this.mainStore.env$
+    error$ = this.mainStore.error$
     result$ = this.store.getMeasurementResult(
         this.route.snapshot.paramMap.get("testUuid")
     )
-    error$ = this.store.error$
 
     constructor(
         private store: TestStore,

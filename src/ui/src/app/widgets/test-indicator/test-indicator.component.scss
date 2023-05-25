@@ -13,7 +13,7 @@
     position: relative;
     width: rem(152);
 
-    @include screen-small {
+    @include screen-xs {
         height: rem(100);
         width: rem(100);
     }
@@ -22,7 +22,7 @@
         color: scale-color($color-secondary, $alpha: -50%);
         font-size: rem(12);
 
-        @include screen-small {
+        @include screen-xs {
             font-size: rem(10);
         }
     }
@@ -31,7 +31,7 @@
         color: $color-secondary;
         font-size: rem(28);
 
-        @include screen-small {
+        @include screen-xs {
             font-size: rem(21);
         }
     }

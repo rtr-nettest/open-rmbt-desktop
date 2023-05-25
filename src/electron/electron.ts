@@ -1,21 +1,10 @@
 import { app, BrowserWindow, ipcMain, protocol, shell } from "electron"
 if (require("electron-squirrel-startup")) app.quit()
-import { config } from "dotenv"
 import path from "path"
-import {
-    getBasicNetworkInfo,
-    getCPUUsage,
-    getCurrentPhaseState,
-    getMeasurementResult,
-    runMeasurement,
-} from "../measurement"
+import { MeasurementRunner } from "../measurement"
 import { Events } from "./enums/events.enum"
 import { IEnv } from "./interfaces/env.interface"
 import Protocol from "./protocol"
-
-config({
-    path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
-})
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -27,9 +16,15 @@ const createWindow = () => {
         )
     }
 
+    const { screen } = require("electron")
+    const primaryDisplay = screen.getPrimaryDisplay()
+    const { width, height } = primaryDisplay.workAreaSize
+
     const win = new BrowserWindow({
-        width: 1200,
-        height: 600,
+        width: 1280,
+        height: 800,
+        minWidth: Math.min(1024, width),
+        minHeight: Math.min(768, height),
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             nodeIntegration: true,
@@ -46,8 +41,8 @@ const createWindow = () => {
     })
 
     if (process.env.DEV === "true") {
-        win.loadURL("http://localhost:4200/")
         win.webContents.openDevTools()
+        win.loadURL("http://localhost:4200/")
     } else {
         win.loadURL(`${Protocol.scheme}://index.html`)
     }
@@ -75,11 +70,26 @@ app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
-ipcMain.on(Events.RUN_MEASUREMENT, (event) => {
+ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
     const webContents = event.sender
-    runMeasurement().catch((e) => {
+    try {
+        return await MeasurementRunner.I.registerClient()
+    } catch (e) {
         webContents.send(Events.ERROR, e)
-    })
+    }
+})
+
+ipcMain.on(Events.RUN_MEASUREMENT, async (event) => {
+    const webContents = event.sender
+    try {
+        await MeasurementRunner.I.runMeasurement()
+    } catch (e) {
+        webContents.send(Events.ERROR, e)
+    }
+})
+
+ipcMain.on(Events.ABORT_MEASUREMENT, () => {
+    MeasurementRunner.I.abortMeasurement()
 })
 
 ipcMain.handle(Events.GET_ENV, (): IEnv => {
@@ -92,21 +102,21 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
 })
 
 ipcMain.handle(Events.GET_BASIC_NETWORK_INFO, () => {
-    return getBasicNetworkInfo()
+    return MeasurementRunner.I.getBasicNetworkInfo()
 })
 
 ipcMain.handle(Events.GET_CPU_USAGE, () => {
-    return getCPUUsage()
+    return MeasurementRunner.I.getCPUUsage()
 })
 
 ipcMain.handle(Events.GET_MEASUREMENT_STATE, () => {
-    return getCurrentPhaseState()
+    return MeasurementRunner.I.getCurrentPhaseState()
 })
 
 ipcMain.handle(Events.GET_MEASUREMENT_RESULT, async (event, testUuid) => {
     const webContents = event.sender
     try {
-        return await getMeasurementResult(testUuid)
+        return await MeasurementRunner.I.getMeasurementResult(testUuid)
     } catch (e) {
         webContents.send(Events.ERROR, e)
     }

@@ -5,6 +5,11 @@
         height: 16px;
         width: 16px;
 
+        &-gray {
+            background: url("/assets/images/icons-sprite.svg") 100% 37.5%
+                no-repeat;
+        }
+
         &-greenest {
             background: url("/assets/images/icons-sprite.svg") 88.88889% 12.5%
                 no-repeat;

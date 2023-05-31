@@ -78,3 +78,4 @@ The variables used are:
     -   `PLATFORM_CLI` - a short string to differentiate the CLI client from the Electron app on the BE.
     -   `CMS_URL` - a CMS instance to use for the `ont` flavor.
     -   `ALLOWED_INACTIVITY_MS` - configures a period of inactivity allowed, in milliseconds, before the measurement is terminated. Default is 10 seconds.
+    -   `ENABLE_LOOP_MODE` - if set to `true` will enable rudimentary loop mode (cururently supported only by the electron GUI).

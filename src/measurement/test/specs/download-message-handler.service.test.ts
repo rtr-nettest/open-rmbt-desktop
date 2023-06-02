@@ -8,11 +8,14 @@ import {
     mockClient,
     mockThread,
 } from "../utils/rmbt-thread-mock.factory"
+import { randomBytes } from "crypto"
+import { RMBTClient } from "../../services/rmbt-client.service"
 
 const handler: DownloadMessageHandler = new DownloadMessageHandler(
     mockThread,
     () => void 0
 )
+let globalSpy: jest.SpyInstance
 
 test("Handler is initialized", () => {
     expect(typeof handler.stopMessaging).toBe("function")
@@ -26,6 +29,8 @@ test("Handler is initialized", () => {
 })
 
 test("Handler writes data", () => {
+    jest.useFakeTimers()
+    globalSpy = jest.spyOn(global, "setInterval")
     const infoSpy = jest.spyOn(Logger.I, "info")
     const msg = `${ESocketMessage.GETTIME} ${mockResponse.test_duration}${
         mockThread.chunkSize === mockThread.defaultChunkSize
@@ -48,3 +53,39 @@ test("Handler writes data", () => {
     expect(mockClient.write).toHaveBeenCalledTimes(1)
     expect(mockClient.write).toHaveBeenCalledWith(msg)
 })
+
+test("Handler reads data", async () => {
+    jest.useRealTimers()
+    globalSpy.mockRestore()
+    const endTimeS = Number(mockResponse.test_duration)
+    const chunks: Buffer[] = []
+    for (let i = 0; i < endTimeS; i++) {
+        const chunk = randomBytes(mockThread.chunkSize)
+        if (i < endTimeS - 1) {
+            chunk[chunk.length - 1] = 0x00
+        } else {
+            chunk[chunk.length - 1] = 0xff
+        }
+        chunks.push(chunk)
+    }
+
+    for (let i = 0; i < endTimeS; i++) {
+        await new Promise((resolve) => {
+            setTimeout(() => {
+                console.log(i)
+                handler.readData(chunks[i])
+                resolve(void 0)
+            }, 1000)
+        })
+    }
+    const speedMbps = Math.round(
+        RMBTClient.getFineResult(
+            [{ ...mockThread.threadResult!, down: handler.result }],
+            "down"
+        ).speed / 1e6
+    )
+
+    expect(handler.downloadBytesRead).toBe(29360128)
+    expect(handler.nsec).toBe(Infinity)
+    expect(speedMbps).toBe(33)
+}, 10000)

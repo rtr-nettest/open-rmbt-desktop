@@ -2,12 +2,12 @@ import * as ThreadService from "../../services/rmbt-thread.service"
 import { Logger } from "../../services/logger.service"
 import { IMeasurementRegistrationResponse } from "../../interfaces/measurement-registration-response.interface"
 import { Socket } from "net"
+import { RMBTClient } from "../../services/rmbt-client.service"
+import { MeasurementThreadResultList } from "../../dto/measurement-thread-result-list.dto"
 
 jest.mock("../../services/rmbt-thread.service")
 jest.mock("net")
 Logger.mock()
-jest.useFakeTimers()
-jest.spyOn(global, "setInterval")
 
 const mockResponse: IMeasurementRegistrationResponse = {
     client_remote_ip: "",
@@ -26,5 +26,6 @@ const mockThread = new ThreadService.RMBTThread(mockResponse, 0)
 mockThread.index = 0
 mockThread.params = mockResponse
 mockThread.client = mockClient
+mockThread.chunkSize = RMBTClient.maxChunkSize
 
 export { mockResponse, mockClient, mockThread }

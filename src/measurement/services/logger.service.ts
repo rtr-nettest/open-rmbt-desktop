@@ -13,6 +13,10 @@ export class Logger {
         return this.instance ?? console
     }
 
+    static mock() {
+        this.instance = pino({ enabled: false })
+    }
+
     static init(index?: number) {
         if (!this.instance) {
             const streams: pino.StreamEntry[] = []

@@ -22,7 +22,7 @@ test("Handler is initialized", () => {
         (Number(mockResponse.test_duration) * 1e9) /
         DownloadMessageHandler.minDiffTime
     console.log("Expected results length is", expectedLength)
-    expect(handler.result.bytes.length).toBe(expectedLength)
+    expect(handler.result.maxStoredResults).toBe(expectedLength)
 })
 
 test("Handler writes data", () => {

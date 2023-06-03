@@ -10,12 +10,20 @@ import {
 } from "../utils/rmbt-thread-mock.factory"
 import { randomBytes } from "crypto"
 import { RMBTClient } from "../../services/rmbt-client.service"
+import fs from "fs"
+import fsp from "fs/promises"
+import * as st from "stream-throttle"
 
-const handler: DownloadMessageHandler = new DownloadMessageHandler(
+let handler: DownloadMessageHandler = new DownloadMessageHandler(
     mockThread,
     () => void 0
 )
 let globalSpy: jest.SpyInstance
+const tempFile = "temp.txt"
+
+afterAll(async () => {
+    await fsp.unlink(tempFile)
+})
 
 test("Handler is initialized", () => {
     expect(typeof handler.stopMessaging).toBe("function")
@@ -24,7 +32,6 @@ test("Handler is initialized", () => {
     const expectedLength =
         (Number(mockResponse.test_duration) * 1e9) /
         DownloadMessageHandler.minDiffTime
-    console.log("Expected results length is", expectedLength)
     expect(handler.result.maxStoredResults).toBe(expectedLength)
 })
 
@@ -58,34 +65,39 @@ test("Handler reads data", async () => {
     jest.useRealTimers()
     globalSpy.mockRestore()
     const endTimeS = Number(mockResponse.test_duration)
-    const chunks: Buffer[] = []
-    for (let i = 0; i < endTimeS; i++) {
-        const chunk = randomBytes(mockThread.chunkSize)
+    const chunksAmount = 100
+    const chunk = randomBytes(mockThread.chunkSize)
+    const expectedSpeedMbps = 2000
+
+    fs.writeFileSync(tempFile, "")
+    for (let i = 0; i < endTimeS * chunksAmount; i++) {
         if (i < endTimeS - 1) {
             chunk[chunk.length - 1] = 0x00
         } else {
             chunk[chunk.length - 1] = 0xff
         }
-        chunks.push(chunk)
+        await fsp.appendFile(tempFile, chunk)
     }
 
-    for (let i = 0; i < endTimeS; i++) {
-        await new Promise((resolve) => {
-            setTimeout(() => {
-                console.log(i)
-                handler.readData(chunks[i])
-                resolve(void 0)
-            }, 1000)
+    await new Promise((resolve) => {
+        handler = new DownloadMessageHandler(mockThread, () => void 0)
+        const tempReadStream = fs
+            .createReadStream(tempFile)
+            .pipe(new st.Throttle({ rate: (expectedSpeedMbps / 8) * 1e6 }))
+        tempReadStream.on("data", (data) => handler.readData(data as Buffer))
+        tempReadStream.on("close", () => {
+            const newSpeed = Math.round(
+                RMBTClient.getFineResult(
+                    [{ ...mockThread.threadResult!, down: handler.result }],
+                    "down"
+                ).speed / 1e6
+            )
+            expect(handler.downloadBytesRead).toBe(
+                mockThread.chunkSize * endTimeS * chunksAmount
+            )
+            expect(handler.nsec).toBe(Infinity)
+            expect(newSpeed).toBe(expectedSpeedMbps)
+            resolve(void 0)
         })
-    }
-    const speedMbps = Math.round(
-        RMBTClient.getFineResult(
-            [{ ...mockThread.threadResult!, down: handler.result }],
-            "down"
-        ).speed / 1e6
-    )
-
-    expect(handler.downloadBytesRead).toBe(29360128)
-    expect(handler.nsec).toBe(Infinity)
-    expect(speedMbps).toBe(33)
-}, 10000)
+    })
+}, 60000)

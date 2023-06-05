@@ -101,10 +101,6 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
     }
 })
 
-ipcMain.handle(Events.GET_BASIC_NETWORK_INFO, () => {
-    return MeasurementRunner.I.getBasicNetworkInfo()
-})
-
 ipcMain.handle(Events.GET_CPU_USAGE, () => {
     return MeasurementRunner.I.getCPUUsage()
 })

@@ -41,14 +41,6 @@ export class TestStore {
         this.resetState()
         window.electronAPI.runMeasurement()
         return interval(STATE_UPDATE_TIMEOUT).pipe(
-            concatMap(() =>
-                from(window.electronAPI.getBasicNetworkInfo()).pipe(
-                    distinctUntilChanged(),
-                    tap((info) => {
-                        this.basicNetworkInfo$.next(info)
-                    })
-                )
-            ),
             concatMap(() => from(window.electronAPI.getMeasurementState())),
             map((phaseState) => {
                 const newState = TestVisualizationState.from(
@@ -56,6 +48,7 @@ export class TestStore {
                     phaseState
                 )
                 this.visualization$.next(newState)
+                this.basicNetworkInfo$.next(phaseState)
                 return newState
             })
         )

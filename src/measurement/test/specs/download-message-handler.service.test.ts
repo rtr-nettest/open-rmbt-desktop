@@ -22,7 +22,7 @@ let globalSpy: jest.SpyInstance
 const tempFile = "temp.txt"
 
 afterAll(async () => {
-    await fsp.unlink(tempFile)
+    if (fs.existsSync(tempFile)) await fsp.unlink(tempFile)
 })
 
 test("Handler is initialized", () => {
@@ -52,6 +52,8 @@ test("Handler writes data", () => {
     expect(handler.downloadStartTime).toBe(startTime)
     expect(handler.downloadEndTime).toBe(endTime)
     expect(setInterval).toHaveBeenCalledTimes(2)
+    expect(handler.activityInterval).not.toBe(undefined)
+    expect(handler.interimHandlerInterval).not.toBe(undefined)
     expect(infoSpy).toHaveBeenCalledWith(
         ELoggerMessage.T_SENDING_MESSAGE,
         mockThread.index,
@@ -59,6 +61,45 @@ test("Handler writes data", () => {
     )
     expect(mockClient.write).toHaveBeenCalledTimes(1)
     expect(mockClient.write).toHaveBeenCalledWith(msg)
+})
+
+test("Stops messaging", () => {
+    globalSpy.mockRestore()
+    globalSpy = jest.spyOn(global, "clearInterval")
+    const onFinishSpy = jest.spyOn(handler, "onFinish")
+
+    handler.stopMessaging()
+
+    expect(clearInterval).toHaveBeenCalledTimes(2)
+    expect(mockThread.threadResult?.down).toBe(handler.result)
+    expect(onFinishSpy).toHaveBeenCalledWith(mockThread.threadResult)
+})
+
+test("Checks activity", () => {
+    globalSpy.mockRestore()
+    globalSpy = jest.spyOn(global, "setInterval")
+
+    handler.checkActivity()
+
+    expect(handler.isFinishRequested).toBe(false)
+
+    Time.mockTime(Time.nowNs() + 10e9)
+
+    handler.checkActivity()
+
+    expect(handler.isFinishRequested).toBe(true)
+    expect(setInterval).toHaveBeenCalled()
+    expect(mockClient.write).toHaveBeenCalledWith(ESocketMessage.OK)
+
+    Time.mockRestore()
+})
+
+test("Submits results", () => {
+    handler.submitResults()
+
+    expect(mockThread.threadResult?.currentTime.down).toBe(undefined)
+    expect(mockThread.threadResult?.currentTransfer.down).toBe(undefined)
+    expect(mockThread.interimHandler).toHaveBeenCalled()
 })
 
 test("Handler reads data", async () => {
@@ -100,4 +141,14 @@ test("Handler reads data", async () => {
             resolve(void 0)
         })
     })
+
+    const downloadBytesRead = handler.downloadBytesRead
+    const stopMessagingSpy = jest.spyOn(handler, "stopMessaging")
+
+    handler.readData(Buffer.from(ESocketMessage.TIME))
+    expect(stopMessagingSpy).not.toHaveBeenCalled()
+    expect(downloadBytesRead).toBe(handler.downloadBytesRead)
+
+    handler.readData(Buffer.from(ESocketMessage.ACCEPT_GETCHUNKS))
+    expect(stopMessagingSpy).toHaveBeenCalled()
 }, 60000)

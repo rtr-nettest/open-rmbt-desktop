@@ -3,7 +3,7 @@ import { Logger } from "../../services/logger.service"
 import { IMeasurementRegistrationResponse } from "../../interfaces/measurement-registration-response.interface"
 import { Socket } from "net"
 import { RMBTClient } from "../../services/rmbt-client.service"
-import { MeasurementThreadResultList } from "../../dto/measurement-thread-result-list.dto"
+import { MeasurementThreadResult } from "../../dto/measurement-thread-result.dto"
 
 jest.mock("../../services/rmbt-thread.service")
 jest.mock("net")
@@ -27,5 +27,7 @@ mockThread.index = 0
 mockThread.params = mockResponse
 mockThread.client = mockClient
 mockThread.chunkSize = RMBTClient.maxChunkSize
+mockThread.threadResult = new MeasurementThreadResult(mockThread.index)
+mockThread.interimHandler = jest.fn()
 
 export { mockResponse, mockClient, mockThread }

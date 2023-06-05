@@ -13,7 +13,7 @@
         "start:ui": "(cd src/ui && npm run start)",
         "start:all": "start-server-and-test start:ui http://localhost:4200/ start:electron",
         "electron": "electron",
-        "test": "jest",
+        "test": "jest --coverage",
         "package": "npm run build:all && electron-forge package",
         "make": "npm run build:all && electron-forge make"
     },

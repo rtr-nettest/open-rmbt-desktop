@@ -81,9 +81,10 @@ export class DownloadMessageHandler implements IMessageHandler {
         this._downloadEndTime =
             this._downloadStartTime +
             Number(this.ctx.params.test_duration) * 1e9
-        this._activityInterval = setInterval(() => {
-            this.checkActivity()
-        }, this._inactivityTimeout)
+        this._activityInterval = setInterval(
+            this.checkActivity,
+            this._inactivityTimeout
+        )
         const msg = `${ESocketMessage.GETTIME} ${
             this.ctx.params.test_duration
         }${
@@ -94,7 +95,7 @@ export class DownloadMessageHandler implements IMessageHandler {
         Logger.I.info(ELoggerMessage.T_SENDING_MESSAGE, this.ctx.index, msg)
         this.ctx.client.write(msg)
         this._interimHandlerInterval = setInterval(
-            () => this.submitResults(),
+            this.submitResults,
             this._interimHandlerTimeout
         )
     }

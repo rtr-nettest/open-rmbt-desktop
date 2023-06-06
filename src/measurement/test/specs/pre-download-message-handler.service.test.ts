@@ -2,14 +2,8 @@ import { Time } from "../../services/time.service"
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import mockFactory from "../utils/rmbt-thread-mock.factory"
 import { randomBytes } from "crypto"
-import fs from "fs"
-import fsp from "fs/promises"
 import { PreDownloadMessageHandler } from "../../services/message-handlers/pre-download-message-handler.service"
 import { Logger } from "../../services/logger.service"
-
-jest.mock("../../services/rmbt-thread.service")
-jest.mock("net")
-Logger.mock()
 
 const { mockThread, mockClient } = mockFactory()
 
@@ -17,14 +11,9 @@ let handler: PreDownloadMessageHandler = new PreDownloadMessageHandler(
     mockThread,
     () => void 0
 )
-const tempFile = "temp.txt"
 
 beforeEach(() => {
     handler = new PreDownloadMessageHandler(mockThread, () => void 0)
-})
-
-afterAll(async () => {
-    if (fs.existsSync(tempFile)) await fsp.unlink(tempFile)
 })
 
 test("Handler is initialized", () => {

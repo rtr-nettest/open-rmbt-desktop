@@ -3,6 +3,12 @@ import { IMeasurementRegistrationResponse } from "../../interfaces/measurement-r
 import { Socket } from "net"
 import { RMBTClient } from "../../services/rmbt-client.service"
 import { MeasurementThreadResult } from "../../dto/measurement-thread-result.dto"
+import { Logger } from "../../services/logger.service"
+import { EMeasurementServerType } from "../../enums/measurement-server-type.enum"
+
+jest.mock("../../services/rmbt-thread.service")
+jest.mock("net")
+Logger.mock()
 
 export default function main() {
     const mockResponse: IMeasurementRegistrationResponse = {
@@ -10,7 +16,7 @@ export default function main() {
         test_server_encryption: false,
         test_numthreads: 0,
         test_uuid: "",
-        test_token: "",
+        test_token: "test_token",
         test_server_address: "",
         test_duration: "7",
         result_url: "",

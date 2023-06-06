@@ -10,10 +10,6 @@ import fs from "fs"
 import fsp from "fs/promises"
 import * as st from "stream-throttle"
 
-jest.mock("../../services/rmbt-thread.service")
-jest.mock("net")
-Logger.mock()
-
 const { mockThread, mockClient, mockResponse } = mockFactory()
 
 let handler: DownloadMessageHandler = new DownloadMessageHandler(

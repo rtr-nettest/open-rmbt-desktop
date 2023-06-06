@@ -25,8 +25,7 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
                     )
                 }
             }
-            await thread.connect(workerData.result)
-            isConnected = await thread.manageInit()
+            isConnected = await connectRetrying()
             parentPort?.postMessage(
                 new OutgoingMessageWithData("connected", isConnected)
             )
@@ -60,8 +59,7 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
             )
             break
         case "preUpload":
-            await thread?.connect(workerData.result)
-            isConnected = (await thread?.manageInit()) || false
+            isConnected = await connectRetrying()
             if (isConnected) {
                 chunks = await thread?.managePreUpload()
             }
@@ -72,8 +70,7 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
         case "reconnectForUpload":
             isConnected = thread?.isConnected || false
             if (!isConnected) {
-                await thread?.connect(workerData.result)
-                isConnected = (await thread?.manageInit()) || false
+                isConnected = await connectRetrying()
             }
             parentPort?.postMessage(
                 new OutgoingMessageWithData("reconnectedForUpload", isConnected)
@@ -91,3 +88,20 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
             break
     }
 })
+
+async function connectRetrying(times = 3): Promise<boolean> {
+    let counter = 0
+    return new Promise((resolve) => {
+        const reconnectInterval = setInterval(async () => {
+            await thread?.connect(workerData.result)
+            const isConnected = await thread?.manageInit()
+            if (isConnected || counter >= times) {
+                clearInterval(reconnectInterval)
+                resolve(isConnected ?? false)
+            } else {
+                await thread?.disconnect()
+                counter++
+            }
+        }, 1000)
+    })
+}

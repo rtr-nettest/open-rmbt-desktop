@@ -366,6 +366,10 @@ export class RMBTClient {
                         return
                     }
                     this.lastMessageReceivedAt = Date.now()
+                    Logger.I.info(
+                        "Last message was received at: %d",
+                        this.lastMessageReceivedAt
+                    )
                     switch (message.message) {
                         case "error":
                             this.cancelMeasurement(
@@ -374,20 +378,8 @@ export class RMBTClient {
                             )
                             break
                         case "connected":
-                            const isInitialized = message.data as boolean
-                            if (isInitialized) {
-                                Logger.I.warn("Worker %d is ready", index)
+                            if (!!message.data) {
                                 this.initializedThreads.push(index)
-                            } else {
-                                Logger.I.warn(
-                                    "Worker %d errored out. Reattempting connection.",
-                                    index
-                                )
-                                setImmediate(() => {
-                                    worker.postMessage(
-                                        new IncomingMessageWithData("connect")
-                                    )
-                                })
                             }
                             if (
                                 this.initializedThreads.length ===

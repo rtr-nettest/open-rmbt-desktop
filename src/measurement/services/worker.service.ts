@@ -100,12 +100,14 @@ async function connectRetrying(times = 2): Promise<boolean> {
                     await thread!.connect(workerData.result)
                     connected = await thread!.manageInit()
                 } finally {
+                    Logger.I.info("Thread %d is connected.", thread!.index)
                     clearTimeout(timeout)
                     resolve(connected)
                 }
             }),
             new Promise((resolve) => {
                 timeout = setTimeout(() => {
+                    Logger.I.info("Thread %d is not connected.", thread!.index)
                     resolve(false)
                 }, 3000)
             }),

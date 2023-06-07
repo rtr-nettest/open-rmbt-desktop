@@ -89,19 +89,32 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
     }
 })
 
-async function connectRetrying(times = 3): Promise<boolean> {
-    let counter = 0
-    return new Promise((resolve) => {
-        const reconnectInterval = setInterval(async () => {
-            await thread?.connect(workerData.result)
-            const isConnected = await thread?.manageInit()
-            if (isConnected || counter >= times) {
-                clearInterval(reconnectInterval)
-                resolve(isConnected ?? false)
-            } else {
-                await thread?.disconnect()
-                counter++
-            }
-        }, 1000)
-    })
+async function connectRetrying(times = 2): Promise<boolean> {
+    let isConnected = false
+    let timeout: NodeJS.Timeout
+    for (let i = 0; i < times; i++) {
+        isConnected = (await Promise.race([
+            new Promise(async (resolve) => {
+                let connected = false
+                try {
+                    await thread!.connect(workerData.result)
+                    connected = await thread!.manageInit()
+                } finally {
+                    clearTimeout(timeout)
+                    resolve(connected)
+                }
+            }),
+            new Promise((resolve) => {
+                timeout = setTimeout(() => {
+                    resolve(false)
+                }, 3000)
+            }),
+        ])) as boolean
+        if (isConnected) {
+            break
+        }
+        Logger.I.warn("Socket hang. Reconnecting.")
+        await thread!.disconnect()
+    }
+    return isConnected
 }

@@ -22,6 +22,7 @@ export class UploadMessageHandler implements IMessageHandler {
     private _buffers: Buffer[] = []
     private _bytesWritten = 0
     private _interimHandlerInterval?: NodeJS.Timer
+    private _isRunning = true
 
     get waterMark() {
         return this.ctx.client.writableHighWaterMark
@@ -64,6 +65,7 @@ export class UploadMessageHandler implements IMessageHandler {
             this.ctx.phase,
             this.ctx.index
         )
+        this._isRunning = false
         this.ctx.client.off("drain", this.putChunks)
         clearInterval(this._interimHandlerInterval)
         clearInterval(this._activityInterval)
@@ -120,7 +122,7 @@ export class UploadMessageHandler implements IMessageHandler {
 
     private putChunks = () => {
         let bufferIndex = 0
-        while (true) {
+        while (this._isRunning) {
             let buffer = this._buffers[bufferIndex]!
             if (bufferIndex >= this._buffers.length - 1) {
                 bufferIndex = 0

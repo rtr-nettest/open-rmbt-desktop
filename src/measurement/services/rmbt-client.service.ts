@@ -366,10 +366,6 @@ export class RMBTClient {
                         return
                     }
                     this.lastMessageReceivedAt = Date.now()
-                    Logger.I.info(
-                        "Last message was received at: %d",
-                        this.lastMessageReceivedAt
-                    )
                     switch (message.message) {
                         case "error":
                             this.cancelMeasurement(

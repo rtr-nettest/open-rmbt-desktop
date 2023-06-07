@@ -11,6 +11,8 @@ import { ELoggerMessage } from "../../enums/logger-message.enum"
 
 export class PreUploadMessageHandler implements IMessageHandler {
     private _chunkSize: number = RMBTClient.minChunkSize
+    private _maxChunksCount = 16
+    private _minChunkSize = 0
     private _preUploadEndTime = Infinity
     private _buffersMap: { [key: string]: Buffer[] } = {}
 
@@ -43,8 +45,11 @@ export class PreUploadMessageHandler implements IMessageHandler {
         if (data.indexOf(ESocketMessage.ACCEPT_GETCHUNKS) === 0) {
             if (Time.nowNs() >= this._preUploadEndTime) {
                 this.stopMessaging()
-            } else {
+            } else if (this.ctx.preUploadChunks < this._maxChunksCount) {
                 this.putNoResult()
+                this.putChunks()
+            } else {
+                this.putNoResultIncreasingChunkSize()
                 this.putChunks()
             }
         }
@@ -65,6 +70,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
             !this.ctx.preUploadChunks || this.ctx.preUploadChunks <= 0
                 ? 1
                 : this.ctx.preUploadChunks * 2
+        this._minChunkSize = this.ctx.preUploadChunks * this._chunkSize
         Logger.I.info(
             ELoggerMessage.T_WRITING_PUTNORESULT,
             this.ctx.index,
@@ -75,6 +81,24 @@ export class PreUploadMessageHandler implements IMessageHandler {
             `${ESocketMessage.PUTNORESULT} ${
                 this._chunkSize * this.ctx.preUploadChunks
             }\n`
+        )
+    }
+
+    private putNoResultIncreasingChunkSize() {
+        this._chunkSize = Math.min(
+            RMBTClient.maxChunkSize,
+            Math.max(this._minChunkSize * 2, this._chunkSize * 2)
+        )
+        this.ctx.preUploadChunks = 1
+        this._maxChunksCount = 1
+        Logger.I.info(
+            ELoggerMessage.T_WRITING_PUTNORESULT,
+            this.ctx.index,
+            ESocketMessage.PUTNORESULT,
+            this._chunkSize
+        )
+        this.ctx.client.write(
+            `${ESocketMessage.PUTNORESULT} ${this._chunkSize}\n`
         )
     }
 

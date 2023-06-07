@@ -100,7 +100,7 @@ test("Submits results", () => {
     expect(mockThread.interimHandler).toHaveBeenCalled()
 })
 
-test.skip("Handler reads data", async () => {
+test("Handler reads data", async () => {
     jest.useRealTimers()
     globalSpy.mockRestore()
     const endTimeS = Number(mockResponse.test_duration)

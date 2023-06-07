@@ -74,6 +74,41 @@ test("Handler stops messaging", () => {
     clearIntervalSpy.mockRestore()
 })
 
+test("Handler checks activity", () => {
+    jest.useFakeTimers()
+    const clearIntervalSpy = jest.spyOn(global, "clearInterval")
+    const finishSpy = jest.spyOn(handler, "onFinish")
+    Time.mockTime(Time.nowNs() + 10e9)
+
+    handler.activityCheck()
+
+    expect(mockClient.off).toBeCalled()
+    expect(clearIntervalSpy).toBeCalledTimes(2)
+    expect(mockThread.threadResult?.up).toBe(handler.result)
+    expect(finishSpy).toBeCalledWith(mockThread.threadResult)
+
+    clearIntervalSpy.mockRestore()
+    Time.mockRestore()
+})
+
+test("Handler reads bytes and nanos", () => {
+    const bytes = 111
+    const nanos = 222
+    Time.mockTime(-Infinity)
+
+    handler.readData(
+        Buffer.from(`${ESocketMessage.TIME} ${nanos} BYTES ${bytes}`)
+    )
+
+    expect(handler.result.bytes[handler.result.bytes.length - 1]).toBe(bytes)
+    expect(handler.result.nsec[handler.result.nsec.length - 1]).toBe(nanos)
+    expect(mockThread.threadResult?.up).toBe(handler.result)
+    expect(mockThread.threadResult?.currentTransfer.up).toBe(bytes)
+    expect(mockThread.threadResult?.currentTime.up).toBe(nanos)
+
+    Time.mockRestore()
+})
+
 test("Handler puts chunks", () => {
     jest.useFakeTimers()
     const mockedTime = Time.nowNs()

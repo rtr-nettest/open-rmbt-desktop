@@ -89,7 +89,7 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
     }
 })
 
-async function connectRetrying(times = 3): Promise<boolean> {
+async function connectRetrying(times = 1): Promise<boolean> {
     let counter = 0
     return new Promise((resolve) => {
         const reconnectInterval = setInterval(async () => {

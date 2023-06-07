@@ -11,6 +11,10 @@ let handler: UploadMessageHandler = new UploadMessageHandler(
     () => void 0
 )
 
+beforeEach(() => {
+    handler = new UploadMessageHandler(mockThread, () => void 0)
+})
+
 test("Handler is initialized", () => {
     expect(typeof handler.stopMessaging).toBe("function")
     expect(typeof handler.readData).toBe("function")

@@ -1,6 +1,5 @@
 import { ESocketMessage } from "../../enums/socket-message.enum"
 import mockFactory from "../utils/rmbt-thread-mock.factory"
-import { EMeasurementServerType } from "../../enums/measurement-server-type.enum"
 import { PingMessageHandler } from "../../services/message-handlers/ping-message-handler.service"
 import { Time } from "../../services/time.service"
 

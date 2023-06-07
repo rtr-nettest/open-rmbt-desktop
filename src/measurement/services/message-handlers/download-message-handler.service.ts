@@ -144,11 +144,7 @@ export class DownloadMessageHandler implements IMessageHandler {
             isFullChunk = this._downloadBytesRead % this.ctx.chunkSize === 0
         }
         if (isFullChunk && (lastByte === 0x00 || lastByte === 0xff)) {
-            const lastNsec = this._result.nsec[this._result.nsec.length - 1]
-            if (
-                this._nsec != Infinity &&
-                (this._nsec > lastNsec || lastNsec === undefined)
-            ) {
+            if (this._nsec > 0 && this._nsec < Infinity) {
                 this._result.addResult(this._downloadBytesRead, this._nsec)
             }
             this._nsec = Infinity

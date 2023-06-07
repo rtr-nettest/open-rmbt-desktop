@@ -10,10 +10,17 @@ export class MeasurementThreadResultList
     nsec: number[] = []
     private resultsCounter = 0
 
-    constructor(private maxStoredResults: number) {}
+    get maxStoredResults() {
+        return this._maxStoredResults
+    }
+
+    constructor(private _maxStoredResults: number) {}
 
     addResult(newBytes: number, newNsec: number) {
         let nsecDiff = newNsec
+        if (newNsec === Infinity) {
+            return
+        }
         if (this.resultsCounter > 0) {
             const prevNsec = this.nsec[this.resultsCounter - 1]
             nsecDiff = newNsec - prevNsec

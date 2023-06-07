@@ -10,38 +10,50 @@ import { Time } from "../time.service"
 import { ELoggerMessage } from "../../enums/logger-message.enum"
 
 export class PreUploadMessageHandler implements IMessageHandler {
-    private chunkSize: number = RMBTClient.minChunkSize
-    private maxChunksCount = 16
-    private minChunkSize = 0
-    private preUploadEndTime = Infinity
-    private buffersMap: { [key: string]: Buffer[] } = {}
+    private _chunkSize: number = RMBTClient.minChunkSize
+    private _maxChunksCount = 16
+    private _minChunkSize = 0
+    private _preUploadEndTime = Infinity
+    private _buffersMap: { [key: string]: Buffer[] } = {}
+
+    get buffersMap() {
+        return this._buffersMap
+    }
+
+    get chunkSize() {
+        return this._chunkSize
+    }
+
+    get minChunkSize() {
+        return this._minChunkSize
+    }
 
     constructor(
         private ctx: IMessageHandlerContext,
-        public onFinish: (chunkSize: number) => void
+        public onFinish: (_chunkSize: number) => void
     ) {
-        for (let i = this.chunkSize; i <= RMBTClient.maxChunkSize; i *= 2) {
-            this.buffersMap[i] = this.generateBuffers(i)
+        for (let i = this._chunkSize; i <= RMBTClient.maxChunkSize; i *= 2) {
+            this._buffersMap[i] = this.generateBuffers(i)
         }
     }
 
     stopMessaging(): void {
-        this.onFinish?.(this.chunkSize)
+        this.onFinish?.(this._chunkSize)
     }
 
     writeData(): void {
         Logger.I.info(ELoggerMessage.T_SENDING_CHUNKS, this.ctx.index)
         this.ctx.preUploadChunks = 0
-        this.preUploadEndTime = Time.nowNs() + 2 * 1e9
+        this._preUploadEndTime = Time.nowNs() + 2 * 1e9
         this.putNoResult()
         this.putChunks()
     }
 
     readData(data: Buffer): void {
         if (data.indexOf(ESocketMessage.ACCEPT_GETCHUNKS) === 0) {
-            if (Time.nowNs() >= this.preUploadEndTime) {
+            if (Time.nowNs() >= this._preUploadEndTime) {
                 this.stopMessaging()
-            } else if (this.ctx.preUploadChunks < this.maxChunksCount) {
+            } else if (this.ctx.preUploadChunks < this._maxChunksCount) {
                 this.putNoResult()
                 this.putChunks()
             } else {
@@ -51,11 +63,11 @@ export class PreUploadMessageHandler implements IMessageHandler {
         }
     }
 
-    private generateBuffers(chunkSize: number) {
+    private generateBuffers(_chunkSize: number) {
         let maxStoredResults = 3
         const buffers = []
         while (maxStoredResults > 0) {
-            buffers.push(randomBytes(chunkSize))
+            buffers.push(randomBytes(_chunkSize))
             maxStoredResults--
         }
         return buffers
@@ -66,35 +78,35 @@ export class PreUploadMessageHandler implements IMessageHandler {
             !this.ctx.preUploadChunks || this.ctx.preUploadChunks <= 0
                 ? 1
                 : this.ctx.preUploadChunks * 2
-        this.minChunkSize = this.ctx.preUploadChunks * this.chunkSize
+        this._minChunkSize = this.ctx.preUploadChunks * this._chunkSize
         Logger.I.info(
             ELoggerMessage.T_WRITING_PUTNORESULT,
             this.ctx.index,
             ESocketMessage.PUTNORESULT,
-            this.chunkSize * this.ctx.preUploadChunks
+            this._chunkSize * this.ctx.preUploadChunks
         )
         this.ctx.client.write(
             `${ESocketMessage.PUTNORESULT} ${
-                this.chunkSize * this.ctx.preUploadChunks
+                this._chunkSize * this.ctx.preUploadChunks
             }\n`
         )
     }
 
     private putNoResultIncreasingChunkSize() {
-        this.chunkSize = Math.min(
+        this._chunkSize = Math.min(
             RMBTClient.maxChunkSize,
-            Math.max(this.minChunkSize * 2, this.chunkSize * 2)
+            Math.max(this._minChunkSize * 2, this._chunkSize * 2)
         )
         this.ctx.preUploadChunks = 1
-        this.maxChunksCount = 1
+        this._maxChunksCount = 1
         Logger.I.info(
             ELoggerMessage.T_WRITING_PUTNORESULT,
             this.ctx.index,
             ESocketMessage.PUTNORESULT,
-            this.chunkSize
+            this._chunkSize
         )
         this.ctx.client.write(
-            `${ESocketMessage.PUTNORESULT} ${this.chunkSize}\n`
+            `${ESocketMessage.PUTNORESULT} ${this._chunkSize}\n`
         )
     }
 
@@ -105,7 +117,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
             this.ctx.preUploadChunks
         )
         let bufferIndex = 0
-        const buffers = this.buffersMap[this.chunkSize]
+        const buffers = this._buffersMap[this._chunkSize]
         for (let i = 0; i < this.ctx.preUploadChunks; i++) {
             let buffer = buffers[bufferIndex]!
             if (bufferIndex >= buffers.length - 1) {

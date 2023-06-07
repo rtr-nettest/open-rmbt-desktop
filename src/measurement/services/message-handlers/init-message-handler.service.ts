@@ -7,18 +7,19 @@ import {
 import { Logger } from "../logger.service"
 
 export class InitMessageHandler implements IMessageHandler {
-    private isInitialized = false
-    private inactivityTimeout = 0
+    private _isInitialized = false
+
+    get isInitialized() {
+        return this._isInitialized
+    }
 
     constructor(
         private ctx: IMessageHandlerContext,
         public onFinish: (result: boolean) => void
-    ) {
-        this.inactivityTimeout = Number(this.ctx.params.test_duration) * 1e6
-    }
+    ) {}
 
     stopMessaging(): void {
-        if (this.isInitialized) {
+        if (this._isInitialized) {
             Logger.I.info(ELoggerMessage.T_INIT_FINISHED, this.ctx.index)
         } else {
             Logger.I.info(
@@ -26,7 +27,7 @@ export class InitMessageHandler implements IMessageHandler {
                 this.ctx.index
             )
         }
-        this.onFinish?.(this.isInitialized)
+        this.onFinish?.(this._isInitialized)
     }
 
     writeData(): void {
@@ -34,13 +35,6 @@ export class InitMessageHandler implements IMessageHandler {
             Logger.I.info(ELoggerMessage.T_REQUESTING_UPGRADE, this.ctx.index)
             this.ctx.client.write(ESocketMessage.HTTP_UPGRADE, "ascii")
         }
-        setTimeout(() => {
-            Logger.I.info(ELoggerMessage.T_CHECKING_ACTIVITY, this.ctx.index)
-            if (!this.isInitialized) {
-                Logger.I.info(ELoggerMessage.T_TIMEOUT, this.ctx.index)
-                this.stopMessaging()
-            }
-        }, this.inactivityTimeout)
     }
 
     readData(data: Buffer): void {
@@ -75,7 +69,7 @@ export class InitMessageHandler implements IMessageHandler {
             return
         }
         if (dataString.includes(ESocketMessage.ACCEPT_GETCHUNKS)) {
-            this.isInitialized = true
+            this._isInitialized = true
             this.stopMessaging()
             return
         }

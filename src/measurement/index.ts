@@ -115,15 +115,7 @@ export class MeasurementRunner {
         this.rmbtClient?.abortMeasurement()
     }
 
-    getBasicNetworkInfo(): IBasicNetworkInfo {
-        return {
-            ipAddress: this.rmbtClient?.params.client_remote_ip ?? "-",
-            serverName: this.rmbtClient?.params.test_server_name ?? "-",
-            providerName: this.rmbtClient?.params.provider ?? "-",
-        }
-    }
-
-    getCurrentPhaseState(): IMeasurementPhaseState {
+    getCurrentPhaseState(): IMeasurementPhaseState & IBasicNetworkInfo {
         const phase =
             this.rmbtClient?.measurementStatus ?? EMeasurementStatus.NOT_STARTED
         return {
@@ -134,6 +126,9 @@ export class MeasurementRunner {
             up: this.rmbtClient?.interimUpMbps ?? -1,
             phase,
             testUuid: this.rmbtClient?.params?.test_uuid ?? "",
+            ipAddress: this.rmbtClient?.params.client_remote_ip ?? "-",
+            serverName: this.rmbtClient?.params.test_server_name ?? "-",
+            providerName: this.rmbtClient?.params.provider ?? "-",
         }
     }
 

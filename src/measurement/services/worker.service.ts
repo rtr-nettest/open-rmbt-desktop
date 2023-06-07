@@ -25,8 +25,7 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
                     )
                 }
             }
-            await thread.connect(workerData.result)
-            isConnected = await thread.manageInit()
+            isConnected = await connectRetrying()
             parentPort?.postMessage(
                 new OutgoingMessageWithData("connected", isConnected)
             )
@@ -60,8 +59,7 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
             )
             break
         case "preUpload":
-            await thread?.connect(workerData.result)
-            isConnected = (await thread?.manageInit()) || false
+            isConnected = await connectRetrying()
             if (isConnected) {
                 chunks = await thread?.managePreUpload()
             }
@@ -72,8 +70,7 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
         case "reconnectForUpload":
             isConnected = thread?.isConnected || false
             if (!isConnected) {
-                await thread?.connect(workerData.result)
-                isConnected = (await thread?.manageInit()) || false
+                isConnected = await connectRetrying()
             }
             parentPort?.postMessage(
                 new OutgoingMessageWithData("reconnectedForUpload", isConnected)
@@ -91,3 +88,35 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
             break
     }
 })
+
+async function connectRetrying(times = 2): Promise<boolean> {
+    let isConnected = false
+    let timeout: NodeJS.Timeout
+    for (let i = 0; i < times; i++) {
+        isConnected = (await Promise.race([
+            new Promise(async (resolve) => {
+                let connected = false
+                try {
+                    await thread!.connect(workerData.result)
+                    connected = await thread!.manageInit()
+                } finally {
+                    Logger.I.info("Thread %d is connected.", thread!.index)
+                    clearTimeout(timeout)
+                    resolve(connected)
+                }
+            }),
+            new Promise((resolve) => {
+                timeout = setTimeout(() => {
+                    Logger.I.info("Thread %d is not connected.", thread!.index)
+                    resolve(false)
+                }, 3000)
+            }),
+        ])) as boolean
+        if (isConnected) {
+            break
+        }
+        Logger.I.warn("Socket hang. Reconnecting.")
+        await thread!.disconnect()
+    }
+    return isConnected
+}

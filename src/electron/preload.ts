@@ -6,8 +6,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     runMeasurement: () => ipcRenderer.send(Events.RUN_MEASUREMENT),
     abortMeasurement: () => ipcRenderer.send(Events.ABORT_MEASUREMENT),
     getEnv: () => ipcRenderer.invoke(Events.GET_ENV),
-    getBasicNetworkInfo: () =>
-        ipcRenderer.invoke(Events.GET_BASIC_NETWORK_INFO),
     getCPUUsage: () => ipcRenderer.invoke(Events.GET_CPU_USAGE),
     getMeasurementState: () => ipcRenderer.invoke(Events.GET_MEASUREMENT_STATE),
     getMeasurementResult: (testUuid: string) =>

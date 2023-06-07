@@ -80,9 +80,10 @@ declare global {
             runMeasurement: () => Promise<void>
             abortMeasurement: () => Promise<void>
             getEnv: () => Promise<IEnv>
-            getBasicNetworkInfo: () => Promise<IBasicNetworkInfo>
             getCPUUsage: () => Promise<ICPU>
-            getMeasurementState: () => Promise<IMeasurementPhaseState>
+            getMeasurementState: () => Promise<
+                IMeasurementPhaseState & IBasicNetworkInfo
+            >
             getMeasurementResult: (
                 testUuid: string
             ) => Promise<ISimpleHistoryResult>

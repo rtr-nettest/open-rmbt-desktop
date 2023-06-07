@@ -60,3 +60,4 @@ spec/fixtures/logo.png
 out/
 .webpack
 src/measurement/services/worker.service.js
+coverage/

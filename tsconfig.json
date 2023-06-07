@@ -12,5 +12,12 @@
             "*": ["node_modules/*"]
         }
     },
-    "exclude": ["dist", "src/ui", "out", "*.config.js"]
+    "exclude": [
+        "dist",
+        "src/ui",
+        "out",
+        "*.config.js",
+        "coverage",
+        "src/measurement/test"
+    ]
 }

@@ -4,7 +4,6 @@ import { Socket } from "net"
 import { RMBTClient } from "../../services/rmbt-client.service"
 import { MeasurementThreadResult } from "../../dto/measurement-thread-result.dto"
 import { Logger } from "../../services/logger.service"
-import { EMeasurementServerType } from "../../enums/measurement-server-type.enum"
 
 jest.mock("../../services/rmbt-thread.service")
 jest.mock("net")

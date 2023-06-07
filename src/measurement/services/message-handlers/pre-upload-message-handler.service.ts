@@ -20,6 +20,14 @@ export class PreUploadMessageHandler implements IMessageHandler {
         return this._buffersMap
     }
 
+    get chunkSize() {
+        return this._chunkSize
+    }
+
+    get minChunkSize() {
+        return this._minChunkSize
+    }
+
     constructor(
         private ctx: IMessageHandlerContext,
         public onFinish: (_chunkSize: number) => void

@@ -18,6 +18,9 @@ export class MeasurementThreadResultList
 
     addResult(newBytes: number, newNsec: number) {
         let nsecDiff = newNsec
+        if (newNsec === Infinity) {
+            return
+        }
         if (this.resultsCounter > 0) {
             const prevNsec = this.nsec[this.resultsCounter - 1]
             nsecDiff = newNsec - prevNsec

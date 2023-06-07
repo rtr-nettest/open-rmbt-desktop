@@ -3,7 +3,6 @@ import { ESocketMessage } from "../../enums/socket-message.enum"
 import mockFactory from "../utils/rmbt-thread-mock.factory"
 import { randomBytes } from "crypto"
 import { PreDownloadMessageHandler } from "../../services/message-handlers/pre-download-message-handler.service"
-import { Logger } from "../../services/logger.service"
 
 const { mockThread, mockClient } = mockFactory()
 

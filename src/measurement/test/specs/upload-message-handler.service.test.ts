@@ -17,11 +17,6 @@ let handler: UploadMessageHandler = new UploadMessageHandler(
     mockThread,
     () => void 0
 )
-const tempFile = "temp.txt"
-
-afterAll(async () => {
-    if (fs.existsSync(tempFile)) await fsp.unlink(tempFile)
-})
 
 test("Handler is initialized", () => {
     expect(typeof handler.stopMessaging).toBe("function")
@@ -64,6 +59,21 @@ test("Handler submits interim results", () => {
     expect(interimSpy).toBeCalled()
 })
 
+test("Handler stops messaging", () => {
+    jest.useFakeTimers()
+    const clearIntervalSpy = jest.spyOn(global, "clearInterval")
+    const finishSpy = jest.spyOn(handler, "onFinish")
+
+    handler.readData(Buffer.from(ESocketMessage.ACCEPT_GETCHUNKS))
+
+    expect(mockClient.off).toBeCalled()
+    expect(clearIntervalSpy).toBeCalledTimes(2)
+    expect(mockThread.threadResult?.up).toBe(handler.result)
+    expect(finishSpy).toBeCalledWith(mockThread.threadResult)
+
+    clearIntervalSpy.mockRestore()
+})
+
 test("Handler puts chunks", () => {
     jest.useFakeTimers()
     const mockedTime = Time.nowNs()
@@ -87,4 +97,6 @@ test("Handler puts chunks", () => {
     handler.readData(Buffer.from(ESocketMessage.OK))
     expect(mockClient.write).toBeCalledWith(writtenBuffer)
     expect(globalSpy).toBeCalled()
+
+    globalSpy.mockRestore()
 })

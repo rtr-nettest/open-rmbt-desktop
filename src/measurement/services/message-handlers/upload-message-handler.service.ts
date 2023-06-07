@@ -64,6 +64,7 @@ export class UploadMessageHandler implements IMessageHandler {
             this.ctx.phase,
             this.ctx.index
         )
+        this.ctx.client.off("drain", this.putChunks)
         clearInterval(this._interimHandlerInterval)
         clearInterval(this._activityInterval)
         this.ctx.threadResult!.up = this._result

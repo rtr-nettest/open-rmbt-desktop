@@ -1,7 +1,10 @@
 import { Injectable } from "@angular/core"
 import { MatSnackBar } from "@angular/material/snack-bar"
 import { MatDialog } from "@angular/material/dialog"
-import { ConfirmDialogComponent } from "../widgets/confirm-dialog/confirm-dialog.component"
+import {
+    ConfirmDialogComponent,
+    ConfirmDialogOpts,
+} from "../widgets/confirm-dialog/confirm-dialog.component"
 
 @Injectable({
     providedIn: "root",
@@ -16,11 +19,16 @@ export class MessageService {
         })
     }
 
-    openConfirmDialog(text: string, onConfirm: () => void) {
+    openConfirmDialog(
+        text: string,
+        onConfirm: () => void,
+        options?: ConfirmDialogOpts
+    ) {
         this.dialog
             .open(ConfirmDialogComponent, {
                 data: {
                     text,
+                    ...options,
                 },
             })
             .afterClosed()

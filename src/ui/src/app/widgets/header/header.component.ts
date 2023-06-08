@@ -32,10 +32,14 @@ export class HeaderComponent {
         if (link === this.noGo) {
             event.stopPropagation()
             event.preventDefault()
-            this.message.openConfirmDialog(THIS_INTERRUPTS_ACTION, () => {
-                window.electronAPI.abortMeasurement()
-                this.router.navigate(["/"])
-            })
+            this.message.openConfirmDialog(
+                THIS_INTERRUPTS_ACTION,
+                () => {
+                    window.electronAPI.abortMeasurement()
+                    this.router.navigate(["/"])
+                },
+                { canCancel: true }
+            )
         }
     }
 }

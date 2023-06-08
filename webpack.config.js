@@ -1,5 +1,6 @@
 const path = require("path")
 const Dotenv = require("dotenv-webpack")
+const webpack = require("webpack")
 
 const baseConfig = {
     node: {
@@ -26,7 +27,13 @@ const baseConfig = {
     resolve: {
         extensions: [".js", ".ts", ".jsx", ".tsx", ".css", ".json"],
     },
-    plugins: [new Dotenv()],
+    plugins: [
+        new Dotenv(),
+        new webpack.NormalModuleReplacementPlugin(
+            /m[sy]sql2?|oracle(db)?|sqlite3|mapbox|pg[-a-z]*/,
+            "node-noop"
+        ),
+    ],
 }
 
 module.exports = [

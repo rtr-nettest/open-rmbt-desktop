@@ -6,10 +6,10 @@ export interface IMeasurementResult {
     client_version?: string
     cpu?: ICPU
     model?: string
-    network_type: number
-    operating_system: string
+    network_type?: number
+    operating_system?: string
     pings: IPing[]
-    platform: string
+    platform?: string
     speed_detail: ISpeedItem[]
     test_bytes_download: number
     test_bytes_upload: number
@@ -25,6 +25,9 @@ export interface IMeasurementResult {
     timezone: string
     type: string
     user_server_selection: number
+    measurement_server?: string
+    provider_name?: string
+    ip_address?: string
 }
 
 export interface IMeasurementThreadResult {

@@ -35,6 +35,9 @@ export class MeasurementResult implements IMeasurementResult {
     timezone: string
     type: string
     user_server_selection: number
+    measurement_server?: string
+    provider_name?: string
+    ip_address?: string | undefined
 
     constructor(
         registrationRequest: IMeasurementRegistrationRequest,
@@ -68,6 +71,9 @@ export class MeasurementResult implements IMeasurementResult {
         this.test_nsec_upload = overallResultUp.nsec
         this.test_speed_upload = overallResultUp.speed / 1e3
         this.cpu = cpu
+        this.measurement_server = registrationResponse.test_server_name
+        this.provider_name = registrationResponse.provider
+        this.ip_address = registrationResponse.client_remote_ip
     }
 
     private getPings(threadResults: IMeasurementThreadResult[]) {

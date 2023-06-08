@@ -13,6 +13,7 @@ import tz from "dayjs/plugin/timezone"
 import { RMBTClient } from "./rmbt-client.service"
 import { ELoggerMessage } from "../enums/logger-message.enum"
 import { Store } from "./store.service"
+import { DBService } from "./db.service"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -123,6 +124,7 @@ export class ControlServer {
             process.env.RESULT_SUBMISSION_PATH,
             result
         )
+        await DBService.I.saveMeasurement(result)
         try {
             const response = (
                 await axios.post(
@@ -141,107 +143,117 @@ export class ControlServer {
         uuid: string
     ): Promise<ISimpleHistoryResult | undefined> {
         Logger.I.info("Receiving measurement result by UUID: %s", uuid)
-        let response: any
-        let retVal: ISimpleHistoryResult | undefined = undefined
-        const fullResultLink = `${process.env.FULL_HISTORY_RESUlT_URL}${uuid}`
+        let retVal: ISimpleHistoryResult | undefined
         try {
             if (process.env.HISTORY_RESULT_PATH_METHOD === "GET") {
                 // as used by Specure
-                Logger.I.info(ELoggerMessage.GET_REQUEST, fullResultLink)
-                response = (
-                    await axios.get(
-                        `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}/${uuid}`,
-                        { headers: this.headers }
-                    )
-                ).data
-                Logger.I.info(ELoggerMessage.RESPONSE, response)
-                if (response) {
-                    retVal = {
-                        measurementDate: response.measurement_date,
-                        measurementServerName:
-                            response.measurementServerName ??
-                            response.measurement_server_name,
-                        downloadKbit: response.speed_download,
-                        uploadKbit: response.speed_upload,
-                        ping: response.ping ?? response.ping_median,
-                        providerName:
-                            response.operator ?? response.client_provider,
-                        ipAddress: response.ip_address,
-                        fullResultLink,
-                        downloadOverTime:
-                            RMBTClient.getOverallResultsFromSpeedItems(
-                                response.speed_detail,
-                                "download"
-                            ),
-                        uploadOverTime:
-                            RMBTClient.getOverallResultsFromSpeedItems(
-                                response.speed_detail,
-                                "upload"
-                            ),
-                    }
-                }
+                retVal = await this.getSpecureMeasurementResult(uuid)
             } else if (process.env.HISTORY_RESULT_PATH_METHOD === "POST") {
                 // as used by RTR
-                const body = {
-                    test_uuid: uuid,
-                    timezone: dayjs.tz.guess(),
-                    capabilities: { classification: { count: 4 } },
-                }
-                Logger.I.info(
-                    ELoggerMessage.POST_REQUEST,
-                    process.env.HISTORY_RESULT_PATH,
-                    body
-                )
-                response = (
-                    await axios.post(
-                        `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}`,
-                        body,
+                retVal = await this.getRTRMeasurementResult(uuid)
+            }
+        } catch (e: any) {
+            retVal = await DBService.I.getMeasurementByUuid(uuid)
+            if (!retVal) {
+                this.handleError(e)
+            }
+        }
+        Logger.I.info("The final result is: %o", retVal)
+        return retVal
+    }
+
+    private async getRTRMeasurementResult(uuid: string) {
+        let response: any
+        let retVal: ISimpleHistoryResult | undefined = undefined
+        const body = {
+            test_uuid: uuid,
+            timezone: dayjs.tz.guess(),
+            capabilities: { classification: { count: 4 } },
+        }
+        Logger.I.info(
+            ELoggerMessage.POST_REQUEST,
+            process.env.HISTORY_RESULT_PATH,
+            body
+        )
+        response = (
+            await axios.post(
+                `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}`,
+                body,
+                { headers: this.headers }
+            )
+        ).data
+        Logger.I.info(ELoggerMessage.RESPONSE, response)
+        if (response?.testresult?.length) {
+            response = response.testresult[0]
+            let openTestsResponse: any
+            if (
+                response.open_test_uuid &&
+                process.env.HISTORY_RESULT_STATS_PATH
+            ) {
+                openTestsResponse = (
+                    await axios.get(
+                        `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_STATS_PATH}/${response.open_test_uuid}`,
                         { headers: this.headers }
                     )
                 ).data
-                Logger.I.info(ELoggerMessage.RESPONSE, response)
-                if (response?.testresult?.length) {
-                    response = response.testresult[0]
-                    let openTestsResponse: any
-                    if (
-                        response.open_test_uuid &&
-                        process.env.HISTORY_RESULT_STATS_PATH
-                    ) {
-                        openTestsResponse = (
-                            await axios.get(
-                                `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_STATS_PATH}/${response.open_test_uuid}`,
-                                { headers: this.headers }
-                            )
-                        ).data
-                    }
-                    Logger.I.info(
-                        "Open test response is: %o",
-                        openTestsResponse
-                    )
-                    retVal = {
-                        measurementDate: dayjs(response.time).toISOString(),
-                        measurementServerName: openTestsResponse?.server_name,
-                        downloadKbit: openTestsResponse?.download_kbit,
-                        uploadKbit: openTestsResponse?.upload_kbit,
-                        ping: openTestsResponse?.ping_ms,
-                        providerName: openTestsResponse?.public_ip_as_name,
-                        ipAddress: openTestsResponse?.ip_anonym,
-                        fullResultLink,
-                        downloadClass:
-                            response.measurement_result
-                                ?.download_classification,
-                        uploadClass:
-                            response.measurement_result?.upload_classification,
-                        pingClass:
-                            response.measurement_result?.ping_classification,
-                    }
-                }
             }
-            Logger.I.info("The final result is: %o", retVal)
-        } catch (e: any) {
-            this.handleError(e)
+            Logger.I.info("Open test response is: %o", openTestsResponse)
+            retVal = {
+                measurementDate: dayjs(response.time).toISOString(),
+                measurementServerName: openTestsResponse?.server_name,
+                downloadKbit: openTestsResponse?.download_kbit,
+                uploadKbit: openTestsResponse?.upload_kbit,
+                ping: openTestsResponse?.ping_ms,
+                providerName: openTestsResponse?.public_ip_as_name,
+                ipAddress: openTestsResponse?.ip_anonym,
+                fullResultLink: this.getFullResultLink(uuid),
+                downloadClass:
+                    response.measurement_result?.download_classification,
+                uploadClass: response.measurement_result?.upload_classification,
+                pingClass: response.measurement_result?.ping_classification,
+            }
         }
         return retVal
+    }
+
+    private async getSpecureMeasurementResult(uuid: string) {
+        let response: any
+        let retVal: ISimpleHistoryResult | undefined = undefined
+        Logger.I.info(ELoggerMessage.GET_REQUEST, this.getFullResultLink(uuid))
+        response = (
+            await axios.get(
+                `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}/${uuid}`,
+                { headers: this.headers }
+            )
+        ).data
+        Logger.I.info(ELoggerMessage.RESPONSE, response)
+        if (response) {
+            retVal = {
+                measurementDate: response.measurement_date,
+                measurementServerName:
+                    response.measurementServerName ??
+                    response.measurement_server_name,
+                downloadKbit: response.speed_download,
+                uploadKbit: response.speed_upload,
+                ping: response.ping ?? response.ping_median,
+                providerName: response.operator ?? response.client_provider,
+                ipAddress: response.ip_address,
+                fullResultLink: this.getFullResultLink(uuid),
+                downloadOverTime: RMBTClient.getOverallResultsFromSpeedItems(
+                    response.speed_detail,
+                    "download"
+                ),
+                uploadOverTime: RMBTClient.getOverallResultsFromSpeedItems(
+                    response.speed_detail,
+                    "upload"
+                ),
+            }
+        }
+        return retVal
+    }
+
+    private getFullResultLink(uuid: string) {
+        return `${process.env.FULL_HISTORY_RESUlT_URL}${uuid}`
     }
 
     private handleError(e: any) {

@@ -71,8 +71,9 @@ export interface IVoipTestResult {
     voip_result_in_num_packets: number
 }
 
+export const MEASUREMENT_TABLE = "measurement"
+
 export const MeasurementResultFields = [
-    '"id" integer PRIMARY KEY AUTOINCREMENT NOT NULL',
     '"client_name" varchar',
     '"client_version" varchar',
     '"client_uuid" varchar NOT NULL',

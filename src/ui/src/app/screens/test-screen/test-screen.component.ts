@@ -33,6 +33,7 @@ export class TestScreenComponent {
                 this.message.openConfirmDialog(
                     ERROR_OCCURED_DURING_MEASUREMENT,
                     () => {
+                        // TODO: fix infinite loop
                         this.mainStore.error$.next(null)
                         this.router.navigate(["/"])
                     }

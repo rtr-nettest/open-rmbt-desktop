@@ -3,8 +3,8 @@ import { Logger } from "./logger.service"
 import { IMeasurementResult } from "../interfaces/measurement-result.interface"
 import { ISimpleHistoryResult } from "../interfaces/simple-history-result.interface"
 import { SimpleHistoryResult } from "../dto/simple-history-result.dto"
-import { DataSource } from "typeorm"
-import { Measurement } from "../models/measurement.model"
+import fs from "fs"
+import initSqlJs, { Database } from "sql.js"
 
 export class DBService {
     private static dbFilePath = Store.I.path.replace(
@@ -17,19 +17,29 @@ export class DBService {
         return this.instance
     }
 
-    private db = new DataSource({
-        type: "sqlite",
-        database: DBService.dbFilePath,
-        entities: [Measurement],
-        logging: process.env.DEV === "true",
-    })
+    private db?: Database
 
     private constructor() {}
 
     async init() {
         try {
-            await this.db.initialize()
-            await this.db.synchronize()
+            if (!fs.existsSync(DBService.dbFilePath)) {
+                fs.writeFileSync(DBService.dbFilePath, "")
+            }
+            const dbFile = fs.readFileSync(DBService.dbFilePath)
+            const SQL = await initSqlJs()
+            this.db = new SQL.Database(dbFile)
+        } catch (e) {
+            Logger.I.warn(e)
+        }
+    }
+
+    async persist() {
+        try {
+            const data = this.db?.export()
+            if (data) {
+                fs.writeFileSync(DBService.dbFilePath, data)
+            }
         } catch (e) {
             Logger.I.warn(e)
         }
@@ -37,7 +47,7 @@ export class DBService {
 
     async saveMeasurement(result: IMeasurementResult) {
         try {
-            return await this.db.manager.save(Measurement.fromDto(result))
+            // return await this.db.manager.save(Measurement.fromDto(result))
         } catch (e) {
             Logger.I.warn(e)
         }
@@ -46,15 +56,15 @@ export class DBService {
     async getMeasurementByUuid(
         testUuid: string
     ): Promise<ISimpleHistoryResult | undefined> {
-        try {
-            const entry: Measurement = await this.db.manager.findOneByOrFail(
-                Measurement,
-                { test_uuid: testUuid }
-            )
-            return SimpleHistoryResult.fromLocalMeasurementResult(entry)
-        } catch (e) {
-            Logger.I.warn(e)
-            return undefined
-        }
+        // try {
+        //     const entry: Measurement = await this.db.manager.findOneByOrFail(
+        //         Measurement,
+        //         { test_uuid: testUuid }
+        //     )
+        //     return SimpleHistoryResult.fromLocalMeasurementResult(entry)
+        // } catch (e) {
+        // Logger.I.warn(e)
+        return undefined
+        // }
     }
 }

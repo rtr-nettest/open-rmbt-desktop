@@ -16,6 +16,7 @@ import { IMeasurementServerResponse } from "./interfaces/measurement-server-resp
 import { config } from "dotenv"
 import { IPInfoService } from "./services/ip-info.service"
 import { DBService } from "./services/db.service"
+import "reflect-metadata"
 
 config({
     path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
@@ -43,7 +44,7 @@ export class MeasurementRunner {
 
     private constructor() {
         Logger.init()
-        DBService.I.createMeasurementsTable()
+        DBService.I.init()
     }
 
     async registerClient(options?: MeasurementOptions): Promise<IUserSettings> {

@@ -1,15 +1,10 @@
-import path from "path"
-import fs from "fs"
 import { Store } from "./store.service"
 import { Logger } from "./logger.service"
 import { IMeasurementResult } from "../interfaces/measurement-result.interface"
 import { ISimpleHistoryResult } from "../interfaces/simple-history-result.interface"
 import { SimpleHistoryResult } from "../dto/simple-history-result.dto"
-import { Sequelize } from "sequelize"
-import {
-    Measurement,
-    createMeasurementModel,
-} from "../models/measurement.model"
+import { DataSource } from "typeorm"
+import { Measurement } from "../models/measurement.model"
 
 export class DBService {
     private static dbFilePath = Store.I.path.replace(
@@ -22,18 +17,19 @@ export class DBService {
         return this.instance
     }
 
-    private db = new Sequelize({
-        dialect: "sqlite",
-        storage: DBService.dbFilePath,
-        logging: Logger.I.debug,
+    private db = new DataSource({
+        type: "sqlite",
+        database: DBService.dbFilePath,
+        entities: [Measurement],
+        logging: process.env.DEV === "true",
     })
 
     private constructor() {}
 
-    async createMeasurementsTable() {
+    async init() {
         try {
-            createMeasurementModel(this.db)
-            await Measurement.sync()
+            await this.db.initialize()
+            await this.db.synchronize()
         } catch (e) {
             Logger.I.warn(e)
         }
@@ -41,8 +37,7 @@ export class DBService {
 
     async saveMeasurement(result: IMeasurementResult) {
         try {
-            const entry = await Measurement.create(result as any)
-            Logger.I.info("Saved to DB: %o", entry)
+            return await this.db.manager.save(Measurement.fromDto(result))
         } catch (e) {
             Logger.I.warn(e)
         }
@@ -52,12 +47,10 @@ export class DBService {
         testUuid: string
     ): Promise<ISimpleHistoryResult | undefined> {
         try {
-            const entry: IMeasurementResult = (await Measurement.findOne({
-                where: {
-                    test_uuid: testUuid,
-                },
-            })) as unknown as IMeasurementResult
-            Logger.I.info("Test UUID: %s. Entry %o", testUuid, entry)
+            const entry: Measurement = await this.db.manager.findOneByOrFail(
+                Measurement,
+                { test_uuid: testUuid }
+            )
             return SimpleHistoryResult.fromLocalMeasurementResult(entry)
         } catch (e) {
             Logger.I.warn(e)

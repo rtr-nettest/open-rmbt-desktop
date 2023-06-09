@@ -1,12 +1,13 @@
 const path = require("path")
 const Dotenv = require("dotenv-webpack")
-const webpack = require("webpack")
+const CopyPlugin = require("copy-webpack-plugin")
 
 const baseConfig = {
     node: {
         __dirname: false,
     },
     module: {
+        noParse: /sql.js/,
         rules: [
             {
                 test: /\.node$/,
@@ -27,13 +28,7 @@ const baseConfig = {
     resolve: {
         extensions: [".js", ".ts", ".jsx", ".tsx", ".css", ".json"],
     },
-    plugins: [
-        new Dotenv(),
-        new webpack.NormalModuleReplacementPlugin(
-            /m[sy]sql2?|oracle(db)?|sqlite3|mapbox|pg[-a-z]*/,
-            "node-noop"
-        ),
-    ],
+    plugins: [new Dotenv()],
 }
 
 module.exports = [
@@ -45,6 +40,16 @@ module.exports = [
             filename: "main.js",
         },
         target: "electron-main",
+        plugins: [
+            ...baseConfig.plugins,
+            new CopyPlugin({
+                patterns: [
+                    {
+                        from: "./node_modules/sql.js/dist/sql-wasm.wasm",
+                    },
+                ],
+            }),
+        ],
     },
     {
         ...baseConfig,

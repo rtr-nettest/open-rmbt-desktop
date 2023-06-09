@@ -34,6 +34,7 @@
         "@types/sql.js": "^1.4.4",
         "@types/stream-throttle": "^0.1.1",
         "@vercel/webpack-asset-relocator-loader": "^1.7.3",
+        "copy-webpack-plugin": "^11.0.0",
         "cross-env": "^7.0.3",
         "dotenv-webpack": "^8.0.1",
         "electron": "^23.1.0",

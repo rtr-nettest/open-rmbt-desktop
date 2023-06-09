@@ -1,6 +1,9 @@
 import { Store } from "./store.service"
 import { Logger } from "./logger.service"
-import { IMeasurementResult } from "../interfaces/measurement-result.interface"
+import {
+    IMeasurementResult,
+    MeasurementResultFields,
+} from "../interfaces/measurement-result.interface"
 import { ISimpleHistoryResult } from "../interfaces/simple-history-result.interface"
 import { SimpleHistoryResult } from "../dto/simple-history-result.dto"
 import fs from "fs"
@@ -29,6 +32,7 @@ export class DBService {
             const dbFile = fs.readFileSync(DBService.dbFilePath)
             const SQL = await initSqlJs()
             this.db = new SQL.Database(dbFile)
+            this.createTable("measurement", MeasurementResultFields)
         } catch (e) {
             Logger.I.warn(e)
         }
@@ -43,6 +47,13 @@ export class DBService {
         } catch (e) {
             Logger.I.warn(e)
         }
+    }
+
+    async createTable(tableName: string, fields: string[] = []) {
+        this.db?.run(
+            `CREATE TABLE IF NOT EXISTS ${tableName} (${fields.join(",")})`
+        )
+        this.persist()
     }
 
     async saveMeasurement(result: IMeasurementResult) {

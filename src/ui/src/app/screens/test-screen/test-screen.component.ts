@@ -1,6 +1,12 @@
-import { ChangeDetectionStrategy, Component } from "@angular/core"
+import { ChangeDetectionStrategy, Component, OnDestroy } from "@angular/core"
 import { Router } from "@angular/router"
-import { tap, withLatestFrom } from "rxjs"
+import {
+    Subject,
+    distinctUntilChanged,
+    takeUntil,
+    tap,
+    withLatestFrom,
+} from "rxjs"
 import { MainStore } from "src/app/store/main.store"
 import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
@@ -9,6 +15,7 @@ import {
     ERROR_OCCURED_DURING_MEASUREMENT,
     ERROR_OCCURED_SENDING_RESULTS,
 } from "src/app/constants/strings"
+import { ITestVisualizationState } from "src/app/interfaces/test-visualization-state.interface"
 
 @Component({
     selector: "app-test-screen",
@@ -16,24 +23,22 @@ import {
     styleUrls: ["./test-screen.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TestScreenComponent {
+export class TestScreenComponent implements OnDestroy {
     env$ = this.mainStore.env$
+    stopped$: Subject<void> = new Subject()
     visualization$ = this.store.launchTest().pipe(
         withLatestFrom(this.mainStore.error$),
+        distinctUntilChanged(),
+        takeUntil(this.stopped$),
         tap(([state, error]) => {
-            const goToResult = () =>
-                this.router.navigate([
-                    "result",
-                    state.phases[state.currentPhaseName].testUuid,
-                ])
             if (
                 error &&
                 state.currentPhaseName !== EMeasurementStatus.SUBMITTING_RESULTS
             ) {
+                this.stopped$.next()
                 this.message.openConfirmDialog(
                     ERROR_OCCURED_DURING_MEASUREMENT,
                     () => {
-                        // TODO: fix infinite loop
                         this.mainStore.error$.next(null)
                         this.router.navigate(["/"])
                     }
@@ -42,15 +47,17 @@ export class TestScreenComponent {
                 error &&
                 state.currentPhaseName === EMeasurementStatus.SUBMITTING_RESULTS
             ) {
+                this.stopped$.next()
                 this.message.openConfirmDialog(
                     ERROR_OCCURED_SENDING_RESULTS,
                     () => {
                         this.mainStore.error$.next(null)
-                        goToResult()
+                        this.goToResult(state)
                     }
                 )
             } else if (state.currentPhaseName === EMeasurementStatus.END) {
-                goToResult()
+                this.stopped$.next()
+                this.goToResult(state)
             }
         })
     )
@@ -61,4 +68,14 @@ export class TestScreenComponent {
         private router: Router,
         private message: MessageService
     ) {}
+
+    ngOnDestroy(): void {
+        this.stopped$.complete()
+    }
+
+    private goToResult = (state: ITestVisualizationState) =>
+        this.router.navigate([
+            "result",
+            state.phases[state.currentPhaseName].testUuid,
+        ])
 }

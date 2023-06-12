@@ -50,7 +50,7 @@ export class MeasurementResult implements IMeasurementResult {
         testStatus?: EMeasurementFinalStatus
     ) {
         this.client_name = registrationRequest.client
-        this.client_version = threadResults[0].client_version ?? ""
+        this.client_version = threadResults[0]?.client_version ?? ""
         this.client_uuid = registrationRequest.uuid ?? ""
         this.operating_system = registrationRequest.operating_system ?? ""
         this.pings = this.getPings(threadResults)

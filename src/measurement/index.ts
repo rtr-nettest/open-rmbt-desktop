@@ -78,20 +78,19 @@ export class MeasurementRunner {
 
             const threadResults = await this.rmbtClient!.scheduleMeasurement()
             this.setCPUUsage()
-            await ControlServer.I.submitMeasurement(
-                new MeasurementResult(
-                    this.registrationRequest!,
-                    this.rmbtClient!.params!,
-                    threadResults,
-                    this.rmbtClient!.finalResultDown!,
-                    this.rmbtClient!.finalResultUp!,
-                    this.cpuInfo,
-                    this.rmbtClient!.measurementStatus ===
-                    EMeasurementStatus.ABORTED
-                        ? EMeasurementFinalStatus.ABORTED
-                        : EMeasurementFinalStatus.SUCCESS
-                )
+            const result = new MeasurementResult(
+                this.registrationRequest!,
+                this.rmbtClient!.params!,
+                threadResults,
+                this.rmbtClient!.finalResultDown!,
+                this.rmbtClient!.finalResultUp!,
+                this.cpuInfo,
+                this.rmbtClient!.measurementStatus ===
+                EMeasurementStatus.ABORTED
+                    ? EMeasurementFinalStatus.ABORTED
+                    : EMeasurementFinalStatus.SUCCESS
             )
+            await ControlServer.I.submitMeasurement(result)
         } catch (e) {
             if (e) {
                 throw e
@@ -112,9 +111,12 @@ export class MeasurementRunner {
                     this.rounded(this.cpuInfo.load_avg * 100)
                 )
             }
-            if (this.rmbtClient) {
-                ;(this.rmbtClient as RMBTClient).measurementStatus =
-                    EMeasurementStatus.END
+            const client = this.rmbtClient as unknown as RMBTClient
+            if (
+                client &&
+                client.measurementStatus !== EMeasurementStatus.ABORTED
+            ) {
+                client.measurementStatus = EMeasurementStatus.END
             }
         }
     }

@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core"
+import { Injectable, NgZone } from "@angular/core"
 import { MatSnackBar } from "@angular/material/snack-bar"
 import { MatDialog } from "@angular/material/dialog"
 import {
@@ -10,12 +10,18 @@ import {
     providedIn: "root",
 })
 export class MessageService {
-    constructor(private snackbar: MatSnackBar, private dialog: MatDialog) {}
+    constructor(
+        private snackbar: MatSnackBar,
+        private dialog: MatDialog,
+        private ngZone: NgZone
+    ) {}
 
     openSnackbar(text: string) {
-        this.snackbar.open(text, undefined, {
-            duration: 3000,
-            panelClass: ["app-snackbar"],
+        this.ngZone.run(() => {
+            this.snackbar.open(text, undefined, {
+                duration: 3000,
+                panelClass: ["app-snackbar"],
+            })
         })
     }
 
@@ -24,18 +30,20 @@ export class MessageService {
         onConfirm: () => void,
         options?: ConfirmDialogOpts
     ) {
-        this.dialog
-            .open(ConfirmDialogComponent, {
-                data: {
-                    text,
-                    ...options,
-                },
-            })
-            .afterClosed()
-            .subscribe(({ confirmAction }) => {
-                if (confirmAction) {
-                    onConfirm()
-                }
-            })
+        this.ngZone.run(() => {
+            this.dialog
+                .open(ConfirmDialogComponent, {
+                    data: {
+                        text,
+                        ...options,
+                    },
+                })
+                .afterClosed()
+                .subscribe(({ confirmAction }) => {
+                    if (confirmAction) {
+                        onConfirm()
+                    }
+                })
+        })
     }
 }

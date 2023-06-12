@@ -17,7 +17,8 @@ export class MainStore {
 
     constructor() {
         window.electronAPI.onError((error) => {
-            this.error$.next(error)
+            console.error(error)
+            this.error$.next(new Error("Server communication error"))
         })
         window.electronAPI.getEnv().then((env) => this.env$.next(env))
         window.electronAPI

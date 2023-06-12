@@ -17,6 +17,7 @@ import { config } from "dotenv"
 import { IPInfoService } from "./services/ip-info.service"
 import { DBService } from "./services/db.service"
 import "reflect-metadata"
+import { EMeasurementFinalStatus } from "./enums/measurement-final-status"
 
 config({
     path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
@@ -84,7 +85,11 @@ export class MeasurementRunner {
                     threadResults,
                     this.rmbtClient!.finalResultDown!,
                     this.rmbtClient!.finalResultUp!,
-                    this.cpuInfo
+                    this.cpuInfo,
+                    this.rmbtClient!.measurementStatus ===
+                    EMeasurementStatus.ABORTED
+                        ? EMeasurementFinalStatus.ABORTED
+                        : EMeasurementFinalStatus.SUCCESS
                 )
             )
         } catch (e) {

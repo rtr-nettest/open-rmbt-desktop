@@ -9,7 +9,7 @@
     "scripts": {
         "build:all": "webpack --mode production && cd src/ui && npm run build-for-packaging && shx cp -rf dist/ui/* ../../dist",
         "start:cli": "webpack --mode development --config ./webpack.cli.config.js && npx ts-node src/cli/cli.ts",
-        "start:electron": "npx tsc && cross-env DEV=true electron dist/electron/electron.js",
+        "start:electron": "webpack --mode development && cross-env DEV=true electron dist/main.js",
         "start:ui": "(cd src/ui && npm run start)",
         "start:all": "start-server-and-test start:ui http://localhost:4200/ start:electron",
         "electron": "electron",

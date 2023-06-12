@@ -28,7 +28,20 @@ const baseConfig = {
     resolve: {
         extensions: [".js", ".ts", ".jsx", ".tsx", ".css", ".json"],
     },
-    plugins: [new Dotenv()],
+    plugins: [
+        new Dotenv(),
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: "./node_modules/sql.js/dist/sql-wasm.wasm",
+                },
+                {
+                    from: "src/measurement/services/migrations",
+                    to: "migrations",
+                },
+            ],
+        }),
+    ],
 }
 
 module.exports = [
@@ -40,16 +53,6 @@ module.exports = [
             filename: "main.js",
         },
         target: "electron-main",
-        plugins: [
-            ...baseConfig.plugins,
-            new CopyPlugin({
-                patterns: [
-                    {
-                        from: "./node_modules/sql.js/dist/sql-wasm.wasm",
-                    },
-                ],
-            }),
-        ],
     },
     {
         ...baseConfig,

@@ -3,12 +3,13 @@ import { Logger } from "./logger.service"
 import {
     IMeasurementResult,
     MEASUREMENT_TABLE,
-    MeasurementResultFields,
 } from "../interfaces/measurement-result.interface"
 import { ISimpleHistoryResult } from "../interfaces/simple-history-result.interface"
 import { SimpleHistoryResult } from "../dto/simple-history-result.dto"
 import fs from "fs"
+import fsp from "fs/promises"
 import initSqlJs, { Database } from "sql.js"
+import path from "path"
 
 export class DBService {
     private static dbFilePath = Store.I.path.replace(
@@ -28,12 +29,12 @@ export class DBService {
     async init() {
         try {
             if (!fs.existsSync(DBService.dbFilePath)) {
-                fs.writeFileSync(DBService.dbFilePath, "")
+                await fsp.writeFile(DBService.dbFilePath, "")
             }
-            const dbFile = fs.readFileSync(DBService.dbFilePath)
+            const dbFile = await fsp.readFile(DBService.dbFilePath)
             const SQL = await initSqlJs()
             this.db = new SQL.Database(dbFile)
-            await this.createTable(MEASUREMENT_TABLE, MeasurementResultFields)
+            await this.runMigrations()
         } catch (e) {
             Logger.I.warn(e)
         }
@@ -43,17 +44,22 @@ export class DBService {
         try {
             const data = this.db?.export()
             if (data) {
-                fs.writeFileSync(DBService.dbFilePath, data)
+                await fsp.writeFile(DBService.dbFilePath, data)
             }
         } catch (e) {
             Logger.I.warn(e)
         }
     }
 
-    async createTable(tableName: string, fields: string[] = []) {
-        this.db?.run(
-            `CREATE TABLE IF NOT EXISTS ${tableName} (${fields.join(",")})`
-        )
+    async runMigrations() {
+        const migrationsFolder = path.resolve(__dirname, "migrations")
+        const migrations = await fsp.readdir(migrationsFolder)
+        for (const sqlFile of migrations) {
+            const sql = (
+                await fsp.readFile(path.resolve(migrationsFolder, sqlFile))
+            ).toString()
+            this.db?.run(sql)
+        }
         await this.persist()
     }
 

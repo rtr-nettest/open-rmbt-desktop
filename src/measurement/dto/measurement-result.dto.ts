@@ -39,6 +39,7 @@ export class MeasurementResult implements IMeasurementResult {
     measurement_server?: string
     provider_name?: string
     ip_address?: string | undefined
+    sent_to_server = false
 
     constructor(
         registrationRequest: IMeasurementRegistrationRequest,

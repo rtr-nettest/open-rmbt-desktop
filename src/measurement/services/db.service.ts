@@ -55,35 +55,59 @@ export class DBService {
         const migrationsFolder = path.resolve(__dirname, "migrations")
         const migrations = await fsp.readdir(migrationsFolder)
         for (const sqlFile of migrations) {
-            const sql = (
-                await fsp.readFile(path.resolve(migrationsFolder, sqlFile))
-            ).toString()
-            this.db?.run(sql)
+            try {
+                const sql = (
+                    await fsp.readFile(path.resolve(migrationsFolder, sqlFile))
+                ).toString()
+                this.db?.run(sql)
+            } finally {
+                continue
+            }
         }
         await this.persist()
     }
 
+    private formatValue(v: unknown) {
+        return typeof v === "object"
+            ? JSON.stringify(v)
+            : v === undefined
+            ? null
+            : v
+    }
+
     async saveMeasurement(result: IMeasurementResult) {
         try {
-            const columns = Object.keys(result).map((c) => `:${c}`)
-            const values = Object.entries(result).reduce(
+            const columns: string[] = Object.keys(result).map((c) => `:${c}`)
+            const values: { [key: string]: any } = Object.entries(
+                result
+            ).reduce(
                 (acc, [c, v]) => ({
                     ...acc,
-                    [`:${c}`]:
-                        typeof v === "object"
-                            ? JSON.stringify(v)
-                            : v === undefined
-                            ? null
-                            : v,
+                    [`:${c}`]: this.formatValue(v),
                 }),
                 {}
             )
-            this.db?.exec(
-                `
-                INSERT INTO ${MEASUREMENT_TABLE} VALUES (${columns.join(",")})
-            `,
-                values
+            const entries: string[] = Object.keys(result).map(
+                (c) => `${c}=:${c}`
             )
+            const existingMeasurement = await this.getMeasurementByUuid(
+                result.test_uuid
+            )
+            if (!existingMeasurement) {
+                this.db?.exec(
+                    `INSERT INTO ${MEASUREMENT_TABLE} VALUES (${columns.join(
+                        ","
+                    )})`,
+                    values
+                )
+            } else {
+                this.db?.exec(
+                    `UPDATE ${MEASUREMENT_TABLE} SET ${entries.join(
+                        ", "
+                    )} WHERE test_uuid="${result.test_uuid}"`,
+                    values
+                )
+            }
             await this.persist()
         } catch (e) {
             Logger.I.warn(e)
@@ -98,7 +122,7 @@ export class DBService {
                 `SELECT * FROM ${MEASUREMENT_TABLE} WHERE test_uuid="${testUuid}"`
             )[0]
             if (!resp) {
-                throw new Error("No response")
+                return undefined
             }
             const entry = resp!.columns.reduce(
                 (acc, col, index) => ({

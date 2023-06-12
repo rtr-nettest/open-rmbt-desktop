@@ -30,6 +30,7 @@ export interface IMeasurementResult {
     measurement_server?: string
     provider_name?: string
     ip_address?: string
+    sent_to_server?: boolean
 }
 
 export interface IMeasurementThreadResult {

@@ -12,8 +12,13 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             result.test_speed_upload,
             result.test_ping_shortest / 1e6,
             result.provider_name ?? "-",
-            result.ip_address ?? "-"
+            result.ip_address ?? "-",
+            result.test_uuid ?? ""
         )
+    }
+
+    get fullResultLink() {
+        return `${process.env.FULL_HISTORY_RESUlT_URL}${this.testUuid}`
     }
 
     constructor(
@@ -24,11 +29,11 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         public ping: number,
         public providerName: string,
         public ipAddress: string,
+        public testUuid?: string,
         public downloadOverTime?: IOverallResult[],
         public uploadOverTime?: IOverallResult[],
         public downloadClass?: number,
         public uploadClass?: number,
-        public pingClass?: number,
-        public fullResultLink?: string
+        public pingClass?: number
     ) {}
 }

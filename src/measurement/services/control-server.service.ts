@@ -14,6 +14,7 @@ import { RMBTClient } from "./rmbt-client.service"
 import { ELoggerMessage } from "../enums/logger-message.enum"
 import { Store } from "./store.service"
 import { DBService } from "./db.service"
+import { SimpleHistoryResult } from "../dto/simple-history-result.dto"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -124,7 +125,6 @@ export class ControlServer {
             process.env.RESULT_SUBMISSION_PATH,
             result
         )
-        await DBService.I.saveMeasurement(result)
         try {
             const response = (
                 await axios.post(
@@ -133,8 +133,13 @@ export class ControlServer {
                     { headers: this.headers }
                 )
             ).data
+            await DBService.I.saveMeasurement({
+                ...result,
+                sent_to_server: true,
+            })
             Logger.I.info("Result is submitted. Response: %o", response)
         } catch (e: any) {
+            await DBService.I.saveMeasurement(result)
             this.handleError(e)
         }
     }
@@ -198,20 +203,21 @@ export class ControlServer {
                 ).data
             }
             Logger.I.info("Open test response is: %o", openTestsResponse)
-            retVal = {
-                measurementDate: dayjs(response.time).toISOString(),
-                measurementServerName: openTestsResponse?.server_name,
-                downloadKbit: openTestsResponse?.download_kbit,
-                uploadKbit: openTestsResponse?.upload_kbit,
-                ping: openTestsResponse?.ping_ms,
-                providerName: openTestsResponse?.public_ip_as_name,
-                ipAddress: openTestsResponse?.ip_anonym,
-                fullResultLink: this.getFullResultLink(uuid),
-                downloadClass:
-                    response.measurement_result?.download_classification,
-                uploadClass: response.measurement_result?.upload_classification,
-                pingClass: response.measurement_result?.ping_classification,
-            }
+            retVal = new SimpleHistoryResult(
+                dayjs(response.time).toISOString(),
+                openTestsResponse?.server_name,
+                openTestsResponse?.download_kbit,
+                openTestsResponse?.upload_kbit,
+                openTestsResponse?.ping_ms,
+                openTestsResponse?.public_ip_as_name,
+                openTestsResponse?.ip_anonym,
+                uuid,
+                [],
+                [],
+                response.measurement_result?.download_classification,
+                response.measurement_result?.upload_classification,
+                response.measurement_result?.ping_classification
+            )
         }
         return retVal
     }
@@ -219,7 +225,6 @@ export class ControlServer {
     private async getSpecureMeasurementResult(uuid: string) {
         let response: any
         let retVal: ISimpleHistoryResult | undefined = undefined
-        Logger.I.info(ELoggerMessage.GET_REQUEST, this.getFullResultLink(uuid))
         response = (
             await axios.get(
                 `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}/${uuid}`,
@@ -228,32 +233,27 @@ export class ControlServer {
         ).data
         Logger.I.info(ELoggerMessage.RESPONSE, response)
         if (response) {
-            retVal = {
-                measurementDate: response.measurement_date,
-                measurementServerName:
-                    response.measurementServerName ??
+            retVal = new SimpleHistoryResult(
+                response.measurement_date,
+                response.measurementServerName ??
                     response.measurement_server_name,
-                downloadKbit: response.speed_download,
-                uploadKbit: response.speed_upload,
-                ping: response.ping ?? response.ping_median,
-                providerName: response.operator ?? response.client_provider,
-                ipAddress: response.ip_address,
-                fullResultLink: this.getFullResultLink(uuid),
-                downloadOverTime: RMBTClient.getOverallResultsFromSpeedItems(
+                response.speed_download,
+                response.speed_upload,
+                response.ping ?? response.ping_median,
+                response.operator ?? response.client_provider,
+                response.ip_address,
+                uuid,
+                RMBTClient.getOverallResultsFromSpeedItems(
                     response.speed_detail,
                     "download"
                 ),
-                uploadOverTime: RMBTClient.getOverallResultsFromSpeedItems(
+                RMBTClient.getOverallResultsFromSpeedItems(
                     response.speed_detail,
                     "upload"
-                ),
-            }
+                )
+            )
         }
         return retVal
-    }
-
-    private getFullResultLink(uuid: string) {
-        return `${process.env.FULL_HISTORY_RESUlT_URL}${uuid}`
     }
 
     private handleError(e: any) {

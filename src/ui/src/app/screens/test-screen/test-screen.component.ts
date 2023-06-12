@@ -31,30 +31,22 @@ export class TestScreenComponent implements OnDestroy {
         distinctUntilChanged(),
         takeUntil(this.stopped$),
         tap(([state, error]) => {
-            if (
-                error &&
-                state.currentPhaseName !== EMeasurementStatus.SUBMITTING_RESULTS
-            ) {
+            if (error) {
                 this.stopped$.next()
-                this.message.openConfirmDialog(
-                    ERROR_OCCURED_DURING_MEASUREMENT,
-                    () => {
-                        this.mainStore.error$.next(null)
-                        this.router.navigate(["/"])
-                    }
-                )
-            } else if (
-                error &&
-                state.currentPhaseName === EMeasurementStatus.SUBMITTING_RESULTS
-            ) {
-                this.stopped$.next()
-                this.message.openConfirmDialog(
-                    ERROR_OCCURED_SENDING_RESULTS,
-                    () => {
-                        this.mainStore.error$.next(null)
-                        this.goToResult(state)
-                    }
-                )
+                const message =
+                    state.currentPhaseName ===
+                    EMeasurementStatus.SUBMITTING_RESULTS
+                        ? ERROR_OCCURED_SENDING_RESULTS
+                        : ERROR_OCCURED_DURING_MEASUREMENT
+                const navigate = () =>
+                    state.currentPhaseName ===
+                    EMeasurementStatus.SUBMITTING_RESULTS
+                        ? this.goToResult(state)
+                        : this.router.navigate(["/"])
+                this.message.openConfirmDialog(message, () => {
+                    this.mainStore.error$.next(null)
+                    navigate()
+                })
             } else if (state.currentPhaseName === EMeasurementStatus.END) {
                 this.stopped$.next()
                 this.goToResult(state)

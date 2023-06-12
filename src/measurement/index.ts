@@ -91,6 +91,12 @@ export class MeasurementRunner {
                     : EMeasurementFinalStatus.SUCCESS
             )
             await ControlServer.I.submitMeasurement(result)
+            if (
+                this.rmbtClient!.measurementStatus !==
+                EMeasurementStatus.ABORTED
+            ) {
+                this.rmbtClient!.measurementStatus = EMeasurementStatus.END
+            }
         } catch (e) {
             if (e) {
                 throw e
@@ -110,13 +116,6 @@ export class MeasurementRunner {
                     ELoggerMessage.CPU_USAGE_AVG,
                     this.rounded(this.cpuInfo.load_avg * 100)
                 )
-            }
-            const client = this.rmbtClient as unknown as RMBTClient
-            if (
-                client &&
-                client.measurementStatus !== EMeasurementStatus.ABORTED
-            ) {
-                client.measurementStatus = EMeasurementStatus.END
             }
         }
     }

@@ -1,4 +1,4 @@
-import { EMeasurementServerType } from "../enums/measurement-server-type.enum"
+import { EMeasurementFinalStatus } from "../enums/measurement-final-status"
 import { ICPU } from "../interfaces/cpu.interface"
 import { IMeasurementRegistrationRequest } from "../interfaces/measurement-registration-request.interface"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
@@ -29,12 +29,17 @@ export class MeasurementResult implements IMeasurementResult {
     test_ping_shortest: number
     test_speed_download: number
     test_speed_upload: number
+    test_status?: number
     test_token: string
     test_uuid: string
     time: number
     timezone: string
     type: string
     user_server_selection: number
+    measurement_server?: string
+    provider_name?: string
+    ip_address?: string | undefined
+    sent_to_server = false
 
     constructor(
         registrationRequest: IMeasurementRegistrationRequest,
@@ -42,10 +47,11 @@ export class MeasurementResult implements IMeasurementResult {
         threadResults: IMeasurementThreadResult[],
         overallResultDown: IOverallResult,
         overallResultUp: IOverallResult,
-        cpu?: ICPU
+        cpu?: ICPU,
+        testStatus?: EMeasurementFinalStatus
     ) {
         this.client_name = registrationRequest.client
-        this.client_version = threadResults[0].client_version ?? ""
+        this.client_version = threadResults[0]?.client_version ?? ""
         this.client_uuid = registrationRequest.uuid ?? ""
         this.operating_system = registrationRequest.operating_system ?? ""
         this.pings = this.getPings(threadResults)
@@ -68,6 +74,10 @@ export class MeasurementResult implements IMeasurementResult {
         this.test_nsec_upload = overallResultUp.nsec
         this.test_speed_upload = overallResultUp.speed / 1e3
         this.cpu = cpu
+        this.measurement_server = registrationResponse.test_server_name
+        this.provider_name = registrationResponse.provider
+        this.ip_address = registrationResponse.client_remote_ip
+        this.test_status = testStatus
     }
 
     private getPings(threadResults: IMeasurementThreadResult[]) {

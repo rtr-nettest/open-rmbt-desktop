@@ -164,12 +164,12 @@ export class GaugeComponent {
         }
         //if speed information is available - set text
         if (speedMbit !== null && speedMbit > 0) {
-            //logarithmic to 1Gbit
-            var speedLog = (2 + Math.log10(speedMbit)) / 5
+            //logarithmic to 10Gbit
+            var barPercent = (2 + Math.log10(speedMbit / 10)) / 5
             //but cap at [0,1]
-            speedLog = Math.max(speedLog, 0)
-            speedLog = Math.min(1, speedLog)
-            this.setBarPercentage("#speed", speedLog)
+            barPercent = Math.max(barPercent, 0)
+            barPercent = Math.min(1, barPercent)
+            this.setBarPercentage("#speed", barPercent)
 
             speedTextEl.innerHTML =
                 '<tspan style="fill:#59b200">' +

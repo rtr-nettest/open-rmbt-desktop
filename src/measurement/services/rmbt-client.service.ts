@@ -273,25 +273,35 @@ export class RMBTClient {
         if (!this.isRunning) {
             return
         }
-        this.finalResultUp = RMBTClient.getFineResult(this.threadResults, "up")
-        this.upThreadResults = [...this.threadResults]
-        this.threadResults = []
-        this.interimThreadResults = new Array(this.params.test_numthreads)
-        for (const w of this.measurementTasks) {
-            w.terminate()
+        try {
+            this.finalResultUp = RMBTClient.getFineResult(
+                this.threadResults,
+                "up"
+            )
+            this.upThreadResults = [...this.threadResults]
+        } finally {
+            Logger.I.info(
+                "Upload is finished in %ds",
+                this.getPhaseDuration(EMeasurementStatus.UP)
+            )
+            Logger.I.info("The total upload speed is %dMbps", this.finalUpMbps)
+            clearInterval(this.activityInterval)
+            this.threadResults = []
+            this.interimThreadResults = new Array(this.params.test_numthreads)
+            for (const w of this.measurementTasks) {
+                w.terminate()
+            }
+            if (this.measurementStatus !== EMeasurementStatus.ABORTED) {
+                Logger.I.info("Measurement is finished. Submitting results.")
+                this.measurementStatus = EMeasurementStatus.SUBMITTING_RESULTS
+            } else {
+                Logger.I.info(
+                    "Measurement is aborted. Submitting the information."
+                )
+            }
+            this.isRunning = false
+            resolve([...this.downThreadResults, ...this.upThreadResults])
         }
-        clearInterval(this.activityInterval)
-        resolve([...this.downThreadResults, ...this.upThreadResults])
-        this.measurementStatus = EMeasurementStatus.SPEEDTEST_END
-        this.phaseStartTimeNs[EMeasurementStatus.SPEEDTEST_END] = Time.nowNs()
-        this.isRunning = false
-        Logger.I.info(
-            "Upload is finished in %ds",
-            this.getPhaseDuration(EMeasurementStatus.UP)
-        )
-        Logger.I.info("The total upload speed is %dMbps", this.finalUpMbps)
-        Logger.I.info("Measurement is finished")
-        this.measurementStatus = EMeasurementStatus.SUBMITTING_RESULTS
     }
 
     abortMeasurement() {
@@ -302,13 +312,13 @@ export class RMBTClient {
         if (!this.isRunning) {
             return
         }
+        clearInterval(this.activityInterval)
         this.threadResults = []
         this.interimThreadResults = new Array(this.params.test_numthreads)
         this.isRunning = false
         for (const w of this.measurementTasks) {
             w.terminate()
         }
-        clearInterval(this.activityInterval)
 
         if (error) {
             Logger.I.error(error)
@@ -362,7 +372,8 @@ export class RMBTClient {
                 worker.postMessage(new IncomingMessageWithData("connect"))
                 worker.on("message", (message) => {
                     if (this.aborter.signal.aborted) {
-                        this.cancelMeasurement(reject)
+                        this.measurementStatus = EMeasurementStatus.ABORTED
+                        this.finishMeasurement(resolve)
                         return
                     }
                     this.lastMessageReceivedAt = Date.now()

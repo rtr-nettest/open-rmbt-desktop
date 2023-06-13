@@ -47,9 +47,13 @@ export class MainMenuComponent {
             event.stopPropagation()
             event.preventDefault()
             if (!item.className?.includes("app-menu-item--active"))
-                this.message.openConfirmDialog(THIS_INTERRUPTS_ACTION, () => {
-                    item.action?.(event)
-                })
+                this.message.openConfirmDialog(
+                    THIS_INTERRUPTS_ACTION,
+                    () => {
+                        item.action?.(event)
+                    },
+                    { canCancel: true }
+                )
         }
     }
 

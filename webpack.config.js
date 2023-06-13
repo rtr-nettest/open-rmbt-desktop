@@ -1,11 +1,13 @@
 const path = require("path")
 const Dotenv = require("dotenv-webpack")
+const CopyPlugin = require("copy-webpack-plugin")
 
 const baseConfig = {
     node: {
         __dirname: false,
     },
     module: {
+        noParse: /sql.js/,
         rules: [
             {
                 test: /\.node$/,
@@ -26,7 +28,20 @@ const baseConfig = {
     resolve: {
         extensions: [".js", ".ts", ".jsx", ".tsx", ".css", ".json"],
     },
-    plugins: [new Dotenv()],
+    plugins: [
+        new Dotenv(),
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: "./node_modules/sql.js/dist/sql-wasm.wasm",
+                },
+                {
+                    from: "src/measurement/services/migrations",
+                    to: "migrations",
+                },
+            ],
+        }),
+    ],
 }
 
 module.exports = [

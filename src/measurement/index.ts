@@ -15,6 +15,9 @@ import { IUserSettings } from "./interfaces/user-settings-response.interface"
 import { IMeasurementServerResponse } from "./interfaces/measurement-server-response.interface"
 import { config } from "dotenv"
 import { IPInfoService } from "./services/ip-info.service"
+import { DBService } from "./services/db.service"
+import "reflect-metadata"
+import { EMeasurementFinalStatus } from "./enums/measurement-final-status"
 
 config({
     path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
@@ -42,6 +45,7 @@ export class MeasurementRunner {
 
     private constructor() {
         Logger.init()
+        DBService.I.init()
     }
 
     async registerClient(options?: MeasurementOptions): Promise<IUserSettings> {
@@ -54,6 +58,7 @@ export class MeasurementRunner {
                 this.settings,
                 this.settingsRequest
             )
+            await ControlServer.I.submitUnsentMeasurements()
             return { ...this.settings, ipInfo }
         } catch (e) {
             throw new Error(
@@ -74,16 +79,25 @@ export class MeasurementRunner {
 
             const threadResults = await this.rmbtClient!.scheduleMeasurement()
             this.setCPUUsage()
-            await ControlServer.I.submitMeasurement(
-                new MeasurementResult(
-                    this.registrationRequest!,
-                    this.rmbtClient!.params!,
-                    threadResults,
-                    this.rmbtClient!.finalResultDown!,
-                    this.rmbtClient!.finalResultUp!,
-                    this.cpuInfo
-                )
+            const result = new MeasurementResult(
+                this.registrationRequest!,
+                this.rmbtClient!.params!,
+                threadResults,
+                this.rmbtClient!.finalResultDown!,
+                this.rmbtClient!.finalResultUp!,
+                this.cpuInfo,
+                this.rmbtClient!.measurementStatus ===
+                EMeasurementStatus.ABORTED
+                    ? EMeasurementFinalStatus.ABORTED
+                    : EMeasurementFinalStatus.SUCCESS
             )
+            await ControlServer.I.submitMeasurement(result)
+            if (
+                this.rmbtClient!.measurementStatus !==
+                EMeasurementStatus.ABORTED
+            ) {
+                this.rmbtClient!.measurementStatus = EMeasurementStatus.END
+            }
         } catch (e) {
             if (e) {
                 throw e
@@ -103,10 +117,6 @@ export class MeasurementRunner {
                     ELoggerMessage.CPU_USAGE_AVG,
                     this.rounded(this.cpuInfo.load_avg * 100)
                 )
-            }
-            if (this.rmbtClient) {
-                ;(this.rmbtClient as RMBTClient).measurementStatus =
-                    EMeasurementStatus.END
             }
         }
     }

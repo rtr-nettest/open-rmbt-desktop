@@ -11,8 +11,9 @@ export interface ISimpleHistoryResult {
     ping: number
     providerName: string
     ipAddress: string
-    fullResultLink: string
     downloadClass?: number
     uploadClass?: number
     pingClass?: number
+    fullResultLink: string
+    testUuid?: string
 }

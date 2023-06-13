@@ -1,7 +1,9 @@
 @import "../../../assets/styles/core.scss";
 
 .app-dialog {
+    max-width: rem(480);
     padding: rem(30) rem(20) rem(20);
+    white-space: pre-line;
 }
 
 .app-footer {

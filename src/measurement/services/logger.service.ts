@@ -28,7 +28,7 @@ export class Logger {
                     console.log("Logging to console is disabled.")
                 }
                 if (process.env.LOG_TO_FILE === "true") {
-                    const logDir = path.join(__dirname, "..", "..", "..", "log")
+                    const logDir = path.resolve("log")
                     if (!fs.existsSync(logDir)) {
                         fs.mkdirSync(logDir)
                     }

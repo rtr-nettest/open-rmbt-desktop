@@ -144,6 +144,21 @@ export class ControlServer {
         }
     }
 
+    async submitUnsentMeasurements() {
+        try {
+            const unsent = await DBService.I.getUnsentMeasurements()
+            if (!unsent.length) {
+                return
+            }
+            const promises = unsent.map((result) =>
+                this.submitMeasurement(result)
+            )
+            await Promise.all(promises)
+        } catch (e: any) {
+            this.handleError(e)
+        }
+    }
+
     async getMeasurementResult(
         uuid: string
     ): Promise<ISimpleHistoryResult | undefined> {

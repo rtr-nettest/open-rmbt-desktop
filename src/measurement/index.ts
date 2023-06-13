@@ -58,6 +58,7 @@ export class MeasurementRunner {
                 this.settings,
                 this.settingsRequest
             )
+            await ControlServer.I.submitUnsentMeasurements()
             return { ...this.settings, ipInfo }
         } catch (e) {
             throw new Error(

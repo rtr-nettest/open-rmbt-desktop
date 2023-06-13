@@ -36,7 +36,7 @@ export class DBService {
             this.db = new SQL.Database(dbFile)
             await this.runMigrations()
         } catch (e) {
-            Logger.I.warn(e)
+            Logger.I.warn("Init error: %o", e)
         }
     }
 
@@ -47,7 +47,7 @@ export class DBService {
                 await fsp.writeFile(DBService.dbFilePath, data)
             }
         } catch (e) {
-            Logger.I.warn(e)
+            Logger.I.warn("Persist error: %o", e)
         }
     }
 
@@ -60,7 +60,7 @@ export class DBService {
                     await fsp.readFile(path.resolve(migrationsFolder, sqlFile))
                 ).toString()
                 this.db?.run(sql)
-            } finally {
+            } catch (e) {
                 continue
             }
         }
@@ -94,14 +94,14 @@ export class DBService {
                 result.test_uuid
             )
             if (!existingMeasurement) {
-                this.db?.exec(
+                this.db?.run(
                     `INSERT INTO ${MEASUREMENT_TABLE} VALUES (${columns.join(
                         ","
                     )})`,
                     values
                 )
             } else {
-                this.db?.exec(
+                this.db?.run(
                     `UPDATE ${MEASUREMENT_TABLE} SET ${entries.join(
                         ", "
                     )} WHERE test_uuid="${result.test_uuid}"`,
@@ -110,7 +110,7 @@ export class DBService {
             }
             await this.persist()
         } catch (e) {
-            Logger.I.warn(e)
+            Logger.I.warn("Save error: %o", e)
         }
     }
 
@@ -131,11 +131,36 @@ export class DBService {
                 }),
                 {}
             ) as IMeasurementResult
-            Logger.I.warn(entry)
             return SimpleHistoryResult.fromLocalMeasurementResult(entry)
         } catch (e) {
-            Logger.I.warn(e)
+            Logger.I.warn("Get by UUID error: %o", e)
             return undefined
+        }
+    }
+
+    async getUnsentMeasurements() {
+        try {
+            const resp = this.db?.exec(
+                `SELECT * FROM ${MEASUREMENT_TABLE} WHERE sent_to_server=0`
+            )[0]
+            if (!resp) {
+                return []
+            }
+            const results = resp.values.map((columnValues) => {
+                return resp.columns.reduce((acc, c, i) => {
+                    let parsedVal = columnValues[i]
+                    if (parsedVal) {
+                        try {
+                            parsedVal = JSON.parse(parsedVal.toString())
+                        } catch (e) {}
+                    }
+                    return { ...acc, [c]: parsedVal }
+                }, {})
+            })
+            return results as unknown as IMeasurementResult[]
+        } catch (e) {
+            Logger.I.warn("Get unsent error: %o", e)
+            return []
         }
     }
 }

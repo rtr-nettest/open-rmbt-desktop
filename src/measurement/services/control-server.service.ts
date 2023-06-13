@@ -153,7 +153,7 @@ export class ControlServer {
             const promises = unsent.map((result) =>
                 this.submitMeasurement(result)
             )
-            await Promise.all(promises)
+            await Promise.allSettled(promises)
         } catch (e: any) {
             this.handleError(e)
         }

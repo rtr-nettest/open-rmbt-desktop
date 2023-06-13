@@ -45,8 +45,8 @@ export class MeasurementResult implements IMeasurementResult {
         registrationRequest: IMeasurementRegistrationRequest,
         registrationResponse: IMeasurementRegistrationResponse,
         threadResults: IMeasurementThreadResult[],
-        overallResultDown: IOverallResult,
-        overallResultUp: IOverallResult,
+        overallResultDown?: IOverallResult,
+        overallResultUp?: IOverallResult,
         cpu?: ICPU,
         testStatus?: EMeasurementFinalStatus
     ) {
@@ -67,12 +67,12 @@ export class MeasurementResult implements IMeasurementResult {
         this.user_server_selection = registrationRequest.user_server_selection
             ? 1
             : 0
-        this.test_bytes_download = overallResultDown.bytes
-        this.test_nsec_download = overallResultDown.nsec
-        this.test_speed_download = overallResultDown.speed / 1e3
-        this.test_bytes_upload = overallResultUp.bytes
-        this.test_nsec_upload = overallResultUp.nsec
-        this.test_speed_upload = overallResultUp.speed / 1e3
+        this.test_bytes_download = overallResultDown?.bytes ?? 0
+        this.test_nsec_download = overallResultDown?.nsec ?? 0
+        this.test_speed_download = (overallResultDown?.speed ?? 0) / 1e3
+        this.test_bytes_upload = overallResultUp?.bytes ?? 0
+        this.test_nsec_upload = overallResultUp?.nsec ?? 0
+        this.test_speed_upload = (overallResultUp?.speed ?? 0) / 1e3
         this.cpu = cpu
         this.measurement_server = registrationResponse.test_server_name
         this.provider_name = registrationResponse.provider

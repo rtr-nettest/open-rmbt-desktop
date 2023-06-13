@@ -83,8 +83,8 @@ export class MeasurementRunner {
                 this.registrationRequest!,
                 this.rmbtClient!.params!,
                 threadResults,
-                this.rmbtClient!.finalResultDown!,
-                this.rmbtClient!.finalResultUp!,
+                this.rmbtClient!.finalResultDown,
+                this.rmbtClient!.finalResultUp,
                 this.cpuInfo,
                 this.rmbtClient!.measurementStatus ===
                 EMeasurementStatus.ABORTED
@@ -100,6 +100,7 @@ export class MeasurementRunner {
             }
         } catch (e) {
             if (e) {
+                // Logger.I.error(e)
                 throw e
             }
         } finally {

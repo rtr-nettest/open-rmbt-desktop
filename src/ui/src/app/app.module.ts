@@ -23,6 +23,7 @@ import { MatIconModule } from "@angular/material/icon"
 import { MatButtonModule } from "@angular/material/button"
 import { MatTooltipModule } from "@angular/material/tooltip"
 import { MatSnackBarModule } from "@angular/material/snack-bar"
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
 import { HttpClientModule } from "@angular/common/http"
 import { TranslocoRootModule } from "./transloco-root.module"
 import { TestHeaderComponent } from "./widgets/test-header/test-header.component"
@@ -125,6 +126,7 @@ declare global {
         MatButtonModule,
         MatDialogModule,
         MatIconModule,
+        MatProgressSpinnerModule,
         MatSnackBarModule,
         MatTooltipModule,
         TranslocoRootModule,

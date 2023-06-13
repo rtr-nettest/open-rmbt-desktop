@@ -27,21 +27,12 @@ export class InterimResultsComponent {
             this.upload = upload < 0 ? "-" : upload + " Mbps"
         })
     )
-    basicNetworkInfo$ = this.store.basicNetworkInfo$.pipe(
-        tap((state) => {
-            this.serverName = state.serverName
-            this.ipAddress = state.ipAddress
-            this.providerName = state.providerName
-        })
-    )
 
     ping: string = "-"
     download: string = "-"
     upload: string = "-"
 
-    serverName: string = "-"
-    ipAddress: string = "-"
-    providerName: string = "-"
+    phases = EMeasurementStatus
 
     constructor(private store: TestStore) {}
 }

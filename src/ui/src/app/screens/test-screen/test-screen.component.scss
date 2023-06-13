@@ -10,7 +10,8 @@
     align-items: center;
     display: flex;
     justify-content: center;
-    padding: rem(64);
+    padding-left: rem(64);
+    padding-right: rem(64);
     height: 100%;
     width: 100%;
 
@@ -23,7 +24,8 @@
     }
 
     @include screen-xs {
-        padding: rem(32);
+        padding-left: rem(32);
+        padding-right: rem(32);
     }
 
     &--ont {

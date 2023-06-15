@@ -14,6 +14,11 @@ export class TestPhaseState implements ITestPhaseState {
     duration: number = 0
     progress: number = 0
     phase: EMeasurementStatus = EMeasurementStatus.NOT_STARTED
+    label?: string | undefined
+    time: number = -1
+    downLog: number = -1
+    upLog: number = -1
+    counterLog: number = -1
 
     constructor(options?: Partial<ITestPhaseState>) {
         if (options) {

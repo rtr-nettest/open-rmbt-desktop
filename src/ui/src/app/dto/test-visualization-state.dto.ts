@@ -8,6 +8,7 @@ import { ETestStatuses } from "../enums/test-statuses.enum"
 import { ETestLabels } from "../enums/test-labels.enum"
 
 export class TestVisualizationState implements ITestVisualizationState {
+    flavor: string = "rtr"
     phases: {
         [key: string]: ITestPhaseState
     } = {
@@ -34,7 +35,8 @@ export class TestVisualizationState implements ITestVisualizationState {
 
     static from(
         initialState: ITestVisualizationState,
-        phaseState: IMeasurementPhaseState
+        phaseState: IMeasurementPhaseState,
+        flavor: string
     ) {
         const newState = extend<ITestVisualizationState>(initialState)
         if (newState.phases[phaseState.phase]) {
@@ -42,6 +44,7 @@ export class TestVisualizationState implements ITestVisualizationState {
                 newState.phases[phaseState.phase],
                 phaseState
             )
+            newState.flavor = flavor
             newState.phases[phaseState.phase] = newTestPhaseState
             newState.setCounter(phaseState.phase, newTestPhaseState)
             newState.extendChart(phaseState.phase)
@@ -59,8 +62,12 @@ export class TestVisualizationState implements ITestVisualizationState {
                 newTestPhaseState.ping
             this.phases[EMeasurementStatus.DOWN].counter =
                 newTestPhaseState.down
+            this.phases[EMeasurementStatus.DOWN].counterLog =
+                newTestPhaseState.downLog
         } else if (newPhaseName === EMeasurementStatus.UP) {
             this.phases[EMeasurementStatus.UP].counter = newTestPhaseState.up
+            this.phases[EMeasurementStatus.UP].counterLog =
+                newTestPhaseState.upLog
         } else if (newPhaseName === EMeasurementStatus.SHOWING_RESULTS) {
             this.phases[EMeasurementStatus.PING].counter =
                 newTestPhaseState.ping
@@ -91,12 +98,22 @@ export class TestVisualizationState implements ITestVisualizationState {
 
     extendChart(newPhaseName: EMeasurementStatus) {
         const newPhase = this.phases[newPhaseName]
-        this.phases[newPhaseName].chart = [
-            ...(newPhase?.chart || []),
-            {
-                x: newPhase.progress * 100,
-                y: Math.max(0, newPhase.counter),
-            },
-        ]
+        if (this.flavor !== "ont") {
+            this.phases[newPhaseName].chart = [
+                ...(newPhase?.chart || []),
+                {
+                    x: newPhase.time,
+                    y: newPhase.counterLog * 100,
+                },
+            ]
+        } else {
+            this.phases[newPhaseName].chart = [
+                ...(newPhase?.chart || []),
+                {
+                    x: newPhase.progress * 100,
+                    y: Math.max(0, newPhase.counter),
+                },
+            ]
+        }
     }
 }

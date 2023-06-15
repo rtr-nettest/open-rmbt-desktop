@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core"
-import { tap } from "rxjs"
+import { fromEvent, map, startWith, tap } from "rxjs"
 import { getSignificantDigits } from "src/app/helpers/number"
 import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
@@ -33,6 +33,32 @@ export class InterimResultsComponent {
     upload: string = "-"
 
     phases = EMeasurementStatus
+
+    chartHeight$ = fromEvent(window, "resize").pipe(
+        startWith(this.chartHeight),
+        map(() => this.chartHeight)
+    )
+
+    chartWidth$ = fromEvent(window, "resize").pipe(
+        startWith(this.chartWidth),
+        map(() => this.chartWidth)
+    )
+
+    private get chartHeight() {
+        const container = globalThis.document?.querySelector(".app-chart")
+        if (!container) {
+            return 0
+        }
+        return parseInt(window.getComputedStyle(container).height)
+    }
+
+    private get chartWidth() {
+        const container = globalThis.document?.querySelector(".app-chart")
+        if (!container) {
+            return 0
+        }
+        return parseInt(window.getComputedStyle(container).width)
+    }
 
     constructor(private store: TestStore) {}
 }

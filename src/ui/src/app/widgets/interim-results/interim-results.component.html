@@ -30,7 +30,14 @@
                     {{ t(download) }}
                 </span>
             </h4>
-            <div class="app-chart app-chart--down"></div>
+            <div class="app-chart app-chart--down">
+                <nt-test-chart
+                    class="nt-canvas__wrapper"
+                    phase="download"
+                    [height]="(chartHeight$ | async) ?? 0"
+                    [width]="(chartWidth$ | async) ?? 0"
+                ></nt-test-chart>
+            </div>
         </div>
         <div class="app-container">
             <h4 class="app-title">
@@ -54,7 +61,14 @@
                     {{ t(upload) }}
                 </span>
             </h4>
-            <div class="app-chart app-chart--up"></div>
+            <div class="app-chart app-chart--up">
+                <nt-test-chart
+                    class="nt-canvas__wrapper"
+                    phase="upload"
+                    [height]="(chartHeight$ | async) ?? 0"
+                    [width]="(chartWidth$ | async) ?? 0"
+                ></nt-test-chart>
+            </div>
         </div>
     </ng-container>
 </div>

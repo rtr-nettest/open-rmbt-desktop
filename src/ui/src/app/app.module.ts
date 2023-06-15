@@ -50,12 +50,13 @@ import {
     LinearScale,
     // LogarithmicScale,
     // RadialLinearScale,
-    // TimeScale,
+    TimeScale,
     // TimeSeriesScale,
     // Decimation,
     Filler,
     // Title,
 } from "chart.js"
+import "chartjs-adapter-dayjs-4/dist/chartjs-adapter-dayjs-4.esm"
 import { HomeMetricsComponent } from "./widgets/home-metrics/home-metrics.component"
 import { MainContentComponent } from "./widgets/main-content/main-content.component"
 import { MainMenuComponent } from "./widgets/main-menu/main-menu.component"
@@ -71,6 +72,7 @@ Chart.register(
     LineController,
     CategoryScale,
     LinearScale,
+    TimeScale,
     Filler
 )
 

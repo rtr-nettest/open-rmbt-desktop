@@ -23,6 +23,8 @@
     "@angular/router": "^15.2.6",
     "@ngneat/transloco": "^4.2.6",
     "chart.js": "^4.2.1",
+    "chartjs-adapter-dayjs-4": "^1.0.4",
+    "dayjs": "^1.11.8",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.12.0"

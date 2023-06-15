@@ -9,7 +9,7 @@
             <dd>
                 <nt-test-chart
                     class="nt-canvas__wrapper"
-                    direction="download"
+                    phase="download"
                     [height]="(chartHeight$ | async) ?? 0"
                     [width]="(chartWidth$ | async) ?? 0"
                 ></nt-test-chart>
@@ -23,7 +23,7 @@
             <dd>
                 <nt-test-chart
                     class="nt-canvas__wrapper"
-                    direction="upload"
+                    phase="upload"
                     [height]="(chartHeight$ | async) ?? 0"
                     [width]="(chartWidth$ | async) ?? 0"
                 ></nt-test-chart>

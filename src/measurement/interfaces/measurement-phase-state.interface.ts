@@ -8,4 +8,7 @@ export interface IMeasurementPhaseState {
     ping: number
     phase: EMeasurementStatus
     testUuid: string
+    time: number
+    downLog: number
+    upLog: number
 }

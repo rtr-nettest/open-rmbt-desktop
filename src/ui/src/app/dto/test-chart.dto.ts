@@ -1,7 +1,7 @@
 import { TestChartDataset } from "./test-chart-dataset.dto"
 import { TestChartOptions } from "./test-chart-options.dto"
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
-import { Chart } from "chart.js"
+import { Chart, ChartData } from "chart.js"
 
 export class TestChart extends Chart {
     private finished = false
@@ -9,17 +9,20 @@ export class TestChart extends Chart {
     constructor(
         private context: CanvasRenderingContext2D,
         label: string,
-        units: string
+        units: string,
+        type: "line" | "bar" = "line",
+        data: ChartData = {
+            datasets: [new TestChartDataset(context)],
+            labels: Array(100)
+                .fill(0)
+                .map((_, idx) => 0 + idx),
+        },
+        options: { [key: string]: any } = new TestChartOptions(units)
     ) {
         super(context, {
-            type: "line",
-            data: {
-                datasets: [new TestChartDataset(context)],
-                labels: Array(100)
-                    .fill(0)
-                    .map((_, idx) => 0 + idx),
-            },
-            options: new TestChartOptions(units),
+            type,
+            data,
+            options,
         })
     }
 
@@ -46,11 +49,11 @@ export class TestChart extends Chart {
         this.finished = !!lastData && lastData.x >= 100
     }
 
-    private getAllData(testItem: ITestPhaseState) {
+    protected getAllData(testItem: ITestPhaseState) {
         return testItem.chart?.length ? testItem.chart : []
     }
 
-    private getLastData(testItem: ITestPhaseState) {
+    protected getLastData(testItem: ITestPhaseState) {
         return testItem.chart?.length
             ? testItem.chart[testItem.chart.length - 1]
             : null

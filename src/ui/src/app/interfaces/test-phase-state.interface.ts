@@ -5,6 +5,7 @@ import { ETestStatuses } from "../enums/test-statuses.enum"
 export interface ITestPhaseState extends IMeasurementPhaseState {
     chart?: { x: number; y: number }[]
     counter: number
+    counterLog: number
     container?: ETestStatuses
     label?: string
 

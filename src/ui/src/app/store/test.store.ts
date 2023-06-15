@@ -45,7 +45,8 @@ export class TestStore {
             map((phaseState) => {
                 const newState = TestVisualizationState.from(
                     this.visualization$.value,
-                    phaseState
+                    phaseState,
+                    this.mainStore.env$.value?.FLAVOR ?? "rtr"
                 )
                 this.visualization$.next(newState)
                 this.basicNetworkInfo$.next(phaseState)
@@ -69,7 +70,8 @@ export class TestStore {
                 })
                 const newState = TestVisualizationState.from(
                     this.visualization$.value,
-                    newPhase
+                    newPhase,
+                    this.mainStore.env$.value?.FLAVOR ?? "rtr"
                 )
                 newState.phases[
                     EMeasurementStatus.DOWN

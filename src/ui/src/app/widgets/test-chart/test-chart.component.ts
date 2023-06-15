@@ -13,6 +13,7 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
 import { TestChart } from "../../dto/test-chart.dto"
 import { MainStore } from "src/app/store/main.store"
 import { TestLogChart } from "src/app/dto/test-log-chart.dto"
+import { ChartPhase } from "src/app/dto/test-log-chart-dataset.dto"
 
 @Component({
     selector: "nt-test-chart",
@@ -21,7 +22,7 @@ import { TestLogChart } from "src/app/dto/test-log-chart.dto"
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestChartComponent {
-    @Input() phase: "download" | "upload" | "ping" = "download"
+    @Input() phase: ChartPhase = "download"
     @Input() width = 0
     @Input() height = 0
     @Input() type: "line" | "bar" = "line"
@@ -110,10 +111,10 @@ export class TestChartComponent {
         if (!ctx) {
             return
         }
-        if (this.flavor !== "ont") {
-            this.chart = new TestLogChart(ctx!, label, units)
+        if (this.flavor !== "rtr") {
+            this.chart = new TestChart(ctx!, label, units)
             return
         }
-        this.chart = new TestChart(ctx!, label, units)
+        this.chart = new TestLogChart(ctx!, label, units, this.phase)
     }
 }

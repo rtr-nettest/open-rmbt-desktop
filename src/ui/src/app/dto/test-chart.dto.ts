@@ -27,14 +27,14 @@ export class TestChart extends Chart {
     }
 
     resetData() {
-        this.data.datasets = [new TestChartDataset(this.context)]
+        this.setNewDatasets()
         this.data.labels = []
         this.finished = false
         this.update()
     }
 
     setData(data: ITestPhaseState) {
-        this.data.datasets = [new TestChartDataset(this.context)]
+        this.setNewDatasets()
         this.data.datasets[0].data = this.getAllData(data)
         this.finished = true
         this.update()
@@ -47,6 +47,10 @@ export class TestChart extends Chart {
             this.update()
         }
         this.finished = !!lastData && lastData.x >= 100
+    }
+
+    protected setNewDatasets() {
+        this.data.datasets = [new TestChartDataset(this.context)]
     }
 
     protected getAllData(testItem: ITestPhaseState) {

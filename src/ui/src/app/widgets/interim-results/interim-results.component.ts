@@ -45,7 +45,7 @@ export class InterimResultsComponent {
     )
 
     private get chartHeight() {
-        const container = globalThis.document?.querySelector(".app-chart")
+        const container = globalThis.document?.querySelector(".app-chart--down")
         if (!container) {
             return 0
         }

@@ -98,20 +98,20 @@ export class TestVisualizationState implements ITestVisualizationState {
 
     extendChart(newPhaseName: EMeasurementStatus) {
         const newPhase = this.phases[newPhaseName]
-        if (this.flavor !== "ont") {
+        if (this.flavor !== "rtr") {
             this.phases[newPhaseName].chart = [
                 ...(newPhase?.chart || []),
                 {
-                    x: newPhase.time,
-                    y: newPhase.counterLog * 100,
+                    x: newPhase.progress * 100,
+                    y: Math.max(0, newPhase.counter),
                 },
             ]
         } else {
             this.phases[newPhaseName].chart = [
                 ...(newPhase?.chart || []),
                 {
-                    x: newPhase.progress * 100,
-                    y: Math.max(0, newPhase.counter),
+                    x: newPhase.time,
+                    y: newPhase.counterLog,
                 },
             ]
         }

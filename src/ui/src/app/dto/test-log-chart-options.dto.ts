@@ -29,11 +29,14 @@ export class TestLogChartOptions {
                 },
             },
             type: "time",
+            ticks: {
+                callback: (value: any, index: number) => `${index + 1} s`,
+            },
         },
         y: {
             beginAtZero: true,
             min: 0,
-            max: 100,
+            max: 1,
             minRotation: 0,
             maxRotation: 0,
             grid: {
@@ -51,6 +54,15 @@ export class TestLogChartOptions {
                 color: EColors.SECONDARY_50,
                 font: {
                     size: 12,
+                },
+                stepSize: 0.2,
+                autoSkip: false,
+                callback: (value: any, index: number) => {
+                    let retVal = 0.1
+                    if (index > 0) {
+                        retVal = 10 ** (index - 1)
+                    }
+                    return `${retVal} Mbps`
                 },
             },
         },

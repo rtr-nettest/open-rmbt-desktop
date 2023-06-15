@@ -1,5 +1,5 @@
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
-import { TestLogChartDataset } from "./test-log-chart-dataset.dto"
+import { ChartPhase, TestLogChartDataset } from "./test-log-chart-dataset.dto"
 import { TestChart } from "./test-chart.dto"
 import { TestLogChartOptions } from "./test-log-chart-options.dto"
 
@@ -7,7 +7,8 @@ export class TestLogChart extends TestChart {
     constructor(
         context: CanvasRenderingContext2D,
         label: string,
-        units: string
+        units: string,
+        private phase: ChartPhase
     ) {
         super(
             context,
@@ -15,10 +16,14 @@ export class TestLogChart extends TestChart {
             units,
             "line",
             {
-                datasets: [new TestLogChartDataset()],
+                datasets: [new TestLogChartDataset(phase)],
             },
             new TestLogChartOptions(units)
         )
+    }
+
+    protected override setNewDatasets(): void {
+        super.data.datasets = [new TestLogChartDataset(this.phase)]
     }
 
     override updateData(data: ITestPhaseState) {

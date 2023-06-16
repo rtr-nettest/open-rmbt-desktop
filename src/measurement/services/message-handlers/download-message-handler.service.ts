@@ -21,6 +21,8 @@ export class DownloadMessageHandler implements IMessageHandler {
     private _isFinishRequested = false
     private _interimHandlerInterval?: NodeJS.Timer
     private _interimHandlerTimeout = 200
+    private _currentNsecVal: number = 0
+    private _currentNsecCount: number = 0
 
     get downloadStartTime() {
         return this._downloadStartTime
@@ -101,17 +103,14 @@ export class DownloadMessageHandler implements IMessageHandler {
     }
 
     checkActivity = () => {
-        this.ctx.client.pause()
         Logger.I.info(ELoggerMessage.T_CHECKING_ACTIVITY, this.ctx.index)
         if (Time.nowNs() >= this._downloadEndTime) {
             Logger.I.info(ELoggerMessage.T_TIMEOUT, this.ctx.index)
             this.requestFinish()
         }
-        this.ctx.client.resume()
     }
 
     submitResults = () => {
-        this.ctx.client.pause()
         if (this.ctx.threadResult) {
             const lastIndex = this._result.nsec.length - 1
             this.ctx.threadResult!.down = this._result
@@ -121,7 +120,6 @@ export class DownloadMessageHandler implements IMessageHandler {
                 this._result.bytes[lastIndex]
             this.ctx.interimHandler?.(this.ctx.threadResult!)
         }
-        this.ctx.client.resume()
     }
 
     readData(data: Buffer): void {
@@ -135,23 +133,29 @@ export class DownloadMessageHandler implements IMessageHandler {
         if (data.includes(ESocketMessage.TIME)) {
             return
         }
-        this.ctx.client.pause()
         let lastByte = 0
         let isFullChunk = false
         if (data.length > 0) {
             this._downloadBytesRead = this._downloadBytesRead + data.byteLength
             this._nsec = Time.nowNs() - this._downloadStartTime
+            this._currentNsecVal += this._nsec
+            this._currentNsecCount++
             lastByte = data[data.length - 1]
             isFullChunk = this._downloadBytesRead % this.ctx.chunkSize === 0
         }
         if (isFullChunk && (lastByte === 0x00 || lastByte === 0xff)) {
-            this._result.addResult(this._downloadBytesRead, this._nsec)
+            const avgNsec = this._currentNsecVal / this._currentNsecCount
+            this._result.addResult(
+                this._downloadBytesRead,
+                Math.ceil((this._nsec + avgNsec) / 2)
+            )
             this._nsec = Infinity
+            this._currentNsecVal = 0
+            this._currentNsecCount = 0
         }
         if (isFullChunk && lastByte === 0xff) {
             this.requestFinish()
         }
-        this.ctx.client.resume()
     }
 
     private requestFinish() {

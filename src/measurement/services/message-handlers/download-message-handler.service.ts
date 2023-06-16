@@ -103,7 +103,14 @@ export class DownloadMessageHandler implements IMessageHandler {
     }
 
     checkActivity = () => {
-        Logger.I.info(ELoggerMessage.T_CHECKING_ACTIVITY, this.ctx.index)
+        if (process.env.LOG_WORKERS === "true") {
+            Logger.I.info(ELoggerMessage.T_CHECKING_ACTIVITY, this.ctx.index)
+        } else {
+            this.ctx.client.pause()
+            setImmediate(() => {
+                this.ctx.client.resume()
+            })
+        }
         if (Time.nowNs() >= this._downloadEndTime) {
             Logger.I.info(ELoggerMessage.T_TIMEOUT, this.ctx.index)
             this.requestFinish()

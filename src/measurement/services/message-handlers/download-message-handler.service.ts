@@ -10,7 +10,7 @@ import { ELoggerMessage } from "../../enums/logger-message.enum"
 import { Time } from "../time.service"
 
 export class DownloadMessageHandler implements IMessageHandler {
-    static minDiffTime = 50000000
+    static minDiffTime = 20000000
     private _downloadStartTime = Time.nowNs()
     private _downloadEndTime = Time.nowNs()
     private _downloadBytesRead = 0
@@ -83,6 +83,10 @@ export class DownloadMessageHandler implements IMessageHandler {
         this._downloadEndTime =
             this._downloadStartTime +
             Number(this.ctx.params.test_duration) * 1e9
+        this._activityInterval = setInterval(
+            this.checkActivity,
+            this._inactivityTimeout
+        )
         const msg = `${ESocketMessage.GETTIME} ${
             this.ctx.params.test_duration
         }${

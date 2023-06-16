@@ -24,7 +24,10 @@ export class TestLogChart extends TestChart {
 
     override updateData(data: ITestPhaseState) {
         const lastData = super.getLastData(data)
-        const lastIndex = Math.ceil(lastData?.x ?? 0)
+        if (!lastData) {
+            return
+        }
+        const lastIndex = Math.ceil(lastData.x)
         super.data.datasets[0].data.push(lastData)
         if (super.data.labels && super.data.labels.length <= lastIndex)
             super.data.labels.push(lastIndex)

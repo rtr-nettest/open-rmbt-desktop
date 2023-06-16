@@ -41,6 +41,9 @@ export class TestChart extends Chart {
 
     updateData(data: ITestPhaseState) {
         const lastData = this.getLastData(data)
+        if (!lastData) {
+            return
+        }
         if (!this.finished) {
             this.data.datasets[0].data.push(lastData)
             this.update()

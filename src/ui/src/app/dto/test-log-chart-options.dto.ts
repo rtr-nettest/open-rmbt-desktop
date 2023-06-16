@@ -57,6 +57,9 @@ export class TestLogChartOptions {
                     if (index > 0) {
                         retVal = 10 ** (index - 1)
                     }
+                    if (retVal >= 1000) {
+                        return `${retVal / 1000} Gbps`
+                    }
                     return `${retVal} Mbps`
                 },
             },

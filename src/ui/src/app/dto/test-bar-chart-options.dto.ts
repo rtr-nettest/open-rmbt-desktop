@@ -49,7 +49,7 @@ export class TestBarChartOptions {
                 font: {
                     size: 12,
                 },
-                maxTicksLimit: 4,
+                maxTicksLimit: 6,
                 stepSize: 10,
                 callback: (value: any, index: number) => {
                     return `${value} ms`

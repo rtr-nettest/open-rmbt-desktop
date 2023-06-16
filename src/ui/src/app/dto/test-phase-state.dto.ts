@@ -4,6 +4,7 @@ import { IOverallResult } from "../../../../measurement/interfaces/overall-resul
 import { ETestStatuses } from "../enums/test-statuses.enum"
 import { speedLog } from "../helpers/number"
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
+import { STATE_UPDATE_TIMEOUT } from "../store/test.store"
 
 export class TestPhaseState implements ITestPhaseState {
     counter: number = -1
@@ -19,6 +20,8 @@ export class TestPhaseState implements ITestPhaseState {
     label?: string | undefined
     time: number = -1
     pings: IPing[] = []
+
+    private startDuration = 0
 
     constructor(options?: Partial<ITestPhaseState>) {
         if (options) {
@@ -45,13 +48,18 @@ export class TestPhaseState implements ITestPhaseState {
     }
 
     extendRTRSpeedChart() {
-        if (!(this.duration >= 0 && this.counter >= 0)) {
+        if (
+            !(this.duration >= STATE_UPDATE_TIMEOUT / 1000 && this.counter >= 0)
+        ) {
             return
+        }
+        if (!this.startDuration) {
+            this.startDuration = this.duration
         }
         this.chart = [
             ...(this.chart || []),
             {
-                x: this.duration,
+                x: this.duration - this.startDuration,
                 y: speedLog(this.counter),
             },
         ]

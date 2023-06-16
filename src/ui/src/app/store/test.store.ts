@@ -19,7 +19,7 @@ import { EMeasurementStatus } from "../../../../measurement/enums/measurement-st
 import { Router } from "@angular/router"
 import { MainStore } from "./main.store"
 
-const STATE_UPDATE_TIMEOUT = 200
+export const STATE_UPDATE_TIMEOUT = 200
 
 @Injectable({
     providedIn: "root",

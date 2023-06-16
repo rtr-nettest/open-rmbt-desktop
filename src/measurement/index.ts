@@ -134,6 +134,7 @@ export class MeasurementRunner {
             progress: this.rmbtClient?.getPhaseProgress(phase) ?? -1,
             time: Date.now(),
             ping: this.rmbtClient?.pingMedian ?? -1,
+            pings: this.rmbtClient?.pings ?? [],
             down: this.rmbtClient?.interimDownMbps ?? -1,
             up: this.rmbtClient?.interimUpMbps ?? -1,
             phase,

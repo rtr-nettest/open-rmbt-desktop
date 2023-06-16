@@ -13,7 +13,8 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
 import { TestChart } from "../../dto/test-chart.dto"
 import { MainStore } from "src/app/store/main.store"
 import { TestLogChart } from "src/app/dto/test-log-chart.dto"
-import { ChartPhase } from "src/app/dto/test-log-chart-dataset.dto"
+import { ChartPhase } from "src/app/dto/test-rtr-chart-dataset.dto"
+import { TestBarChart } from "src/app/dto/test-bar-chart.dto"
 
 @Component({
     selector: "nt-test-chart",
@@ -77,6 +78,10 @@ export class TestChartComponent {
                         this.chart?.updateData(
                             visualization.phases[EMeasurementStatus.DOWN]
                         )
+                    } else if (this.phase === "ping") {
+                        this.chart?.setData(
+                            visualization.phases[EMeasurementStatus.PING]
+                        )
                     }
                     break
                 case EMeasurementStatus.UP:
@@ -113,8 +118,10 @@ export class TestChartComponent {
         }
         if (this.flavor !== "rtr") {
             this.chart = new TestChart(ctx!, label, units)
-            return
+        } else if (this.phase === "ping") {
+            this.chart = new TestBarChart(ctx!, label, units, this.phase)
+        } else {
+            this.chart = new TestLogChart(ctx!, label, units, this.phase)
         }
-        this.chart = new TestLogChart(ctx!, label, units, this.phase)
     }
 }

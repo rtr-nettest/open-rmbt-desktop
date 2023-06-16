@@ -58,8 +58,16 @@ export class TestVisualizationState implements ITestVisualizationState {
         newTestPhaseState: ITestPhaseState
     ) {
         if (newPhaseName === EMeasurementStatus.DOWN) {
-            this.phases[EMeasurementStatus.PING].counter =
+            if (
+                this.phases[EMeasurementStatus.PING].counter !==
                 newTestPhaseState.ping
+            ) {
+                this.phases[EMeasurementStatus.PING].counter =
+                    newTestPhaseState.ping
+                this.phases[EMeasurementStatus.PING].setChartFromPings?.(
+                    newTestPhaseState.pings
+                )
+            }
             this.phases[EMeasurementStatus.DOWN].counter =
                 newTestPhaseState.down
         } else if (newPhaseName === EMeasurementStatus.UP) {
@@ -71,16 +79,6 @@ export class TestVisualizationState implements ITestVisualizationState {
                 newTestPhaseState.down
             this.phases[EMeasurementStatus.UP].counter = newTestPhaseState.up
         }
-    }
-
-    private speedLog(speedMbps?: number) {
-        if (!speedMbps) {
-            return -1
-        }
-        let yPercent = (2 + Math.log10(speedMbps / 10)) / 5
-        yPercent = Math.max(yPercent, 0)
-        yPercent = Math.min(1, yPercent)
-        return yPercent
     }
 
     setDone(newPhaseName: EMeasurementStatus) {
@@ -105,21 +103,9 @@ export class TestVisualizationState implements ITestVisualizationState {
     extendChart(newPhaseName: EMeasurementStatus) {
         const newPhase = this.phases[newPhaseName]
         if (this.flavor !== "rtr") {
-            this.phases[newPhaseName].chart = [
-                ...(newPhase?.chart || []),
-                {
-                    x: newPhase.progress * 100,
-                    y: Math.max(0, newPhase.counter),
-                },
-            ]
+            newPhase.extendONTSpeedChart()
         } else {
-            this.phases[newPhaseName].chart = [
-                ...(newPhase?.chart || []),
-                {
-                    x: newPhase.duration,
-                    y: this.speedLog(newPhase.counter),
-                },
-            ]
+            newPhase.extendRTRSpeedChart()
         }
     }
 }

@@ -54,10 +54,10 @@ export class MeasurementResult implements IMeasurementResult {
         this.client_version = threadResults[0]?.client_version ?? ""
         this.client_uuid = registrationRequest.uuid ?? ""
         this.operating_system = registrationRequest.operating_system ?? ""
-        this.pings = this.getPings(threadResults)
-        this.test_ping_shortest = this.getShortestPing(this.pings)
+        this.pings = MeasurementResult.getPings(threadResults)
+        this.test_ping_shortest = MeasurementResult.getShortestPing(this.pings)
         this.platform = registrationRequest.platform ?? ""
-        this.speed_detail = this.getSpeedDetail(threadResults)
+        this.speed_detail = MeasurementResult.getSpeedDetail(threadResults)
         this.test_num_threads = registrationResponse.test_numthreads
         this.test_token = registrationResponse.test_token
         this.test_uuid = registrationResponse.test_uuid
@@ -80,7 +80,7 @@ export class MeasurementResult implements IMeasurementResult {
         this.test_status = testStatus
     }
 
-    private getPings(threadResults: IMeasurementThreadResult[]) {
+    static getPings(threadResults: IMeasurementThreadResult[]) {
         return (
             threadResults
                 ?.reduce(
@@ -92,7 +92,7 @@ export class MeasurementResult implements IMeasurementResult {
         )
     }
 
-    private getShortestPing(pings: IPing[]) {
+    static getShortestPing(pings: IPing[]) {
         return pings.reduce((acc, ping) => {
             return Math.min(
                 acc,
@@ -102,7 +102,7 @@ export class MeasurementResult implements IMeasurementResult {
         }, Infinity)
     }
 
-    private getSpeedDetail(threadResults: IMeasurementThreadResult[]) {
+    static getSpeedDetail(threadResults: IMeasurementThreadResult[]) {
         const speedItemsDownMap: { [key: number]: ISpeedItem } = {}
         const speedItemsUpMap: { [key: number]: ISpeedItem } = {}
         for (const threadResult of threadResults) {
@@ -116,7 +116,7 @@ export class MeasurementResult implements IMeasurementResult {
         return [...speedItemsDown, ...speedItemsUp]
     }
 
-    private getThreadSpeedItems(
+    static getThreadSpeedItems(
         map: { [key: number]: ISpeedItem },
         threadResult: IMeasurementThreadResult,
         direction: TransferDirection

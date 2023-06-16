@@ -1,8 +1,6 @@
-import { EColors } from "../enums/colors.enum"
-
 export type ChartPhase = "download" | "upload" | "ping"
 
-export class TestLogChartDataset {
+export class TestRTRChartDataset {
     fill = true
     backgroundColor!: string
     borderColor!: string
@@ -18,9 +16,17 @@ export class TestLogChartDataset {
         if (phase === "download") {
             this.backgroundColor = "rgba(108, 209, 95, 0.33)"
             this.borderColor = "rgba(108, 209, 95, 1)"
-        } else {
+        } else if (phase === "upload") {
             this.backgroundColor = "rgba(0, 128, 193, 0.33)"
             this.borderColor = "rgba(0, 128, 193, 1)"
+        } else {
+            this.backgroundColor = "rgb(39, 177, 220)"
+            this.borderColor = "transparent"
+            Object.assign(this, {
+                barPercentage: 0.5,
+                barThickness: 6,
+                maxBarThickness: 8,
+            })
         }
     }
 }

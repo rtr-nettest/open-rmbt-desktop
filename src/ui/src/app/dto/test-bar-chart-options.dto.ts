@@ -1,6 +1,6 @@
 import { EColors } from "src/app/enums/colors.enum"
 
-export class TestLogChartOptions {
+export class TestBarChartOptions {
     animation = {
         duration: 0,
     }
@@ -26,13 +26,12 @@ export class TestLogChartOptions {
                 },
             },
             ticks: {
-                callback: (value: any) => `${value} s`,
+                callback: () => "",
             },
         },
         y: {
             beginAtZero: true,
             min: 0,
-            max: 1,
             minRotation: 0,
             maxRotation: 0,
             grid: {
@@ -50,14 +49,10 @@ export class TestLogChartOptions {
                 font: {
                     size: 12,
                 },
-                stepSize: 0.2,
-                autoSkip: false,
+                maxTicksLimit: 4,
+                stepSize: 10,
                 callback: (value: any, index: number) => {
-                    let retVal = 0.1
-                    if (index > 0) {
-                        retVal = 10 ** (index - 1)
-                    }
-                    return `${retVal} Mbps`
+                    return `${value} ms`
                 },
             },
         },

@@ -139,7 +139,9 @@ export class ControlServer {
             })
             Logger.I.info("Result is submitted. Response: %o", response)
         } catch (e: any) {
-            await DBService.I.saveMeasurement(result)
+            if (e.response.status != 400) {
+                await DBService.I.saveMeasurement(result)
+            }
             this.handleError(e)
         }
     }

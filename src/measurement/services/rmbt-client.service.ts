@@ -3,6 +3,7 @@ import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import {
     IMeasurementThreadResult,
+    IPing,
     ISpeedItem,
 } from "../interfaces/measurement-result.interface"
 import {
@@ -15,6 +16,7 @@ import { Time } from "./time.service"
 import path from "path"
 import { IOverallResult } from "../interfaces/overall-result.interface"
 import { IPreDownloadResult } from "./rmbt-thread.service"
+import { MeasurementResult } from "../dto/measurement-result.dto"
 
 export type TransferDirection = "down" | "up"
 
@@ -188,6 +190,7 @@ export class RMBTClient {
     isRunning = false
     activityInterval?: NodeJS.Timer
     aborter = new AbortController()
+    pings: IPing[] = []
     private bytesPerSecPreDownload: number[] = []
     private estimatePhaseDuration: { [key: string]: number } = {
         [EMeasurementStatus.INIT]: 0.5,
@@ -448,6 +451,9 @@ export class RMBTClient {
                             this.pingMedian =
                                 ((message.data! as IMeasurementThreadResult)
                                     .ping_median ?? -1000000) / 1000000
+                            this.pings = MeasurementResult.getPings([
+                                message.data! as IMeasurementThreadResult,
+                            ])
                             const calculatedChunkSize = this.getChunkSize()
                             for (const w of this.measurementTasks) {
                                 w.postMessage(

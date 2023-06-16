@@ -13,7 +13,14 @@
                     {{ t(ping) }}
                 </span>
             </h4>
-            <div class="app-chart app-chart--ping"></div>
+            <div class="app-chart app-chart--ping">
+                <nt-test-chart
+                    class="nt-canvas__wrapper"
+                    phase="ping"
+                    [height]="(chartHeight$ | async) ?? 0"
+                    [width]="(chartWidth$ | async) ?? 0"
+                ></nt-test-chart>
+            </div>
         </div>
         <div class="app-container">
             <h4 class="app-title">

@@ -1,8 +1,9 @@
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
 import { ChartPhase, TestRTRChartDataset } from "./test-rtr-chart-dataset.dto"
 import { TestChart } from "./test-chart.dto"
-import { TestLogChartOptions } from "./test-log-chart-options.dto"
-export class TestLogChart extends TestChart {
+import { TestBarChartOptions } from "./test-bar-chart-options.dto"
+
+export class TestBarChart extends TestChart {
     constructor(
         context: CanvasRenderingContext2D,
         label: string,
@@ -13,22 +14,20 @@ export class TestLogChart extends TestChart {
             context,
             label,
             units,
-            "line",
+            "bar",
             {
                 datasets: [new TestRTRChartDataset(phase)],
                 labels: [],
             },
-            new TestLogChartOptions()
+            new TestBarChartOptions()
         )
     }
 
-    override updateData(data: ITestPhaseState) {
-        const lastData = super.getLastData(data)
-        const lastIndex = Math.ceil(lastData?.x ?? 0)
-        super.data.datasets[0].data.push(lastData)
-        if (super.data.labels && super.data.labels.length <= lastIndex)
-            super.data.labels.push(lastIndex)
-        super.update()
+    override setData(data: ITestPhaseState) {
+        this.resetDatasets()
+        this.data.datasets[0].data = this.getAllData(data)
+        this.data.labels = this.data.datasets[0].data.map(() => "")
+        this.update()
     }
 
     protected override resetDatasets(): void {

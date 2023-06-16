@@ -75,10 +75,10 @@ export class TestStore {
                 )
                 newState.phases[
                     EMeasurementStatus.DOWN
-                ].setChartFromOverallResults?.(result.downloadOverTime ?? [])
+                ].setChartFromOverallSpeed?.(result.downloadOverTime ?? [])
                 newState.phases[
                     EMeasurementStatus.UP
-                ].setChartFromOverallResults?.(result.uploadOverTime ?? [])
+                ].setChartFromOverallSpeed?.(result.uploadOverTime ?? [])
                 this.visualization$.next(newState)
                 this.basicNetworkInfo$.next({
                     serverName: result.measurementServerName,

@@ -18,9 +18,6 @@ export class TestLogChartOptions {
             grid: {
                 color: EColors.SECONDARY_10,
             },
-            time: {
-                unit: "second",
-            },
             title: {
                 display: true,
                 color: EColors.SECONDARY_50,
@@ -28,9 +25,8 @@ export class TestLogChartOptions {
                     size: 12,
                 },
             },
-            type: "time",
             ticks: {
-                callback: (value: any, index: number) => `${index + 1} s`,
+                callback: (value: any) => `${value} s`,
             },
         },
         y: {

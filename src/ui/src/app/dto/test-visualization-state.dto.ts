@@ -62,12 +62,8 @@ export class TestVisualizationState implements ITestVisualizationState {
                 newTestPhaseState.ping
             this.phases[EMeasurementStatus.DOWN].counter =
                 newTestPhaseState.down
-            this.phases[EMeasurementStatus.DOWN].counterLog =
-                newTestPhaseState.downLog
         } else if (newPhaseName === EMeasurementStatus.UP) {
             this.phases[EMeasurementStatus.UP].counter = newTestPhaseState.up
-            this.phases[EMeasurementStatus.UP].counterLog =
-                newTestPhaseState.upLog
         } else if (newPhaseName === EMeasurementStatus.SHOWING_RESULTS) {
             this.phases[EMeasurementStatus.PING].counter =
                 newTestPhaseState.ping
@@ -75,6 +71,16 @@ export class TestVisualizationState implements ITestVisualizationState {
                 newTestPhaseState.down
             this.phases[EMeasurementStatus.UP].counter = newTestPhaseState.up
         }
+    }
+
+    private speedLog(speedMbps?: number) {
+        if (!speedMbps) {
+            return -1
+        }
+        let yPercent = (2 + Math.log10(speedMbps / 10)) / 5
+        yPercent = Math.max(yPercent, 0)
+        yPercent = Math.min(1, yPercent)
+        return yPercent
     }
 
     setDone(newPhaseName: EMeasurementStatus) {
@@ -110,8 +116,8 @@ export class TestVisualizationState implements ITestVisualizationState {
             this.phases[newPhaseName].chart = [
                 ...(newPhase?.chart || []),
                 {
-                    x: newPhase.time,
-                    y: newPhase.counterLog,
+                    x: newPhase.duration,
+                    y: this.speedLog(newPhase.counter),
                 },
             ]
         }

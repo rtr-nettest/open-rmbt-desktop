@@ -2,6 +2,7 @@ import { TestChartDataset } from "./test-chart-dataset.dto"
 import { TestChartOptions } from "./test-chart-options.dto"
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
 import { Chart, ChartData } from "chart.js"
+import { generateIndexesOfLength } from "../helpers/array"
 
 export class TestChart extends Chart {
     private finished = false
@@ -13,9 +14,7 @@ export class TestChart extends Chart {
         type: "line" | "bar" = "line",
         data: ChartData = {
             datasets: [new TestChartDataset(context)],
-            labels: Array(100)
-                .fill(0)
-                .map((_, idx) => 0 + idx),
+            labels: generateIndexesOfLength(100),
         },
         options: { [key: string]: any } = new TestChartOptions(units)
     ) {
@@ -27,14 +26,14 @@ export class TestChart extends Chart {
     }
 
     resetData() {
-        this.setNewDatasets()
-        this.data.labels = []
+        this.resetDatasets()
+        this.resetLabels()
         this.finished = false
         this.update()
     }
 
     setData(data: ITestPhaseState) {
-        this.setNewDatasets()
+        this.resetDatasets()
         this.data.datasets[0].data = this.getAllData(data)
         this.finished = true
         this.update()
@@ -49,7 +48,11 @@ export class TestChart extends Chart {
         this.finished = !!lastData && lastData.x >= 100
     }
 
-    protected setNewDatasets() {
+    protected resetLabels() {
+        this.data.labels = []
+    }
+
+    protected resetDatasets() {
         this.data.datasets = [new TestChartDataset(this.context)]
     }
 

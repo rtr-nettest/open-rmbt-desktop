@@ -126,16 +126,6 @@ export class MeasurementRunner {
         this.rmbtClient?.abortMeasurement()
     }
 
-    private speedLog(speedMbps?: number) {
-        if (!speedMbps) {
-            return -1
-        }
-        let yPercent = (2 + Math.log10(speedMbps / 10)) / 5
-        yPercent = Math.max(yPercent, 0)
-        yPercent = Math.min(1, yPercent)
-        return yPercent
-    }
-
     getCurrentPhaseState(): IMeasurementPhaseState & IBasicNetworkInfo {
         const phase =
             this.rmbtClient?.measurementStatus ?? EMeasurementStatus.NOT_STARTED
@@ -146,8 +136,6 @@ export class MeasurementRunner {
             ping: this.rmbtClient?.pingMedian ?? -1,
             down: this.rmbtClient?.interimDownMbps ?? -1,
             up: this.rmbtClient?.interimUpMbps ?? -1,
-            downLog: this.speedLog(this.rmbtClient?.interimDownMbps),
-            upLog: this.speedLog(this.rmbtClient?.interimUpMbps),
             phase,
             testUuid: this.rmbtClient?.params?.test_uuid ?? "",
             ipAddress: this.rmbtClient?.params.client_remote_ip ?? "-",

@@ -8,6 +8,7 @@ import { ETestStatuses } from "../enums/test-statuses.enum"
 import { ETestLabels } from "../enums/test-labels.enum"
 
 export class TestVisualizationState implements ITestVisualizationState {
+    flavor: string = "rtr"
     phases: {
         [key: string]: ITestPhaseState
     } = {
@@ -34,7 +35,8 @@ export class TestVisualizationState implements ITestVisualizationState {
 
     static from(
         initialState: ITestVisualizationState,
-        phaseState: IMeasurementPhaseState
+        phaseState: IMeasurementPhaseState,
+        flavor: string
     ) {
         const newState = extend<ITestVisualizationState>(initialState)
         if (newState.phases[phaseState.phase]) {
@@ -42,6 +44,7 @@ export class TestVisualizationState implements ITestVisualizationState {
                 newState.phases[phaseState.phase],
                 phaseState
             )
+            newState.flavor = flavor
             newState.phases[phaseState.phase] = newTestPhaseState
             newState.setCounter(phaseState.phase, newTestPhaseState)
             newState.extendChart(phaseState.phase)
@@ -55,8 +58,16 @@ export class TestVisualizationState implements ITestVisualizationState {
         newTestPhaseState: ITestPhaseState
     ) {
         if (newPhaseName === EMeasurementStatus.DOWN) {
-            this.phases[EMeasurementStatus.PING].counter =
+            if (
+                this.phases[EMeasurementStatus.PING].counter !==
                 newTestPhaseState.ping
+            ) {
+                this.phases[EMeasurementStatus.PING].counter =
+                    newTestPhaseState.ping
+                this.phases[EMeasurementStatus.PING].setChartFromPings?.(
+                    newTestPhaseState.pings
+                )
+            }
             this.phases[EMeasurementStatus.DOWN].counter =
                 newTestPhaseState.down
         } else if (newPhaseName === EMeasurementStatus.UP) {
@@ -91,12 +102,10 @@ export class TestVisualizationState implements ITestVisualizationState {
 
     extendChart(newPhaseName: EMeasurementStatus) {
         const newPhase = this.phases[newPhaseName]
-        this.phases[newPhaseName].chart = [
-            ...(newPhase?.chart || []),
-            {
-                x: newPhase.progress * 100,
-                y: Math.max(0, newPhase.counter),
-            },
-        ]
+        if (this.flavor !== "rtr") {
+            newPhase.extendONTSpeedChart()
+        } else {
+            newPhase.extendRTRSpeedChart()
+        }
     }
 }

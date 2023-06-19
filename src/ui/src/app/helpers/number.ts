@@ -9,3 +9,13 @@ export function getSignificantDigits(number: number) {
     }
     return Math.round(number * rounder) / rounder
 }
+
+export function speedLog(speedMbps?: number) {
+    if (!speedMbps) {
+        return -1
+    }
+    let yPercent = (2 + Math.log10(speedMbps / 10)) / 5
+    yPercent = Math.max(yPercent, 0)
+    yPercent = Math.min(1, yPercent)
+    return yPercent
+}

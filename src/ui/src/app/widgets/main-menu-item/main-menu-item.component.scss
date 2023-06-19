@@ -31,7 +31,7 @@
     width: rem($font-size-xxl * 2.5);
 
     & + span {
-        @include screen-md {
+        @include screen-lg {
             display: none;
         }
     }

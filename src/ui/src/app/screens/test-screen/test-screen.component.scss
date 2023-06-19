@@ -10,20 +10,20 @@
     align-items: center;
     display: flex;
     justify-content: center;
-    padding: rem(64);
     height: 100%;
     width: 100%;
 
     & > * {
-        flex: 0 0 45%;
+        flex: 0 0 44%;
     }
 
     & > app-spacer {
-        flex: 0 0 10%;
+        flex: 0 0 4%;
     }
 
     @include screen-xs {
-        padding: rem(32);
+        padding-left: rem(32);
+        padding-right: rem(32);
     }
 
     &--ont {
@@ -37,4 +37,9 @@
             flex: auto;
         }
     }
+}
+
+app-body {
+    padding-bottom: 0;
+    padding-top: 0;
 }

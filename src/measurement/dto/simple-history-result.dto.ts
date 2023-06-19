@@ -17,9 +17,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         )
     }
 
-    get fullResultLink() {
-        return `${process.env.FULL_HISTORY_RESUlT_URL}${this.testUuid}`
-    }
+    fullResultLink: string
 
     constructor(
         public measurementDate: string,
@@ -35,5 +33,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         public downloadClass?: number,
         public uploadClass?: number,
         public pingClass?: number
-    ) {}
+    ) {
+        this.fullResultLink = `${process.env.FULL_HISTORY_RESUlT_URL}${this.testUuid}`
+    }
 }

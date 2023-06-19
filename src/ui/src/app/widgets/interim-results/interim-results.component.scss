@@ -25,11 +25,16 @@
 }
 
 .app-chart {
-    height: 18vh;
-    margin-bottom: 2vh;
     position: relative;
 
+    nt-test-chart {
+        height: 18vh;
+        width: 40vw;
+    }
+
     &--ping {
-        height: 14vh;
+        nt-test-chart {
+            height: 14vh;
+        }
     }
 }

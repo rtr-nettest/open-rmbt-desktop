@@ -1,4 +1,4 @@
-<div class="app-wrapper" *transloco="let t">
+<div class="app-wrapper app-wrapper--charts" *transloco="let t">
     <ng-container *ngIf="visualization$ | async as state">
         <div class="app-container">
             <h4 class="app-title">
@@ -17,8 +17,6 @@
                 <nt-test-chart
                     class="nt-canvas__wrapper"
                     phase="ping"
-                    [height]="(chartHeight$ | async) ?? 0"
-                    [width]="(chartWidth$ | async) ?? 0"
                 ></nt-test-chart>
             </div>
         </div>
@@ -41,8 +39,6 @@
                 <nt-test-chart
                     class="nt-canvas__wrapper"
                     phase="download"
-                    [height]="(chartHeight$ | async) ?? 0"
-                    [width]="(chartWidth$ | async) ?? 0"
                 ></nt-test-chart>
             </div>
         </div>
@@ -68,12 +64,10 @@
                     {{ t(upload) }}
                 </span>
             </h4>
-            <div class="app-chart app-chart--up">
+            <div class="app-chart app-chart--up" [style.margin-bottom]="0">
                 <nt-test-chart
                     class="nt-canvas__wrapper"
                     phase="upload"
-                    [height]="(chartHeight$ | async) ?? 0"
-                    [width]="(chartWidth$ | async) ?? 0"
                 ></nt-test-chart>
             </div>
         </div>

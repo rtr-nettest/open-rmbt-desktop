@@ -24,8 +24,6 @@ import { TestBarChart } from "src/app/dto/test-bar-chart.dto"
 })
 export class TestChartComponent {
     @Input() phase: ChartPhase = "download"
-    @Input() width = 0
-    @Input() height = 0
     @Input() type: "line" | "bar" = "line"
 
     chart: TestChart | undefined

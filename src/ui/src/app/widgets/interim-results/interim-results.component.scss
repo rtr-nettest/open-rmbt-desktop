@@ -1,15 +1,14 @@
 @import "../../../assets/styles/core.scss";
 
 .app-wrapper {
-    display: flex;
-    flex-direction: column;
+    display: block;
 }
 
 .app-title {
     display: flex;
     font-size: rem($font-size-xl);
     font-weight: bold;
-    margin-bottom: rem(20);
+    margin-bottom: 1vh;
 
     & > * {
         margin-right: 1ex;
@@ -26,5 +25,11 @@
 }
 
 .app-chart {
-    height: rem(160);
+    height: 18vh;
+    margin-bottom: 2vh;
+    position: relative;
+
+    &--ping {
+        height: 14vh;
+    }
 }

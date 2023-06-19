@@ -6,12 +6,13 @@
     <ng-container *transloco="let t">
         <dl class="app-chart-wrapper">
             <dt class="app-title">{{ t("test.download.label") }}</dt>
-            <dd>
+            <dd
+                [style.height.px]="(chartHeight$ | async) ?? 0"
+                [style.width.px]="(chartWidth$ | async) ?? 0"
+            >
                 <nt-test-chart
                     class="nt-canvas__wrapper"
                     phase="download"
-                    [height]="(chartHeight$ | async) ?? 0"
-                    [width]="(chartWidth$ | async) ?? 0"
                 ></nt-test-chart>
             </dd>
         </dl>
@@ -20,12 +21,14 @@
             [style.margin-left.px]="(margin$ | async) ?? 0 * 2"
         >
             <dt class="app-title">{{ t("test.upload.label") }}</dt>
-            <dd>
+            <dd
+                [style.height.px]="(chartHeight$ | async) ?? 0"
+                [style.width.px]="(chartWidth$ | async) ?? 0"
+            >
+                >
                 <nt-test-chart
                     class="nt-canvas__wrapper"
                     phase="upload"
-                    [height]="(chartHeight$ | async) ?? 0"
-                    [width]="(chartWidth$ | async) ?? 0"
                 ></nt-test-chart>
             </dd>
         </dl>

@@ -9,18 +9,12 @@
 .app-main {
     align-items: center;
     display: flex;
-    justify-content: center;
-    padding-left: rem(64);
-    padding-right: rem(64);
+    justify-content: space-evenly;
     height: 100%;
     width: 100%;
 
     & > * {
         flex: 0 0 45%;
-    }
-
-    & > app-spacer {
-        flex: 0 0 10%;
     }
 
     @include screen-xs {
@@ -39,4 +33,9 @@
             flex: auto;
         }
     }
+}
+
+app-body {
+    padding-bottom: 0;
+    padding-top: 0;
 }

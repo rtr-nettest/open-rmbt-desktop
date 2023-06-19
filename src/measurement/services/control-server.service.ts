@@ -229,6 +229,7 @@ export class ControlServer {
                 openTestsResponse?.public_ip_as_name,
                 openTestsResponse?.ip_anonym,
                 uuid,
+                false,
                 [],
                 [],
                 response.measurement_result?.download_classification,
@@ -260,6 +261,7 @@ export class ControlServer {
                 response.operator ?? response.client_provider,
                 response.ip_address,
                 uuid,
+                false,
                 RMBTClient.getOverallResultsFromSpeedItems(
                     response.speed_detail,
                     "download"

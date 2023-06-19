@@ -1,0 +1,5 @@
+<div class="app-export-warning" *ngIf="isLocal$ | async">
+    <span *transloco="let t">
+        {{ t("This result is only available locally.") }}
+    </span>
+</div>

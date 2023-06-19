@@ -64,6 +64,7 @@ import { MainMenuItemComponent } from "./widgets/main-menu-item/main-menu-item.c
 import { BodyComponent } from "./widgets/body/body.component"
 import { ConfirmDialogComponent } from "./widgets/confirm-dialog/confirm-dialog.component"
 import { MatDialogModule } from "@angular/material/dialog"
+import { ExportWarningComponent } from "./widgets/export-warning/export-warning.component"
 Chart.register(
     BarElement,
     BarController,
@@ -100,6 +101,7 @@ declare global {
         AppComponent,
         BodyComponent,
         DlComponent,
+        ExportWarningComponent,
         FooterComponent,
         GaugeComponent,
         HeaderComponent,

@@ -13,7 +13,8 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             result.test_ping_shortest / 1e6,
             result.provider_name ?? "-",
             result.ip_address ?? "-",
-            result.test_uuid ?? ""
+            result.test_uuid ?? "",
+            true
         )
     }
 
@@ -28,6 +29,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         public providerName: string,
         public ipAddress: string,
         public testUuid?: string,
+        public isLocal?: boolean,
         public downloadOverTime?: IOverallResult[],
         public uploadOverTime?: IOverallResult[],
         public downloadClass?: number,

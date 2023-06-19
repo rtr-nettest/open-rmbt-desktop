@@ -16,4 +16,5 @@ export interface ISimpleHistoryResult {
     pingClass?: number
     fullResultLink: string
     testUuid?: string
+    isLocal?: boolean
 }

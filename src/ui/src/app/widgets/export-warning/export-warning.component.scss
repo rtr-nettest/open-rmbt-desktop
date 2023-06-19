@@ -1,0 +1,18 @@
+@import "src/assets/styles/core";
+
+:host {
+    width: 100%;
+}
+
+.app-export-warning {
+    background-color: rgba(255, 204, 0, 0.2);
+    border: 1px solid #ffcc00;
+    border-radius: 8px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    font-size: rem(14);
+    margin: 0 auto rem(24);
+    padding: rem(12) rem(16);
+    width: 100%;
+}

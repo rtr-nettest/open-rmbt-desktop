@@ -16,7 +16,11 @@
 <ng-template #rtr>
     <app-body>
         <app-main-menu></app-main-menu>
-        <app-main-content *ngIf="result$ | async as result; else noResult">
+        <app-main-content
+            *ngIf="result$ | async as result; else noResult"
+            [style.flex-direction]="'column'"
+        >
+            <app-export-warning></app-export-warning>
             <div class="app-main">
                 <header class="app-title">
                     Measurement result from {{ result.measurementDate | date }}

@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from "@angular/core"
+import {
+    ChangeDetectionStrategy,
+    Component,
+    OnDestroy,
+    OnInit,
+} from "@angular/core"
 import {
     Subject,
     distinctUntilChanged,
@@ -18,7 +23,7 @@ import { MainStore } from "src/app/store/main.store"
     styleUrls: ["./home-screen.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeScreenComponent implements OnDestroy {
+export class HomeScreenComponent implements OnDestroy, OnInit {
     destroyed$ = new Subject<void>()
     env$ = this.mainStore.env$
     error$ = this.mainStore.error$
@@ -67,6 +72,10 @@ export class HomeScreenComponent implements OnDestroy {
         private cmsService: CMSService,
         private message: MessageService
     ) {}
+
+    ngOnInit(): void {
+        this.mainStore.registerClient()
+    }
 
     ngOnDestroy(): void {
         this.destroyed$.next()

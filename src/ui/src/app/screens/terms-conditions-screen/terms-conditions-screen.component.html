@@ -1,0 +1,11 @@
+<div class="app-wrapper" *transloco="let t">
+    <div class="app-body" [innerHTML]="t('Terms and conditions text')"></div>
+    <footer class="app-footer">
+        <button mat-button color="primary" (click)="cancel()">
+            {{ t("Cancel") }}
+        </button>
+        <button mat-flat-button type="submit" color="primary" (click)="agree()">
+            {{ t("Agree") }}
+        </button>
+    </footer>
+</div>

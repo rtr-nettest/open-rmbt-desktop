@@ -65,6 +65,7 @@ import { BodyComponent } from "./widgets/body/body.component"
 import { ConfirmDialogComponent } from "./widgets/confirm-dialog/confirm-dialog.component"
 import { MatDialogModule } from "@angular/material/dialog"
 import { ExportWarningComponent } from "./widgets/export-warning/export-warning.component"
+import { TermsConditionsScreenComponent } from "./screens/terms-conditions-screen/terms-conditions-screen.component"
 Chart.register(
     BarElement,
     BarController,
@@ -80,6 +81,9 @@ Chart.register(
 declare global {
     interface Window {
         electronAPI: {
+            quit: () => Promise<void>
+            getTermsAccepted: () => Promise<boolean>
+            acceptTerms: () => Promise<void>
             registerClient: () => Promise<IUserSettings>
             runMeasurement: () => Promise<void>
             abortMeasurement: () => Promise<void>
@@ -121,6 +125,7 @@ declare global {
         TestIndicatorComponent,
         TestScreenComponent,
         ConfirmDialogComponent,
+        TermsConditionsScreenComponent,
     ],
     imports: [
         AppRoutingModule,

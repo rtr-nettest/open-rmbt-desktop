@@ -21,6 +21,9 @@ export class MainStore {
             this.error$.next(new Error("Server communication error"))
         })
         window.electronAPI.getEnv().then((env) => this.env$.next(env))
+    }
+
+    registerClient() {
         window.electronAPI
             .registerClient()
             .then((settings) => this.settings$.next(settings))

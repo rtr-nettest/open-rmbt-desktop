@@ -5,6 +5,7 @@ import { MeasurementRunner } from "../measurement"
 import { Events } from "./enums/events.enum"
 import { IEnv } from "./interfaces/env.interface"
 import Protocol from "./protocol"
+import { Store } from "../measurement/services/store.service"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -72,6 +73,18 @@ app.on("window-all-closed", () => {
 
 app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
+})
+
+ipcMain.on(Events.QUIT, () => {
+    app.quit()
+})
+
+ipcMain.handle(Events.GET_TERMS_ACCEPTED, () => {
+    return Store.termsAccepted
+})
+
+ipcMain.on(Events.ACCEPT_TERMS, () => {
+    Store.termsAccepted = true
 })
 
 ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {

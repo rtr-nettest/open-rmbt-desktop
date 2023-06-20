@@ -7,4 +7,5 @@ export enum ERoutes {
     HISTORY = "history",
     STATISTICS = "statistics",
     HELP = "help",
+    TERMS_CONDITIONS = "terms-conditions",
 }

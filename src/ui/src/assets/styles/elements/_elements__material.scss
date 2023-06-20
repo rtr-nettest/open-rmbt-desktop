@@ -30,6 +30,11 @@ $app-theme: mat.define-light-theme(
     padding: rem(12) rem(18);
 }
 
+.mdc-button[mat-button] {
+    border: 2px solid;
+    padding: rem(8) rem(14);
+}
+
 .app-snackbar {
     --mat-mdc-snack-bar-button-color: black;
     --mdc-snackbar-container-color: white;

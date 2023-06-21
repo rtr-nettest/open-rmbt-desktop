@@ -8,35 +8,48 @@ import {
 } from "@ngneat/transloco"
 import { Injectable, isDevMode, NgModule } from "@angular/core"
 import { IUITranslation } from "./interfaces/ui-translation.interface"
-import { MainStore } from "./store/main.store"
-import { of, switchMap } from "rxjs"
+import { from, map, of, switchMap, withLatestFrom } from "rxjs"
 import { TranslocoConfigExt } from "src/transloco.config"
+import { IEnv } from "../../../electron/interfaces/env.interface"
+import { ICrowdinJson } from "../../../measurement/interfaces/crowdin.interface"
+import { MainStore } from "./store/main.store"
 
 @Injectable({ providedIn: "root" })
 export class TranslocoHttpLoader implements TranslocoLoader {
-    constructor(private http: HttpClient, private mainStore: MainStore) {}
+    constructor(private http: HttpClient, private store: MainStore) {}
 
     getTranslation(lang: string) {
-        return this.mainStore.env$.pipe(
+        return from(window.electronAPI.getEnv()).pipe(
             switchMap((env) => {
                 if (!env) {
                     return of([])
                 } else if (env.FLAVOR !== "rtr") {
-                    return this.http.get<IUITranslation[]>(
-                        `${env?.CMS_URL}/ui-translations?locale.iso=${lang}&_limit=1000`,
-                        {
-                            headers: {
-                                "Content-Type": "application/json",
-                                "X-Nettest-Client": env?.X_NETTEST_CLIENT ?? "",
-                            },
-                        }
-                    )
+                    return this.getFromCms(env, lang)
                 } else {
-                    return this.http.get<{ [key: string]: string }>(
-                        `assets/i18n/${lang}.json`
-                    )
+                    return from(window.electronAPI.getTranslations(lang))
                 }
+            }),
+            withLatestFrom(
+                this.http.get<ICrowdinJson>(`assets/i18n/${lang}.json`)
+            ),
+            map(([remote, local]) => {
+                if (!remote) {
+                    return local
+                }
+                return remote
             })
+        )
+    }
+
+    private getFromCms(env: IEnv, lang: string) {
+        return this.http.get<IUITranslation[]>(
+            `${env?.CMS_URL}/ui-translations?locale.iso=${lang}&_limit=1000`,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Nettest-Client": env?.X_NETTEST_CLIENT ?? "",
+                },
+            }
         )
     }
 }

@@ -66,6 +66,8 @@ import { ConfirmDialogComponent } from "./widgets/confirm-dialog/confirm-dialog.
 import { MatDialogModule } from "@angular/material/dialog"
 import { ExportWarningComponent } from "./widgets/export-warning/export-warning.component"
 import { TermsConditionsScreenComponent } from "./screens/terms-conditions-screen/terms-conditions-screen.component"
+import { ICrowdinJson } from "../../../measurement/interfaces/crowdin.interface"
+
 Chart.register(
     BarElement,
     BarController,
@@ -82,6 +84,7 @@ declare global {
     interface Window {
         electronAPI: {
             quit: () => Promise<void>
+            getTranslations: (lang: string) => Promise<ICrowdinJson>
             getTermsAccepted: () => Promise<number | undefined>
             acceptTerms: () => Promise<void>
             registerClient: () => Promise<IUserSettings>

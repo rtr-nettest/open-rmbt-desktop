@@ -64,6 +64,7 @@
         "pino-pretty": "^10.0.0",
         "reflect-metadata": "^0.1.13",
         "sql.js": "^1.8.0",
-        "uuidv4": "^6.2.13"
+        "uuidv4": "^6.2.13",
+        "xliff": "^6.1.0"
     }
 }

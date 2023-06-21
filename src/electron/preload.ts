@@ -3,6 +3,8 @@ import { Events } from "./enums/events.enum"
 
 contextBridge.exposeInMainWorld("electronAPI", {
     quit: () => ipcRenderer.send(Events.QUIT),
+    getTranslations: (lang: string) =>
+        ipcRenderer.invoke(Events.GET_TRANSLATIONS, lang),
     getTermsAccepted: () => ipcRenderer.invoke(Events.GET_TERMS_ACCEPTED),
     acceptTerms: () => ipcRenderer.send(Events.ACCEPT_TERMS),
     registerClient: () => ipcRenderer.invoke(Events.REGISTER_CLIENT),

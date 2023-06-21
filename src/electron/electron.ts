@@ -6,6 +6,7 @@ import { Events } from "./enums/events.enum"
 import { IEnv } from "./interfaces/env.interface"
 import Protocol from "./protocol"
 import { Store } from "../measurement/services/store.service"
+import { CrowdinService } from "../measurement/services/crowdin.service"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -77,6 +78,10 @@ app.on("activate", () => {
 
 ipcMain.on(Events.QUIT, () => {
     app.quit()
+})
+
+ipcMain.handle(Events.GET_TRANSLATIONS, async (event, lang: string) => {
+    return await CrowdinService.I.getTranslations(lang)
 })
 
 ipcMain.handle(Events.GET_TERMS_ACCEPTED, () => {

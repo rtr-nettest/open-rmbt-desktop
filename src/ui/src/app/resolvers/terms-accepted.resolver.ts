@@ -1,21 +1,30 @@
 import { Injectable } from "@angular/core"
 import { Router } from "@angular/router"
-import { Observable, from, map } from "rxjs"
+import { Observable, from, map, withLatestFrom } from "rxjs"
 import { ERoutes } from "../enums/routes.enum"
+import { TranslocoService } from "@ngneat/transloco"
+import { TRANSLATIONS_UPDATED_AT } from "../constants/strings"
 
 @Injectable({
     providedIn: "root",
 })
 export class TermsAcceptedResolver {
-    constructor(private router: Router) {}
+    constructor(private router: Router, private transloco: TranslocoService) {}
 
     resolve(): Observable<boolean> {
         return from(window.electronAPI.getTermsAccepted()).pipe(
-            map((accepted) => {
-                if (!accepted) {
+            withLatestFrom(
+                this.transloco.selectTranslate(TRANSLATIONS_UPDATED_AT)
+            ),
+            map(([termsAcceptedAt, translationsUpdatedAt]) => {
+                if (
+                    !termsAcceptedAt ||
+                    (translationsUpdatedAt &&
+                        translationsUpdatedAt > termsAcceptedAt)
+                ) {
                     this.router.navigate(["/", ERoutes.TERMS_CONDITIONS])
                 }
-                return !!accepted
+                return true
             })
         )
     }

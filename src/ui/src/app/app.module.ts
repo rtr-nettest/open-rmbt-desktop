@@ -82,7 +82,7 @@ declare global {
     interface Window {
         electronAPI: {
             quit: () => Promise<void>
-            getTermsAccepted: () => Promise<boolean>
+            getTermsAccepted: () => Promise<number | undefined>
             acceptTerms: () => Promise<void>
             registerClient: () => Promise<IUserSettings>
             runMeasurement: () => Promise<void>

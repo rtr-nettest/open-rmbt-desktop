@@ -80,11 +80,11 @@ ipcMain.on(Events.QUIT, () => {
 })
 
 ipcMain.handle(Events.GET_TERMS_ACCEPTED, () => {
-    return Store.termsAccepted
+    return Store.termsAcceptedAt
 })
 
 ipcMain.on(Events.ACCEPT_TERMS, () => {
-    Store.termsAccepted = true
+    Store.termsAcceptedAt = Date.now()
 })
 
 ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {

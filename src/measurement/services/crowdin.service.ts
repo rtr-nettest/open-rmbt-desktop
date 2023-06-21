@@ -21,9 +21,12 @@ export class CrowdinService {
 
     private constructor() {}
 
-    async getTranslations(lang: string): Promise<ICrowdinJson> {
+    async getTranslations(lang: string): Promise<ICrowdinJson | null> {
         try {
-            const root = process.env.CROWDIN_PROJECT_URL ?? "/"
+            const root = process.env.CROWDIN_PROJECT_URL
+            if (!root) {
+                return null
+            }
             Logger.I.info("Exporting translations for language %s", lang)
             let download: ICrowdinDownload = (
                 await axios.post(
@@ -54,7 +57,7 @@ export class CrowdinService {
             return translations
         } catch (e) {
             Logger.I.error(e)
-            return {}
+            return null
         }
     }
 

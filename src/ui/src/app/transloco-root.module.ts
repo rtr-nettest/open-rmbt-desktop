@@ -8,10 +8,9 @@ import {
 } from "@ngneat/transloco"
 import { Injectable, isDevMode, NgModule } from "@angular/core"
 import { IUITranslation } from "./interfaces/ui-translation.interface"
-import { from, map, of, switchMap, withLatestFrom } from "rxjs"
+import { from, of, switchMap } from "rxjs"
 import { TranslocoConfigExt } from "src/transloco.config"
 import { IEnv } from "../../../electron/interfaces/env.interface"
-import { ICrowdinJson } from "../../../measurement/interfaces/crowdin.interface"
 import { MainStore } from "./store/main.store"
 
 @Injectable({ providedIn: "root" })
@@ -21,22 +20,19 @@ export class TranslocoHttpLoader implements TranslocoLoader {
     getTranslation(lang: string) {
         return from(window.electronAPI.getEnv()).pipe(
             switchMap((env) => {
-                if (!env) {
-                    return of([])
-                } else if (env.FLAVOR !== "rtr") {
+                if (env && env.FLAVOR === "ont") {
                     return this.getFromCms(env, lang)
-                } else {
+                } else if (env.CROWDIN_UPDATE_AT_RUNTIME === "true") {
                     return from(window.electronAPI.getTranslations(lang))
+                } else {
+                    return of([])
                 }
             }),
-            withLatestFrom(
-                this.http.get<ICrowdinJson>(`assets/i18n/${lang}.json`)
-            ),
-            map(([remote, local]) => {
-                if (!remote) {
-                    return local
+            switchMap((remote) => {
+                if (!remote || !remote.length) {
+                    return this.http.get(`/assets/i18n/${lang}.json`)
                 }
-                return remote
+                return of(remote)
             })
         )
     }

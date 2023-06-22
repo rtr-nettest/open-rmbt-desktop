@@ -120,6 +120,7 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         FLAVOR: process.env.FLAVOR || "rtr",
         X_NETTEST_CLIENT: process.env.X_NETTEST_CLIENT || "",
         ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",
+        CROWDIN_UPDATE_AT_RUNTIME: process.env.CROWDIN_UPDATE_AT_RUNTIME || "",
     }
 })
 

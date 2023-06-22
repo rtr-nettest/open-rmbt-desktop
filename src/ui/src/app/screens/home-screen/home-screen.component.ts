@@ -5,6 +5,7 @@ import {
     OnInit,
 } from "@angular/core"
 import { Router } from "@angular/router"
+import { TranslocoService } from "@ngneat/transloco"
 import {
     Subject,
     distinctUntilChanged,
@@ -13,8 +14,9 @@ import {
     switchMap,
     takeUntil,
     tap,
+    withLatestFrom,
 } from "rxjs"
-import { UNKNOWN } from "src/app/constants/strings"
+import { TERMS_AND_CONDITIONS, UNKNOWN } from "src/app/constants/strings"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { CMSService } from "src/app/services/cms.service"
 import { MessageService } from "src/app/services/message.service"
@@ -69,11 +71,13 @@ export class HomeScreenComponent implements OnDestroy, OnInit {
             )
         )
     )
-    terms$ = from(window.electronAPI.getTermsAccepted())
+    terms$ = this.transloco
+        .selectTranslate(TERMS_AND_CONDITIONS)
         .pipe(
             takeUntil(this.destroyed$),
-            tap((terms) => {
-                if (!terms) {
+            withLatestFrom(from(window.electronAPI.getTermsAccepted())),
+            tap(([terms, acceptedTerms]) => {
+                if (terms !== acceptedTerms) {
                     this.router.navigate(["/", ERoutes.TERMS_CONDITIONS])
                 }
             })
@@ -84,7 +88,8 @@ export class HomeScreenComponent implements OnDestroy, OnInit {
         private mainStore: MainStore,
         private cmsService: CMSService,
         private message: MessageService,
-        private router: Router
+        private router: Router,
+        private transloco: TranslocoService
     ) {}
 
     ngOnInit(): void {

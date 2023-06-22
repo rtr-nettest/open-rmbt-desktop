@@ -7,7 +7,7 @@
         "node": ">=18"
     },
     "scripts": {
-        "prepare:translations": "npx ts-node -O '{\"module\": \"commonjs\"}' download-translations.ts",
+        "prepare:translations": "npx ts-node download-translations.ts",
         "build:all": "npm run prepare:translations && webpack --mode production && cd src/ui && npm run build-for-packaging && shx cp -rf dist/ui/* ../../dist",
         "start:cli": "webpack --mode development --config ./webpack.cli.config.js && npx ts-node src/cli/cli.ts",
         "start:electron": "webpack --mode development && cross-env DEV=true electron dist/main.js",

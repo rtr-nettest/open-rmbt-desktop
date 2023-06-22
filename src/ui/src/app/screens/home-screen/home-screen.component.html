@@ -2,6 +2,9 @@
 <app-body>
     <app-main-menu></app-main-menu>
     <app-main-content>
+        <div *ngIf="showProgress" style="width: 100%">
+            <mat-spinner style="margin: auto"></mat-spinner>
+        </div>
         <div style="width: 100%" *transloco="let t">
             <h1 class="app-title" *ngIf="(env$ | async)?.FLAVOR === 'ont'">
                 {{ t("test.title") }}

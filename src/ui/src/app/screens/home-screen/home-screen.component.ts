@@ -79,10 +79,13 @@ export class HomeScreenComponent implements OnDestroy, OnInit {
             tap(([terms, acceptedTerms]) => {
                 if (terms !== acceptedTerms) {
                     this.router.navigate(["/", ERoutes.TERMS_CONDITIONS])
+                } else {
+                    this.showProgress = false
                 }
             })
         )
         .subscribe()
+    showProgress = true
 
     constructor(
         private mainStore: MainStore,

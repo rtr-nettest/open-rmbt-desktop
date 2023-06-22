@@ -2,13 +2,12 @@ import { Injectable } from "@angular/core"
 import { Router } from "@angular/router"
 import { Observable, from, map } from "rxjs"
 import { ERoutes } from "../enums/routes.enum"
-import { TranslocoService } from "@ngneat/transloco"
 
 @Injectable({
     providedIn: "root",
 })
 export class TermsAcceptedResolver {
-    constructor(private router: Router, private transloco: TranslocoService) {}
+    constructor(private router: Router) {}
 
     resolve(): Observable<boolean> {
         return from(window.electronAPI.getTermsAccepted()).pipe(

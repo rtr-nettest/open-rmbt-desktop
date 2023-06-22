@@ -2,7 +2,7 @@ import ElectronStore from "electron-store"
 
 export class Store {
     private static clientUuidKey = "clienUuid"
-    private static termsAcceptedAtKey = "termsAcceptedAt"
+    private static termsAcceptedKey = "termsAccepted"
     private static instance = new ElectronStore()
 
     static get I() {
@@ -17,12 +17,12 @@ export class Store {
         Store.I.set(Store.clientUuidKey, newValue)
     }
 
-    static get termsAcceptedAt() {
-        return Store.I.get(Store.termsAcceptedAtKey) as number
+    static get termsAccepted() {
+        return Store.I.get(Store.termsAcceptedKey) as string
     }
 
-    static set termsAcceptedAt(newValue: number) {
-        Store.I.set(Store.termsAcceptedAtKey, newValue)
+    static set termsAccepted(newValue: string) {
+        Store.I.set(Store.termsAcceptedKey, newValue)
     }
 
     private constructor() {}

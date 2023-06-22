@@ -85,8 +85,8 @@ declare global {
         electronAPI: {
             quit: () => Promise<void>
             getTranslations: (lang: string) => Promise<ICrowdinJson | null>
-            getTermsAccepted: () => Promise<number | undefined>
-            acceptTerms: () => Promise<void>
+            getTermsAccepted: () => Promise<string | undefined>
+            acceptTerms: (terms: string) => Promise<void>
             registerClient: () => Promise<IUserSettings>
             runMeasurement: () => Promise<void>
             abortMeasurement: () => Promise<void>

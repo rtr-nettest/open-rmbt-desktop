@@ -6,7 +6,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getTranslations: (lang: string) =>
         ipcRenderer.invoke(Events.GET_TRANSLATIONS, lang),
     getTermsAccepted: () => ipcRenderer.invoke(Events.GET_TERMS_ACCEPTED),
-    acceptTerms: () => ipcRenderer.send(Events.ACCEPT_TERMS),
+    acceptTerms: (terms: string) =>
+        ipcRenderer.send(Events.ACCEPT_TERMS, terms),
     registerClient: () => ipcRenderer.invoke(Events.REGISTER_CLIENT),
     runMeasurement: () => ipcRenderer.send(Events.RUN_MEASUREMENT),
     abortMeasurement: () => ipcRenderer.send(Events.ABORT_MEASUREMENT),

@@ -4,15 +4,18 @@ import {
     OnDestroy,
     OnInit,
 } from "@angular/core"
+import { Router } from "@angular/router"
 import {
     Subject,
     distinctUntilChanged,
+    from,
     map,
     switchMap,
     takeUntil,
     tap,
 } from "rxjs"
 import { UNKNOWN } from "src/app/constants/strings"
+import { ERoutes } from "src/app/enums/routes.enum"
 import { CMSService } from "src/app/services/cms.service"
 import { MessageService } from "src/app/services/message.service"
 import { MainStore } from "src/app/store/main.store"
@@ -66,11 +69,22 @@ export class HomeScreenComponent implements OnDestroy, OnInit {
             )
         )
     )
+    terms$ = from(window.electronAPI.getTermsAccepted())
+        .pipe(
+            takeUntil(this.destroyed$),
+            tap((terms) => {
+                if (!terms) {
+                    this.router.navigate(["/", ERoutes.TERMS_CONDITIONS])
+                }
+            })
+        )
+        .subscribe()
 
     constructor(
         private mainStore: MainStore,
         private cmsService: CMSService,
-        private message: MessageService
+        private message: MessageService,
+        private router: Router
     ) {}
 
     ngOnInit(): void {

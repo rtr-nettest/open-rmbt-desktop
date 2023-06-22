@@ -4,6 +4,7 @@ import { IEnv } from "../../../../electron/interfaces/env.interface"
 import { IMainAsset } from "../interfaces/main-asset.interface"
 import { IMainProject } from "../interfaces/main-project.interface"
 import { IUserSettings } from "../../../../measurement/interfaces/user-settings-response.interface"
+import { INewsItem } from "../../../../measurement/interfaces/news.interface"
 
 @Injectable({
     providedIn: "root",
@@ -14,6 +15,7 @@ export class MainStore {
     project$ = new BehaviorSubject<IMainProject | null>(null)
     settings$ = new BehaviorSubject<IUserSettings | null>(null)
     error$ = new BehaviorSubject<Error | null>(null)
+    news$ = new BehaviorSubject<INewsItem[] | null>(null)
 
     constructor() {
         window.electronAPI.onError((error) => {

@@ -7,6 +7,7 @@ import { IEnv } from "./interfaces/env.interface"
 import Protocol from "./protocol"
 import { Store } from "../measurement/services/store.service"
 import { CrowdinService } from "../measurement/services/crowdin.service"
+import { ControlServer } from "../measurement/services/control-server.service"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -86,6 +87,10 @@ ipcMain.handle(Events.GET_TRANSLATIONS, async (event, lang: string) => {
 
 ipcMain.handle(Events.GET_TERMS_ACCEPTED, () => {
     return Store.termsAccepted
+})
+
+ipcMain.handle(Events.GET_NEWS, async () => {
+    return await ControlServer.I.getNews()
 })
 
 ipcMain.on(Events.ACCEPT_TERMS, (event, terms: string) => {

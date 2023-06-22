@@ -67,6 +67,8 @@ import { MatDialogModule } from "@angular/material/dialog"
 import { ExportWarningComponent } from "./widgets/export-warning/export-warning.component"
 import { TermsConditionsScreenComponent } from "./screens/terms-conditions-screen/terms-conditions-screen.component"
 import { ICrowdinJson } from "../../../measurement/interfaces/crowdin.interface"
+import { INewsItem } from "../../../measurement/interfaces/news.interface"
+import { NewsComponent } from "./screens/news/news.component"
 
 Chart.register(
     BarElement,
@@ -86,6 +88,7 @@ declare global {
             quit: () => Promise<void>
             getTranslations: (lang: string) => Promise<ICrowdinJson | null>
             getTermsAccepted: () => Promise<string | undefined>
+            getNews: () => Promise<INewsItem[] | null>
             acceptTerms: (terms: string) => Promise<void>
             registerClient: () => Promise<IUserSettings>
             runMeasurement: () => Promise<void>
@@ -129,6 +132,7 @@ declare global {
         TestScreenComponent,
         ConfirmDialogComponent,
         TermsConditionsScreenComponent,
+        NewsComponent,
     ],
     imports: [
         AppRoutingModule,

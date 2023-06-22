@@ -1,10 +1,10 @@
 <app-header></app-header>
 <app-body>
     <app-main-menu></app-main-menu>
-    <app-main-content *transloco="let t">
+    <app-main-content>
         <div style="width: 100%">
             <h1 class="app-title" *ngIf="(env$ | async)?.FLAVOR === 'ont'">
-                {{ t("test.title") }}
+                {{ "test.title" | transloco }}
             </h1>
             <app-start-test-button></app-start-test-button>
             <div

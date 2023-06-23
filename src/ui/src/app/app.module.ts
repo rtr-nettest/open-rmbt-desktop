@@ -68,7 +68,8 @@ import { ExportWarningComponent } from "./widgets/export-warning/export-warning.
 import { TermsConditionsScreenComponent } from "./screens/terms-conditions-screen/terms-conditions-screen.component"
 import { ICrowdinJson } from "../../../measurement/interfaces/crowdin.interface"
 import { INewsItem } from "../../../measurement/interfaces/news.interface"
-import { NewsComponent } from "./screens/news/news.component"
+import { SettingsScreenComponent } from "./screens/settings-screen/settings-screen.component"
+import { NewsScreenComponent } from "./screens/news-screen/news-screen.component"
 
 Chart.register(
     BarElement,
@@ -132,7 +133,8 @@ declare global {
         TestScreenComponent,
         ConfirmDialogComponent,
         TermsConditionsScreenComponent,
-        NewsComponent,
+        NewsScreenComponent,
+        SettingsScreenComponent,
     ],
     imports: [
         AppRoutingModule,

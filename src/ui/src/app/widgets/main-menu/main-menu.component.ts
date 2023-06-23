@@ -2,6 +2,7 @@ import { Component, Input } from "@angular/core"
 import { ActivatedRoute, Router } from "@angular/router"
 import { map, withLatestFrom } from "rxjs"
 import { THIS_INTERRUPTS_ACTION } from "src/app/constants/strings"
+import { ERoutes } from "src/app/enums/routes.enum"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 import { CMSService } from "src/app/services/cms.service"
 import { MessageService } from "src/app/services/message.service"
@@ -34,6 +35,12 @@ export class MainMenuComponent {
             })
         })
     )
+    settingsItem: IMainMenuItem = {
+        label: "Options",
+        translations: [],
+        icon: "settings",
+        route: "/" + ERoutes.SETTINGS,
+    }
 
     constructor(
         private activeRoute: ActivatedRoute,

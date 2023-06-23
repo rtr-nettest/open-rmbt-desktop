@@ -7,7 +7,8 @@ import { ERoutes } from "./enums/routes.enum"
 import { TermsConditionsScreenComponent } from "./screens/terms-conditions-screen/terms-conditions-screen.component"
 import { TermsAcceptedResolver } from "./resolvers/terms-accepted.resolver"
 import { NewsResolver } from "./resolvers/news.resolver"
-import { NewsComponent } from "./screens/news/news.component"
+import { SettingsScreenComponent } from "./screens/settings-screen/settings-screen.component"
+import { NewsScreenComponent } from "./screens/news-screen/news-screen.component"
 
 const routes: Routes = [
     {
@@ -24,7 +25,11 @@ const routes: Routes = [
     },
     {
         path: ERoutes.NEWS,
-        component: NewsComponent,
+        component: NewsScreenComponent,
+    },
+    {
+        path: ERoutes.SETTINGS,
+        component: SettingsScreenComponent,
     },
     {
         path: "**",

@@ -36,6 +36,7 @@ yarn-error.log
 /libpeerconnection.log
 testem.log
 /typings
+transloco.config.js
 
 # System files
 .DS_Store

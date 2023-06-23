@@ -5,6 +5,9 @@ import { MeasurementRunner } from "../measurement"
 import { Events } from "./enums/events.enum"
 import { IEnv } from "./interfaces/env.interface"
 import Protocol from "./protocol"
+import { Store } from "../measurement/services/store.service"
+import { CrowdinService } from "../measurement/services/crowdin.service"
+import { ControlServer } from "../measurement/services/control-server.service"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -74,6 +77,26 @@ app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
+ipcMain.on(Events.QUIT, () => {
+    app.quit()
+})
+
+ipcMain.handle(Events.GET_TRANSLATIONS, async (event, lang: string) => {
+    return await CrowdinService.I.getTranslations(lang)
+})
+
+ipcMain.handle(Events.GET_TERMS_ACCEPTED, () => {
+    return Store.termsAccepted
+})
+
+ipcMain.handle(Events.GET_NEWS, async () => {
+    return await ControlServer.I.getNews()
+})
+
+ipcMain.on(Events.ACCEPT_TERMS, (event, terms: string) => {
+    Store.termsAccepted = terms
+})
+
 ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
     const webContents = event.sender
     try {
@@ -102,6 +125,7 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         FLAVOR: process.env.FLAVOR || "rtr",
         X_NETTEST_CLIENT: process.env.X_NETTEST_CLIENT || "",
         ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",
+        CROWDIN_UPDATE_AT_RUNTIME: process.env.CROWDIN_UPDATE_AT_RUNTIME || "",
     }
 })
 

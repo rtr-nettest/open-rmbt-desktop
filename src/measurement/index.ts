@@ -18,6 +18,7 @@ import { IPInfoService } from "./services/ip-info.service"
 import { DBService } from "./services/db.service"
 import "reflect-metadata"
 import { EMeasurementFinalStatus } from "./enums/measurement-final-status"
+import { Store } from "./services/store.service"
 
 config({
     path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",

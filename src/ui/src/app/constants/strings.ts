@@ -5,3 +5,4 @@ export const ERROR_OCCURED_DURING_MEASUREMENT =
     "An error occurred. Please try again later."
 export const ERROR_OCCURED_SENDING_RESULTS = `An error occurred while sending the results.
     The application will store the results and try again later.`
+export const TERMS_AND_CONDITIONS = "Terms and conditions text"

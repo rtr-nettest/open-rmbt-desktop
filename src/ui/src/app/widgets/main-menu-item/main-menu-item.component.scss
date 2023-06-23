@@ -1,6 +1,7 @@
 @import "../../../assets/styles/core.scss";
 
 .app-menu-item {
+    border: none;
     border-radius: 0;
     color: black !important;
     font-size: rem($font-size-xxl);

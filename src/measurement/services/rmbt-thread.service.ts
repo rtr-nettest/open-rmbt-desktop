@@ -74,7 +74,7 @@ export class RMBTThread implements IMessageHandlerContext {
             } else {
                 this.client = net.createConnection(options)
             }
-            this.client.setNoDelay()
+            // this.client.setNoDelay()
             this.client.on("data", this.dataListener)
             this.client.on("error", this.errorListener)
             this.client.on("end", this.endListener)

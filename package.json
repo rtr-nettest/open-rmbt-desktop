@@ -7,11 +7,12 @@
         "node": ">=18"
     },
     "scripts": {
-        "build:all": "webpack --mode production && cd src/ui && npm run build-for-packaging && shx cp -rf dist/ui/* ../../dist",
+        "prepare:translations": "npx ts-node download-translations.ts",
+        "build:all": "npm run prepare:translations && webpack --mode production && cd src/ui && npm run build-for-packaging && shx cp -rf dist/ui/* ../../dist",
         "start:cli": "webpack --mode development --config ./webpack.cli.config.js && npx ts-node src/cli/cli.ts",
         "start:electron": "webpack --mode development && cross-env DEV=true electron dist/main.js",
         "start:ui": "(cd src/ui && npm run start)",
-        "start:all": "start-server-and-test start:ui http://localhost:4200/ start:electron",
+        "start:all": "npm run prepare:translations && start-server-and-test start:ui http://localhost:4200/ start:electron",
         "electron": "electron",
         "test": "jest --coverage",
         "package": "npm run build:all && electron-forge package",
@@ -64,6 +65,7 @@
         "pino-pretty": "^10.0.0",
         "reflect-metadata": "^0.1.13",
         "sql.js": "^1.8.0",
-        "uuidv4": "^6.2.13"
+        "uuidv4": "^6.2.13",
+        "xliff": "^6.1.0"
     }
 }

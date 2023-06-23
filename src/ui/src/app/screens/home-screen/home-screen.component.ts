@@ -1,13 +1,18 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from "@angular/core"
+import { Component, OnDestroy, OnInit } from "@angular/core"
+import { Router } from "@angular/router"
+import { TranslocoService } from "@ngneat/transloco"
 import {
     Subject,
+    combineLatest,
     distinctUntilChanged,
+    from,
     map,
     switchMap,
     takeUntil,
     tap,
 } from "rxjs"
-import { UNKNOWN } from "src/app/constants/strings"
+import { TERMS_AND_CONDITIONS, UNKNOWN } from "src/app/constants/strings"
+import { ERoutes } from "src/app/enums/routes.enum"
 import { CMSService } from "src/app/services/cms.service"
 import { MessageService } from "src/app/services/message.service"
 import { MainStore } from "src/app/store/main.store"
@@ -16,9 +21,8 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-home-screen",
     templateUrl: "./home-screen.component.html",
     styleUrls: ["./home-screen.component.scss"],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeScreenComponent implements OnDestroy {
+export class HomeScreenComponent implements OnDestroy, OnInit {
     destroyed$ = new Subject<void>()
     env$ = this.mainStore.env$
     error$ = this.mainStore.error$
@@ -61,12 +65,34 @@ export class HomeScreenComponent implements OnDestroy {
             )
         )
     )
+    terms$ = combineLatest([
+        this.transloco.selectTranslate(TERMS_AND_CONDITIONS),
+        from(window.electronAPI.getTermsAccepted()),
+    ])
+        .pipe(
+            takeUntil(this.destroyed$),
+            tap(([terms, acceptedTerms]) => {
+                if (terms !== acceptedTerms) {
+                    this.router.navigate(["/", ERoutes.TERMS_CONDITIONS])
+                } else {
+                    this.showProgress = false
+                }
+            })
+        )
+        .subscribe()
+    showProgress = true
 
     constructor(
         private mainStore: MainStore,
         private cmsService: CMSService,
-        private message: MessageService
+        private message: MessageService,
+        private router: Router,
+        private transloco: TranslocoService
     ) {}
+
+    ngOnInit(): void {
+        this.mainStore.registerClient()
+    }
 
     ngOnDestroy(): void {
         this.destroyed$.next()

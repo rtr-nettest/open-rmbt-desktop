@@ -15,6 +15,7 @@ import { ELoggerMessage } from "../enums/logger-message.enum"
 import { Store } from "./store.service"
 import { DBService } from "./db.service"
 import { SimpleHistoryResult } from "../dto/simple-history-result.dto"
+import { INewsRequest, INewsResponse } from "../interfaces/news.interface"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -36,6 +37,44 @@ export class ControlServer {
             headers["X-Nettest-Client"] = process.env.X_NETTEST_CLIENT
         }
         return headers
+    }
+
+    async getNews() {
+        if (!process.env.NEWS_PATH) {
+            return null
+        }
+        const lastNewsUid = Store.lastNewsUid
+        const newsRequest: INewsRequest = {
+            language: "en",
+            platform: "DESKTOP",
+            softwareVersionCode: "0.0.1",
+            lastNewsUid,
+            uuid: Store.clientUuid,
+        }
+        Logger.I.info(
+            ELoggerMessage.POST_REQUEST,
+            process.env.NEWS_PATH,
+            newsRequest
+        )
+        try {
+            const response = (
+                await axios.post(
+                    `${process.env.CONTROL_SERVER_URL}${process.env.NEWS_PATH}`,
+                    newsRequest
+                )
+            ).data as INewsResponse
+            if (response.error?.length) {
+                throw response.error
+            }
+            if (response.news?.[0]?.uid) {
+                Store.lastNewsUid = response.news[0].uid
+            }
+            Logger.I.info("News are %o", response.news)
+            return response.news ?? null
+        } catch (e) {
+            Logger.I.warn(e)
+            return null
+        }
     }
 
     async getMeasurementServerFromApi(

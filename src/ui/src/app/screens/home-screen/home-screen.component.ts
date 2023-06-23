@@ -1,20 +1,15 @@
-import {
-    ChangeDetectionStrategy,
-    Component,
-    OnDestroy,
-    OnInit,
-} from "@angular/core"
+import { Component, OnDestroy, OnInit } from "@angular/core"
 import { Router } from "@angular/router"
 import { TranslocoService } from "@ngneat/transloco"
 import {
     Subject,
+    combineLatest,
     distinctUntilChanged,
     from,
     map,
     switchMap,
     takeUntil,
     tap,
-    withLatestFrom,
 } from "rxjs"
 import { TERMS_AND_CONDITIONS, UNKNOWN } from "src/app/constants/strings"
 import { ERoutes } from "src/app/enums/routes.enum"
@@ -26,7 +21,6 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-home-screen",
     templateUrl: "./home-screen.component.html",
     styleUrls: ["./home-screen.component.scss"],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeScreenComponent implements OnDestroy, OnInit {
     destroyed$ = new Subject<void>()
@@ -71,11 +65,12 @@ export class HomeScreenComponent implements OnDestroy, OnInit {
             )
         )
     )
-    terms$ = this.transloco
-        .selectTranslate(TERMS_AND_CONDITIONS)
+    terms$ = combineLatest([
+        this.transloco.selectTranslate(TERMS_AND_CONDITIONS),
+        from(window.electronAPI.getTermsAccepted()),
+    ])
         .pipe(
             takeUntil(this.destroyed$),
-            withLatestFrom(from(window.electronAPI.getTermsAccepted())),
             tap(([terms, acceptedTerms]) => {
                 if (terms !== acceptedTerms) {
                     this.router.navigate(["/", ERoutes.TERMS_CONDITIONS])

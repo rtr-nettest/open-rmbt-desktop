@@ -1,4 +1,5 @@
 import { Component } from "@angular/core"
+import { Router } from "@angular/router"
 import { MainStore } from "src/app/store/main.store"
 
 @Component({
@@ -9,5 +10,9 @@ import { MainStore } from "src/app/store/main.store"
 export class NewsComponent {
     news$ = this.mainStore.news$
 
-    constructor(private mainStore: MainStore) {}
+    constructor(private mainStore: MainStore, private router: Router) {}
+
+    close() {
+        this.router.navigateByUrl("/")
+    }
 }

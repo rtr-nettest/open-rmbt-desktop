@@ -1,13 +1,8 @@
-import {
-    Component,
-    InjectionToken,
-    Injector,
-    Type,
-    inject,
-} from "@angular/core"
+import { Component, OnInit, Type } from "@angular/core"
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
 import { ISort } from "src/app/interfaces/sort.interface"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
+import { MainStore } from "src/app/store/main.store"
 import { SettingsUuidComponent } from "src/app/widgets/settings-uuid/settings-uuid.component"
 
 export interface ISettingsRow {
@@ -20,7 +15,7 @@ export interface ISettingsRow {
     templateUrl: "./settings-screen.component.html",
     styleUrls: ["./settings-screen.component.scss"],
 })
-export class SettingsScreenComponent {
+export class SettingsScreenComponent implements OnInit {
     columns: ITableColumn[] = [
         {
             columnDef: "title",
@@ -43,5 +38,14 @@ export class SettingsScreenComponent {
     sort: ISort = {
         active: "",
         direction: "",
+    }
+    tableClassNames = ["app-table--wide"]
+
+    constructor(private store: MainStore) {}
+
+    ngOnInit(): void {
+        if (!this.store.settings$.value) {
+            this.store.registerClient()
+        }
     }
 }

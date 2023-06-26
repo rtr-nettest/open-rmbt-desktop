@@ -1,1 +1,6 @@
-<p>settings-uuid works!</p>
+<ng-container *ngIf="uuid$ | async as uuid">
+    <span>{{ uuid }}</span>
+    <button mat-flat-button color="secondary" (click)="copy(uuid)">
+        <b>Copy</b>
+    </button>
+</ng-container>

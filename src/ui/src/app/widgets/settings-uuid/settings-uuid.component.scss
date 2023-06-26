@@ -1,0 +1,13 @@
+@import "../../../assets/styles/core.scss";
+
+:host {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+
+    .mdc-button {
+        color: $color-primary;
+        margin-left: rem(20);
+    }
+}

@@ -22,7 +22,7 @@ import { MainStore } from "src/app/store/main.store"
     templateUrl: "./home-screen.component.html",
     styleUrls: ["./home-screen.component.scss"],
 })
-export class HomeScreenComponent implements OnDestroy, OnInit {
+export class HomeScreenComponent implements OnDestroy {
     destroyed$ = new Subject<void>()
     env$ = this.mainStore.env$
     error$ = this.mainStore.error$
@@ -75,6 +75,7 @@ export class HomeScreenComponent implements OnDestroy, OnInit {
                 if (terms !== acceptedTerms) {
                     this.router.navigate(["/", ERoutes.TERMS_CONDITIONS])
                 } else {
+                    this.mainStore.registerClient()
                     this.showProgress = false
                 }
             })
@@ -89,10 +90,6 @@ export class HomeScreenComponent implements OnDestroy, OnInit {
         private router: Router,
         private transloco: TranslocoService
     ) {}
-
-    ngOnInit(): void {
-        this.mainStore.registerClient()
-    }
 
     ngOnDestroy(): void {
         this.destroyed$.next()

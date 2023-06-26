@@ -3,7 +3,13 @@
     <app-main-menu></app-main-menu>
     <app-main-content>
         <div class="app-main" *transloco="let t">
-            <div class="app-wrapper">{{ t("Settings") }}</div>
+            <div class="app-wrapper">
+                <app-table
+                    [columns]="columns"
+                    [data]="data"
+                    [sort]="sort"
+                ></app-table>
+            </div>
         </div>
     </app-main-content>
 </app-body>

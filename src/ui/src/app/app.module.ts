@@ -70,6 +70,13 @@ import { ICrowdinJson } from "../../../measurement/interfaces/crowdin.interface"
 import { INewsItem } from "../../../measurement/interfaces/news.interface"
 import { SettingsScreenComponent } from "./screens/settings-screen/settings-screen.component"
 import { NewsScreenComponent } from "./screens/news-screen/news-screen.component"
+import { MatTableModule } from "@angular/material/table"
+import { MatSortModule } from "@angular/material/sort"
+import { MatPaginatorModule } from "@angular/material/paginator"
+import { TableComponent } from "./widgets/table/table.component"
+import { PaginatorComponent } from "./widgets/paginator/paginator.component"
+import { TableCellComponentDirective } from "./directives/table-cell-component.directive"
+import { SettingsUuidComponent } from "./widgets/settings-uuid/settings-uuid.component"
 
 Chart.register(
     BarElement,
@@ -125,6 +132,7 @@ declare global {
         ResultScreenComponent,
         SpacerComponent,
         StartTestButtonComponent,
+        TableComponent,
         TestBoxesComponent,
         TestChartComponent,
         TestChartsComponent,
@@ -135,6 +143,9 @@ declare global {
         TermsConditionsScreenComponent,
         NewsScreenComponent,
         SettingsScreenComponent,
+        PaginatorComponent,
+        TableCellComponentDirective,
+        SettingsUuidComponent,
     ],
     imports: [
         AppRoutingModule,
@@ -144,12 +155,14 @@ declare global {
         MatButtonModule,
         MatDialogModule,
         MatIconModule,
+        MatPaginatorModule,
         MatProgressSpinnerModule,
         MatSnackBarModule,
+        MatTableModule,
+        MatSortModule,
         MatTooltipModule,
         TranslocoRootModule,
     ],
-    providers: [],
     bootstrap: [AppComponent],
 })
 export class AppModule {}

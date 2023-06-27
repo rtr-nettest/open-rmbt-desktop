@@ -8,6 +8,7 @@ import Protocol from "./protocol"
 import { Store } from "../measurement/services/store.service"
 import { CrowdinService } from "../measurement/services/crowdin.service"
 import { ControlServer } from "../measurement/services/control-server.service"
+import pack from "../../package.json"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -35,11 +36,7 @@ const createWindow = () => {
     })
 
     win.webContents.setWindowOpenHandler(({ url }) => {
-        const historyUrl = new URL(process.env.FULL_HISTORY_RESUlT_URL ?? "")
-        const thisUrl = new URL(url)
-        if (thisUrl.hostname === historyUrl.hostname) {
-            shell.openExternal(url)
-        }
+        shell.openExternal(url)
         return { action: "deny" }
     })
 
@@ -126,6 +123,8 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         X_NETTEST_CLIENT: process.env.X_NETTEST_CLIENT || "",
         ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",
         CROWDIN_UPDATE_AT_RUNTIME: process.env.CROWDIN_UPDATE_AT_RUNTIME || "",
+        APP_VERSION: pack.version,
+        REPO_URL: pack.repository,
     }
 })
 

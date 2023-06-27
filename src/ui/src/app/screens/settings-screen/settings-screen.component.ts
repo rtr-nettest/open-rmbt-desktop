@@ -3,7 +3,9 @@ import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
 import { ISort } from "src/app/interfaces/sort.interface"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
 import { MainStore } from "src/app/store/main.store"
+import { SettingsRepoLinkComponent } from "src/app/widgets/settings-repo-link/settings-repo-link.component"
 import { SettingsUuidComponent } from "src/app/widgets/settings-uuid/settings-uuid.component"
+import { SettingsVersionComponent } from "src/app/widgets/settings-version/settings-version.component"
 
 export interface ISettingsRow {
     title: string
@@ -31,6 +33,14 @@ export class SettingsScreenComponent implements OnInit {
             {
                 title: "Client UUID",
                 component: SettingsUuidComponent,
+            },
+            {
+                title: "Version",
+                component: SettingsVersionComponent,
+            },
+            {
+                title: "Open source",
+                component: SettingsRepoLinkComponent,
             },
         ],
         totalElements: 1,

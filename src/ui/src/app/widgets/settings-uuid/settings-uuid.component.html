@@ -1,5 +1,5 @@
 <ng-container *ngIf="uuid$ | async as uuid">
-    <span>{{ uuid }}</span>
+    <span (click)="copy(uuid)">{{ uuid }}</span>
     <button mat-flat-button color="secondary" (click)="copy(uuid)">
         <b>Copy</b>
     </button>

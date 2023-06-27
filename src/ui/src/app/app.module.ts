@@ -76,7 +76,11 @@ import { MatPaginatorModule } from "@angular/material/paginator"
 import { TableComponent } from "./widgets/table/table.component"
 import { PaginatorComponent } from "./widgets/paginator/paginator.component"
 import { TableCellComponentDirective } from "./directives/table-cell-component.directive"
-import { SettingsUuidComponent } from "./widgets/settings-uuid/settings-uuid.component"
+import { SettingsUuidComponent } from "./widgets/settings-uuid/settings-uuid.component";
+import { SettingsVersionComponent } from './widgets/settings-version/settings-version.component';
+import { SettingsRepoLinkComponent } from './widgets/settings-repo-link/settings-repo-link.component';
+import { SettingsIpv4Component } from './widgets/settings-ipv4/settings-ipv4.component';
+import { SettingsIpv6Component } from './widgets/settings-ipv6/settings-ipv6.component'
 
 Chart.register(
     BarElement,
@@ -146,6 +150,10 @@ declare global {
         PaginatorComponent,
         TableCellComponentDirective,
         SettingsUuidComponent,
+        SettingsVersionComponent,
+        SettingsRepoLinkComponent,
+        SettingsIpv4Component,
+        SettingsIpv6Component,
     ],
     imports: [
         AppRoutingModule,

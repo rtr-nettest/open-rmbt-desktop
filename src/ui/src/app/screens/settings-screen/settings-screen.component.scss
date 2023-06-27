@@ -1,3 +1,5 @@
+@import "../../../assets/styles/core.scss";
+
 :host {
     display: flex;
     flex-direction: column;
@@ -10,4 +12,8 @@ app-main-content {
 
 .app-main {
     width: 100%;
+}
+
+.app-title {
+    margin-bottom: rem(40);
 }

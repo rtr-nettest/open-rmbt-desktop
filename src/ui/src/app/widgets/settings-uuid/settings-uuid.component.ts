@@ -17,7 +17,9 @@ export class SettingsUuidComponent {
         window.navigator.clipboard
             .writeText(uuid)
             .then(() => {
-                this.message.openSnackbar("UUID was copied to the clipboard.")
+                this.message.openSnackbar(
+                    "Client UUID was copied to the clipboard."
+                )
             })
             .catch((e) => {
                 this.message.openSnackbar(e)

@@ -57,7 +57,18 @@ export class TranslocoHttpLoader implements TranslocoLoader {
             provide: TRANSLOCO_CONFIG,
             useValue: translocoConfig({
                 availableLangs: TranslocoConfigExt["availableLangs"],
-                defaultLang: TranslocoConfigExt["defaultLang"],
+                defaultLang: (() => {
+                    const systemLang =
+                        Intl.DateTimeFormat().resolvedOptions().locale
+                    if (
+                        TranslocoConfigExt["availableLangs"].includes(
+                            systemLang
+                        )
+                    ) {
+                        return systemLang
+                    }
+                    return TranslocoConfigExt["defaultLang"]
+                })(),
                 // Remove this option if your application doesn't support changing language in runtime.
                 reRenderOnLangChange: true,
                 prodMode: !isDevMode(),

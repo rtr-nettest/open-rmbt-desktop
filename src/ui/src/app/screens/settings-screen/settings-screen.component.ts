@@ -9,6 +9,7 @@ import { SettingsRepoLinkComponent } from "src/app/widgets/settings-repo-link/se
 import { SettingsUuidComponent } from "src/app/widgets/settings-uuid/settings-uuid.component"
 import { SettingsVersionComponent } from "src/app/widgets/settings-version/settings-version.component"
 import { EIPVersion } from "../../../../../measurement/enums/ip-version.enum"
+import { SettingsLocaleComponent } from "src/app/widgets/settings-locale/settings-locale.component"
 
 export interface ISettingsRow {
     title: string
@@ -59,6 +60,10 @@ export class SettingsScreenComponent implements OnInit {
                 parameters: {
                     ipVersion: EIPVersion.v6,
                 },
+            },
+            {
+                title: "Language",
+                component: SettingsLocaleComponent,
             },
         ],
         totalElements: 1,

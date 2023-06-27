@@ -45,3 +45,15 @@ $app-theme: mat.define-light-theme(
 .mat-mdc-slide-toggle.app-slide-toggle {
     --mdc-switch-unselected-handle-color: white;
 }
+
+.cdk-overlay-pane {
+    width: auto !important;
+}
+
+.mat-mdc-select-arrow-wrapper {
+    margin-left: rem(4);
+}
+
+app-settings-locale .mat-mdc-select {
+    font-size: 1em;
+}

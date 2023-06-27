@@ -74,6 +74,7 @@ import { MatTableModule } from "@angular/material/table"
 import { MatSortModule } from "@angular/material/sort"
 import { MatPaginatorModule } from "@angular/material/paginator"
 import { MatSlideToggleModule } from "@angular/material/slide-toggle"
+import { MatSelectModule } from "@angular/material/select"
 import { TableComponent } from "./widgets/table/table.component"
 import { PaginatorComponent } from "./widgets/paginator/paginator.component"
 import { DynamicComponentDirective } from "./directives/dynamic-component.directive"
@@ -81,6 +82,8 @@ import { SettingsUuidComponent } from "./widgets/settings-uuid/settings-uuid.com
 import { SettingsVersionComponent } from "./widgets/settings-version/settings-version.component"
 import { SettingsRepoLinkComponent } from "./widgets/settings-repo-link/settings-repo-link.component"
 import { SettingsIpComponent } from "./widgets/settings-ip/settings-ip.component"
+import { SettingsLocaleComponent } from "./widgets/settings-locale/settings-locale.component"
+import { FormsModule } from "@angular/forms"
 
 Chart.register(
     BarElement,
@@ -153,11 +156,13 @@ declare global {
         SettingsRepoLinkComponent,
         DynamicComponentDirective,
         SettingsIpComponent,
+        SettingsLocaleComponent,
     ],
     imports: [
         AppRoutingModule,
         BrowserAnimationsModule,
         BrowserModule,
+        FormsModule,
         HttpClientModule,
         MatButtonModule,
         MatDialogModule,
@@ -169,6 +174,7 @@ declare global {
         MatSortModule,
         MatTooltipModule,
         MatSlideToggleModule,
+        MatSelectModule,
         TranslocoRootModule,
     ],
     bootstrap: [AppComponent],

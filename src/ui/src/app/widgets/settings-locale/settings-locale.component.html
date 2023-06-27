@@ -1,0 +1,14 @@
+<mat-select
+    disableOptionCentering
+    [(ngModel)]="selectedLocale"
+    (selectionChange)="change($event)"
+>
+    <mat-select-trigger>
+        {{ selectedLocale?.name }}
+    </mat-select-trigger>
+    <mat-option *ngFor="let locale of locales" [value]="locale">
+        <div class="app-language-name">
+            {{ locale.name }}
+        </div>
+    </mat-option>
+</mat-select>

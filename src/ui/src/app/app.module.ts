@@ -73,14 +73,14 @@ import { NewsScreenComponent } from "./screens/news-screen/news-screen.component
 import { MatTableModule } from "@angular/material/table"
 import { MatSortModule } from "@angular/material/sort"
 import { MatPaginatorModule } from "@angular/material/paginator"
+import { MatSlideToggleModule } from "@angular/material/slide-toggle"
 import { TableComponent } from "./widgets/table/table.component"
 import { PaginatorComponent } from "./widgets/paginator/paginator.component"
-import { TableCellComponentDirective } from "./directives/table-cell-component.directive"
-import { SettingsUuidComponent } from "./widgets/settings-uuid/settings-uuid.component";
-import { SettingsVersionComponent } from './widgets/settings-version/settings-version.component';
-import { SettingsRepoLinkComponent } from './widgets/settings-repo-link/settings-repo-link.component';
-import { SettingsIpv4Component } from './widgets/settings-ipv4/settings-ipv4.component';
-import { SettingsIpv6Component } from './widgets/settings-ipv6/settings-ipv6.component'
+import { DynamicComponentDirective } from "./directives/dynamic-component.directive"
+import { SettingsUuidComponent } from "./widgets/settings-uuid/settings-uuid.component"
+import { SettingsVersionComponent } from "./widgets/settings-version/settings-version.component"
+import { SettingsRepoLinkComponent } from "./widgets/settings-repo-link/settings-repo-link.component"
+import { SettingsIpComponent } from "./widgets/settings-ip/settings-ip.component"
 
 Chart.register(
     BarElement,
@@ -148,12 +148,11 @@ declare global {
         NewsScreenComponent,
         SettingsScreenComponent,
         PaginatorComponent,
-        TableCellComponentDirective,
         SettingsUuidComponent,
         SettingsVersionComponent,
         SettingsRepoLinkComponent,
-        SettingsIpv4Component,
-        SettingsIpv6Component,
+        DynamicComponentDirective,
+        SettingsIpComponent,
     ],
     imports: [
         AppRoutingModule,
@@ -169,6 +168,7 @@ declare global {
         MatTableModule,
         MatSortModule,
         MatTooltipModule,
+        MatSlideToggleModule,
         TranslocoRootModule,
     ],
     bootstrap: [AppComponent],

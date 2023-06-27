@@ -1,5 +1,6 @@
 import { Component } from "@angular/core"
 import { map } from "rxjs"
+import { IDynamicComponent } from "src/app/interfaces/dynamic-component.interface"
 import { MessageService } from "src/app/services/message.service"
 import { MainStore } from "src/app/store/main.store"
 

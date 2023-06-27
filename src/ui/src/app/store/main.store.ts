@@ -5,6 +5,7 @@ import { IMainAsset } from "../interfaces/main-asset.interface"
 import { IMainProject } from "../interfaces/main-project.interface"
 import { IUserSettings } from "../../../../measurement/interfaces/user-settings-response.interface"
 import { INewsItem } from "../../../../measurement/interfaces/news.interface"
+import { EIPVersion } from "../../../../measurement/enums/ip-version.enum"
 
 @Injectable({
     providedIn: "root",
@@ -16,6 +17,7 @@ export class MainStore {
     settings$ = new BehaviorSubject<IUserSettings | null>(null)
     error$ = new BehaviorSubject<Error | null>(null)
     news$ = new BehaviorSubject<INewsItem[] | null>(null)
+    ipVersion$ = new BehaviorSubject<EIPVersion | null>(null)
 
     constructor() {
         window.electronAPI.onError((error) => {
@@ -29,5 +31,13 @@ export class MainStore {
         window.electronAPI
             .registerClient()
             .then((settings) => this.settings$.next(settings))
+    }
+
+    setIPVersion(ipVersion?: EIPVersion) {
+        if (!ipVersion) {
+            this.ipVersion$.next(null)
+        } else {
+            this.ipVersion$.next(ipVersion)
+        }
     }
 }

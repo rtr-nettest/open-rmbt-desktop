@@ -45,9 +45,8 @@ export const environment: {
         {
             label: "Help",
             icon: "help",
-            route: ERoutes.HELP,
+            url: "https://www.rtr.at/$lang/tk/netztesthilfe",
             translations: [],
-            hidden: true,
         },
     ],
 }

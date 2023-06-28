@@ -15,11 +15,11 @@ import { MainStore } from "src/app/store/main.store"
 export class SettingsIpComponent implements IDynamicComponent {
     @Input() parameters?: IDynamicComponentParameters
 
-    checked$ = this.store.ipVersion$.pipe(
+    checked$ = this.store.env$.pipe(
         map(
-            (v) =>
+            (env) =>
                 !!this.parameters?.["ipVersion"] &&
-                v === this.parameters?.["ipVersion"]
+                env?.IP_VERSION === this.parameters?.["ipVersion"]
         )
     )
 

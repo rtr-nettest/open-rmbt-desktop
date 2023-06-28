@@ -1,3 +1,4 @@
+import { EIPVersion } from "../enums/ip-version.enum"
 import { EMeasurementServerType } from "../enums/measurement-server-type.enum"
 
 export interface IMeasurementRegistrationResponse {
@@ -18,4 +19,5 @@ export interface IMeasurementRegistrationResponse {
     uuid?: string
     test_server_type?: EMeasurementServerType
     error?: string[]
+    ip_version?: EIPVersion
 }

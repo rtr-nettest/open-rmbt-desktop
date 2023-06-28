@@ -67,12 +67,12 @@ export class HomeScreenComponent implements OnDestroy {
     )
     terms$ = combineLatest([
         this.transloco.selectTranslate(TERMS_AND_CONDITIONS),
-        from(window.electronAPI.getTermsAccepted()),
+        from(window.electronAPI.getEnv()),
     ])
         .pipe(
             takeUntil(this.destroyed$),
-            tap(([terms, acceptedTerms]) => {
-                if (terms !== acceptedTerms) {
+            tap(([terms, env]) => {
+                if (terms !== env.TERMS_ACCEPTED) {
                     this.router.navigate(["/", ERoutes.TERMS_CONDITIONS])
                 } else {
                     this.mainStore.registerClient()

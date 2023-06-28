@@ -17,6 +17,22 @@ export class MainMenuComponent {
     menu$ = this.cmsService.getMenu().pipe(
         withLatestFrom(this.activeRoute.url),
         map(([menu, activeRoute]) => {
+            this.settingsItem = {
+                label: "Options",
+                translations: [],
+                route: this.disabled ? undefined : "/" + ERoutes.SETTINGS,
+                className: [
+                    this.disabled ? "app-menu-item--disabled" : "",
+                    activeRoute.join("/") === ERoutes.SETTINGS
+                        ? "app-menu-item--active"
+                        : "",
+                ].join(" "),
+                icon: "settings",
+                action: () => {
+                    window.electronAPI.abortMeasurement()
+                    this.router.navigate(["/", ERoutes.SETTINGS])
+                },
+            }
             return menu.map((item) => {
                 return {
                     ...item,
@@ -35,12 +51,7 @@ export class MainMenuComponent {
             })
         })
     )
-    settingsItem: IMainMenuItem = {
-        label: "Options",
-        translations: [],
-        icon: "settings",
-        route: "/" + ERoutes.SETTINGS,
-    }
+    settingsItem?: IMainMenuItem
 
     constructor(
         private activeRoute: ActivatedRoute,

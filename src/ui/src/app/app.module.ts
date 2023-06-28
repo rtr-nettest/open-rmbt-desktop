@@ -84,6 +84,7 @@ import { SettingsRepoLinkComponent } from "./widgets/settings-repo-link/settings
 import { SettingsIpComponent } from "./widgets/settings-ip/settings-ip.component"
 import { SettingsLocaleComponent } from "./widgets/settings-locale/settings-locale.component"
 import { FormsModule } from "@angular/forms"
+import { EIPVersion } from "../../../measurement/enums/ip-version.enum"
 
 Chart.register(
     BarElement,
@@ -102,10 +103,10 @@ declare global {
         electronAPI: {
             quit: () => Promise<void>
             getTranslations: (lang: string) => Promise<ICrowdinJson | null>
-            getTermsAccepted: () => Promise<string | undefined>
             getNews: () => Promise<INewsItem[] | null>
             acceptTerms: (terms: string) => Promise<void>
             registerClient: () => Promise<IUserSettings>
+            setIpVersion: (ipv: EIPVersion | null) => Promise<void>
             runMeasurement: () => Promise<void>
             abortMeasurement: () => Promise<void>
             getEnv: () => Promise<IEnv>

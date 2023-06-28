@@ -11,9 +11,9 @@ export class TermsAcceptedResolver {
     constructor(private router: Router, private store: MainStore) {}
 
     resolve(): Observable<boolean> {
-        return from(window.electronAPI.getTermsAccepted()).pipe(
-            map((accepted) => {
-                if (!accepted) {
+        return from(this.store.getEnv()).pipe(
+            map((env) => {
+                if (!env?.TERMS_ACCEPTED) {
                     this.router.navigate(["/", ERoutes.TERMS_CONDITIONS])
                     return false
                 }

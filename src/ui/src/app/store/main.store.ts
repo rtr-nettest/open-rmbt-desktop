@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core"
-import { BehaviorSubject } from "rxjs"
+import { BehaviorSubject, from, lastValueFrom, tap } from "rxjs"
 import { IEnv } from "../../../../electron/interfaces/env.interface"
 import { IMainAsset } from "../interfaces/main-asset.interface"
 import { IMainProject } from "../interfaces/main-project.interface"
@@ -17,14 +17,22 @@ export class MainStore {
     settings$ = new BehaviorSubject<IUserSettings | null>(null)
     error$ = new BehaviorSubject<Error | null>(null)
     news$ = new BehaviorSubject<INewsItem[] | null>(null)
-    ipVersion$ = new BehaviorSubject<EIPVersion | null>(null)
 
     constructor() {
         window.electronAPI.onError((error) => {
             console.error(error)
             this.error$.next(new Error("Server communication error"))
         })
-        window.electronAPI.getEnv().then((env) => this.env$.next(env))
+        lastValueFrom(this.getEnv()).then()
+    }
+
+    getEnv() {
+        if (this.env$.value) {
+            return this.env$
+        }
+        return from(window.electronAPI.getEnv()).pipe(
+            tap((env) => this.env$.next(env))
+        )
     }
 
     registerClient() {
@@ -34,10 +42,16 @@ export class MainStore {
     }
 
     setIPVersion(ipVersion?: EIPVersion) {
+        const currentEnv = this.env$.value
+        if (!currentEnv) {
+            return
+        }
         if (!ipVersion) {
-            this.ipVersion$.next(null)
+            this.env$.next({ ...currentEnv, IP_VERSION: null })
+            window.electronAPI.setIpVersion(null)
         } else {
-            this.ipVersion$.next(ipVersion)
+            this.env$.next({ ...currentEnv, IP_VERSION: ipVersion })
+            window.electronAPI.setIpVersion(ipVersion)
         }
     }
 }

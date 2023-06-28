@@ -5,10 +5,15 @@ import { MeasurementRunner } from "../measurement"
 import { Events } from "./enums/events.enum"
 import { IEnv } from "./interfaces/env.interface"
 import Protocol from "./protocol"
-import { Store } from "../measurement/services/store.service"
+import {
+    IP_VERSION,
+    Store,
+    TERMS_ACCEPTED,
+} from "../measurement/services/store.service"
 import { CrowdinService } from "../measurement/services/crowdin.service"
 import { ControlServer } from "../measurement/services/control-server.service"
 import pack from "../../package.json"
+import { EIPVersion } from "../measurement/enums/ip-version.enum"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -82,16 +87,12 @@ ipcMain.handle(Events.GET_TRANSLATIONS, async (event, lang: string) => {
     return await CrowdinService.I.getTranslations(lang)
 })
 
-ipcMain.handle(Events.GET_TERMS_ACCEPTED, () => {
-    return Store.termsAccepted
-})
-
 ipcMain.handle(Events.GET_NEWS, async () => {
     return await ControlServer.I.getNews()
 })
 
 ipcMain.on(Events.ACCEPT_TERMS, (event, terms: string) => {
-    Store.termsAccepted = terms
+    Store.I.set(TERMS_ACCEPTED, terms)
 })
 
 ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
@@ -101,6 +102,10 @@ ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
     } catch (e) {
         webContents.send(Events.ERROR, e)
     }
+})
+
+ipcMain.on(Events.SET_IP_VERSION, (event, ipv: EIPVersion | null) => {
+    Store.I.set(IP_VERSION, ipv)
 })
 
 ipcMain.on(Events.RUN_MEASUREMENT, async (event) => {
@@ -126,6 +131,8 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         APP_VERSION: pack.version,
         REPO_URL: pack.repository,
         ENABLE_LANGUAGE_SWITCH: process.env.ENABLE_LANGUAGE_SWITCH || "",
+        IP_VERSION: (Store.I.get(IP_VERSION) as string) || "",
+        TERMS_ACCEPTED: (Store.I.get(TERMS_ACCEPTED) as boolean) || false,
     }
 })
 

@@ -4,6 +4,7 @@
     align-self: start;
     flex: 0 0 30%;
     height: 100%;
+    z-index: 10;
 
     @include screen-lg {
         flex: 0 0 rem(48);

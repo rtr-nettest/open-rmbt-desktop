@@ -7,4 +7,6 @@ export interface IEnv {
     APP_VERSION: string
     REPO_URL: string
     ENABLE_LANGUAGE_SWITCH: string
+    IP_VERSION: string | null
+    TERMS_ACCEPTED: boolean
 }

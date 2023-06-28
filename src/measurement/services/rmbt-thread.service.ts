@@ -54,16 +54,15 @@ export class RMBTThread implements IMessageHandlerContext {
     ) {}
 
     async connect(result: IMeasurementThreadResult): Promise<RMBTThread> {
-        const host = await DNSService.I.resolve(
-            this.params.test_server_address,
-            this.params.ip_version
-        )
-        Logger.I.info(
-            ELoggerMessage.T_CONNECTING,
-            this.index,
-            host,
-            this.params.test_server_port
-        )
+        let host: string | undefined
+        try {
+            host = await DNSService.I.resolve(
+                this.params.test_server_address,
+                this.params.ip_version
+            )
+        } catch (e) {
+            this.errorListener(e as Error)
+        }
         return new Promise((resolve) => {
             this.threadResult = result
             const options: net.NetConnectOpts & tls.ConnectionOptions = {
@@ -75,6 +74,12 @@ export class RMBTThread implements IMessageHandlerContext {
                 options.key = fs.readFileSync(process.env.SSL_KEY_PATH)
                 options.cert = fs.readFileSync(process.env.SSL_CERT_PATH)
             }
+            Logger.I.info(
+                ELoggerMessage.T_CONNECTING,
+                this.index,
+                host,
+                this.params.test_server_port
+            )
             if (this.params.test_server_encryption) {
                 this.client = tls.connect(options)
             } else {

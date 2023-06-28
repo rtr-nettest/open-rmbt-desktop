@@ -10,6 +10,7 @@ import { SettingsUuidComponent } from "src/app/widgets/settings-uuid/settings-uu
 import { SettingsVersionComponent } from "src/app/widgets/settings-version/settings-version.component"
 import { EIPVersion } from "../../../../../measurement/enums/ip-version.enum"
 import { SettingsLocaleComponent } from "src/app/widgets/settings-locale/settings-locale.component"
+import { Observable, map } from "rxjs"
 
 export interface ISettingsRow {
     title: string
@@ -33,41 +34,48 @@ export class SettingsScreenComponent implements OnInit {
             header: "",
         },
     ]
-    data: IBasicResponse<ISettingsRow> = {
-        content: [
-            {
-                title: "Client UUID",
-                component: SettingsUuidComponent,
-            },
-            {
-                title: "Version",
-                component: SettingsVersionComponent,
-            },
-            {
-                title: "Open source",
-                component: SettingsRepoLinkComponent,
-            },
-            {
-                title: "IPv4 only",
-                component: SettingsIpComponent,
-                parameters: {
-                    ipVersion: EIPVersion.v4,
+    data$: Observable<IBasicResponse<ISettingsRow>> = this.store.env$.pipe(
+        map((env) => {
+            const content: ISettingsRow[] = [
+                {
+                    title: "Client UUID",
+                    component: SettingsUuidComponent,
                 },
-            },
-            {
-                title: "IPv6 only",
-                component: SettingsIpComponent,
-                parameters: {
-                    ipVersion: EIPVersion.v6,
+                {
+                    title: "Version",
+                    component: SettingsVersionComponent,
                 },
-            },
-            {
-                title: "Language",
-                component: SettingsLocaleComponent,
-            },
-        ],
-        totalElements: 1,
-    }
+                {
+                    title: "Open source",
+                    component: SettingsRepoLinkComponent,
+                },
+                {
+                    title: "IPv4 only",
+                    component: SettingsIpComponent,
+                    parameters: {
+                        ipVersion: EIPVersion.v4,
+                    },
+                },
+                {
+                    title: "IPv6 only",
+                    component: SettingsIpComponent,
+                    parameters: {
+                        ipVersion: EIPVersion.v6,
+                    },
+                },
+            ]
+            if (env?.ENABLE_LANGUAGE_SWITCH === "true") {
+                content.push({
+                    title: "Language",
+                    component: SettingsLocaleComponent,
+                })
+            }
+            return {
+                content,
+                totalElements: content.length,
+            }
+        })
+    )
     sort: ISort = {
         active: "",
         direction: "",

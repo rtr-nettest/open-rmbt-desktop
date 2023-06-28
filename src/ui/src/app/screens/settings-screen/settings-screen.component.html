@@ -6,7 +6,7 @@
             <div class="app-wrapper">
                 <app-table
                     [columns]="columns"
-                    [data]="data"
+                    [data]="(data$ | async)!"
                     [sort]="sort"
                     [tableClassNames]="tableClassNames"
                 ></app-table>

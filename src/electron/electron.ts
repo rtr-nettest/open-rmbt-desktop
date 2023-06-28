@@ -125,6 +125,7 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         CROWDIN_UPDATE_AT_RUNTIME: process.env.CROWDIN_UPDATE_AT_RUNTIME || "",
         APP_VERSION: pack.version,
         REPO_URL: pack.repository,
+        ENABLE_LANGUAGE_SWITCH: process.env.ENABLE_LANGUAGE_SWITCH || "",
     }
 })
 

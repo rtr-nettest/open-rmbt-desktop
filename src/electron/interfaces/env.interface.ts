@@ -6,4 +6,5 @@ export interface IEnv {
     CROWDIN_UPDATE_AT_RUNTIME: string
     APP_VERSION: string
     REPO_URL: string
+    ENABLE_LANGUAGE_SWITCH: string
 }

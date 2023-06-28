@@ -1,4 +1,4 @@
-import { NgModule } from "@angular/core"
+import { APP_INITIALIZER, NgModule } from "@angular/core"
 import { BrowserModule } from "@angular/platform-browser"
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations"
 
@@ -85,6 +85,7 @@ import { SettingsIpComponent } from "./widgets/settings-ip/settings-ip.component
 import { SettingsLocaleComponent } from "./widgets/settings-locale/settings-locale.component"
 import { FormsModule } from "@angular/forms"
 import { EIPVersion } from "../../../measurement/enums/ip-version.enum"
+import { MainStore } from "./store/main.store"
 
 Chart.register(
     BarElement,
@@ -107,6 +108,7 @@ declare global {
             acceptTerms: (terms: string) => Promise<void>
             registerClient: () => Promise<IUserSettings>
             setIpVersion: (ipv: EIPVersion | null) => Promise<void>
+            setLanguage: (language: string) => Promise<void>
             runMeasurement: () => Promise<void>
             abortMeasurement: () => Promise<void>
             getEnv: () => Promise<IEnv>
@@ -179,5 +181,13 @@ declare global {
         TranslocoRootModule,
     ],
     bootstrap: [AppComponent],
+    providers: [
+        {
+            provide: APP_INITIALIZER,
+            useFactory: MainStore.factory,
+            deps: [MainStore],
+            multi: true,
+        },
+    ],
 })
 export class AppModule {}

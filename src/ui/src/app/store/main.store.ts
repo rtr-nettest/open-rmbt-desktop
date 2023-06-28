@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core"
-import { BehaviorSubject, from, lastValueFrom, tap } from "rxjs"
+import { BehaviorSubject, firstValueFrom, from, tap } from "rxjs"
 import { IEnv } from "../../../../electron/interfaces/env.interface"
 import { IMainAsset } from "../interfaces/main-asset.interface"
 import { IMainProject } from "../interfaces/main-project.interface"
@@ -11,6 +11,10 @@ import { EIPVersion } from "../../../../measurement/enums/ip-version.enum"
     providedIn: "root",
 })
 export class MainStore {
+    static factory(store: MainStore) {
+        return () => firstValueFrom(store.getEnv())
+    }
+
     assets$ = new BehaviorSubject<{ [key: string]: IMainAsset }>({})
     env$ = new BehaviorSubject<IEnv | null>(null)
     project$ = new BehaviorSubject<IMainProject | null>(null)
@@ -23,7 +27,6 @@ export class MainStore {
             console.error(error)
             this.error$.next(new Error("Server communication error"))
         })
-        lastValueFrom(this.getEnv()).then()
     }
 
     getEnv() {

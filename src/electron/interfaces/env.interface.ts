@@ -9,4 +9,5 @@ export interface IEnv {
     ENABLE_LANGUAGE_SWITCH: string
     IP_VERSION: string | null
     TERMS_ACCEPTED: boolean
+    LANGUAGE: string | null
 }

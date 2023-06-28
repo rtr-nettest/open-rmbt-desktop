@@ -12,6 +12,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     registerClient: () => ipcRenderer.invoke(Events.REGISTER_CLIENT),
     setIpVersion: (ipv: EIPVersion | null) =>
         ipcRenderer.send(Events.SET_IP_VERSION, ipv),
+    setLanguage: (language: string) =>
+        ipcRenderer.send(Events.SET_LANGUAGE, language),
     runMeasurement: () => ipcRenderer.send(Events.RUN_MEASUREMENT),
     abortMeasurement: () => ipcRenderer.send(Events.ABORT_MEASUREMENT),
     getEnv: () => ipcRenderer.invoke(Events.GET_ENV),

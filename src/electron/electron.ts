@@ -6,6 +6,7 @@ import { Events } from "./enums/events.enum"
 import { IEnv } from "./interfaces/env.interface"
 import Protocol from "./protocol"
 import {
+    LANGUAGE,
     IP_VERSION,
     Store,
     TERMS_ACCEPTED,
@@ -108,6 +109,10 @@ ipcMain.on(Events.SET_IP_VERSION, (event, ipv: EIPVersion | null) => {
     Store.I.set(IP_VERSION, ipv)
 })
 
+ipcMain.on(Events.SET_LANGUAGE, (event, language: string) => {
+    Store.I.set(LANGUAGE, language)
+})
+
 ipcMain.on(Events.RUN_MEASUREMENT, async (event) => {
     const webContents = event.sender
     try {
@@ -133,6 +138,7 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         ENABLE_LANGUAGE_SWITCH: process.env.ENABLE_LANGUAGE_SWITCH || "",
         IP_VERSION: (Store.I.get(IP_VERSION) as string) || "",
         TERMS_ACCEPTED: (Store.I.get(TERMS_ACCEPTED) as boolean) || false,
+        LANGUAGE: Store.I.get(LANGUAGE) as string,
     }
 })
 

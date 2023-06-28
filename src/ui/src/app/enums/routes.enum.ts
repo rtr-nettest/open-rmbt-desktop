@@ -5,6 +5,7 @@ export enum ERoutes {
     LOOP_MODE = "loop",
     MAP = "map",
     NEWS = "new",
+    SETTINGS = "settings",
     STATISTICS = "statistics",
     TERMS_CONDITIONS = "terms-conditions",
     TEST = "test",

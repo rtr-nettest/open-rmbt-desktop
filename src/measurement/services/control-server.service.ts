@@ -12,10 +12,11 @@ import utc from "dayjs/plugin/utc"
 import tz from "dayjs/plugin/timezone"
 import { RMBTClient } from "./rmbt-client.service"
 import { ELoggerMessage } from "../enums/logger-message.enum"
-import { Store } from "./store.service"
+import { CLIENT_UUID, IP_VERSION, LAST_NEWS_UID, Store } from "./store.service"
 import { DBService } from "./db.service"
 import { SimpleHistoryResult } from "../dto/simple-history-result.dto"
 import { INewsRequest, INewsResponse } from "../interfaces/news.interface"
+import { EIPVersion } from "../enums/ip-version.enum"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -43,13 +44,13 @@ export class ControlServer {
         if (!process.env.NEWS_PATH) {
             return null
         }
-        const lastNewsUid = Store.lastNewsUid
+        const lastNewsUid = Store.I.get(LAST_NEWS_UID) as number
         const newsRequest: INewsRequest = {
             language: "en",
             platform: "DESKTOP",
             softwareVersionCode: "0.0.1",
             lastNewsUid,
-            uuid: Store.clientUuid,
+            uuid: Store.I.get(CLIENT_UUID) as string,
         }
         Logger.I.info(
             ELoggerMessage.POST_REQUEST,
@@ -67,7 +68,7 @@ export class ControlServer {
                 throw response.error
             }
             if (response.news?.[0]?.uid) {
-                Store.lastNewsUid = response.news[0].uid
+                Store.I.set(LAST_NEWS_UID, response.news[0].uid)
             }
             Logger.I.info("News are %o", response.news)
             return response.news ?? null
@@ -125,7 +126,7 @@ export class ControlServer {
         ).data as IUserSetingsResponse
         if (response?.settings?.length) {
             Logger.I.info("Using settings: %o", response.settings[0])
-            Store.clientUuid = response.settings[0].uuid
+            Store.I.set(CLIENT_UUID, response.settings[0].uuid)
             return response.settings[0]
         }
         if (response?.error?.length) {
@@ -149,6 +150,7 @@ export class ControlServer {
         ).data as IMeasurementRegistrationResponse
         if (response?.test_token && response?.test_uuid) {
             Logger.I.info("Registered measurement: %o", response)
+            response.ip_version = Store.I.get(IP_VERSION) as EIPVersion
             return response
         }
         if (response?.error?.length) {

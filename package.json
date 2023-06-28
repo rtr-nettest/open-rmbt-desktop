@@ -6,6 +6,7 @@
     "engines": {
         "node": ">=18"
     },
+    "repository": "https://github.com/rtr-nettest/open-rmbt-desktop",
     "scripts": {
         "prepare:translations": "npx ts-node download-translations.ts",
         "build:all": "npm run prepare:translations && webpack --mode production && cd src/ui && npm run build-for-packaging && shx cp -rf dist/ui/* ../../dist",

@@ -1,0 +1,152 @@
+@import "../../../assets/styles/core.scss";
+
+.app-table {
+    mat-row {
+        &:nth-child(odd) {
+            background-color: #ecf3e5;
+        }
+        &:nth-child(even) {
+            background-color: #f9fbf7;
+        }
+    }
+
+    mat-row {
+        min-height: rem(40);
+    }
+
+    mat-header-row {
+        min-height: rem(50);
+    }
+
+    &--expanded {
+        height: auto;
+    }
+
+    &__cell--ellipsis,
+    mat-header-cell > *,
+    mat-cell > * {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    &__subheader {
+        * {
+            color: inherit !important;
+        }
+    }
+
+    mat-cell {
+        :nth-child(2) {
+            flex: 1;
+            max-width: 100%;
+        }
+        :not(:only-child) {
+            @include screen-sm {
+                max-width: 50vw;
+            }
+        }
+    }
+
+    mat-footer-cell {
+        font-weight: bold;
+        * {
+            font-weight: bold;
+            &:first-child {
+                font-weight: 500;
+            }
+        }
+
+        :not(:only-child) {
+            @include screen-sm {
+                max-width: 50vw;
+            }
+        }
+    }
+
+    mat-header-cell {
+        color: rgba($color-primary, 0.5);
+        font-size: rem(14);
+        font-weight: 700 !important;
+
+        :not(:only-child) {
+            @include screen-sm {
+                max-width: 50vw;
+            }
+        }
+    }
+
+    .mat-column {
+        &-expandArrow {
+            flex: 0 0 rem(50);
+
+            .material-icons {
+                cursor: pointer;
+                font-size: rem(20);
+            }
+        }
+
+        &-expandedDetail {
+            display: none;
+        }
+
+        &-title {
+            flex: 0 0 30%;
+        }
+    }
+
+    &__detail-row {
+        .mat-column-expandedDetail {
+            display: flex;
+        }
+    }
+
+    &--wide {
+        mat-row {
+            min-height: rem(60);
+        }
+    }
+
+    &__expanded-table {
+        flex: 1;
+
+        .app-table--expanded {
+            .mat-row {
+                border-top: none;
+            }
+        }
+    }
+
+    &__expanded-empty {
+        font-size: rem(13);
+        color: color(gray6);
+        padding: rem(20) rem(60);
+    }
+
+    &__detail {
+        overflow: hidden;
+        display: flex;
+        flex: 1;
+
+        &-row {
+            min-height: 0 !important;
+            border-bottom-width: 0;
+
+            .mat-cell {
+                border-bottom-width: 0;
+                width: 100%;
+                padding: 0;
+            }
+        }
+    }
+}
+
+mat-paginator {
+    color: color(black);
+}
+
+.mat-table-wrap {
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+}

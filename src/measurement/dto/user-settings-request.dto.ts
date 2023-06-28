@@ -4,7 +4,7 @@ import tz from "dayjs/plugin/timezone"
 import { IUserSettingsRequest } from "../interfaces/user-settings-request.interface"
 import { EMeasurementServerType } from "../enums/measurement-server-type.enum"
 import os from "os"
-import { Store } from "../services/store.service"
+import { CLIENT_UUID, Store } from "../services/store.service"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -22,6 +22,6 @@ export class UserSettingsRequest implements IUserSettingsRequest {
     type = "DESKTOP"
 
     constructor(public platform = "DESKTOP") {
-        this.uuid = Store.clientUuid
+        this.uuid = Store.I.get(CLIENT_UUID) as string
     }
 }

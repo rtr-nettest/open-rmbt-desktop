@@ -1,4 +1,4 @@
-import { NgModule } from "@angular/core"
+import { APP_INITIALIZER, NgModule } from "@angular/core"
 import { BrowserModule } from "@angular/platform-browser"
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations"
 
@@ -68,7 +68,24 @@ import { ExportWarningComponent } from "./widgets/export-warning/export-warning.
 import { TermsConditionsScreenComponent } from "./screens/terms-conditions-screen/terms-conditions-screen.component"
 import { ICrowdinJson } from "../../../measurement/interfaces/crowdin.interface"
 import { INewsItem } from "../../../measurement/interfaces/news.interface"
-import { NewsComponent } from "./screens/news/news.component"
+import { SettingsScreenComponent } from "./screens/settings-screen/settings-screen.component"
+import { NewsScreenComponent } from "./screens/news-screen/news-screen.component"
+import { MatTableModule } from "@angular/material/table"
+import { MatSortModule } from "@angular/material/sort"
+import { MatPaginatorModule } from "@angular/material/paginator"
+import { MatSlideToggleModule } from "@angular/material/slide-toggle"
+import { MatSelectModule } from "@angular/material/select"
+import { TableComponent } from "./widgets/table/table.component"
+import { PaginatorComponent } from "./widgets/paginator/paginator.component"
+import { DynamicComponentDirective } from "./directives/dynamic-component.directive"
+import { SettingsUuidComponent } from "./widgets/settings-uuid/settings-uuid.component"
+import { SettingsVersionComponent } from "./widgets/settings-version/settings-version.component"
+import { SettingsRepoLinkComponent } from "./widgets/settings-repo-link/settings-repo-link.component"
+import { SettingsIpComponent } from "./widgets/settings-ip/settings-ip.component"
+import { SettingsLocaleComponent } from "./widgets/settings-locale/settings-locale.component"
+import { FormsModule } from "@angular/forms"
+import { EIPVersion } from "../../../measurement/enums/ip-version.enum"
+import { MainStore } from "./store/main.store"
 
 Chart.register(
     BarElement,
@@ -87,10 +104,11 @@ declare global {
         electronAPI: {
             quit: () => Promise<void>
             getTranslations: (lang: string) => Promise<ICrowdinJson | null>
-            getTermsAccepted: () => Promise<string | undefined>
             getNews: () => Promise<INewsItem[] | null>
             acceptTerms: (terms: string) => Promise<void>
             registerClient: () => Promise<IUserSettings>
+            setIpVersion: (ipv: EIPVersion | null) => Promise<void>
+            setLanguage: (language: string) => Promise<void>
             runMeasurement: () => Promise<void>
             abortMeasurement: () => Promise<void>
             getEnv: () => Promise<IEnv>
@@ -124,6 +142,7 @@ declare global {
         ResultScreenComponent,
         SpacerComponent,
         StartTestButtonComponent,
+        TableComponent,
         TestBoxesComponent,
         TestChartComponent,
         TestChartsComponent,
@@ -132,22 +151,43 @@ declare global {
         TestScreenComponent,
         ConfirmDialogComponent,
         TermsConditionsScreenComponent,
-        NewsComponent,
+        NewsScreenComponent,
+        SettingsScreenComponent,
+        PaginatorComponent,
+        SettingsUuidComponent,
+        SettingsVersionComponent,
+        SettingsRepoLinkComponent,
+        DynamicComponentDirective,
+        SettingsIpComponent,
+        SettingsLocaleComponent,
     ],
     imports: [
         AppRoutingModule,
         BrowserAnimationsModule,
         BrowserModule,
+        FormsModule,
         HttpClientModule,
         MatButtonModule,
         MatDialogModule,
         MatIconModule,
+        MatPaginatorModule,
         MatProgressSpinnerModule,
         MatSnackBarModule,
+        MatTableModule,
+        MatSortModule,
         MatTooltipModule,
+        MatSlideToggleModule,
+        MatSelectModule,
         TranslocoRootModule,
     ],
-    providers: [],
     bootstrap: [AppComponent],
+    providers: [
+        {
+            provide: APP_INITIALIZER,
+            useFactory: MainStore.factory,
+            deps: [MainStore],
+            multi: true,
+        },
+    ],
 })
 export class AppModule {}

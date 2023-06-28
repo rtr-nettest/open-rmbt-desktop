@@ -2,6 +2,7 @@ import { Component, Input } from "@angular/core"
 import { ActivatedRoute, Router } from "@angular/router"
 import { map, withLatestFrom } from "rxjs"
 import { THIS_INTERRUPTS_ACTION } from "src/app/constants/strings"
+import { ERoutes } from "src/app/enums/routes.enum"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 import { CMSService } from "src/app/services/cms.service"
 import { MessageService } from "src/app/services/message.service"
@@ -16,6 +17,22 @@ export class MainMenuComponent {
     menu$ = this.cmsService.getMenu().pipe(
         withLatestFrom(this.activeRoute.url),
         map(([menu, activeRoute]) => {
+            this.settingsItem = {
+                label: "Options",
+                translations: [],
+                route: this.disabled ? undefined : "/" + ERoutes.SETTINGS,
+                className: [
+                    this.disabled ? "app-menu-item--disabled" : "",
+                    activeRoute.join("/") === ERoutes.SETTINGS
+                        ? "app-menu-item--active"
+                        : "",
+                ].join(" "),
+                icon: "settings",
+                action: () => {
+                    window.electronAPI.abortMeasurement()
+                    this.router.navigate(["/", ERoutes.SETTINGS])
+                },
+            }
             return menu.map((item) => {
                 return {
                     ...item,
@@ -34,6 +51,7 @@ export class MainMenuComponent {
             })
         })
     )
+    settingsItem?: IMainMenuItem
 
     constructor(
         private activeRoute: ActivatedRoute,

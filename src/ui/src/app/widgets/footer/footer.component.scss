@@ -2,10 +2,15 @@
 
 .app-footer {
     align-items: center;
+    bottom: 0;
     display: flex;
     height: rem(108);
     font-size: rem($font-size-sm);
+    justify-content: flex-end;
+    left: 0;
     padding: rem(30);
+    position: absolute;
+    right: 0;
 
     img {
         height: auto;

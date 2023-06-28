@@ -48,9 +48,7 @@ export class TestPhaseState implements ITestPhaseState {
     }
 
     extendRTRSpeedChart() {
-        if (
-            !(this.duration >= STATE_UPDATE_TIMEOUT / 1000 && this.counter >= 0)
-        ) {
+        if (this.counter <= 0 && !this.startDuration) {
             return
         }
         if (!this.startDuration) {

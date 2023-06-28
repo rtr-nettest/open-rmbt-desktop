@@ -37,9 +37,6 @@
     }
 
     mat-cell {
-        &:nth-child(2) {
-            margin-left: rem(10);
-        }
         :nth-child(2) {
             flex: 1;
             max-width: 100%;
@@ -59,9 +56,6 @@
                 font-weight: 500;
             }
         }
-        &:nth-child(2) {
-            margin-left: rem(10);
-        }
 
         :not(:only-child) {
             @include screen-sm {
@@ -74,10 +68,6 @@
         color: rgba($color-primary, 0.5);
         font-size: rem(14);
         font-weight: 700 !important;
-
-        &:nth-child(2) {
-            margin-left: rem(10);
-        }
 
         :not(:only-child) {
             @include screen-sm {

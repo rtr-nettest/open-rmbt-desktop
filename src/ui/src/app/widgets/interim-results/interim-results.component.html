@@ -10,7 +10,7 @@
                     <mat-spinner></mat-spinner>
                 </div>
                 <span *ngIf="state.currentPhaseName !== phases.PING && ping">
-                    {{ t(ping) }}
+                    {{ ping }}
                 </span>
             </h4>
             <div class="app-chart app-chart--ping">
@@ -32,7 +32,7 @@
                 <span
                     *ngIf="state.currentPhaseName !== phases.DOWN && download"
                 >
-                    {{ t(download) }}
+                    {{ download }}
                 </span>
             </h4>
             <div class="app-chart app-chart--down">
@@ -61,7 +61,7 @@
                         upload
                     "
                 >
-                    {{ t(upload) }}
+                    {{ upload }}
                 </span>
             </h4>
             <div class="app-chart app-chart--up">

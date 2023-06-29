@@ -1,4 +1,5 @@
 import { EColors } from "src/app/enums/colors.enum"
+import { TranslocoService } from "@ngneat/transloco"
 
 export class TestChartOptions {
     animation = {
@@ -42,7 +43,7 @@ export class TestChartOptions {
                 font: {
                     size: 12,
                 },
-                labelString: "Mbps",
+                labelString: this.t.translate("Mbps"),
             },
             position: "right",
             ticks: {
@@ -64,7 +65,5 @@ export class TestChartOptions {
         },
     }
 
-    constructor(yLabel: string) {
-        this.scales.y.title.labelString = yLabel
-    }
+    constructor(private t: TranslocoService) {}
 }

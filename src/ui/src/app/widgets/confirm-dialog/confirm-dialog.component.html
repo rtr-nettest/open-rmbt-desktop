@@ -1,5 +1,5 @@
 <div class="app-dialog" *transloco="let t">
-    <p>{{ t(text) }}</p>
+    <p [innerHTML]="t(text)"></p>
     <footer class="app-footer">
         <ng-container *ngIf="canCancel; else simpleOk">
             <button mat-button color="primary" (click)="close()">

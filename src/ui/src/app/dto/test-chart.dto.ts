@@ -3,20 +3,20 @@ import { TestChartOptions } from "./test-chart-options.dto"
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
 import { Chart, ChartData } from "chart.js"
 import { generateIndexesOfLength } from "../helpers/array"
+import { TranslocoService } from "@ngneat/transloco"
 
 export class TestChart extends Chart {
     private finished = false
 
     constructor(
         private context: CanvasRenderingContext2D,
-        label: string,
-        units: string,
+        transloco: TranslocoService,
         type: "line" | "bar" = "line",
         data: ChartData = {
             datasets: [new TestChartDataset(context)],
             labels: generateIndexesOfLength(100),
         },
-        options: { [key: string]: any } = new TestChartOptions(units)
+        options: { [key: string]: any } = new TestChartOptions(transloco)
     ) {
         super(context, {
             type,

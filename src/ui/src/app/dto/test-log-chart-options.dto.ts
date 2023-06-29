@@ -1,4 +1,5 @@
 import { EColors } from "src/app/enums/colors.enum"
+import { TranslocoService } from "@ngneat/transloco"
 
 export class TestLogChartOptions {
     animation = {
@@ -26,7 +27,7 @@ export class TestLogChartOptions {
                 },
             },
             ticks: {
-                callback: (value: any) => `${value} s`,
+                callback: (value: any) => `${value} ${this.t.translate("s")}`,
             },
         },
         y: {
@@ -58,9 +59,9 @@ export class TestLogChartOptions {
                         retVal = 10 ** (index - 1)
                     }
                     if (retVal >= 1000) {
-                        return `${retVal / 1000} Gbps`
+                        return `${retVal / 1000} ${this.t.translate("Gbps")}`
                     }
-                    return `${retVal} Mbps`
+                    return `${retVal} ${this.t.translate("Mbps")}`
                 },
             },
         },
@@ -74,5 +75,5 @@ export class TestLogChartOptions {
         },
     }
 
-    constructor() {}
+    constructor(private t: TranslocoService) {}
 }

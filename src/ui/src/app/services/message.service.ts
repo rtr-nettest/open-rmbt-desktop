@@ -5,6 +5,7 @@ import {
     ConfirmDialogComponent,
     ConfirmDialogOpts,
 } from "../widgets/confirm-dialog/confirm-dialog.component"
+import { TranslocoService } from "@ngneat/transloco"
 
 @Injectable({
     providedIn: "root",
@@ -13,12 +14,13 @@ export class MessageService {
     constructor(
         private snackbar: MatSnackBar,
         private dialog: MatDialog,
-        private ngZone: NgZone
+        private ngZone: NgZone,
+        private transloco: TranslocoService
     ) {}
 
     openSnackbar(text: string) {
         this.ngZone.run(() => {
-            this.snackbar.open(text, undefined, {
+            this.snackbar.open(this.transloco.translate(text), undefined, {
                 duration: 3000,
                 panelClass: ["app-snackbar"],
             })

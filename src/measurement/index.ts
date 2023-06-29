@@ -62,9 +62,7 @@ export class MeasurementRunner {
             await ControlServer.I.submitUnsentMeasurements()
             return { ...this.settings, ipInfo }
         } catch (e) {
-            throw new Error(
-                "The registration couldn't be completed. Please try again."
-            )
+            throw new Error("The registration couldn't be completed")
         }
     }
 

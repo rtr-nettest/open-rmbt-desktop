@@ -1,24 +1,23 @@
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
 import { ChartPhase, TestRTRChartDataset } from "./test-rtr-chart-dataset.dto"
-import { TestChart } from "./test-chart.dto"
 import { TestLogChartOptions } from "./test-log-chart-options.dto"
+import { TranslocoService } from "@ngneat/transloco"
+import { TestChart } from "./test-chart.dto"
 export class TestLogChart extends TestChart {
     constructor(
         context: CanvasRenderingContext2D,
-        label: string,
-        units: string,
+        transloco: TranslocoService,
         private phase: ChartPhase
     ) {
         super(
             context,
-            label,
-            units,
+            transloco,
             "line",
             {
                 datasets: [new TestRTRChartDataset(phase)],
                 labels: [],
             },
-            new TestLogChartOptions()
+            new TestLogChartOptions(transloco)
         )
     }
 

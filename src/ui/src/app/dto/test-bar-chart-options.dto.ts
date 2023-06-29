@@ -1,3 +1,4 @@
+import { TranslocoService } from "@ngneat/transloco"
 import { EColors } from "src/app/enums/colors.enum"
 
 export class TestBarChartOptions {
@@ -51,8 +52,8 @@ export class TestBarChartOptions {
                 },
                 maxTicksLimit: 6,
                 stepSize: 10,
-                callback: (value: any, index: number) => {
-                    return `${value} ms`
+                callback: (value: any) => {
+                    return `${value} ${this.t.translate("ms")}`
                 },
             },
         },
@@ -66,5 +67,5 @@ export class TestBarChartOptions {
         },
     }
 
-    constructor() {}
+    constructor(private t: TranslocoService) {}
 }

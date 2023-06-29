@@ -29,14 +29,10 @@ export class TestChartComponent {
     chart: TestChart | undefined
     visualization$: Observable<ITestVisualizationState> =
         this.store.visualization$.pipe(
-            withLatestFrom(
-                this.transloco.selectTranslate("test.progress.label"),
-                this.transloco.selectTranslate("test.download.units"),
-                this.mainStore.env$
-            ),
-            map(([s, label, units, env]) => {
+            withLatestFrom(this.mainStore.env$),
+            map(([s, env]) => {
                 this.flavor = env?.FLAVOR || "rtr"
-                this.handleChanges(s, label, units)
+                this.handleChanges(s)
                 return s
             })
         )
@@ -53,22 +49,18 @@ export class TestChartComponent {
         private transloco: TranslocoService
     ) {}
 
-    private handleChanges(
-        visualization: ITestVisualizationState,
-        label: string,
-        units: string
-    ) {
+    private handleChanges(visualization: ITestVisualizationState) {
         this.ngZone.runOutsideAngular(async () => {
             switch (visualization.currentPhaseName) {
                 case EMeasurementStatus.INIT:
                     this.chart?.resetData()
                     if (this.flavor === "rtr") {
-                        this.initChart(label, units)
+                        this.initChart()
                     }
                     break
                 case EMeasurementStatus.PING:
                     if (this.flavor !== "rtr") {
-                        this.initChart(label, units)
+                        this.initChart()
                     }
                     break
                 case EMeasurementStatus.DOWN:
@@ -90,7 +82,7 @@ export class TestChartComponent {
                     }
                     break
                 case EMeasurementStatus.SHOWING_RESULTS:
-                    this.initChart(label, units)
+                    this.initChart()
                     if (this.phase === "download") {
                         this.chart?.setData(
                             visualization.phases[EMeasurementStatus.DOWN]
@@ -105,7 +97,7 @@ export class TestChartComponent {
         })
     }
 
-    private initChart(label: string, units: string) {
+    private initChart() {
         if (this.chart) {
             return
         }
@@ -115,11 +107,11 @@ export class TestChartComponent {
             return
         }
         if (this.flavor !== "rtr") {
-            this.chart = new TestChart(ctx!, label, units)
+            this.chart = new TestChart(ctx!, this.transloco)
         } else if (this.phase === "ping") {
-            this.chart = new TestBarChart(ctx!, label, units, this.phase)
+            this.chart = new TestBarChart(ctx!, this.transloco, this.phase)
         } else {
-            this.chart = new TestLogChart(ctx!, label, units, this.phase)
+            this.chart = new TestLogChart(ctx!, this.transloco, this.phase)
         }
     }
 }

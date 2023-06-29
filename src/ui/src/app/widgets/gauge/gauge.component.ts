@@ -4,6 +4,7 @@ import { getSignificantDigits } from "src/app/helpers/number"
 import { ITestPhaseState } from "src/app/interfaces/test-phase-state.interface"
 import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
+import { TranslocoService } from "@ngneat/transloco"
 
 @Component({
     selector: "app-gauge",
@@ -20,7 +21,11 @@ export class GaugeComponent {
         })
     )
 
-    constructor(private store: TestStore, private ngZone: NgZone) {}
+    constructor(
+        private store: TestStore,
+        private ngZone: NgZone,
+        private transloco: TranslocoService
+    ) {}
 
     private getProgressSegment(status: EMeasurementStatus, progress: number) {
         var ProgressSegmentsTotal = 96
@@ -176,7 +181,7 @@ export class GaugeComponent {
                 directionSymbol +
                 "</tspan>\u200a" +
                 getSignificantDigits(speedMbit)
-            speedUnitEl.textContent = "Mbps"
+            speedUnitEl.textContent = this.transloco.translate("Mbps")
 
             //enable smoothing animations on speed gauge, as soon as initial speed value is set
             //as not to visualize a gradually increase of speed

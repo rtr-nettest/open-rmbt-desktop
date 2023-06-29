@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core"
 import { ActivatedRoute } from "@angular/router"
+import { TranslocoService } from "@ngneat/transloco"
 import { getSignificantDigits } from "src/app/helpers/number"
 import { MainStore } from "src/app/store/main.store"
 import { TestStore } from "src/app/store/test.store"
@@ -20,7 +21,8 @@ export class ResultScreenComponent {
     constructor(
         private store: TestStore,
         private mainStore: MainStore,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        private transloco: TranslocoService
     ) {}
 
     getIconStyleByClass(classification: number) {
@@ -39,10 +41,14 @@ export class ResultScreenComponent {
     }
 
     getSpeedInMbps(speed: number) {
-        return getSignificantDigits(speed / 1e3) + " Mbps"
+        return (
+            getSignificantDigits(speed / 1e3) +
+            " " +
+            this.transloco.translate("Mbps")
+        )
     }
 
     getPingInMs(ping: number) {
-        return getSignificantDigits(ping) + " ms"
+        return getSignificantDigits(ping) + " " + this.transloco.translate("ms")
     }
 }

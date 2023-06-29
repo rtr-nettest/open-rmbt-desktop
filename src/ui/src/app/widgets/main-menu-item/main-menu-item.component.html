@@ -57,5 +57,5 @@
 
 <ng-template #linkText let-item>
     <i class="app-icon" *ngIf="item.icon" [attr.data-icon]="item.icon"></i>
-    <span>{{ item.label }}</span>
+    <span>{{ item.label | transloco }}</span>
 </ng-template>

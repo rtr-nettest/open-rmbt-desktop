@@ -29,6 +29,6 @@ export class DNSService {
             Logger.I.info("IP version is %s. Using address: %s", ipv, ips[0])
             return ips[0]
         }
-        throw new Error(`Could not resolve the hostname.`)
+        throw new Error("Could not resolve the hostname")
     }
 }

@@ -33,5 +33,12 @@
     "Provider": "Provider",
     "Developed by Specure": "Developed by Specure",
     "Start Test": "Start Test",
-    "Start RTR-NetTest": "Start RTR-NetTest"
+    "Start RTR-NetTest": "Start RTR-NetTest",
+    "Client UUID": "Client UUID",
+    "Version": "Version",
+    "Open source": "Open source",
+    "IPv4 only": "IPv4 only",
+    "IPv6 only": "IPv6 only",
+    "Language": "Language",
+    "Copy": "Copy"
 }

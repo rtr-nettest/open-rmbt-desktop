@@ -10,7 +10,8 @@ import { SettingsUuidComponent } from "src/app/widgets/settings-uuid/settings-uu
 import { SettingsVersionComponent } from "src/app/widgets/settings-version/settings-version.component"
 import { EIPVersion } from "../../../../../measurement/enums/ip-version.enum"
 import { SettingsLocaleComponent } from "src/app/widgets/settings-locale/settings-locale.component"
-import { Observable, map } from "rxjs"
+import { Observable, combineLatest, map } from "rxjs"
+import { TranslocoService } from "@ngneat/transloco"
 
 export interface ISettingsRow {
     title: string
@@ -34,30 +35,33 @@ export class SettingsScreenComponent implements OnInit {
             header: "",
         },
     ]
-    data$: Observable<IBasicResponse<ISettingsRow>> = this.store.env$.pipe(
-        map((env) => {
+    data$: Observable<IBasicResponse<ISettingsRow>> = combineLatest([
+        this.store.env$,
+        this.transloco.selectTranslation(),
+    ]).pipe(
+        map(([env, t]) => {
             const content: ISettingsRow[] = [
                 {
-                    title: "Client UUID",
+                    title: t["Client UUID"],
                     component: SettingsUuidComponent,
                 },
                 {
-                    title: "Version",
+                    title: t["Version"],
                     component: SettingsVersionComponent,
                 },
                 {
-                    title: "Open source",
+                    title: t["Open source"],
                     component: SettingsRepoLinkComponent,
                 },
                 {
-                    title: "IPv4 only",
+                    title: t["IPv4 only"],
                     component: SettingsIpComponent,
                     parameters: {
                         ipVersion: EIPVersion.v4,
                     },
                 },
                 {
-                    title: "IPv6 only",
+                    title: t["IPv6 only"],
                     component: SettingsIpComponent,
                     parameters: {
                         ipVersion: EIPVersion.v6,
@@ -66,7 +70,7 @@ export class SettingsScreenComponent implements OnInit {
             ]
             if (env?.ENABLE_LANGUAGE_SWITCH === "true") {
                 content.push({
-                    title: "Language",
+                    title: t["Language"],
                     component: SettingsLocaleComponent,
                 })
             }
@@ -82,7 +86,10 @@ export class SettingsScreenComponent implements OnInit {
     }
     tableClassNames = ["app-table--wide"]
 
-    constructor(private store: MainStore) {}
+    constructor(
+        private store: MainStore,
+        private transloco: TranslocoService
+    ) {}
 
     ngOnInit(): void {
         if (!this.store.settings$.value) {

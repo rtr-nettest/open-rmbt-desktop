@@ -1,13 +1,12 @@
 import { Component, Input } from "@angular/core"
 import { ActivatedRoute, Router, UrlSegment } from "@angular/router"
 import { TranslocoService } from "@ngneat/transloco"
-import { map, withLatestFrom } from "rxjs"
+import { combineLatest, map } from "rxjs"
 import { THIS_INTERRUPTS_ACTION } from "src/app/constants/strings"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 import { CMSService } from "src/app/services/cms.service"
 import { MessageService } from "src/app/services/message.service"
-import { MainStore } from "src/app/store/main.store"
 
 @Component({
     selector: "app-main-menu",
@@ -16,9 +15,12 @@ import { MainStore } from "src/app/store/main.store"
 })
 export class MainMenuComponent {
     @Input() disabled = false
-    menu$ = this.cmsService.getMenu().pipe(
-        withLatestFrom(this.activeRoute.url, this.store.env$),
-        map(([menu, activeRoute, env]) => {
+    menu$ = combineLatest([
+        this.cmsService.getMenu(),
+        this.activeRoute.url,
+        this.transloco.selectTranslation(),
+    ]).pipe(
+        map(([menu, activeRoute]) => {
             this.settingsItem = this.parseMenuItem(
                 {
                     label: "Options",
@@ -50,7 +52,6 @@ export class MainMenuComponent {
         private cmsService: CMSService,
         private message: MessageService,
         private router: Router,
-        private store: MainStore,
         private transloco: TranslocoService
     ) {}
 

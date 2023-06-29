@@ -12,7 +12,7 @@ import { EIPVersion } from "../../../../measurement/enums/ip-version.enum"
 })
 export class MainStore {
     static factory(store: MainStore) {
-        return () => firstValueFrom(store.getEnv())
+        return () => firstValueFrom(store.setEnv())
     }
 
     assets$ = new BehaviorSubject<{ [key: string]: IMainAsset }>({})
@@ -29,7 +29,7 @@ export class MainStore {
         })
     }
 
-    getEnv() {
+    setEnv() {
         if (this.env$.value) {
             return this.env$
         }

@@ -18,6 +18,14 @@ Install packages by running `npm i` or `yarn install` in the root folder and in 
 
 ## Compilation and running
 
+To download translations from the Crowdin API run
+
+    npm run prepare:translations
+
+or
+
+    yarn prepare:translations
+
 To run a measurement from the command line use
 
     npm run start:cli

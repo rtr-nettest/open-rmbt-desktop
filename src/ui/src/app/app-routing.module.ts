@@ -5,10 +5,10 @@ import { ResultScreenComponent } from "./screens/result-screen/result-screen.com
 import { TestScreenComponent } from "./screens/test-screen/test-screen.component"
 import { ERoutes } from "./enums/routes.enum"
 import { TermsConditionsScreenComponent } from "./screens/terms-conditions-screen/terms-conditions-screen.component"
-import { TermsAcceptedResolver } from "./resolvers/terms-accepted.resolver"
 import { NewsResolver } from "./resolvers/news.resolver"
 import { SettingsScreenComponent } from "./screens/settings-screen/settings-screen.component"
 import { NewsScreenComponent } from "./screens/news-screen/news-screen.component"
+import { EnvResolver } from "./resolvers/env.resolver"
 
 const routes: Routes = [
     {
@@ -35,7 +35,7 @@ const routes: Routes = [
         path: "**",
         component: HomeScreenComponent,
         resolve: {
-            termsAccepted: () => inject(TermsAcceptedResolver).resolve(),
+            env: () => inject(EnvResolver).resolve(),
             news: () => inject(NewsResolver).resolve(),
         },
         pathMatch: "full",

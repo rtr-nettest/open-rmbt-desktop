@@ -16,26 +16,15 @@ import { ERoutes } from "src/app/enums/routes.enum"
 import { CMSService } from "src/app/services/cms.service"
 import { MessageService } from "src/app/services/message.service"
 import { MainStore } from "src/app/store/main.store"
+import { BaseScreen } from "../base-screen/base-screen.component"
 
 @Component({
     selector: "app-home-screen",
     templateUrl: "./home-screen.component.html",
     styleUrls: ["./home-screen.component.scss"],
 })
-export class HomeScreenComponent implements OnDestroy {
-    destroyed$ = new Subject<void>()
+export class HomeScreenComponent extends BaseScreen {
     env$ = this.mainStore.env$
-    error$ = this.mainStore.error$
-        .pipe(
-            distinctUntilChanged(),
-            takeUntil(this.destroyed$),
-            tap((error) => {
-                if (error) {
-                    this.message.openSnackbar(error.message)
-                }
-            })
-        )
-        .subscribe()
     ipInfo$ = this.mainStore.settings$.pipe(
         map((settings) => {
             if (settings?.ipInfo) {
@@ -84,16 +73,13 @@ export class HomeScreenComponent implements OnDestroy {
     showProgress = true
 
     constructor(
-        private mainStore: MainStore,
+        mainStore: MainStore,
+        message: MessageService,
         private cmsService: CMSService,
-        private message: MessageService,
         private router: Router,
         private transloco: TranslocoService
-    ) {}
-
-    ngOnDestroy(): void {
-        this.destroyed$.next()
-        this.destroyed$.complete()
+    ) {
+        super(mainStore, message)
     }
 
     getIPIcon(publicAddress: string, privateAddress: string) {

@@ -12,6 +12,8 @@ import { EIPVersion } from "../../../../../measurement/enums/ip-version.enum"
 import { SettingsLocaleComponent } from "src/app/widgets/settings-locale/settings-locale.component"
 import { Observable, combineLatest, map } from "rxjs"
 import { TranslocoService } from "@ngneat/transloco"
+import { BaseScreen } from "../base-screen/base-screen.component"
+import { MessageService } from "src/app/services/message.service"
 
 export interface ISettingsRow {
     title: string
@@ -24,7 +26,7 @@ export interface ISettingsRow {
     templateUrl: "./settings-screen.component.html",
     styleUrls: ["./settings-screen.component.scss"],
 })
-export class SettingsScreenComponent implements OnInit {
+export class SettingsScreenComponent extends BaseScreen implements OnInit {
     columns: ITableColumn[] = [
         {
             columnDef: "title",
@@ -36,7 +38,7 @@ export class SettingsScreenComponent implements OnInit {
         },
     ]
     data$: Observable<IBasicResponse<ISettingsRow>> = combineLatest([
-        this.store.env$,
+        this.mainStore.env$,
         this.transloco.selectTranslation(),
     ]).pipe(
         map(([env, t]) => {
@@ -87,13 +89,16 @@ export class SettingsScreenComponent implements OnInit {
     tableClassNames = ["app-table--wide"]
 
     constructor(
-        private store: MainStore,
+        mainStore: MainStore,
+        message: MessageService,
         private transloco: TranslocoService
-    ) {}
+    ) {
+        super(mainStore, message)
+    }
 
     ngOnInit(): void {
-        if (!this.store.settings$.value) {
-            this.store.registerClient()
+        if (!this.mainStore.settings$.value) {
+            this.mainStore.registerClient()
         }
     }
 }

@@ -19,6 +19,7 @@ import { INewsRequest, INewsResponse } from "../interfaces/news.interface"
 import { EIPVersion } from "../enums/ip-version.enum"
 import { I18nService } from "./i18n.service"
 import * as pack from "../../../package.json"
+import { EMeasurementFinalStatus } from "../enums/measurement-final-status"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -185,7 +186,9 @@ export class ControlServer {
             if (e.response.status != 400) {
                 await DBService.I.saveMeasurement(result)
             }
-            this.handleError(e)
+            if (result.test_status !== EMeasurementFinalStatus.ABORTED) {
+                this.handleError(e)
+            }
         }
     }
 

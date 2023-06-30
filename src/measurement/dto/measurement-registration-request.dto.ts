@@ -1,5 +1,6 @@
 import { EMeasurementServerType } from "../enums/measurement-server-type.enum"
 import { IMeasurementRegistrationRequest } from "../interfaces/measurement-registration-request.interface"
+import { I18nService } from "../services/i18n.service"
 import { UserSettingsRequest } from "./user-settings-request.dto"
 const registry = require("../../../package.json")
 
@@ -7,7 +8,7 @@ export class MeasurementRegistrationRequest
     implements IMeasurementRegistrationRequest
 {
     client = EMeasurementServerType.RMBTel
-    language = ""
+    language = I18nService.I.getActiveLanguage()
     measurement_server_id: number | undefined
     measurement_type_flag = "regular"
     prefer_server: number | undefined

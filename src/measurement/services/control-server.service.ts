@@ -12,18 +12,13 @@ import utc from "dayjs/plugin/utc"
 import tz from "dayjs/plugin/timezone"
 import { RMBTClient } from "./rmbt-client.service"
 import { ELoggerMessage } from "../enums/logger-message.enum"
-import {
-    CLIENT_UUID,
-    IP_VERSION,
-    LANGUAGE,
-    LAST_NEWS_UID,
-    Store,
-} from "./store.service"
+import { CLIENT_UUID, IP_VERSION, LAST_NEWS_UID, Store } from "./store.service"
 import { DBService } from "./db.service"
 import { SimpleHistoryResult } from "../dto/simple-history-result.dto"
 import { INewsRequest, INewsResponse } from "../interfaces/news.interface"
 import { EIPVersion } from "../enums/ip-version.enum"
-import { TranslocoConfigExt } from "../../ui/src/transloco.config"
+import { I18nService } from "./i18n.service"
+import * as pack from "../../../package.json"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -52,14 +47,10 @@ export class ControlServer {
             return null
         }
         const lastNewsUid = Store.I.get(LAST_NEWS_UID) as number
-        let language = Intl.DateTimeFormat().resolvedOptions().locale
-        if (!TranslocoConfigExt["availableLangs"].includes(language)) {
-            language = "en"
-        }
         const newsRequest: INewsRequest = {
-            language: (Store.I.get(LANGUAGE) as string) ?? language,
+            language: I18nService.I.getActiveLanguage(),
             platform: "DESKTOP",
-            softwareVersionCode: "0.0.1",
+            softwareVersionCode: pack.version,
             lastNewsUid,
             uuid: Store.I.get(CLIENT_UUID) as string,
         }

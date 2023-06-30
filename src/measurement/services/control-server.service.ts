@@ -12,11 +12,18 @@ import utc from "dayjs/plugin/utc"
 import tz from "dayjs/plugin/timezone"
 import { RMBTClient } from "./rmbt-client.service"
 import { ELoggerMessage } from "../enums/logger-message.enum"
-import { CLIENT_UUID, IP_VERSION, LAST_NEWS_UID, Store } from "./store.service"
+import {
+    CLIENT_UUID,
+    IP_VERSION,
+    LANGUAGE,
+    LAST_NEWS_UID,
+    Store,
+} from "./store.service"
 import { DBService } from "./db.service"
 import { SimpleHistoryResult } from "../dto/simple-history-result.dto"
 import { INewsRequest, INewsResponse } from "../interfaces/news.interface"
 import { EIPVersion } from "../enums/ip-version.enum"
+import { TranslocoConfigExt } from "../../ui/src/transloco.config"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -45,8 +52,12 @@ export class ControlServer {
             return null
         }
         const lastNewsUid = Store.I.get(LAST_NEWS_UID) as number
+        let language = Intl.DateTimeFormat().resolvedOptions().locale
+        if (!TranslocoConfigExt["availableLangs"].includes(language)) {
+            language = "en"
+        }
         const newsRequest: INewsRequest = {
-            language: "en",
+            language: (Store.I.get(LANGUAGE) as string) ?? language,
             platform: "DESKTOP",
             softwareVersionCode: "0.0.1",
             lastNewsUid,

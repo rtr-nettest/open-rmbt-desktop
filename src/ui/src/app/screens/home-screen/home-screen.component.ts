@@ -31,19 +31,25 @@ export class HomeScreenComponent extends BaseScreen {
                 const { publicV4, publicV6, privateV4, privateV6 } =
                     settings?.ipInfo
                 return [
-                    `IPv4:&nbsp;${this.getIPIcon(
+                    `${this.transloco.translate("IPv4")}:&nbsp;${this.getIPIcon(
                         publicV4,
                         privateV4
                     )}&nbsp;${publicV4}`,
-                    `IPv6:&nbsp;${this.getIPIcon(
+                    `${this.transloco.translate("IPv6")}:&nbsp;${this.getIPIcon(
                         publicV6,
                         privateV6
                     )}&nbsp;${publicV6}`,
                 ]
             }
             return [
-                `IPv4:&nbsp;${this.getIPIcon(UNKNOWN, UNKNOWN)}`,
-                `IPv6:&nbsp;${this.getIPIcon(UNKNOWN, UNKNOWN)}`,
+                `${this.transloco.translate("IPv4")}:&nbsp;${this.getIPIcon(
+                    UNKNOWN,
+                    UNKNOWN
+                )}`,
+                `${this.transloco.translate("IPv6")}:&nbsp;${this.getIPIcon(
+                    UNKNOWN,
+                    UNKNOWN
+                )}`,
             ]
         })
     )

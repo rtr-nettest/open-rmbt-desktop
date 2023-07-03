@@ -40,5 +40,8 @@
     "IPv4 only": "IPv4 only",
     "IPv6 only": "IPv6 only",
     "Language": "Language",
-    "Copy": "Copy"
+    "Copy": "Copy",
+    "Client UUID was copied to the clipboard.": "Client UUID was copied to the clipboard.",
+    "IPv4": "IPv4",
+    "IPv6": "IPv6"
 }

@@ -1,20 +1,20 @@
-import { config } from "dotenv"
 import { app, BrowserWindow, ipcMain, protocol, shell } from "electron"
+if (require("electron-squirrel-startup")) app.quit()
 import path from "path"
-import {
-    getBasicNetworkInfo,
-    getCPUUsage,
-    getCurrentPhaseState,
-    getMeasurementResult,
-    runMeasurement,
-} from "../measurement"
+import { MeasurementRunner } from "../measurement"
 import { Events } from "./enums/events.enum"
 import { IEnv } from "./interfaces/env.interface"
 import Protocol from "./protocol"
-
-config({
-    path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
-})
+import {
+    LANGUAGE,
+    IP_VERSION,
+    Store,
+    TERMS_ACCEPTED,
+} from "../measurement/services/store.service"
+import { CrowdinService } from "../measurement/services/crowdin.service"
+import { ControlServer } from "../measurement/services/control-server.service"
+import pack from "../../package.json"
+import { EIPVersion } from "../measurement/enums/ip-version.enum"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -26,9 +26,15 @@ const createWindow = () => {
         )
     }
 
+    const { screen } = require("electron")
+    const primaryDisplay = screen.getPrimaryDisplay()
+    const { width, height } = primaryDisplay.workAreaSize
+
     const win = new BrowserWindow({
-        width: 1200,
-        height: 600,
+        width: 1280,
+        height: 800,
+        minWidth: Math.min(800, width),
+        minHeight: Math.min(600, height),
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             nodeIntegration: true,
@@ -36,17 +42,13 @@ const createWindow = () => {
     })
 
     win.webContents.setWindowOpenHandler(({ url }) => {
-        const historyUrl = new URL(process.env.FULL_HISTORY_RESUlT_URL ?? "")
-        const thisUrl = new URL(url)
-        if (thisUrl.hostname === historyUrl.hostname) {
-            shell.openExternal(url)
-        }
+        shell.openExternal(url)
         return { action: "deny" }
     })
 
     if (process.env.DEV === "true") {
-        win.loadURL("http://localhost:4200/")
         win.webContents.openDevTools()
+        win.loadURL("http://localhost:4200/")
     } else {
         win.loadURL(`${Protocol.scheme}://index.html`)
     }
@@ -67,18 +69,61 @@ protocol.registerSchemesAsPrivileged([
 ])
 
 app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") app.quit()
+    if (process.platform !== "darwin") {
+        app.quit()
+    } else {
+        MeasurementRunner.I.abortMeasurement()
+    }
 })
 
 app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
-ipcMain.on(Events.RUN_MEASUREMENT, (event) => {
+ipcMain.on(Events.QUIT, () => {
+    app.quit()
+})
+
+ipcMain.handle(Events.GET_TRANSLATIONS, async (event, lang: string) => {
+    return await CrowdinService.I.getTranslations(lang)
+})
+
+ipcMain.handle(Events.GET_NEWS, async () => {
+    return await ControlServer.I.getNews()
+})
+
+ipcMain.on(Events.ACCEPT_TERMS, (event, terms: string) => {
+    Store.I.set(TERMS_ACCEPTED, terms)
+})
+
+ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
     const webContents = event.sender
-    runMeasurement().catch((e) => {
+    try {
+        return await MeasurementRunner.I.registerClient()
+    } catch (e) {
         webContents.send(Events.ERROR, e)
-    })
+    }
+})
+
+ipcMain.on(Events.SET_IP_VERSION, (event, ipv: EIPVersion | null) => {
+    Store.I.set(IP_VERSION, ipv)
+})
+
+ipcMain.on(Events.SET_LANGUAGE, (event, language: string) => {
+    Store.I.set(LANGUAGE, language)
+})
+
+ipcMain.on(Events.RUN_MEASUREMENT, async (event) => {
+    const webContents = event.sender
+    try {
+        await MeasurementRunner.I.runMeasurement()
+    } catch (e) {
+        webContents.send(Events.ERROR, e)
+    }
+})
+
+ipcMain.on(Events.ABORT_MEASUREMENT, () => {
+    MeasurementRunner.I.abortMeasurement()
 })
 
 ipcMain.handle(Events.GET_ENV, (): IEnv => {
@@ -86,28 +131,33 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         CMS_URL: process.env.CMS_URL || "",
         FLAVOR: process.env.FLAVOR || "rtr",
         X_NETTEST_CLIENT: process.env.X_NETTEST_CLIENT || "",
+        ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",
+        CROWDIN_UPDATE_AT_RUNTIME: process.env.CROWDIN_UPDATE_AT_RUNTIME || "",
+        APP_VERSION: pack.version,
+        REPO_URL: pack.repository,
+        ENABLE_LANGUAGE_SWITCH: process.env.ENABLE_LANGUAGE_SWITCH || "",
+        IP_VERSION: (Store.I.get(IP_VERSION) as string) || "",
+        TERMS_ACCEPTED: (Store.I.get(TERMS_ACCEPTED) as boolean) || false,
+        LANGUAGE: Store.I.get(LANGUAGE) as string,
     }
 })
 
-ipcMain.handle(Events.GET_BASIC_NETWORK_INFO, () => {
-    return getBasicNetworkInfo()
-})
-
 ipcMain.handle(Events.GET_CPU_USAGE, () => {
-    return getCPUUsage()
+    return MeasurementRunner.I.getCPUUsage()
 })
 
 ipcMain.handle(Events.GET_MEASUREMENT_STATE, () => {
-    return getCurrentPhaseState()
+    return MeasurementRunner.I.getCurrentPhaseState()
 })
 
 ipcMain.handle(Events.GET_MEASUREMENT_RESULT, async (event, testUuid) => {
     const webContents = event.sender
     try {
-        return await getMeasurementResult(testUuid)
+        return await MeasurementRunner.I.getMeasurementResult(testUuid)
     } catch (e) {
         webContents.send(Events.ERROR, e)
     }
 })
 
 app.whenReady().then(() => createWindow())
+app.disableHardwareAcceleration()

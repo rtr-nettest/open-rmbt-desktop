@@ -4,7 +4,7 @@
 
 html {
     font-family: $base-font-family;
-    font-size: $base-font-size + px;
+    font-size: var(--base-font-size);
     line-height: $base-line-height;
     height: 100%;
     -webkit-text-size-adjust: 100%;

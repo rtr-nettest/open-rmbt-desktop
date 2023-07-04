@@ -1,47 +1,63 @@
 <app-header></app-header>
-<main
-    class="app-main {{
-        (env$ | async)?.FLAVOR === 'ont' ? 'app-main--ont' : ''
-    }}"
-    *transloco="let t"
->
-    <div>
-        <h1 class="app-title" *ngIf="(env$ | async)?.FLAVOR === 'ont'">
-            {{ t("test.title") }}
-        </h1>
-        <app-start-test-button></app-start-test-button>
-        <div class="app-link-wrapper" *ngIf="(env$ | async)?.FLAVOR === 'ont'">
-            <!-- TODO: take the href and the text from the CMS -->
-            <a
-                class="app-link"
-                href="https://nettest.com/en/methodology"
-                target="_blank"
-                ><mat-icon>info</mat-icon
-                ><span
-                    >Learn more about the methodology of the measurement</span
-                ></a
-            >
+<app-body>
+    <app-main-menu></app-main-menu>
+    <app-main-content>
+        <div *ngIf="showProgress" style="width: 100%">
+            <mat-spinner style="margin: auto"></mat-spinner>
         </div>
-    </div>
-    <aside class="app-aside" *ngIf="(env$ | async)?.FLAVOR === 'ont'">
-        <img
-            *ngIf="testInviteImg$ | async as testInviteImg"
-            [src]="testInviteImg.url"
-            [alt]="
-                testInviteImg.alternativeText ||
-                testInviteImg.caption ||
-                testInviteImg.name ||
-                ''
-            "
-            [title]="
-                testInviteImg.alternativeText ||
-                testInviteImg.caption ||
-                testInviteImg.name ||
-                ''
-            "
-            width="280"
-            height="280"
-        />
-    </aside>
-</main>
+        <ng-container *ngIf="!showProgress">
+            <div style="width: 100%" *transloco="let t">
+                <h1 class="app-title" *ngIf="(env$ | async)?.FLAVOR === 'ont'">
+                    {{ t("test.title") }}
+                </h1>
+                <app-start-test-button></app-start-test-button>
+                <div
+                    class="app-link-wrapper app-link-wrapper--metrics"
+                    *ngIf="(env$ | async)?.FLAVOR === 'rtr'"
+                >
+                    <app-home-metrics
+                        [list]="ipInfo$ | async"
+                        title="Your IP address"
+                    ></app-home-metrics>
+                </div>
+                <div
+                    class="app-link-wrapper"
+                    *ngIf="(env$ | async)?.FLAVOR === 'ont'"
+                >
+                    <!-- TODO: take the href and the text from the CMS -->
+                    <a
+                        class="app-link"
+                        href="https://nettest.com/en/methodology"
+                        target="_blank"
+                        ><mat-icon>info</mat-icon
+                        ><span
+                            >Learn more about the methodology of the
+                            measurement</span
+                        ></a
+                    >
+                </div>
+            </div>
+            <aside class="app-aside" *ngIf="(env$ | async)?.FLAVOR === 'ont'">
+                <img
+                    *ngIf="testInviteImg$ | async as testInviteImg"
+                    [src]="testInviteImg.url"
+                    [alt]="
+                        testInviteImg.alternativeText ||
+                        testInviteImg.caption ||
+                        testInviteImg.name ||
+                        ''
+                    "
+                    [title]="
+                        testInviteImg.alternativeText ||
+                        testInviteImg.caption ||
+                        testInviteImg.name ||
+                        ''
+                    "
+                    width="280"
+                    height="280"
+                />
+            </aside>
+        </ng-container>
+    </app-main-content>
+</app-body>
 <app-footer></app-footer>

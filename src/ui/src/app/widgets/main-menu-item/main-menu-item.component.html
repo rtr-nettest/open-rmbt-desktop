@@ -1,0 +1,61 @@
+<ng-container
+    *ngTemplateOutlet="
+        !!item?.url
+            ? external
+            : item?.route !== null && item?.route !== undefined
+            ? default
+            : noRoute;
+        context: { $implicit: item }
+    "
+></ng-container>
+
+<ng-template #default let-item>
+    <a
+        mat-button
+        color="primary"
+        class="app-menu-item {{ item.className }}"
+        [routerLink]="item.route"
+        routerLinkActive="app-menu-item--active"
+        (click)="menuClick.emit($event)"
+        role="menuitem"
+    >
+        <ng-container
+            *ngTemplateOutlet="linkText; context: { $implicit: item }"
+        ></ng-container>
+    </a>
+</ng-template>
+
+<ng-template #external let-item>
+    <a
+        mat-button
+        color="primary"
+        class="app-menu-item {{ item.className }}"
+        [href]="item.url"
+        role="menuitem"
+        target="_blank"
+    >
+        <ng-container
+            *ngTemplateOutlet="linkText; context: { $implicit: item }"
+        ></ng-container>
+    </a>
+</ng-template>
+
+<ng-template #noRoute let-item>
+    <a
+        mat-button
+        color="primary"
+        href="javascript:;"
+        class="app-menu-item {{ item.className }}"
+        (click)="menuClick.emit($event)"
+        role="menuitem"
+    >
+        <ng-container
+            *ngTemplateOutlet="linkText; context: { $implicit: item }"
+        ></ng-container>
+    </a>
+</ng-template>
+
+<ng-template #linkText let-item>
+    <i class="app-icon" *ngIf="item.icon" [attr.data-icon]="item.icon"></i>
+    <span>{{ item.label | transloco }}</span>
+</ng-template>

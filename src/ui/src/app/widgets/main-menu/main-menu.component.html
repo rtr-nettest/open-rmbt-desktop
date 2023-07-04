@@ -1,0 +1,18 @@
+<aside class="app-aside">
+    <ul *ngIf="menu$ | async as menu" class="app-list">
+        <ng-container *ngFor="let item of menu; trackBy: trackBy">
+            <li *ngIf="!item.hidden" class="app-list-item">
+                <app-main-menu-item
+                    [item]="item"
+                    (menuClick)="handleClick($event, item)"
+                ></app-main-menu-item>
+            </li>
+        </ng-container>
+    </ul>
+    <footer class="app-footer" *ngIf="settingsItem">
+        <app-main-menu-item
+            [item]="settingsItem"
+            (menuClick)="handleClick($event, settingsItem)"
+        ></app-main-menu-item>
+    </footer>
+</aside>

@@ -9,9 +9,9 @@
             <dd>
                 <nt-test-chart
                     class="nt-canvas__wrapper"
-                    direction="download"
-                    [height]="(chartHeight$ | async) ?? 0"
-                    [width]="(chartWidth$ | async) ?? 0"
+                    phase="download"
+                    [style.height.px]="(chartHeight$ | async) ?? 0"
+                    [style.width.px]="(chartWidth$ | async) ?? 0"
                 ></nt-test-chart>
             </dd>
         </dl>
@@ -21,11 +21,12 @@
         >
             <dt class="app-title">{{ t("test.upload.label") }}</dt>
             <dd>
+                >
                 <nt-test-chart
                     class="nt-canvas__wrapper"
-                    direction="upload"
-                    [height]="(chartHeight$ | async) ?? 0"
-                    [width]="(chartWidth$ | async) ?? 0"
+                    phase="upload"
+                    [style.height.px]="(chartHeight$ | async) ?? 0"
+                    [style.width.px]="(chartWidth$ | async) ?? 0"
                 ></nt-test-chart>
             </dd>
         </dl>

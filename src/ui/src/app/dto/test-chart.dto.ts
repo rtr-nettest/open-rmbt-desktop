@@ -1,75 +1,71 @@
 import { TestChartDataset } from "./test-chart-dataset.dto"
 import { TestChartOptions } from "./test-chart-options.dto"
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
-import * as Chart from "chart.js"
+import { Chart, ChartData } from "chart.js"
+import { generateIndexesOfLength } from "../helpers/array"
+import { TranslocoService } from "@ngneat/transloco"
 
 export class TestChart extends Chart {
+    private finished = false
+
     constructor(
-        context:
-            | string
-            | CanvasRenderingContext2D
-            | HTMLCanvasElement
-            | ArrayLike<CanvasRenderingContext2D | HTMLCanvasElement>,
-        label: string,
-        units: string
+        private context: CanvasRenderingContext2D,
+        transloco: TranslocoService,
+        type: "line" | "bar" = "line",
+        data: ChartData = {
+            datasets: [new TestChartDataset(context)],
+            labels: generateIndexesOfLength(100),
+        },
+        options: { [key: string]: any } = new TestChartOptions(transloco)
     ) {
-        const labels = []
-        labels.length = 30
-        for (let index = 0; index < labels.length; index++) {
-            labels[index] = index
-        }
         super(context, {
-            type: "line",
-            data: {
-                datasets: [new TestChartDataset()],
-                labels,
-            },
-            options: new TestChartOptions(units),
+            type,
+            data,
+            options,
         })
     }
 
     resetData() {
-        this.data.datasets = [new TestChartDataset()]
-        this.data.labels = []
+        this.resetDatasets()
+        this.resetLabels()
+        this.finished = false
         this.update()
     }
 
     setData(data: ITestPhaseState) {
-        this.data.datasets = [new TestChartDataset()]
+        this.resetDatasets()
         this.data.datasets[0].data = this.getAllData(data)
-        this.data.labels = this.getAllLabels(data)
+        this.finished = true
         this.update()
     }
 
     updateData(data: ITestPhaseState) {
-        this.data?.datasets?.[0].data?.push(this.getLastData(data))
-        const { length, value } = this.getLastLabel(data)
-        if (length === 1 && this.data?.labels?.[0]) {
-            this.data.labels[0] = value
+        const lastData = this.getLastData(data)
+        if (!lastData) {
+            return
         }
-        this.update()
-    }
-
-    private getAllData(testItem: ITestPhaseState) {
-        return testItem?.chart?.length ? testItem.chart.map((ti) => ti.y) : []
-    }
-
-    private getAllLabels(testItem: ITestPhaseState) {
-        return testItem?.chart?.length ? testItem.chart.map((ti) => ti.x) : []
-    }
-
-    private getLastData(testItem: ITestPhaseState) {
-        return testItem?.chart?.length
-            ? testItem.chart[testItem.chart.length - 1].y
-            : 0
-    }
-
-    private getLastLabel(testItem: ITestPhaseState) {
-        return {
-            length: testItem?.chart?.length,
-            value: testItem?.chart?.length
-                ? testItem.chart[testItem.chart.length - 1].x
-                : 0,
+        if (!this.finished) {
+            this.data.datasets[0].data.push(lastData)
+            this.update()
         }
+        this.finished = !!lastData && lastData.x >= 100
+    }
+
+    protected resetLabels() {
+        this.data.labels = []
+    }
+
+    protected resetDatasets() {
+        this.data.datasets = [new TestChartDataset(this.context)]
+    }
+
+    protected getAllData(testItem: ITestPhaseState) {
+        return testItem.chart?.length ? testItem.chart : []
+    }
+
+    protected getLastData(testItem: ITestPhaseState) {
+        return testItem.chart?.length
+            ? testItem.chart[testItem.chart.length - 1]
+            : null
     }
 }

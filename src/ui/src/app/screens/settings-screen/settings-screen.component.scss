@@ -1,0 +1,19 @@
+@import "../../../assets/styles/core.scss";
+
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+app-main-content {
+    align-items: flex-start;
+}
+
+.app-main {
+    width: 100%;
+}
+
+.app-title {
+    margin-bottom: rem(40);
+}

@@ -1,4 +1,5 @@
 import { EMeasurementStatus } from "../enums/measurement-status.enum"
+import { IPing } from "./measurement-result.interface"
 
 export interface IMeasurementPhaseState {
     duration: number
@@ -6,6 +7,8 @@ export interface IMeasurementPhaseState {
     down: number
     up: number
     ping: number
+    pings: IPing[]
     phase: EMeasurementStatus
     testUuid: string
+    time: number
 }

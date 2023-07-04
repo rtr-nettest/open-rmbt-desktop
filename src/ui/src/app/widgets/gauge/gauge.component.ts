@@ -4,6 +4,7 @@ import { getSignificantDigits } from "src/app/helpers/number"
 import { ITestPhaseState } from "src/app/interfaces/test-phase-state.interface"
 import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
+import { TranslocoService } from "@ngneat/transloco"
 
 @Component({
     selector: "app-gauge",
@@ -20,7 +21,11 @@ export class GaugeComponent {
         })
     )
 
-    constructor(private store: TestStore, private ngZone: NgZone) {}
+    constructor(
+        private store: TestStore,
+        private ngZone: NgZone,
+        private transloco: TranslocoService
+    ) {}
 
     private getProgressSegment(status: EMeasurementStatus, progress: number) {
         var ProgressSegmentsTotal = 96
@@ -164,19 +169,19 @@ export class GaugeComponent {
         }
         //if speed information is available - set text
         if (speedMbit !== null && speedMbit > 0) {
-            //logarithmic to 1Gbit
-            var speedLog = (2 + Math.log10(speedMbit)) / 5
+            //logarithmic to 10Gbit
+            var barPercent = (2 + Math.log10(speedMbit / 10)) / 5
             //but cap at [0,1]
-            speedLog = Math.max(speedLog, 0)
-            speedLog = Math.min(1, speedLog)
-            this.setBarPercentage("#speed", speedLog)
+            barPercent = Math.max(barPercent, 0)
+            barPercent = Math.min(1, barPercent)
+            this.setBarPercentage("#speed", barPercent)
 
             speedTextEl.innerHTML =
                 '<tspan style="fill:#59b200">' +
                 directionSymbol +
                 "</tspan>\u200a" +
                 getSignificantDigits(speedMbit)
-            speedUnitEl.textContent = "Mbps"
+            speedUnitEl.textContent = this.transloco.translate("Mbps")
 
             //enable smoothing animations on speed gauge, as soon as initial speed value is set
             //as not to visualize a gradually increase of speed

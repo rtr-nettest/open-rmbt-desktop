@@ -1,0 +1,17 @@
+<app-header></app-header>
+<app-body>
+    <app-main-menu></app-main-menu>
+    <app-main-content>
+        <div class="app-main" *transloco="let t">
+            <div class="app-wrapper">
+                <app-table
+                    [columns]="columns"
+                    [data]="(data$ | async)!"
+                    [sort]="sort"
+                    [tableClassNames]="tableClassNames"
+                ></app-table>
+            </div>
+        </div>
+    </app-main-content>
+</app-body>
+<app-footer></app-footer>

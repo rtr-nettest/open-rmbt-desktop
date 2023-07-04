@@ -3,26 +3,24 @@
 :host {
     display: flex;
     flex-direction: column;
-    min-height: 100%;
+    height: 100%;
 }
 
 .app-title {
     margin-bottom: rem(40);
 }
 
-.app-main {
-    align-items: center;
-    display: flex;
-    flex: 1;
-    padding: rem(30);
-
-    &--ont {
-        justify-content: space-around;
-    }
-}
-
 .app-link-wrapper {
     margin-top: rem(40);
+
+    &--metrics {
+        display: flex;
+        margin-top: rem(70);
+
+        & > * {
+            flex-basis: calc(50% - rem(35));
+        }
+    }
 }
 
 .app-link {
@@ -43,7 +41,7 @@
         width: 100%;
     }
 
-    @include screen-small {
+    @include screen-xs {
         display: none;
     }
 }

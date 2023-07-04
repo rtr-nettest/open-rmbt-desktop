@@ -1,6 +1,40 @@
 @import "../../../assets/styles/core.scss";
 
 .app-wrapper {
+    display: block;
+}
+
+.app-title {
     display: flex;
-    flex-direction: column;
+    font-size: rem($font-size-xl);
+    font-weight: bold;
+    margin-bottom: 1vh;
+
+    & > * {
+        margin-right: 1ex;
+    }
+}
+
+.app-spinner {
+    align-self: center;
+    mat-spinner {
+        height: rem($font-size-xxl) !important;
+        width: rem($font-size-xxl) !important;
+        overflow: visible;
+    }
+}
+
+.app-chart {
+    position: relative;
+
+    nt-test-chart {
+        height: 18vh;
+        width: 40vw;
+    }
+
+    &--ping {
+        nt-test-chart {
+            height: 14vh;
+        }
+    }
 }

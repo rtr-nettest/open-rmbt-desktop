@@ -6,6 +6,7 @@ export interface ITestVisualizationState {
         [key: string]: ITestPhaseState
     }
     currentPhaseName: EMeasurementStatus
+    flavor: string
 
     setCounter(
         newPhase: EMeasurementStatus,

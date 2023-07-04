@@ -5,6 +5,8 @@ import { catchError, first, map, switchMap, tap } from "rxjs/operators"
 import { IMainAsset } from "../interfaces/main-asset.interface"
 import { IMainProject } from "../interfaces/main-project.interface"
 import { MainStore } from "../store/main.store"
+import { IMainMenuItem } from "../interfaces/main-menu-item.interface"
+import { environment } from "../constants/environment"
 
 @Injectable({
     providedIn: "root",
@@ -26,6 +28,10 @@ export class CMSService {
     }
 
     constructor(private http: HttpClient, private mainStore: MainStore) {}
+
+    getMenu(): Observable<IMainMenuItem[]> {
+        return of(environment.menu)
+    }
 
     getProject(): Observable<IMainProject> {
         return this.mainStore.project$.pipe(

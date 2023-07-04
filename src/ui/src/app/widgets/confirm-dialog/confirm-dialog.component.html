@@ -1,0 +1,24 @@
+<div class="app-dialog" *transloco="let t">
+    <p [innerHTML]="t(text)"></p>
+    <footer class="app-footer">
+        <ng-container *ngIf="canCancel; else simpleOk">
+            <button mat-button color="primary" (click)="close()">
+                {{ t("Cancel") }}
+            </button>
+            <button
+                mat-flat-button
+                type="submit"
+                color="primary"
+                (click)="close(true)"
+            >
+                {{ t("Proceed") }}
+            </button>
+        </ng-container>
+    </footer>
+</div>
+
+<ng-template #simpleOk>
+    <button *transloco="let t" mat-button color="primary" (click)="close(true)">
+        {{ t("Ok") }}
+    </button>
+</ng-template>

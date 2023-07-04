@@ -1,17 +1,75 @@
-<div class="app-wrapper">
-    <ng-container *ngIf="visualization$ | async">
-        <app-dl
-            [items]="{ Ping: ping, Download: download, Upload: upload }"
-            style="margin-bottom: 32px"
-        ></app-dl>
-    </ng-container>
-    <ng-container *ngIf="basicNetworkInfo$ | async">
-        <app-dl
-            [items]="{
-                'Server name': serverName,
-                'IP Address': ipAddress,
-                Provider: providerName
-            }"
-        ></app-dl>
+<div class="app-wrapper app-wrapper--charts" *transloco="let t">
+    <ng-container *ngIf="visualization$ | async as state">
+        <div class="app-container">
+            <h4 class="app-title">
+                <span>{{ t("Ping") }}:</span>
+                <div
+                    class="app-spinner"
+                    *ngIf="state.currentPhaseName === phases.PING"
+                >
+                    <mat-spinner></mat-spinner>
+                </div>
+                <span *ngIf="state.currentPhaseName !== phases.PING && ping">
+                    {{ ping }}
+                </span>
+            </h4>
+            <div class="app-chart app-chart--ping">
+                <nt-test-chart
+                    class="nt-canvas__wrapper"
+                    phase="ping"
+                ></nt-test-chart>
+            </div>
+        </div>
+        <div class="app-container">
+            <h4 class="app-title">
+                <span>{{ t("Download") }}:</span>
+                <div
+                    class="app-spinner"
+                    *ngIf="state.currentPhaseName === phases.DOWN"
+                >
+                    <mat-spinner></mat-spinner>
+                </div>
+                <span
+                    *ngIf="state.currentPhaseName !== phases.DOWN && download"
+                >
+                    {{ download }}
+                </span>
+            </h4>
+            <div class="app-chart app-chart--down">
+                <nt-test-chart
+                    class="nt-canvas__wrapper"
+                    phase="download"
+                ></nt-test-chart>
+            </div>
+        </div>
+        <div class="app-container">
+            <h4 class="app-title">
+                <span>{{ t("Upload") }}:</span>
+                <div
+                    class="app-spinner"
+                    *ngIf="
+                        state.currentPhaseName === phases.UP ||
+                        state.currentPhaseName === phases.INIT_UP
+                    "
+                >
+                    <mat-spinner></mat-spinner>
+                </div>
+                <span
+                    *ngIf="
+                        state.currentPhaseName !== phases.UP &&
+                        state.currentPhaseName !== phases.INIT_UP &&
+                        upload
+                    "
+                >
+                    {{ upload }}
+                </span>
+            </h4>
+            <div class="app-chart app-chart--up">
+                <nt-test-chart
+                    class="nt-canvas__wrapper"
+                    phase="upload"
+                ></nt-test-chart>
+            </div>
+        </div>
     </ng-container>
 </div>

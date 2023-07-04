@@ -1,3 +1,4 @@
+<app-header></app-header>
 <ng-container
     [ngTemplateOutlet]="(env$ | async)?.FLAVOR === 'ont' ? ont : rtr"
 ></ng-container>
@@ -11,9 +12,15 @@
 </ng-template>
 
 <ng-template #rtr>
-    <main *ngIf="visualization$ | async" class="app-main">
-        <app-gauge></app-gauge>
-        <app-spacer></app-spacer>
-        <app-interim-results></app-interim-results>
-    </main>
+    <app-body>
+        <app-main-menu [disabled]="true"></app-main-menu>
+        <app-main-content *ngIf="visualization$ | async">
+            <div class="app-main">
+                <app-gauge></app-gauge>
+                <app-spacer></app-spacer>
+                <app-interim-results></app-interim-results>
+            </div>
+        </app-main-content>
+    </app-body>
+    <app-footer></app-footer>
 </ng-template>

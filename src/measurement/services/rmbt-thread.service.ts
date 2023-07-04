@@ -1,7 +1,6 @@
 import net from "net"
 import tls from "tls"
 import fs from "fs"
-import { MeasurementThreadResult } from "../dto/measurement-thread-result.dto"
 import { ESocketMessage } from "../enums/socket-message.enum"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import { IMeasurementThreadResult } from "../interfaces/measurement-result.interface"
@@ -13,6 +12,9 @@ import { PreUploadMessageHandler } from "./message-handlers/pre-upload-message-h
 import { InitMessageHandler } from "./message-handlers/init-message-handler.service"
 import { UploadMessageHandler } from "./message-handlers/upload-message-handler.service"
 import { IMessageHandlerContext } from "../interfaces/message-handler.interface"
+import { ELoggerMessage } from "../enums/logger-message.enum"
+import { DNSService } from "./dns.service"
+import { EIPVersion } from "../enums/ip-version.enum"
 
 export interface IPreDownloadResult {
     chunkSize: number
@@ -25,13 +27,13 @@ export class RMBTThread implements IMessageHandlerContext {
     defaultChunkSize = 4096
     chunkSize: number = 0
     client: net.Socket = new net.Socket()
-    currentTime: number = -1
-    currentTransfer: number = -1
     interimHandler?: (interimResult: IMeasurementThreadResult) => void
-    threadResult: IMeasurementThreadResult = new MeasurementThreadResult()
+    errorHandler?: (error: Error) => void
+    isConnected = false
+    threadResult?: IMeasurementThreadResult
     preDownloadChunks: number = 1
     preUploadChunks: number = 1
-    private phase?:
+    phase?:
         | "init"
         | "predownload"
         | "ping"
@@ -45,7 +47,6 @@ export class RMBTThread implements IMessageHandlerContext {
     private preUploadMessageHandler?: PreUploadMessageHandler
     private uploadMessageHandler?: UploadMessageHandler
     private hadError = false
-    private isConnected = false
 
     constructor(
         public params: IMeasurementRegistrationResponse,
@@ -53,32 +54,43 @@ export class RMBTThread implements IMessageHandlerContext {
     ) {}
 
     async connect(result: IMeasurementThreadResult): Promise<RMBTThread> {
+        let host: string | undefined
+        try {
+            host = await DNSService.I.resolve(
+                this.params.test_server_address,
+                this.params.ip_version
+            )
+        } catch (e) {
+            this.errorListener(e as Error)
+        }
         return new Promise((resolve) => {
             this.threadResult = result
-            Logger.I.info(
-                `Thread ${this.index} is connecting on host ${this.params.test_server_address}, port ${this.params.test_server_port}...`
-            )
             const options: net.NetConnectOpts & tls.ConnectionOptions = {
-                host: this.params.test_server_address,
+                host,
                 port: this.params.test_server_port,
+                rejectUnauthorized: false,
             }
             if (process.env.SSL_KEY_PATH && process.env.SSL_CERT_PATH) {
                 options.key = fs.readFileSync(process.env.SSL_KEY_PATH)
                 options.cert = fs.readFileSync(process.env.SSL_CERT_PATH)
             }
+            Logger.I.info(
+                ELoggerMessage.T_CONNECTING,
+                this.index,
+                host,
+                this.params.test_server_port
+            )
             if (this.params.test_server_encryption) {
                 this.client = tls.connect(options)
             } else {
                 this.client = net.createConnection(options)
             }
-            this.client.on("data", this.dataListener.bind(this))
-            this.client.on("error", this.errorListener.bind(this))
-            this.client.on("end", this.endListener.bind(this))
-            this.client.on("close", this.closeListener.bind(this))
-            this.client.on(
-                "connect",
-                this.connectionListener.call(this, resolve)
-            )
+            // this.client.setNoDelay()
+            this.client.on("data", this.dataListener)
+            this.client.on("error", this.errorListener)
+            this.client.on("end", this.endListener)
+            this.client.on("close", this.closeListener)
+            this.client.on("connect", this.connectionListener(resolve))
         })
     }
 
@@ -87,31 +99,29 @@ export class RMBTThread implements IMessageHandlerContext {
             if (!this.isConnected) {
                 resolve(this)
             }
-            Logger.I.info(`Thread ${this.index} is disconnecting.`)
+            Logger.I.info(ELoggerMessage.T_DISCONNECTING, this.index)
             this.isConnected = false
-            this.client.end()
+            this.client.removeAllListeners()
+            this.client.destroy()
             resolve(this)
         })
     }
 
     private connectionListener =
         (resolve: (thread: RMBTThread) => void) => () => {
-            Logger.I.info(`Thread ${this.index} is connected.`)
+            Logger.I.info(ELoggerMessage.T_CONNECTED, this.index)
             this.isConnected = true
             this.hadError = false
-            // this.threadResult.ip_local = this.client.localAddress
-            // this.threadResult.ip_server = this.client.remoteAddress
-            // this.threadResult.port_remote = this.client.remotePort
             resolve(this)
         }
 
-    private dataListener(data: Buffer) {
-        const dataString = data.length < 128 ? data.toString().trim() : ""
-        if (dataString.includes(ESocketMessage.ERR)) {
-            this.hadError = true
-        }
-        if (dataString.length) {
-            Logger.I.info(`Thread ${this.index} received message ${dataString}`)
+    private dataListener = (data: Buffer) => {
+        if (data.length < 128) {
+            Logger.I.info(ELoggerMessage.T_RECEIVED_MESSAGE, this.index, data)
+            if (data.includes(ESocketMessage.ERR)) {
+                this.hadError = true
+                this.errorListener(new Error(data.toString()))
+            }
         }
         switch (true) {
             case this.phase === "init":
@@ -137,32 +147,40 @@ export class RMBTThread implements IMessageHandlerContext {
         }
     }
 
-    private errorListener(err: Error) {
-        Logger.I.error(
-            `Thread ${this.index} reported an error: %s`,
-            err.message
-        )
+    private errorListener = (err: Error) => {
+        Logger.I.error(ELoggerMessage.T_REPORTED_ERROR, this.index, err.message)
+        // TODO: enable before going to prod
+        // if (
+        //     err.message.includes("ECONNRESET") &&
+        //     (this.phase === "preupload" ||
+        //         (this.phase === "upload" && this.threadResult?.up.bytes.length))
+        // ) {
+        //     return
+        // }
+        this.errorHandler?.(err)
     }
 
-    private endListener() {
-        Logger.I.info(`Transmission was ended on the thread ${this.index}.`)
+    private endListener = () => {
+        Logger.I.info(ELoggerMessage.T_ENDED_TRANSMISSION, this.index)
     }
 
-    private closeListener(hadError: boolean) {
-        Logger.I.info(
-            `Connection was closed for the thread ${this.index}%s.`,
-            hadError || this.hadError ? " with error" : ""
-        )
-        this.isConnected = false
-
-        switch (this.phase) {
-            case "preupload":
-                this.preUploadMessageHandler?.stopMessaging()
-                break
-            case "upload":
-                this.uploadMessageHandler?.stopMessaging()
-                break
+    private closeListener = (hadError: boolean) => {
+        if (hadError) {
+            Logger.I.info(
+                ELoggerMessage.T_CLOSED_CONNECTION_WITH_ERROR,
+                this.index
+            )
+        } else if (this.hadError) {
+            Logger.I.info(
+                ELoggerMessage.T_CLOSED_CONNECTION_WITH_ERR_MESSAGE,
+                this.index
+            )
+        } else {
+            Logger.I.info(ELoggerMessage.T_CLOSED_CONNECTION, this.index)
         }
+        this.isConnected = false
+        this.client.removeAllListeners()
+        this.client.destroy()
     }
 
     private dropHandlers() {
@@ -179,9 +197,13 @@ export class RMBTThread implements IMessageHandlerContext {
             this.phase = "init"
             this.dropHandlers()
             this.initMessageHandler = new InitMessageHandler(this, (result) => {
-                this.phase = undefined
+                Logger.I.info(
+                    ELoggerMessage.T_RESOLVING_PHASE,
+                    this.index,
+                    this.phase
+                )
+
                 this.dropHandlers()
-                Logger.I.info(`Resolving thread ${this.index} init.`)
                 if (result) {
                     resolve(result)
                 } else {
@@ -199,11 +221,12 @@ export class RMBTThread implements IMessageHandlerContext {
             this.preDownloadMessageHandler = new PreDownloadMessageHandler(
                 this,
                 () => {
-                    this.dropHandlers()
-                    this.phase = undefined
                     Logger.I.info(
-                        `Resolving thread ${this.index} pre-download.`
+                        ELoggerMessage.T_RESOLVING_PHASE,
+                        this.index,
+                        this.phase
                     )
+                    this.dropHandlers()
                     resolve({
                         chunkSize: this.chunkSize,
                         bytesPerSec: Math.max(...this.bytesPerSecPretest),
@@ -219,9 +242,12 @@ export class RMBTThread implements IMessageHandlerContext {
             this.phase = "ping"
             this.dropHandlers()
             this.pingMessageHandler = new PingMessageHandler(this, (result) => {
+                Logger.I.info(
+                    ELoggerMessage.T_RESOLVING_PHASE,
+                    this.index,
+                    this.phase
+                )
                 this.dropHandlers()
-                this.phase = undefined
-                Logger.I.info(`Resolving thread ${this.index} ping.`)
                 resolve(result)
             })
             this.pingMessageHandler.writeData()
@@ -236,16 +262,22 @@ export class RMBTThread implements IMessageHandlerContext {
             if (chunkSize) {
                 this.chunkSize = chunkSize
             }
+            Logger.I.info(
+                ELoggerMessage.T_DONWLOAD_CHUNK_SIZE,
+                this.index,
+                this.chunkSize
+            )
             this.dropHandlers()
             this.downloadMessageHandler = new DownloadMessageHandler(
                 this,
                 (result) => {
                     this.dropHandlers()
-                    this.phase = undefined
                     this.interimHandler = undefined
                     this.disconnect().then(() => {
                         Logger.I.info(
-                            `Resolving thread ${this.index} download.`
+                            ELoggerMessage.T_RESOLVING_PHASE,
+                            this.index,
+                            "download"
                         )
                         resolve(result)
                     })
@@ -261,35 +293,43 @@ export class RMBTThread implements IMessageHandlerContext {
             this.dropHandlers()
             this.preUploadMessageHandler = new PreUploadMessageHandler(
                 this,
-                () => {
+                (chunkSize: number) => {
+                    Logger.I.info(
+                        ELoggerMessage.T_RESOLVING_PHASE,
+                        this.index,
+                        this.phase
+                    )
                     this.dropHandlers()
-                    this.phase = undefined
-                    this.disconnect().then(() => {
-                        Logger.I.info(
-                            `Resolving thread ${this.index} pre-upload.`
-                        )
-                        resolve(this.chunkSize)
-                    })
+                    resolve(chunkSize)
                 }
             )
             this.preUploadMessageHandler.writeData()
         })
     }
 
-    async manageUpload(): Promise<IMeasurementThreadResult> {
+    async manageUpload(chunkSize?: number): Promise<IMeasurementThreadResult> {
         return new Promise((resolve) => {
             this.phase = "upload"
+            if (chunkSize) {
+                this.chunkSize = chunkSize
+            }
+            Logger.I.info(
+                ELoggerMessage.T_UPLOAD_CHUNK_SIZE,
+                this.index,
+                this.chunkSize
+            )
             this.dropHandlers()
-            this.currentTransfer = 0
-            this.currentTime = 0
             this.uploadMessageHandler = new UploadMessageHandler(
                 this,
                 (result) => {
                     this.dropHandlers()
-                    this.phase = undefined
                     this.interimHandler = undefined
                     this.disconnect().then(() => {
-                        Logger.I.info(`Resolving thread ${this.index} upload.`)
+                        Logger.I.info(
+                            ELoggerMessage.T_RESOLVING_PHASE,
+                            this.index,
+                            "upload"
+                        )
                         resolve(result)
                     })
                 }

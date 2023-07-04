@@ -13,6 +13,9 @@
     <a
         routerLink="/test"
         class="uk-card uk-card-primary uk-card-hover uk-card-body"
+        [ariaDisabled]="disabled$ | async"
+        (click)="preventNavigation($event)"
+        *transloco="let t"
     >
         <div class="uk-card-media-top">
             <span
@@ -22,7 +25,9 @@
                 <img src="/assets/images/start-button-icon.svg" />
             </span>
         </div>
-        <p>Start Test</p>
-        <h3 class="uk-card-title uk-margin-top">Start RTR-NetTest</h3>
+        <p>{{ t("Start Test") }}</p>
+        <h3 class="uk-card-title uk-margin-top">
+            {{ t("Start RTR-NetTest") }}
+        </h3>
     </a>
 </ng-template>

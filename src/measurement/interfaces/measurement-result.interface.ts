@@ -1,12 +1,16 @@
+import { EMeasurementFinalStatus } from "../enums/measurement-final-status"
+import { ICPU } from "./cpu.interface"
+
 export interface IMeasurementResult {
     client_uuid: string
     client_name?: string
     client_version?: string
+    cpu?: ICPU
     model?: string
-    network_type: number
-    operating_system: string
+    network_type?: number
+    operating_system?: string
     pings: IPing[]
-    platform: string
+    platform?: string
     speed_detail: ISpeedItem[]
     test_bytes_download: number
     test_bytes_upload: number
@@ -16,21 +20,32 @@ export interface IMeasurementResult {
     test_ping_shortest: number
     test_speed_download: number
     test_speed_upload: number
+    test_status?: EMeasurementFinalStatus
     test_token: string
     test_uuid: string
     time: number
     timezone: string
     type: string
     user_server_selection: number
+    measurement_server?: string
+    provider_name?: string
+    ip_address?: string
+    sent_to_server?: boolean
 }
 
 export interface IMeasurementThreadResult {
+    index: number
     down: IMeasurementThreadResultList
     up: IMeasurementThreadResultList
     chunkSize?: number
-    currentTime: number
-    currentTransfer: number
-    speedItems: ISpeedItem[]
+    currentTime: {
+        down: number
+        up: number
+    }
+    currentTransfer: {
+        down: number
+        up: number
+    }
     pings: IPing[]
     ping_median: number
     ping_shortest: number
@@ -58,3 +73,5 @@ export interface ISpeedItem {
 export interface IVoipTestResult {
     voip_result_in_num_packets: number
 }
+
+export const MEASUREMENT_TABLE = "measurements"

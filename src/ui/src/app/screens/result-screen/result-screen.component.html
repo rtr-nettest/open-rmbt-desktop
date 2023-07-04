@@ -14,62 +14,73 @@
 </ng-template>
 
 <ng-template #rtr>
-    <main *ngIf="result$ | async as result; else noResult" class="app-main">
-        <header class="app-title">
-            Measurement result from {{ result.measurementDate | date }}
-        </header>
-        <div class="app-wrapper">
-            <app-dl
-                [items]="{
-                    'Server name': result.measurementServerName,
-                    'IP Address': result.ipAddress,
-                    Provider: result.providerName
-                }"
-            ></app-dl>
-            <app-spacer></app-spacer>
-            <div>
-                <app-dl
-                    [items]="{
-                        Download: getSpeedInMbps(result.downloadKbit),
-                        Upload: getSpeedInMbps(result.uploadKbit),
-                        Ping: getPingInMs(result.ping)
-                    }"
-                    [icons]="
-                        result.downloadClass &&
-                        result.uploadClass &&
-                        result.pingClass
-                            ? {
-                                  Download: getIconStyleByClass(
-                                      result.downloadClass
-                                  ),
-                                  Upload: getIconStyleByClass(
-                                      result.uploadClass
-                                  ),
-                                  Ping: getIconStyleByClass(result.pingClass)
-                              }
-                            : undefined
-                    "
-                ></app-dl>
-                <div style="margin-top: 30px">
-                    <a
-                        class="app-link"
-                        [href]="result.fullResultLink"
-                        target="_blank"
-                        >More results</a
-                    >
+    <app-body>
+        <app-main-menu></app-main-menu>
+        <app-main-content
+            *ngIf="result$ | async as result; else noResult"
+            [style.flex-direction]="'column'"
+        >
+            <app-export-warning></app-export-warning>
+            <div class="app-main">
+                <header class="app-title">
+                    Measurement result from {{ result.measurementDate | date }}
+                </header>
+                <div class="app-wrapper">
+                    <app-dl
+                        [items]="{
+                            'Server name': result.measurementServerName,
+                            'IP Address': result.ipAddress,
+                            Provider: result.providerName
+                        }"
+                    ></app-dl>
+                    <app-spacer></app-spacer>
+                    <div>
+                        <app-dl
+                            [items]="{
+                                Download: getSpeedInMbps(result.downloadKbit),
+                                Upload: getSpeedInMbps(result.uploadKbit),
+                                Ping: getPingInMs(result.ping)
+                            }"
+                            [icons]="
+                                result.downloadClass &&
+                                result.uploadClass &&
+                                result.pingClass
+                                    ? {
+                                          Download: getIconStyleByClass(
+                                              result.downloadClass
+                                          ),
+                                          Upload: getIconStyleByClass(
+                                              result.uploadClass
+                                          ),
+                                          Ping: getIconStyleByClass(
+                                              result.pingClass
+                                          )
+                                      }
+                                    : undefined
+                            "
+                        ></app-dl>
+                        <div style="margin-top: 30px">
+                            <a
+                                class="app-link"
+                                [href]="result.fullResultLink"
+                                target="_blank"
+                                >More results</a
+                            >
+                        </div>
+                    </div>
                 </div>
+                <footer class="app-footer">
+                    <a routerLink="/test" class="app-btn">Start a new test</a>
+                </footer>
             </div>
-        </div>
-        <footer class="app-footer">
-            <a routerLink="/test" class="app-btn">Start a new test</a>
-        </footer>
-    </main>
+        </app-main-content>
+    </app-body>
     <app-footer></app-footer>
 </ng-template>
 
 <ng-template #noResult>
     <main *ngIf="error$ | async as error" class="app-main">
-        There was an error while processing the result. {{ error.message }}
+        Measurement failed. {{ error.message }}
     </main>
     <main *ngIf="(error$ | async) === null" class="app-main">
         Fetching the result...

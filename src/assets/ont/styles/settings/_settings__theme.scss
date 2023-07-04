@@ -1,18 +1,36 @@
-$base-font-family: "Open Sans", sans-serif;
-$base-font-size: 14;
-$base-line-height: 1.4;
-
-$font-size-xxl: 36;
-$font-size-xl: 24;
-$font-size-l: 18;
-$font-size-m: $base-font-size;
+$font-size-3xl: 36;
+$font-size-xxl: 22;
+$font-size-xl: 18;
+$font-size-l: 16;
+$font-size-m: 14;
 $font-size-sm: 12;
 $font-size-xs: 10;
 
-$screen-xs: 475px;
-$screen-sm: 768px;
-$screen-md: 960px;
-$screen-lg: 1440px;
+$screen-xs: 768px;
+$screen-sm: 1024px;
+$screen-md: 1280px;
+$screen-lg: 1920px;
+$screen-xl: 2560px;
+
+$base-font-family: "Open Sans", sans-serif;
+$base-font-size: $font-size-m;
+$base-line-height: 1.4;
+
+html {
+    --base-font-size: #{$font-size-sm}px;
+
+    @media screen and (min-width: $screen-md) {
+        --base-font-size: #{$font-size-m}px;
+    }
+
+    @media screen and (min-width: $screen-lg) {
+        --base-font-size: #{$font-size-l}px;
+    }
+
+    @media screen and (min-width: $screen-xl) {
+        --base-font-size: #{$font-size-xl}px;
+    }
+}
 
 $color-primary: #0958bd;
 $color-secondary: black;

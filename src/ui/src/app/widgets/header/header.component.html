@@ -1,3 +1,16 @@
-<header class="app-header">
-    <a routerLink="/"><img src="/assets/images/logo-header.svg" /></a>
-</header>
+<ng-container *ngIf="link$ | async as link">
+    <header class="app-header app-header--large">
+        <a [routerLink]="link" (click)="handleClick($event, link)"
+            ><img
+                (click)="handleClick($event, link)"
+                src="/assets/images/logo-header.svg"
+        /></a>
+    </header>
+    <header class="app-header app-header--small">
+        <a [routerLink]="link"
+            ><img
+                (click)="handleClick($event, link)"
+                src="/assets/images/logo-header-small.svg"
+        /></a>
+    </header>
+</ng-container>

@@ -1,3 +1,5 @@
+import { EMeasurementFinalStatus } from "../enums/measurement-final-status"
+import { ICPU } from "../interfaces/cpu.interface"
 import { IMeasurementRegistrationRequest } from "../interfaces/measurement-registration-request.interface"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import {
@@ -7,11 +9,13 @@ import {
     ISpeedItem,
 } from "../interfaces/measurement-result.interface"
 import { IOverallResult } from "../interfaces/overall-result.interface"
+import { TransferDirection } from "../services/rmbt-client.service"
 
 export class MeasurementResult implements IMeasurementResult {
     client_name?: string
     client_version?: string
     client_uuid: string
+    cpu?: ICPU
     network_type = 0 // TODO: detect the real one, 0 == Unknown
     operating_system: string
     pings: IPing[]
@@ -25,28 +29,35 @@ export class MeasurementResult implements IMeasurementResult {
     test_ping_shortest: number
     test_speed_download: number
     test_speed_upload: number
+    test_status?: number
     test_token: string
     test_uuid: string
     time: number
     timezone: string
     type: string
     user_server_selection: number
+    measurement_server?: string
+    provider_name?: string
+    ip_address?: string | undefined
+    sent_to_server = false
 
     constructor(
         registrationRequest: IMeasurementRegistrationRequest,
         registrationResponse: IMeasurementRegistrationResponse,
         threadResults: IMeasurementThreadResult[],
-        overallResultDown: IOverallResult,
-        overallResultUp: IOverallResult
+        overallResultDown?: IOverallResult,
+        overallResultUp?: IOverallResult,
+        cpu?: ICPU,
+        testStatus?: EMeasurementFinalStatus
     ) {
         this.client_name = registrationRequest.client
-        this.client_version = threadResults[0].client_version ?? ""
+        this.client_version = threadResults[0]?.client_version ?? ""
         this.client_uuid = registrationRequest.uuid ?? ""
         this.operating_system = registrationRequest.operating_system ?? ""
-        this.pings = this.getPings(threadResults)
-        this.test_ping_shortest = this.getShortestPing(this.pings)
+        this.pings = MeasurementResult.getPings(threadResults)
+        this.test_ping_shortest = MeasurementResult.getShortestPing(this.pings)
         this.platform = registrationRequest.platform ?? ""
-        this.speed_detail = this.getSpeedDetail(threadResults)
+        this.speed_detail = MeasurementResult.getSpeedDetail(threadResults)
         this.test_num_threads = registrationResponse.test_numthreads
         this.test_token = registrationResponse.test_token
         this.test_uuid = registrationResponse.test_uuid
@@ -56,15 +67,20 @@ export class MeasurementResult implements IMeasurementResult {
         this.user_server_selection = registrationRequest.user_server_selection
             ? 1
             : 0
-        this.test_bytes_download = overallResultDown.bytes
-        this.test_nsec_download = overallResultDown.nsec
-        this.test_speed_download = overallResultDown.speed / 1e3
-        this.test_bytes_upload = overallResultUp.bytes
-        this.test_nsec_upload = overallResultUp.nsec
-        this.test_speed_upload = overallResultUp.speed / 1e3
+        this.test_bytes_download = overallResultDown?.bytes ?? 0
+        this.test_nsec_download = overallResultDown?.nsec ?? 0
+        this.test_speed_download = (overallResultDown?.speed ?? 0) / 1e3
+        this.test_bytes_upload = overallResultUp?.bytes ?? 0
+        this.test_nsec_upload = overallResultUp?.nsec ?? 0
+        this.test_speed_upload = (overallResultUp?.speed ?? 0) / 1e3
+        this.cpu = cpu
+        this.measurement_server = registrationResponse.test_server_name
+        this.provider_name = registrationResponse.provider
+        this.ip_address = registrationResponse.client_remote_ip
+        this.test_status = testStatus
     }
 
-    private getPings(threadResults: IMeasurementThreadResult[]) {
+    static getPings(threadResults: IMeasurementThreadResult[]) {
         return (
             threadResults
                 ?.reduce(
@@ -76,7 +92,7 @@ export class MeasurementResult implements IMeasurementResult {
         )
     }
 
-    private getShortestPing(pings: IPing[]) {
+    static getShortestPing(pings: IPing[]) {
         return pings.reduce((acc, ping) => {
             return Math.min(
                 acc,
@@ -86,17 +102,12 @@ export class MeasurementResult implements IMeasurementResult {
         }, Infinity)
     }
 
-    private getSpeedDetail(threadResults: IMeasurementThreadResult[]) {
+    static getSpeedDetail(threadResults: IMeasurementThreadResult[]) {
         const speedItemsDownMap: { [key: number]: ISpeedItem } = {}
         const speedItemsUpMap: { [key: number]: ISpeedItem } = {}
         for (const threadResult of threadResults) {
-            for (const speedItem of threadResult.speedItems) {
-                if (speedItem.direction === "download") {
-                    this.dedupeTime(speedItemsDownMap, speedItem)
-                } else {
-                    this.dedupeTime(speedItemsUpMap, speedItem)
-                }
-            }
+            this.getThreadSpeedItems(speedItemsDownMap, threadResult, "down")
+            this.getThreadSpeedItems(speedItemsUpMap, threadResult, "up")
         }
         const speedItemsDown = Object.values(speedItemsDownMap)
         const speedItemsUp = Object.values(speedItemsUpMap)
@@ -105,18 +116,32 @@ export class MeasurementResult implements IMeasurementResult {
         return [...speedItemsDown, ...speedItemsUp]
     }
 
-    private dedupeTime(
+    static getThreadSpeedItems(
         map: { [key: number]: ISpeedItem },
-        speedItem: ISpeedItem
+        threadResult: IMeasurementThreadResult,
+        direction: TransferDirection
     ) {
-        if (!speedItem.time) {
+        if (!threadResult[direction]) {
             return map
         }
-        if (!map[speedItem.time]) {
-            map[speedItem.time] = speedItem
-        }
-        if (speedItem.bytes > map[speedItem.time].bytes) {
-            map[speedItem.time] = speedItem
+        for (let i = 0; i < threadResult[direction].nsec.length; i++) {
+            const thisNsec = Number(threadResult[direction].nsec[i])
+            const thisBytes = Number(threadResult[direction].bytes[i])
+            if (isNaN(thisNsec) || isNaN(thisBytes)) {
+                continue
+            }
+            const speedItem: ISpeedItem = {
+                direction: direction === "down" ? "download" : "upload",
+                thread: threadResult.index,
+                time: thisNsec,
+                bytes: thisBytes,
+            }
+            if (!map[thisNsec]) {
+                map[thisNsec] = speedItem
+            }
+            if (speedItem.bytes > map[thisNsec].bytes) {
+                map[thisNsec] = speedItem
+            }
         }
         return map
     }

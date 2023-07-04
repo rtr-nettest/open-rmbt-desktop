@@ -2,6 +2,8 @@
 
 @include mat.core();
 
+@import "../core.scss";
+
 //create palettes
 $app-primary: mat.define-palette($palette-primary);
 $app-accent: mat.define-palette($palette-accent);
@@ -22,7 +24,36 @@ $app-theme: mat.define-light-theme(
 @include mat.all-component-themes($app-theme);
 @include mat.all-component-typographies($app-typography);
 
-.mdc-button[mat-flat-button] {
+.mdc-button[mat-flat-button],
+.mdc-button[mat-button] {
     height: auto;
-    padding: 16px 24px;
+    padding: rem(12) rem(18);
+}
+
+.mdc-button[mat-button] {
+    border: 2px solid;
+    padding: rem(8) rem(14);
+}
+
+.app-snackbar {
+    --mat-mdc-snack-bar-button-color: black;
+    --mdc-snackbar-container-color: white;
+    --mdc-snackbar-supporting-text-color: black;
+    text-align: center;
+}
+
+.mat-mdc-slide-toggle.app-slide-toggle {
+    --mdc-switch-unselected-handle-color: white;
+}
+
+.cdk-overlay-pane {
+    width: auto !important;
+}
+
+.mat-mdc-select-arrow-wrapper {
+    margin-left: rem(4);
+}
+
+app-settings-locale .mat-mdc-select {
+    font-size: 1em;
 }

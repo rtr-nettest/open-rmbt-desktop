@@ -13,14 +13,19 @@ export interface IMessageHandlerContext {
     bytesPerSecPretest: number[]
     chunkSize: number
     client: Socket
-    currentTime: number
-    currentTransfer: number
     defaultChunkSize: number
     index: number
     params: IMeasurementRegistrationResponse
+    phase?:
+        | "init"
+        | "predownload"
+        | "ping"
+        | "download"
+        | "preupload"
+        | "upload"
     preDownloadChunks: number
     preUploadChunks: number
-    threadResult: IMeasurementThreadResult
+    threadResult?: IMeasurementThreadResult
 
     interimHandler?: (interimResult: IMeasurementThreadResult) => void
 }

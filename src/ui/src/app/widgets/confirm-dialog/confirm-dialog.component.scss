@@ -1,0 +1,17 @@
+@import "../../../assets/styles/core.scss";
+
+.app-dialog {
+    max-width: rem(480);
+    padding: rem(30) rem(20) rem(20);
+    white-space: pre-line;
+}
+
+.app-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: rem(30);
+
+    .mdc-button {
+        margin-left: rem(10);
+    }
+}

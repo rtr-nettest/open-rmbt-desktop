@@ -1,0 +1,23 @@
+@import "../../../assets/styles/core.scss";
+
+:host {
+    align-self: start;
+    flex: 0 0 30%;
+    height: 100%;
+    z-index: 10;
+
+    @include screen-lg {
+        flex: 0 0 rem(48);
+    }
+}
+
+.app-aside {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.app-list {
+    list-style: none;
+}

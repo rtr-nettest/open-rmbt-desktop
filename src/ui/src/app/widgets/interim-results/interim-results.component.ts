@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core"
-import { tap } from "rxjs"
+import { fromEvent, map, startWith, tap } from "rxjs"
 import { getSignificantDigits } from "src/app/helpers/number"
 import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
+import { TranslocoService } from "@ngneat/transloco"
 
 @Component({
     selector: "app-interim-results",
@@ -16,22 +17,22 @@ export class InterimResultsComponent {
             const ping = getSignificantDigits(
                 state.phases[EMeasurementStatus.DOWN].ping
             )
-            this.ping = ping < 0 ? "-" : ping + " ms"
+            this.ping =
+                ping < 0 ? "-" : ping + " " + this.transloco.translate("ms")
             const download = getSignificantDigits(
                 state.phases[EMeasurementStatus.DOWN].down
             )
-            this.download = download < 0 ? "-" : download + " Mbps"
+            this.download =
+                download < 0
+                    ? "-"
+                    : download + " " + this.transloco.translate("Mbps")
             const upload = getSignificantDigits(
                 state.phases[EMeasurementStatus.UP].up
             )
-            this.upload = upload < 0 ? "-" : upload + " Mbps"
-        })
-    )
-    basicNetworkInfo$ = this.store.basicNetworkInfo$.pipe(
-        tap((state) => {
-            this.serverName = state.serverName
-            this.ipAddress = state.ipAddress
-            this.providerName = state.providerName
+            this.upload =
+                upload < 0
+                    ? "-"
+                    : upload + " " + this.transloco.translate("Mbps")
         })
     )
 
@@ -39,9 +40,10 @@ export class InterimResultsComponent {
     download: string = "-"
     upload: string = "-"
 
-    serverName: string = "-"
-    ipAddress: string = "-"
-    providerName: string = "-"
+    phases = EMeasurementStatus
 
-    constructor(private store: TestStore) {}
+    constructor(
+        private store: TestStore,
+        private transloco: TranslocoService
+    ) {}
 }

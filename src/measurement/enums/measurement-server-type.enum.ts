@@ -3,4 +3,5 @@ export enum EMeasurementServerType {
     RMBTws = "RMBTws",
     RMBThttp = "RMBThttp",
     QoS = "QoS",
+    RMBTel = "RMBTel",
 }

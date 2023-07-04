@@ -1,6 +1,6 @@
 {
     "name": "open-rmbt-desktop",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "description": "open-rmbt-desktop application",
     "main": "dist/main.js",
     "engines": {

@@ -50,8 +50,8 @@ export class ControlServer {
         const lastNewsUid = Store.I.get(LAST_NEWS_UID) as number
         const newsRequest: INewsRequest = {
             language: I18nService.I.getActiveLanguage(),
-            platform: "DESKTOP",
-            softwareVersionCode: pack.version,
+            plattform: "Desktop",
+            softwareVersionCode: pack.version.replaceAll(".", ""),
             lastNewsUid,
             uuid: Store.I.get(CLIENT_UUID) as string,
         }

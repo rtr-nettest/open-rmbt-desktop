@@ -12,7 +12,13 @@ import utc from "dayjs/plugin/utc"
 import tz from "dayjs/plugin/timezone"
 import { RMBTClient } from "./rmbt-client.service"
 import { ELoggerMessage } from "../enums/logger-message.enum"
-import { CLIENT_UUID, IP_VERSION, LAST_NEWS_UID, Store } from "./store.service"
+import {
+    CLIENT_UUID,
+    IP_VERSION,
+    LANGUAGE,
+    LAST_NEWS_UID,
+    Store,
+} from "./store.service"
 import { DBService } from "./db.service"
 import { SimpleHistoryResult } from "../dto/simple-history-result.dto"
 import { INewsRequest, INewsResponse } from "../interfaces/news.interface"
@@ -20,6 +26,7 @@ import { EIPVersion } from "../enums/ip-version.enum"
 import { I18nService } from "./i18n.service"
 import * as pack from "../../../package.json"
 import { EMeasurementFinalStatus } from "../enums/measurement-final-status"
+import * as fsp from "fs/promises"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -214,8 +221,8 @@ export class ControlServer {
         let retVal: ISimpleHistoryResult | undefined
         try {
             if (process.env.HISTORY_RESULT_PATH_METHOD === "GET") {
-                // as used by Specure
-                retVal = await this.getSpecureMeasurementResult(uuid)
+                // as used by ONT
+                retVal = await this.getONTMeasurementResult(uuid)
             } else if (process.env.HISTORY_RESULT_PATH_METHOD === "POST") {
                 // as used by RTR
                 retVal = await this.getRTRMeasurementResult(uuid)
@@ -253,7 +260,24 @@ export class ControlServer {
         Logger.I.info(ELoggerMessage.RESPONSE, response)
         if (response?.testresult?.length) {
             response = response.testresult[0]
+            let testResultDetail: any
             let openTestsResponse: any
+            if (
+                response.open_test_uuid &&
+                process.env.HISTORY_RESULT_DETAILS_PATH
+            ) {
+                testResultDetail = (
+                    await axios.post(
+                        `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_DETAILS_PATH}`,
+                        {
+                            ...body,
+                            language: Store.I.get(LANGUAGE) as string,
+                        },
+                        { headers: this.headers }
+                    )
+                ).data
+            }
+            Logger.I.info("Test result detail is: %o", testResultDetail)
             if (
                 response.open_test_uuid &&
                 process.env.HISTORY_RESULT_STATS_PATH
@@ -269,24 +293,29 @@ export class ControlServer {
             retVal = new SimpleHistoryResult(
                 dayjs(response.time).toISOString(),
                 openTestsResponse?.server_name,
-                openTestsResponse?.download_kbit,
-                openTestsResponse?.upload_kbit,
-                openTestsResponse?.ping_ms,
+                response.measurement_result?.download_kbit,
+                response.measurement_result?.upload_kbit,
+                response.measurement_result?.ping_ms,
                 openTestsResponse?.public_ip_as_name,
                 openTestsResponse?.ip_anonym,
                 uuid,
                 false,
-                [],
-                [],
+                RMBTClient.getOverallResultsFromSpeedCurve(
+                    openTestsResponse?.speed_curve.download
+                ),
+                RMBTClient.getOverallResultsFromSpeedCurve(
+                    openTestsResponse?.speed_curve.upload
+                ),
                 response.measurement_result?.download_classification,
                 response.measurement_result?.upload_classification,
-                response.measurement_result?.ping_classification
+                response.measurement_result?.ping_classification,
+                testResultDetail?.testresultdetail
             )
         }
         return retVal
     }
 
-    private async getSpecureMeasurementResult(uuid: string) {
+    private async getONTMeasurementResult(uuid: string) {
         let response: any
         let retVal: ISimpleHistoryResult | undefined = undefined
         response = (

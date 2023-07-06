@@ -1,4 +1,4 @@
-import { ISpeedItem } from "./measurement-result.interface"
+import { IDetailedHistoryResultItem } from "./detailed-history-result-item.interface"
 import { IOverallResult } from "./overall-result.interface"
 
 export interface ISimpleHistoryResult {
@@ -17,4 +17,5 @@ export interface ISimpleHistoryResult {
     fullResultLink: string
     testUuid?: string
     isLocal?: boolean
+    detailedHistoryResult?: IDetailedHistoryResultItem[]
 }

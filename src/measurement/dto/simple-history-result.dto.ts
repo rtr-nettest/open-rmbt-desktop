@@ -2,6 +2,7 @@ import dayjs from "dayjs"
 import { IMeasurementResult } from "../interfaces/measurement-result.interface"
 import { IOverallResult } from "../interfaces/overall-result.interface"
 import { ISimpleHistoryResult } from "../interfaces/simple-history-result.interface"
+import { IDetailedHistoryResultItem } from "../interfaces/detailed-history-result-item.interface"
 
 export class SimpleHistoryResult implements ISimpleHistoryResult {
     static fromLocalMeasurementResult(result: IMeasurementResult) {
@@ -34,7 +35,8 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         public uploadOverTime?: IOverallResult[],
         public downloadClass?: number,
         public uploadClass?: number,
-        public pingClass?: number
+        public pingClass?: number,
+        public detailedHistoryResult?: IDetailedHistoryResultItem[]
     ) {
         this.fullResultLink = `${process.env.FULL_HISTORY_RESUlT_URL}${this.testUuid}`
     }

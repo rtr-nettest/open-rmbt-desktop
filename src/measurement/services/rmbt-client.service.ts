@@ -24,6 +24,22 @@ export class RMBTClient {
     static minChunkSize = 4096
     static maxChunkSize = 4194304
 
+    static getOverallResultsFromSpeedCurve(
+        curve: {
+            bytes_total: number
+            time_elapsed: number
+        }[]
+    ): IOverallResult[] {
+        if (!curve?.length) {
+            return []
+        }
+        return curve.map((ci) => ({
+            bytes: ci.bytes_total,
+            nsec: ci.time_elapsed * 1e6,
+            speed: (ci.bytes_total * 8) / (ci.time_elapsed / 1e3),
+        }))
+    }
+
     static getOverallResultsFromSpeedItems(
         speedItems: ISpeedItem[],
         direction: "download" | "upload"

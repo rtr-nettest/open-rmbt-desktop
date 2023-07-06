@@ -1,8 +1,5 @@
-<footer class="app-footer">
-    <!-- TODO: take the text from the CMS -->
-    <img
-        *ngIf="(env$ | async)?.FLAVOR === 'ont'"
-        src="/assets/images/logo-footer.svg"
-        class="app-logo"
-    />{{ "Developed by Specure" | transloco }}
-</footer>
+<img
+    *ngIf="(env$ | async)?.FLAVOR === 'ont'"
+    src="/assets/images/logo-footer.svg"
+    class="app-logo"
+/>{{ "Developed by Specure" | transloco }}

@@ -3,6 +3,8 @@ import { ChartPhase, TestRTRChartDataset } from "./test-rtr-chart-dataset.dto"
 import { TestLogChartOptions } from "./test-log-chart-options.dto"
 import { TranslocoService } from "@ngneat/transloco"
 import { TestChart } from "./test-chart.dto"
+import { generateIndexesOfLength } from "../helpers/array"
+
 export class TestLogChart extends TestChart {
     constructor(
         context: CanvasRenderingContext2D,
@@ -15,7 +17,7 @@ export class TestLogChart extends TestChart {
             "line",
             {
                 datasets: [new TestRTRChartDataset(phase)],
-                labels: [],
+                labels: generateIndexesOfLength(8),
             },
             new TestLogChartOptions(transloco)
         )
@@ -38,6 +40,6 @@ export class TestLogChart extends TestChart {
     }
 
     protected override resetLabels(): void {
-        super.data.labels = []
+        super.data.labels = generateIndexesOfLength(8)
     }
 }

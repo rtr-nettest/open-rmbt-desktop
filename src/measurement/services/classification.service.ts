@@ -20,12 +20,13 @@ export class ClassificationService {
         threshold = threshold.sort((a, b) => b - a)
         let retVal = 1
         for (let i = 0; i < threshold.length; i++) {
-            const cond1 = condition === "smallerBetter" && value <= threshold[i]
-            const cond2 = condition === "biggerBetter" && value >= threshold[i]
-            if (cond1 || cond2) {
+            if (condition === "biggerBetter" && value >= threshold[i]) {
                 retVal = CLASSIFICATION_ITEMS - i
+                break
+            } else if (condition === "smallerBetter" && value <= threshold[i]) {
+                retVal++
             }
         }
-        return retVal
+        return Math.min(retVal, CLASSIFICATION_ITEMS)
     }
 }

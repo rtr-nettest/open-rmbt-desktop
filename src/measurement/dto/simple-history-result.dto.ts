@@ -36,7 +36,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
                 "biggerBetter"
             ),
             ClassificationService.I.classify(
-                result.test_ping_shortest / 1e6,
+                result.test_ping_shortest,
                 THRESHOLD_PING,
                 "smallerBetter"
             )
@@ -79,7 +79,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
                 ),
             response.measurement_result?.ping_classification ??
                 ClassificationService.I.classify(
-                    response.measurement_result?.ping_ms,
+                    response.measurement_result?.ping_ms * 1e6,
                     THRESHOLD_PING,
                     "smallerBetter"
                 ),

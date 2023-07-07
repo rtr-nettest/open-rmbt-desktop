@@ -26,7 +26,6 @@ import { EIPVersion } from "../enums/ip-version.enum"
 import { I18nService } from "./i18n.service"
 import * as pack from "../../../package.json"
 import { EMeasurementFinalStatus } from "../enums/measurement-final-status"
-import * as fsp from "fs/promises"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -290,26 +289,11 @@ export class ControlServer {
                 ).data
             }
             Logger.I.info("Open test response is: %o", openTestsResponse)
-            retVal = new SimpleHistoryResult(
-                dayjs(response.time).toISOString(),
-                openTestsResponse?.server_name,
-                response.measurement_result?.download_kbit,
-                response.measurement_result?.upload_kbit,
-                response.measurement_result?.ping_ms,
-                openTestsResponse?.public_ip_as_name,
-                openTestsResponse?.ip_anonym,
+            retVal = SimpleHistoryResult.fromRTRMeasurementResult(
                 uuid,
-                false,
-                RMBTClient.getOverallResultsFromSpeedCurve(
-                    openTestsResponse?.speed_curve.download
-                ),
-                RMBTClient.getOverallResultsFromSpeedCurve(
-                    openTestsResponse?.speed_curve.upload
-                ),
-                response.measurement_result?.download_classification,
-                response.measurement_result?.upload_classification,
-                response.measurement_result?.ping_classification,
-                testResultDetail?.testresultdetail
+                response,
+                openTestsResponse,
+                testResultDetail
             )
         }
         return retVal
@@ -326,25 +310,9 @@ export class ControlServer {
         ).data
         Logger.I.info(ELoggerMessage.RESPONSE, response)
         if (response) {
-            retVal = new SimpleHistoryResult(
-                response.measurement_date,
-                response.measurementServerName ??
-                    response.measurement_server_name,
-                response.speed_download,
-                response.speed_upload,
-                response.ping ?? response.ping_median,
-                response.operator ?? response.client_provider,
-                response.ip_address,
+            retVal = SimpleHistoryResult.fromONTMeasurementResult(
                 uuid,
-                false,
-                RMBTClient.getOverallResultsFromSpeedItems(
-                    response.speed_detail,
-                    "download"
-                ),
-                RMBTClient.getOverallResultsFromSpeedItems(
-                    response.speed_detail,
-                    "upload"
-                )
+                response
             )
         }
         return retVal

@@ -44,18 +44,18 @@ export class ResultScreenComponent {
         private transloco: TranslocoService
     ) {}
 
-    getIconStyleByClass(classification: number) {
+    getIconByClass(classification?: number) {
         switch (classification) {
             case 1:
-                return ["app-icon--class", "app-icon--class-red"]
+                return '<i class="app-icon--class app-icon--class-red"></i>'
             case 2:
-                return ["app-icon--class", "app-icon--class-yellow"]
+                return '<i class="app-icon--class app-icon--class-yellow"></i>'
             case 3:
-                return ["app-icon--class", "app-icon--class-green"]
+                return '<i class="app-icon--class app-icon--class-green"></i>'
             case 4:
-                return ["app-icon--class", "app-icon--class-greenest"]
+                return '<i class="app-icon--class app-icon--class-greenest"></i>'
             default:
-                return ["app-icon--class"]
+                return ""
         }
     }
 
@@ -81,18 +81,30 @@ export class ResultScreenComponent {
                         ...acc,
                         {
                             title: "Download",
-                            value: this.getSpeedInMbps(value),
+                            value:
+                                this.getIconByClass(result.downloadClass) +
+                                this.getSpeedInMbps(value),
                         },
                     ]
                 case "uploadKbit":
                     return [
                         ...acc,
-                        { title: "Upload", value: this.getSpeedInMbps(value) },
+                        {
+                            title: "Upload",
+                            value:
+                                this.getIconByClass(result.uploadClass) +
+                                this.getSpeedInMbps(value),
+                        },
                     ]
                 case "ping":
                     return [
                         ...acc,
-                        { title: "Ping", value: this.getPingInMs(value) },
+                        {
+                            title: "Ping",
+                            value:
+                                this.getIconByClass(result.pingClass) +
+                                this.getPingInMs(value),
+                        },
                     ]
                 default:
                     return acc

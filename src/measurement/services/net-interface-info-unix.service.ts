@@ -24,9 +24,11 @@ export class NetInterfaceInfoUnixService implements NetInterfaceInfo {
         return this.convertToJson(ifaces)
     }
 
-    async getActiveInterfaceType(id: string) {
+    async getActiveInterfaceType() {
+        const activeInterfaces =
+            await NetInterfaceInfoUnixService.I.getActiveInterfaces()
         const iface: string = await new Promise((res, rej) => {
-            cp.exec(`ifconfig -v ${id}`, (err, out) => {
+            cp.exec(`ifconfig -v ${activeInterfaces?.[0].key}`, (err, out) => {
                 if (err) {
                     Logger.I.error(err)
                     rej(err)

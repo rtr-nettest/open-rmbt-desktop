@@ -4,8 +4,8 @@ import { IUserSettingsRequest } from "../interfaces/user-settings-request.interf
 import os from "os"
 import { Logger } from "./logger.service"
 import { ELoggerMessage } from "../enums/logger-message.enum"
-import fs from "fs"
 import { NetInterfaceInfoUnixService } from "./net-interface-info-unix.service"
+import { NetInterfaceInfoWindowsService } from "./net-interface-info-windows.service"
 
 export class NetworkInfoService {
     private static instance = new NetworkInfoService()
@@ -72,24 +72,26 @@ export class NetworkInfoService {
     }
 
     async getNetworkType(): Promise<number> {
+        let type: string | undefined
         try {
-            const activeInterface =
-                await NetInterfaceInfoUnixService.I.getActiveInterfaces()
-            const type =
-                await NetInterfaceInfoUnixService.I.getActiveInterfaceType(
-                    activeInterface?.[0].key
-                )
-            switch (type) {
-                case "wifi":
-                    return 99
-                case "ethernet":
-                    return 106
-                default:
-                    return 0
+            if (process.platform === "win32") {
+                type =
+                    await NetInterfaceInfoWindowsService.I.getActiveInterfaceType()
+            } else {
+                type =
+                    await NetInterfaceInfoUnixService.I.getActiveInterfaceType()
             }
         } catch (e) {
             Logger.I.error(e)
             return 0
+        }
+        switch (type) {
+            case "wifi":
+                return 99
+            case "ethernet":
+                return 106
+            default:
+                return 0
         }
     }
 }

@@ -33,28 +33,32 @@
                         [sort]="sort"
                     ></app-table>
                 </div>
-                <div class="app-wrapper app-charts">
-                    <div class="app-charts__col">
-                        <h3 class="app-title">{{ t("Ping") }}</h3>
-                        <app-test-chart phase="ping"></app-test-chart>
+                <ng-container
+                    *ngIf="getDetailedResults(result) as detailedResult"
+                >
+                    <div class="app-wrapper app-charts">
+                        <div class="app-charts__col">
+                            <h3 class="app-title">{{ t("Ping") }}</h3>
+                            <app-test-chart phase="ping"></app-test-chart>
+                        </div>
+                        <div class="app-charts__col">
+                            <h3 class="app-title">{{ t("Download") }}</h3>
+                            <app-test-chart phase="download"></app-test-chart>
+                        </div>
+                        <div class="app-charts__col">
+                            <h3 class="app-title">{{ t("Upload") }}</h3>
+                            <app-test-chart phase="upload"></app-test-chart>
+                        </div>
                     </div>
-                    <div class="app-charts__col">
-                        <h3 class="app-title">{{ t("Download") }}</h3>
-                        <app-test-chart phase="download"></app-test-chart>
+                    <h3 class="app-title">{{ t("Detailed results") }}</h3>
+                    <div class="app-wrapper">
+                        <app-table
+                            [columns]="columns"
+                            [data]="detailedResult"
+                            [sort]="sort"
+                        ></app-table>
                     </div>
-                    <div class="app-charts__col">
-                        <h3 class="app-title">{{ t("Upload") }}</h3>
-                        <app-test-chart phase="upload"></app-test-chart>
-                    </div>
-                </div>
-                <h3 class="app-title">{{ t("Detailed results") }}</h3>
-                <div class="app-wrapper">
-                    <app-table
-                        [columns]="columns"
-                        [data]="getDetailedResults(result)"
-                        [sort]="sort"
-                    ></app-table>
-                </div>
+                </ng-container>
             </div>
             <app-footer></app-footer>
         </app-main-content>

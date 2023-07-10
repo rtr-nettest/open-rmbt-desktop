@@ -35,19 +35,19 @@
                 </div>
                 <div class="app-wrapper app-charts">
                     <div class="app-charts__col">
-                        <h2 class="app-title">{{ t("Ping") }}</h2>
+                        <h3 class="app-title">{{ t("Ping") }}</h3>
                         <app-test-chart phase="ping"></app-test-chart>
                     </div>
                     <div class="app-charts__col">
-                        <h2 class="app-title">{{ t("Download") }}</h2>
+                        <h3 class="app-title">{{ t("Download") }}</h3>
                         <app-test-chart phase="download"></app-test-chart>
                     </div>
                     <div class="app-charts__col">
-                        <h2 class="app-title">{{ t("Upload") }}</h2>
+                        <h3 class="app-title">{{ t("Upload") }}</h3>
                         <app-test-chart phase="upload"></app-test-chart>
                     </div>
                 </div>
-                <h2 class="app-title">{{ t("Detailed results") }}</h2>
+                <h3 class="app-title">{{ t("Detailed results") }}</h3>
                 <div class="app-wrapper">
                     <app-table
                         [columns]="columns"

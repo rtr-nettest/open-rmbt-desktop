@@ -50,10 +50,20 @@ $container-width: 100%;
 }
 
 .app-charts {
-    margin: 0 rem(-10) 0;
-    width: auto;
+    margin: 0 0 0 rem(-10);
+
     &__col {
+        height: rem(200);
         padding: rem(20) rem(10) 0;
+        width: 33%;
+    }
+
+    @include screen-sm {
+        display: block;
+
+        &__col {
+            width: auto;
+        }
     }
 }
 
@@ -69,4 +79,5 @@ app-footer {
 
 app-main-content {
     align-items: initial;
+    overflow: auto;
 }

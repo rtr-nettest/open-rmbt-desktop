@@ -4,6 +4,7 @@ import { TestLogChartOptions } from "./test-log-chart-options.dto"
 import { TranslocoService } from "@ngneat/transloco"
 import { TestChart } from "./test-chart.dto"
 import { generateIndexesOfLength } from "../helpers/array"
+import { Point } from "chart.js"
 
 export class TestLogChart extends TestChart {
     constructor(
@@ -21,6 +22,21 @@ export class TestLogChart extends TestChart {
             },
             new TestLogChartOptions(transloco)
         )
+    }
+
+    override setData(data: ITestPhaseState) {
+        this.resetDatasets()
+        super.data.datasets[0].data = this.getAllData(data)
+        const lastIndex = Math.round(
+            (
+                super.data.datasets[0].data[
+                    super.data.datasets[0].data.length - 1
+                ] as Point
+            ).x
+        )
+        if (super.data.labels && super.data.labels.length <= lastIndex)
+            super.data.labels.push(lastIndex)
+        this.update()
     }
 
     override updateData(data: ITestPhaseState) {

@@ -1,9 +1,11 @@
+import { Point } from "chart.js"
 import { EMeasurementStatus } from "../../../../measurement/enums/measurement-status.enum"
 import { IPing } from "../../../../measurement/interfaces/measurement-result.interface"
 import { IOverallResult } from "../../../../measurement/interfaces/overall-result.interface"
 import { ETestStatuses } from "../enums/test-statuses.enum"
 import { speedLog } from "../helpers/number"
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
+import { STATE_UPDATE_TIMEOUT } from "../store/test.store"
 
 export class TestPhaseState implements ITestPhaseState {
     counter: number = -1
@@ -40,14 +42,26 @@ export class TestPhaseState implements ITestPhaseState {
     }
 
     setRTRChartFromOverallSpeed(overallResults: IOverallResult[]) {
-        this.chart = overallResults.map((r) => ({
-            x: r.nsec / 1e9,
-            y: speedLog(r.speed / 1e6),
-        }))
-        // Always start at 0
-        if (this.chart[0]?.x != 0) {
-            this.chart.unshift({ x: 0, y: 0 })
-        }
+        let skippedMs = 1
+        let shift = 0
+        this.chart = overallResults.reduce((acc, r, i) => {
+            const msec = r.nsec / 1e6
+            if (msec > 0 && msec >= STATE_UPDATE_TIMEOUT * skippedMs) {
+                skippedMs++
+                if (!shift) {
+                    shift = msec / 1e3
+                }
+                return [
+                    ...acc,
+                    {
+                        x: msec / 1e3 - shift,
+                        y: speedLog(r.speed / 1e6),
+                    },
+                ]
+            } else {
+                return acc
+            }
+        }, [] as Point[])
     }
 
     setChartFromPings(pings: IPing[]): void {

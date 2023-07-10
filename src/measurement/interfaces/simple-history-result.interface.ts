@@ -16,7 +16,6 @@ export interface ISimpleHistoryResult {
     downloadClass?: number
     uploadClass?: number
     pingClass?: number
-    fullResultLink: string
     testUuid?: string
     isLocal?: boolean
     detailedHistoryResult?: IDetailedHistoryResultItem[]

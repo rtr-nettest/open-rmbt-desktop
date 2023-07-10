@@ -9,6 +9,7 @@ import { ISimpleHistoryResult } from "../../../../../measurement/interfaces/simp
 import { IDetailedHistoryResultItem } from "../../../../../measurement/interfaces/detailed-history-result-item.interface"
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
 import { ISort } from "src/app/interfaces/sort.interface"
+import { tap } from "rxjs"
 
 @Component({
     selector: "app-result-screen",
@@ -27,8 +28,17 @@ export class ResultScreenComponent {
             header: "",
         },
     ]
-    env$ = this.mainStore.env$
+    env$ = this.mainStore.env$.pipe(
+        tap((env) => {
+            this.openResultURL =
+                env?.OPEN_HISTORY_RESUlT_URL?.replace(
+                    "$lang",
+                    this.transloco.getActiveLang()
+                ) ?? ""
+        })
+    )
     error$ = this.mainStore.error$
+    openResultURL = ""
     result$ = this.store.getMeasurementResult(
         this.route.snapshot.paramMap.get("testUuid")
     )
@@ -120,7 +130,15 @@ export class ResultScreenComponent {
         result: ISimpleHistoryResult
     ): IBasicResponse<IDetailedHistoryResultItem> {
         return {
-            content: result.detailedHistoryResult ?? [],
+            content:
+                result.detailedHistoryResult?.map((item) =>
+                    this.openResultURL && /^O[-0-9a-zA-Z]+$/.test(item.value)
+                        ? {
+                              title: item.title,
+                              value: `<a href="${this.openResultURL}${item.value}" target="_blank">${item.value}</a>`,
+                          }
+                        : item
+                ) ?? [],
             totalElements: result.detailedHistoryResult?.length ?? 0,
         }
     }

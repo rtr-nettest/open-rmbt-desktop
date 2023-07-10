@@ -114,8 +114,6 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         )
     }
 
-    fullResultLink: string
-
     constructor(
         public measurementDate: string,
         public measurementServerName: string,
@@ -133,7 +131,5 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         public uploadClass?: number,
         public pingClass?: number,
         public detailedHistoryResult?: IDetailedHistoryResultItem[]
-    ) {
-        this.fullResultLink = `${process.env.FULL_HISTORY_RESUlT_URL}${this.testUuid}`
-    }
+    ) {}
 }

@@ -75,6 +75,7 @@ The project contains a `.env.example` file. You can use it as an example to conf
 | `HISTORY_RESULT_STATS_PATH`    | A control server endpoint starting with `/`, from which we can receive the measurement result speed charts by its ` open_test_uuid`. Required when using the app with RTR servers, otherwise optional. |
 | `HISTORY_RESULT_DETAILS_PATH`  | A control server endpoint starting with `/`, from which we can receive the measurement result details by its ` open_test_uuid`. Required when using the app with RTR servers, otherwise optional.      |
 | `FULL_HISTORY_RESUlT_URL`      | A full URL, without ` test_uuid`, of a webpage, which contains a detailed measurement result.                                                                                                          |
+| `OPEN_HISTORY_RESUlT_URL`      | A full URL, without ` open_test_uuid`, of a webpage, which contains an open measurement result for sharing.                                                                                            |
 | `FLAVOR`                       | `rtr` or `ont`, determines the type of UI used for the Electron app. Defaults to ` rtr` if not set.                                                                                                    |
 | `ASSETS_FOLDER`                | A path to a folder that contains flavor specific files, such as icons and styles.                                                                                                                      |
 

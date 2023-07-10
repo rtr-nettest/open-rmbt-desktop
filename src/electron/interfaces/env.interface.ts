@@ -10,4 +10,5 @@ export interface IEnv {
     IP_VERSION: string | null
     TERMS_ACCEPTED: boolean
     LANGUAGE: string | null
+    OPEN_HISTORY_RESUlT_URL: string
 }

@@ -1,10 +1,10 @@
 @import "../../../assets/styles/core.scss";
 
-.app-footer {
+:host {
     align-items: center;
     bottom: 0;
     display: flex;
-    height: rem(108);
+    height: rem(52);
     font-size: rem($font-size-sm);
     justify-content: flex-end;
     left: 0;

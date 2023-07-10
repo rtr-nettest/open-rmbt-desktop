@@ -59,17 +59,12 @@ export class TestStore {
                     up: result.uploadKbit / 1000,
                     ping: result.ping / 1e6,
                 })
-                const newState = TestVisualizationState.from(
+                const newState = TestVisualizationState.fromHistoryResult(
+                    result,
                     this.visualization$.value,
                     newPhase,
                     this.mainStore.env$.value?.FLAVOR ?? "rtr"
                 )
-                newState.phases[
-                    EMeasurementStatus.DOWN
-                ].setChartFromOverallSpeed?.(result.downloadOverTime ?? [])
-                newState.phases[
-                    EMeasurementStatus.UP
-                ].setChartFromOverallSpeed?.(result.uploadOverTime ?? [])
                 this.visualization$.next(newState)
                 this.basicNetworkInfo$.next({
                     serverName: result.measurementServerName,

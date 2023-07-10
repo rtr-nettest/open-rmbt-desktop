@@ -1,3 +1,4 @@
+import { Point } from "chart.js"
 import { EMeasurementStatus } from "../../../../measurement/enums/measurement-status.enum"
 import { IPing } from "../../../../measurement/interfaces/measurement-result.interface"
 import { IOverallResult } from "../../../../measurement/interfaces/overall-result.interface"
@@ -29,7 +30,7 @@ export class TestPhaseState implements ITestPhaseState {
         }
     }
 
-    setChartFromOverallSpeed(overallResults: IOverallResult[]) {
+    setONTChartFromOverallSpeed(overallResults: IOverallResult[]) {
         this.chart = overallResults.map((r) => ({
             x: (r.nsec * 100) / overallResults[overallResults.length - 1].nsec,
             y: r.speed / 1e6,
@@ -38,6 +39,29 @@ export class TestPhaseState implements ITestPhaseState {
         if (this.chart[0]?.x != 0) {
             this.chart.unshift({ x: 0, y: 0 })
         }
+    }
+
+    setRTRChartFromOverallSpeed(overallResults: IOverallResult[]) {
+        let skippedMs = 1
+        let shift = 0
+        this.chart = overallResults.reduce((acc, r, i) => {
+            const msec = r.nsec / 1e6
+            if (msec > 0 && msec >= STATE_UPDATE_TIMEOUT * skippedMs) {
+                skippedMs++
+                if (!shift) {
+                    shift = msec / 1e3
+                }
+                return [
+                    ...acc,
+                    {
+                        x: msec / 1e3 - shift,
+                        y: speedLog(r.speed / 1e6),
+                    },
+                ]
+            } else {
+                return acc
+            }
+        }, [] as Point[])
     }
 
     setChartFromPings(pings: IPing[]): void {

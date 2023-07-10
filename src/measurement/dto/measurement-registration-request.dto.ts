@@ -17,6 +17,7 @@ export class MeasurementRegistrationRequest
     type = ""
     user_server_selection = false
     app_version = registry.version
+    networkType?: number | undefined
 
     constructor(
         public uuid: string,

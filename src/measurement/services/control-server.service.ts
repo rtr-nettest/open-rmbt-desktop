@@ -12,7 +12,13 @@ import utc from "dayjs/plugin/utc"
 import tz from "dayjs/plugin/timezone"
 import { RMBTClient } from "./rmbt-client.service"
 import { ELoggerMessage } from "../enums/logger-message.enum"
-import { CLIENT_UUID, IP_VERSION, LAST_NEWS_UID, Store } from "./store.service"
+import {
+    CLIENT_UUID,
+    IP_VERSION,
+    LANGUAGE,
+    LAST_NEWS_UID,
+    Store,
+} from "./store.service"
 import { DBService } from "./db.service"
 import { SimpleHistoryResult } from "../dto/simple-history-result.dto"
 import { INewsRequest, INewsResponse } from "../interfaces/news.interface"
@@ -214,8 +220,8 @@ export class ControlServer {
         let retVal: ISimpleHistoryResult | undefined
         try {
             if (process.env.HISTORY_RESULT_PATH_METHOD === "GET") {
-                // as used by Specure
-                retVal = await this.getSpecureMeasurementResult(uuid)
+                // as used by ONT
+                retVal = await this.getONTMeasurementResult(uuid)
             } else if (process.env.HISTORY_RESULT_PATH_METHOD === "POST") {
                 // as used by RTR
                 retVal = await this.getRTRMeasurementResult(uuid)
@@ -253,7 +259,24 @@ export class ControlServer {
         Logger.I.info(ELoggerMessage.RESPONSE, response)
         if (response?.testresult?.length) {
             response = response.testresult[0]
+            let testResultDetail: any
             let openTestsResponse: any
+            if (
+                response.open_test_uuid &&
+                process.env.HISTORY_RESULT_DETAILS_PATH
+            ) {
+                testResultDetail = (
+                    await axios.post(
+                        `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_DETAILS_PATH}`,
+                        {
+                            ...body,
+                            language: Store.I.get(LANGUAGE) as string,
+                        },
+                        { headers: this.headers }
+                    )
+                ).data
+            }
+            Logger.I.info("Test result detail is: %o", testResultDetail)
             if (
                 response.open_test_uuid &&
                 process.env.HISTORY_RESULT_STATS_PATH
@@ -266,27 +289,17 @@ export class ControlServer {
                 ).data
             }
             Logger.I.info("Open test response is: %o", openTestsResponse)
-            retVal = new SimpleHistoryResult(
-                dayjs(response.time).toISOString(),
-                openTestsResponse?.server_name,
-                openTestsResponse?.download_kbit,
-                openTestsResponse?.upload_kbit,
-                openTestsResponse?.ping_ms,
-                openTestsResponse?.public_ip_as_name,
-                openTestsResponse?.ip_anonym,
+            retVal = SimpleHistoryResult.fromRTRMeasurementResult(
                 uuid,
-                false,
-                [],
-                [],
-                response.measurement_result?.download_classification,
-                response.measurement_result?.upload_classification,
-                response.measurement_result?.ping_classification
+                response,
+                openTestsResponse,
+                testResultDetail
             )
         }
         return retVal
     }
 
-    private async getSpecureMeasurementResult(uuid: string) {
+    private async getONTMeasurementResult(uuid: string) {
         let response: any
         let retVal: ISimpleHistoryResult | undefined = undefined
         response = (
@@ -297,25 +310,9 @@ export class ControlServer {
         ).data
         Logger.I.info(ELoggerMessage.RESPONSE, response)
         if (response) {
-            retVal = new SimpleHistoryResult(
-                response.measurement_date,
-                response.measurementServerName ??
-                    response.measurement_server_name,
-                response.speed_download,
-                response.speed_upload,
-                response.ping ?? response.ping_median,
-                response.operator ?? response.client_provider,
-                response.ip_address,
+            retVal = SimpleHistoryResult.fromONTMeasurementResult(
                 uuid,
-                false,
-                RMBTClient.getOverallResultsFromSpeedItems(
-                    response.speed_detail,
-                    "download"
-                ),
-                RMBTClient.getOverallResultsFromSpeedItems(
-                    response.speed_detail,
-                    "upload"
-                )
+                response
             )
         }
         return retVal

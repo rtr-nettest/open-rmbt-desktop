@@ -16,7 +16,7 @@ export class MeasurementResult implements IMeasurementResult {
     client_version?: string
     client_uuid: string
     cpu?: ICPU
-    network_type = 0 // TODO: detect the real one, 0 == Unknown
+    network_type = 0
     operating_system: string
     pings: IPing[]
     platform: string
@@ -78,6 +78,7 @@ export class MeasurementResult implements IMeasurementResult {
         this.provider_name = registrationResponse.provider
         this.ip_address = registrationResponse.client_remote_ip
         this.test_status = testStatus
+        this.network_type = registrationRequest.networkType ?? 0
     }
 
     static getPings(threadResults: IMeasurementThreadResult[]) {

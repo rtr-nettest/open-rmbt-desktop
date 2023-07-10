@@ -37,121 +37,6 @@
             </ng-container>
             <!-- END MAT-HEADER-CELL-->
 
-            <!-- MAT-CELL -->
-            <ng-container
-                *ngIf="column.columnDef === 'expandArrow'; else defaultCell"
-            >
-                <mat-cell *matCellDef="let element">
-                    <i
-                        [@arrowRotate]="
-                            isElementExpanded(element.id)
-                                ? 'expanded'
-                                : 'collapsed'
-                        "
-                        class="material-icons"
-                        >keyboard_arrow_right</i
-                    >
-                </mat-cell>
-            </ng-container>
-
-            <ng-container
-                *ngIf="column.columnDef === 'mobileCounter'; else defaultCell"
-            >
-                <mat-cell *matCellDef="let i = dataIndex">
-                    <span class="app-table__mobile-label"
-                        >{{ t(column.header) }} {{ i + 1 }}</span
-                    >
-                </mat-cell>
-            </ng-container>
-
-            <ng-container *ngIf="column.columnDef === 'date'; else defaultCell">
-                <mat-cell *matCellDef="let element">
-                    <span class="app-table__mobile-label">{{
-                        t(column.header)
-                    }}</span>
-                    <a
-                        *ngIf="column.link"
-                        [routerLink]="column.link(element)"
-                        [matTooltip]="column.getTooltip?.(element, column) ?? '' 
-                        "
-                        [ngClass]="
-                            column.getNgClass &&
-                            column.getNgClass(element, column)
-                        "
-                        class="app-link"
-                    >
-                        {{ element.measurementDate | date : "yyy-MM-dd" }}
-                    </a>
-                    <span
-                        *ngIf="!column.link"
-                        [matTooltip]="column.getTooltip?.(element, column) ?? ''
-                        "
-                        [ngClass]="
-                            column.getNgClass &&
-                            column.getNgClass(element, column)
-                        "
-                    >
-                        {{ element.measurementDate | date : "yyy-MM-dd" }}
-                    </span>
-                </mat-cell>
-            </ng-container>
-            <ng-container *ngIf="column.columnDef === 'time'; else defaultCell">
-                <mat-cell *matCellDef="let element">
-                    <span class="app-table__mobile-label">{{
-                        t(column.header)
-                    }}</span>
-                    <span
-                        [matTooltip]="column.getTooltip?.(element, column) ?? ''
-                        "
-                    >
-                        {{
-                            column.key && element[column.key]
-                                ? (element[column.key] | date : "HH:mm:ss")
-                                : "No Data"
-                        }}
-                    </span>
-                </mat-cell>
-            </ng-container>
-
-            <ng-container
-                *ngIf="column.columnDef === 'expandedDetail'; else defaultCell"
-            >
-                <mat-cell
-                    *matCellDef="let element"
-                    [attr.colspan]="displayedColumns.length"
-                >
-                    <div
-                        class="app-table__detail"
-                        [@expandVertically]="isElementExpanded(element.id)"
-                    >
-                        <ng-container
-                            *ngIf="
-                                column.transformValue?.(
-                                    element,
-                                    column
-                                ) as expandedData
-                            "
-                        >
-                            <app-table
-                                *ngIf="!expandedData.message"
-                                class="app-table__expanded-table"
-                                [columns]="expandedColumns"
-                                [data]="expandedData"
-                                [sort]="sort"
-                                [tableClassNames]="expandedTableClassNames"
-                            >
-                            </app-table>
-                            <p
-                                *ngIf="expandedData.message"
-                                [ngClass]="column.getNgClass?.(element, column)"
-                            >
-                                {{ expandedData.message }}
-                            </p>
-                        </ng-container>
-                    </div>
-                </mat-cell>
-            </ng-container>
-
             <ng-container
                 *ngIf="column.columnDef === 'component'; else defaultCell"
             >
@@ -163,6 +48,17 @@
                         [dynamicComponent]="element.component"
                         [parameters]="element.parameters"
                     ></ng-template>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container
+                *ngIf="column.columnDef === 'value'; else defaultCell"
+            >
+                <mat-cell
+                    *matCellDef="let element; let i = dataIndex"
+                    [style]="justify(column)"
+                    [innerHtml]="element.value"
+                >
                 </mat-cell>
             </ng-container>
 

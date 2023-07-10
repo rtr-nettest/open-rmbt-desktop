@@ -1,5 +1,8 @@
 import dayjs from "dayjs"
-import { IMeasurementResult } from "../interfaces/measurement-result.interface"
+import {
+    IMeasurementResult,
+    IPing,
+} from "../interfaces/measurement-result.interface"
 import { IOverallResult } from "../interfaces/overall-result.interface"
 import { ISimpleHistoryResult } from "../interfaces/simple-history-result.interface"
 import { IDetailedHistoryResultItem } from "../interfaces/detailed-history-result-item.interface"
@@ -23,6 +26,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             result.ip_address ?? "-",
             result.test_uuid ?? "",
             true,
+            [],
             [],
             [],
             ClassificationService.I.classify(
@@ -65,6 +69,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             RMBTClient.getOverallResultsFromSpeedCurve(
                 openTestsResponse?.speed_curve.upload
             ),
+            RMBTClient.getOverallPings(openTestsResponse?.speed_curve.ping),
             response.measurement_result?.download_classification ??
                 ClassificationService.I.classify(
                     response.measurement_result?.download_kbit,
@@ -123,6 +128,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         public isLocal?: boolean,
         public downloadOverTime?: IOverallResult[],
         public uploadOverTime?: IOverallResult[],
+        public pingOverTime?: IPing[],
         public downloadClass?: number,
         public uploadClass?: number,
         public pingClass?: number,

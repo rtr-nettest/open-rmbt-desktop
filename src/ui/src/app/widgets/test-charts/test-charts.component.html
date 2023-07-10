@@ -7,12 +7,12 @@
         <dl class="app-chart-wrapper">
             <dt class="app-title">{{ t("test.download.label") }}</dt>
             <dd>
-                <nt-test-chart
+                <app-test-chart
                     class="nt-canvas__wrapper"
                     phase="download"
                     [style.height.px]="(chartHeight$ | async) ?? 0"
                     [style.width.px]="(chartWidth$ | async) ?? 0"
-                ></nt-test-chart>
+                ></app-test-chart>
             </dd>
         </dl>
         <dl
@@ -22,12 +22,12 @@
             <dt class="app-title">{{ t("test.upload.label") }}</dt>
             <dd>
                 >
-                <nt-test-chart
+                <app-test-chart
                     class="nt-canvas__wrapper"
                     phase="upload"
                     [style.height.px]="(chartHeight$ | async) ?? 0"
                     [style.width.px]="(chartWidth$ | async) ?? 0"
-                ></nt-test-chart>
+                ></app-test-chart>
             </dd>
         </dl>
     </ng-container>

@@ -6,6 +6,7 @@ import { extend } from "../helpers/extend"
 import { TestPhaseState } from "./test-phase-state.dto"
 import { ETestStatuses } from "../enums/test-statuses.enum"
 import { ETestLabels } from "../enums/test-labels.enum"
+import { ISimpleHistoryResult } from "../../../../measurement/interfaces/simple-history-result.interface"
 
 export class TestVisualizationState implements ITestVisualizationState {
     flavor: string = "rtr"
@@ -50,6 +51,38 @@ export class TestVisualizationState implements ITestVisualizationState {
             newState.extendChart(phaseState.phase)
             newState.setDone(phaseState.phase)
         }
+        return newState
+    }
+
+    static fromHistoryResult(
+        result: ISimpleHistoryResult,
+        initialState: ITestVisualizationState,
+        phaseState: IMeasurementPhaseState,
+        flavor: string
+    ) {
+        const newState = TestVisualizationState.from(
+            initialState,
+            phaseState,
+            flavor
+        )
+        if (flavor !== "rtr") {
+            newState.phases[
+                EMeasurementStatus.DOWN
+            ].setONTChartFromOverallSpeed?.(result.downloadOverTime ?? [])
+            newState.phases[
+                EMeasurementStatus.UP
+            ].setONTChartFromOverallSpeed?.(result.uploadOverTime ?? [])
+        } else {
+            newState.phases[
+                EMeasurementStatus.DOWN
+            ].setRTRChartFromOverallSpeed?.(result.downloadOverTime ?? [])
+            newState.phases[
+                EMeasurementStatus.UP
+            ].setRTRChartFromOverallSpeed?.(result.uploadOverTime ?? [])
+        }
+        newState.phases[EMeasurementStatus.PING].setChartFromPings?.(
+            result.pingOverTime ?? []
+        )
         return newState
     }
 

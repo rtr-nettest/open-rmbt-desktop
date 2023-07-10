@@ -4,7 +4,6 @@ import { IOverallResult } from "../../../../measurement/interfaces/overall-resul
 import { ETestStatuses } from "../enums/test-statuses.enum"
 import { speedLog } from "../helpers/number"
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
-import { STATE_UPDATE_TIMEOUT } from "../store/test.store"
 
 export class TestPhaseState implements ITestPhaseState {
     counter: number = -1
@@ -29,10 +28,21 @@ export class TestPhaseState implements ITestPhaseState {
         }
     }
 
-    setChartFromOverallSpeed(overallResults: IOverallResult[]) {
+    setONTChartFromOverallSpeed(overallResults: IOverallResult[]) {
         this.chart = overallResults.map((r) => ({
             x: (r.nsec * 100) / overallResults[overallResults.length - 1].nsec,
             y: r.speed / 1e6,
+        }))
+        // Always start at 0
+        if (this.chart[0]?.x != 0) {
+            this.chart.unshift({ x: 0, y: 0 })
+        }
+    }
+
+    setRTRChartFromOverallSpeed(overallResults: IOverallResult[]) {
+        this.chart = overallResults.map((r) => ({
+            x: r.nsec / 1e9,
+            y: speedLog(r.speed / 1e6),
         }))
         // Always start at 0
         if (this.chart[0]?.x != 0) {

@@ -119,10 +119,6 @@ export class ResultScreenComponent {
     getDetailedResults(
         result: ISimpleHistoryResult
     ): IBasicResponse<IDetailedHistoryResultItem> {
-        console.log(
-            "result.detailedHistoryResult",
-            result.detailedHistoryResult
-        )
         return {
             content: result.detailedHistoryResult ?? [],
             totalElements: result.detailedHistoryResult?.length ?? 0,

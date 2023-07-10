@@ -49,12 +49,21 @@ $container-width: 100%;
     text-decoration: none !important;
 }
 
+.app-charts {
+    margin: 0 rem(-10) 0;
+    width: auto;
+    &__col {
+        padding: rem(20) rem(10) 0;
+    }
+}
+
 app-test-boxes {
     width: 100%;
 }
 
 app-footer {
     height: auto;
+    padding-bottom: rem(20);
     position: relative;
 }
 

@@ -24,6 +24,22 @@ export class RMBTClient {
     static minChunkSize = 4096
     static maxChunkSize = 4194304
 
+    static getOverallPings(
+        pings: {
+            ping_ms: number
+            time_elapsed: number
+        }[]
+    ): IPing[] {
+        if (!pings?.length) {
+            return []
+        }
+        return pings.map((p) => ({
+            time_ns: p.time_elapsed * 1e6,
+            value: p.ping_ms * 1e6,
+            value_server: p.ping_ms * 1e6,
+        }))
+    }
+
     static getOverallResultsFromSpeedCurve(
         curve: {
             bytes_total: number

@@ -17,7 +17,7 @@ import { ChartPhase } from "src/app/dto/test-rtr-chart-dataset.dto"
 import { TestBarChart } from "src/app/dto/test-bar-chart.dto"
 
 @Component({
-    selector: "nt-test-chart",
+    selector: "app-test-chart",
     templateUrl: "./test-chart.component.html",
     styleUrls: ["./test-chart.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -90,6 +90,10 @@ export class TestChartComponent {
                     } else if (this.phase === "upload") {
                         this.chart?.setData(
                             visualization.phases[EMeasurementStatus.UP]
+                        )
+                    } else if (this.phase === "ping") {
+                        this.chart?.setData(
+                            visualization.phases[EMeasurementStatus.PING]
                         )
                     }
                     break

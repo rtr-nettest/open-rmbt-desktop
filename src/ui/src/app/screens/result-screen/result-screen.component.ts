@@ -128,7 +128,10 @@ export class ResultScreenComponent {
 
     getDetailedResults(
         result: ISimpleHistoryResult
-    ): IBasicResponse<IDetailedHistoryResultItem> {
+    ): IBasicResponse<IDetailedHistoryResultItem> | null {
+        if (!result.detailedHistoryResult) {
+            return null
+        }
         return {
             content:
                 result.detailedHistoryResult?.map((item) =>

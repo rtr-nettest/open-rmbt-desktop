@@ -50,11 +50,11 @@ $container-width: 100%;
 }
 
 .app-charts {
-    margin: 0 0 0 rem(-10);
+    margin: rem(20) 0 rem(40) rem(-10);
 
     &__col {
         height: rem(200);
-        padding: rem(20) rem(10) 0;
+        padding: 0 rem(10);
         width: 33%;
     }
 
@@ -73,6 +73,7 @@ app-test-boxes {
 
 app-footer {
     height: auto;
+    padding-right: 0;
     padding-bottom: rem(20);
     position: relative;
 }

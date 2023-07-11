@@ -25,7 +25,11 @@ export class NetInterfaceInfoWindowsService implements NetInterfaceInfo {
     }
 
     async getActiveInterfaceType() {
-        return (await this.getActiveInterfaces())[0].key
+        const activeInterfaces = await this.getActiveInterfaces()
+        if (activeInterfaces.length <= 0 && activeInterfaces.length > 1) {
+            return ""
+        }
+        return activeInterfaces[0].key
     }
 
     private async convertToJson(info: string) {

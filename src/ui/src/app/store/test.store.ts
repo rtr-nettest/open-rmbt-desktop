@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core"
-import { BehaviorSubject, concatMap, from, interval, map, of } from "rxjs"
+import { BehaviorSubject, concatMap, from, interval, map, of, tap } from "rxjs"
 import { TestVisualizationState } from "../dto/test-visualization-state.dto"
 import { ITestVisualizationState } from "../interfaces/test-visualization-state.interface"
 import { IBasicNetworkInfo } from "../../../../measurement/interfaces/basic-network-info.interface"
@@ -44,6 +44,13 @@ export class TestStore {
                 return newState
             })
         )
+    }
+
+    getMeasurementHistory() {
+        if (this.mainStore.error$.value) {
+            return of([])
+        }
+        return from(window.electronAPI.getMeasurementHistory())
     }
 
     getMeasurementResult(testUuid: string | null) {

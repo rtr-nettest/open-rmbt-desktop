@@ -9,6 +9,7 @@ import { NewsResolver } from "./resolvers/news.resolver"
 import { SettingsScreenComponent } from "./screens/settings-screen/settings-screen.component"
 import { NewsScreenComponent } from "./screens/news-screen/news-screen.component"
 import { EnvResolver } from "./resolvers/env.resolver"
+import { HistoryScreenComponent } from "./screens/history-screen/history-screen.component"
 
 const routes: Routes = [
     {
@@ -22,6 +23,10 @@ const routes: Routes = [
     {
         path: ERoutes.TEST_RESULT,
         component: ResultScreenComponent,
+    },
+    {
+        path: ERoutes.HISTORY,
+        component: HistoryScreenComponent,
     },
     {
         path: ERoutes.NEWS,

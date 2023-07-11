@@ -213,6 +213,47 @@ export class ControlServer {
         }
     }
 
+    async getMeasurementHistory() {
+        if (!process.env.HISTORY_PATH) {
+            return []
+        }
+        let retVal: ISimpleHistoryResult[] | undefined
+        const body = {
+            language: I18nService.I.getActiveLanguage(),
+            timezone: dayjs.tz.guess(),
+            uuid: Store.I.get(CLIENT_UUID) as string,
+        }
+        Logger.I.info(
+            ELoggerMessage.POST_REQUEST,
+            process.env.HISTORY_PATH,
+            body
+        )
+        try {
+            const resp = (
+                await axios.post(
+                    `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_PATH}`,
+                    body,
+                    { headers: this.headers }
+                )
+            ).data
+            if (resp?.error.length) {
+                throw new Error(resp.error)
+            }
+            if (resp?.history.length) {
+                retVal = resp.history.map((hi: any) =>
+                    SimpleHistoryResult.fromRTRHistoryResult(hi)
+                )
+            }
+        } catch (e) {
+            retVal = await DBService.I.getAllMeasurements()
+            if (!retVal) {
+                this.handleError(e)
+            }
+        }
+        Logger.I.info("The history is: %o", retVal)
+        return retVal
+    }
+
     async getMeasurementResult(
         uuid: string
     ): Promise<ISimpleHistoryResult | undefined> {

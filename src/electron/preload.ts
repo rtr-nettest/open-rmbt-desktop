@@ -21,6 +21,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getMeasurementState: () => ipcRenderer.invoke(Events.GET_MEASUREMENT_STATE),
     getMeasurementResult: (testUuid: string) =>
         ipcRenderer.invoke(Events.GET_MEASUREMENT_RESULT, testUuid),
+    getMeasurementHistory: () =>
+        ipcRenderer.invoke(Events.GET_MEASUREMENT_HISTORY),
     onError: (callback: (error: Error) => any) => {
         ipcRenderer.removeAllListeners(Events.ERROR)
         ipcRenderer.on(Events.ERROR, (event, error) => callback(error))

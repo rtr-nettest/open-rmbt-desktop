@@ -154,7 +154,16 @@ ipcMain.handle(Events.GET_MEASUREMENT_STATE, () => {
 ipcMain.handle(Events.GET_MEASUREMENT_RESULT, async (event, testUuid) => {
     const webContents = event.sender
     try {
-        return await MeasurementRunner.I.getMeasurementResult(testUuid)
+        return await ControlServer.I.getMeasurementResult(testUuid)
+    } catch (e) {
+        webContents.send(Events.ERROR, e)
+    }
+})
+
+ipcMain.handle(Events.GET_MEASUREMENT_HISTORY, async (event) => {
+    const webContents = event.sender
+    try {
+        return await ControlServer.I.getMeasurementHistory()
     } catch (e) {
         webContents.send(Events.ERROR, e)
     }

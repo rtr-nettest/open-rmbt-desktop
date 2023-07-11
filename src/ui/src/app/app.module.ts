@@ -85,7 +85,8 @@ import { SettingsIpComponent } from "./widgets/settings-ip/settings-ip.component
 import { SettingsLocaleComponent } from "./widgets/settings-locale/settings-locale.component"
 import { FormsModule } from "@angular/forms"
 import { EIPVersion } from "../../../measurement/enums/ip-version.enum"
-import { MainStore } from "./store/main.store"
+import { MainStore } from "./store/main.store";
+import { HistoryScreenComponent } from './screens/history-screen/history-screen.component'
 
 Chart.register(
     BarElement,
@@ -119,6 +120,7 @@ declare global {
             getMeasurementResult: (
                 testUuid: string
             ) => Promise<ISimpleHistoryResult>
+            getMeasurementHistory: () => Promise<ISimpleHistoryResult[]>
             onError: (callback: (error: Error) => any) => Promise<any>
         }
     }
@@ -160,6 +162,7 @@ declare global {
         DynamicComponentDirective,
         SettingsIpComponent,
         SettingsLocaleComponent,
+        HistoryScreenComponent,
     ],
     imports: [
         AppRoutingModule,

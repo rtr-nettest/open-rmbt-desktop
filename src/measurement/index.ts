@@ -147,10 +147,6 @@ export class MeasurementRunner {
         }
     }
 
-    async getMeasurementResult(testUuid: string) {
-        return await ControlServer.I.getMeasurementResult(testUuid)
-    }
-
     getCPUUsage(): ICPU | undefined {
         return this.cpuInfo
     }

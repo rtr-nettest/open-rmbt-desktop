@@ -143,6 +143,9 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         HISTORY_RESULTS_LIMIT: process.env.HISTORY_RESULTS_LIMIT
             ? parseInt(process.env.HISTORY_RESULTS_LIMIT)
             : undefined,
+        HISTORY_SEARCH_URL: process.env.HISTORY_SEARCH_URL,
+        HISTORY_EXPORT_URL: process.env.HISTORY_EXPORT_URL,
+        FULL_HISTORY_RESULT_URL: process.env.FULL_HISTORY_RESULT_URL,
     }
 })
 

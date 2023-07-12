@@ -21,6 +21,9 @@ import { EMeasurementStatus } from "../../../../measurement/enums/measurement-st
 import { Router } from "@angular/router"
 import { MainStore } from "./main.store"
 import { IPaginator } from "../interfaces/paginator.interface"
+import { HttpClient, HttpParams } from "@angular/common/http"
+import { saveAs } from "file-saver"
+import { TranslocoService } from "@ngneat/transloco"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
@@ -43,7 +46,12 @@ export class TestStore {
     })
     allHistoryLoaded$ = new BehaviorSubject<boolean>(false)
 
-    constructor(private mainStore: MainStore, private router: Router) {}
+    constructor(
+        private mainStore: MainStore,
+        private router: Router,
+        private http: HttpClient,
+        private transloco: TranslocoService
+    ) {}
 
     launchTest() {
         this.resetState()
@@ -136,6 +144,64 @@ export class TestStore {
                 return result
             })
         )
+    }
+
+    exportAsPdf(results: ISimpleHistoryResult[]) {
+        const exportUrl = this.mainStore.env$.value?.HISTORY_EXPORT_URL
+        if (!exportUrl) {
+            return
+        }
+        this.http
+            .post(exportUrl + "/pdf", this.getExportParams("pdf", results))
+            .pipe(
+                switchMap((resp: any) => {
+                    const historyUrl =
+                        this.mainStore.env$.value?.FULL_HISTORY_RESULT_URL?.replace(
+                            "$lang",
+                            this.transloco.getActiveLang()
+                        )
+                    if (resp["file"] && historyUrl) {
+                        return this.http.get(
+                            historyUrl + resp["file"].replace("L", ""),
+                            {
+                                responseType: "blob",
+                                observe: "response",
+                            }
+                        )
+                    }
+                    return of(null)
+                })
+            )
+            .subscribe((data: any) => {
+                if (data?.body)
+                    saveAs(data.body, `${new Date().toUTCString()}.pdf`)
+            })
+    }
+
+    exportAs(format: "csv" | "xlsx", results: ISimpleHistoryResult[]) {
+        const exportUrl = this.mainStore.env$.value?.HISTORY_SEARCH_URL
+        if (!exportUrl) {
+            return
+        }
+        this.http
+            .post(exportUrl, this.getExportParams(format, results), {
+                responseType: "blob",
+                observe: "response",
+            })
+            .subscribe((data) => {
+                if (data.body)
+                    saveAs(data.body, `${new Date().toUTCString()}.${format}`)
+            })
+    }
+
+    private getExportParams(format: string, results: ISimpleHistoryResult[]) {
+        return new HttpParams({
+            fromObject: {
+                test_uuid: results.map((hi) => "T" + hi.testUuid).join(","),
+                format,
+                max_results: 1000,
+            },
+        })
     }
 
     private resetState() {

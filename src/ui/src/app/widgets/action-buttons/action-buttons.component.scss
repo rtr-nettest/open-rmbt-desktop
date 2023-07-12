@@ -1,0 +1,15 @@
+@import "../../../assets/styles/core.scss";
+
+:host {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+    position: relative;
+}
+
+.app-button {
+    height: rem($font-size-xxl * 2.5);
+    margin-left: 1ex;
+    padding: 0;
+    width: rem($font-size-xxl * 2.5);
+}

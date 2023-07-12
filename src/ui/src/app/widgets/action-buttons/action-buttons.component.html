@@ -1,0 +1,10 @@
+<ng-container *ngIf="items?.length">
+    <button
+        class="app-button"
+        mat-icon-button
+        *ngFor="let item of items"
+        (click)="item.action?.($event)"
+    >
+        <i class="app-icon app-icon--{{ item.icon }}" *ngIf="item.icon"></i>
+    </button>
+</ng-container>

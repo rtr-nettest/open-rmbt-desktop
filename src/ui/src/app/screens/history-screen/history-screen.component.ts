@@ -10,6 +10,7 @@ import { TranslocoService } from "@ngneat/transloco"
 import { getSignificantDigits } from "src/app/helpers/number"
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
 import { MainStore } from "src/app/store/main.store"
+import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 
 export interface IHistoryRow {
     id: string
@@ -96,6 +97,27 @@ export class HistoryScreenComponent implements OnInit {
         active: "time",
         direction: "desc",
     }
+    actionButtons: IMainMenuItem[] = [
+        {
+            label: "",
+            translations: [],
+            icon: "filetype-csv",
+            action: () => this.store.exportAs("csv", this.store.history$.value),
+        },
+        {
+            label: "",
+            translations: [],
+            icon: "filetype-pdf",
+            action: () => this.store.exportAsPdf(this.store.history$.value),
+        },
+        {
+            label: "",
+            translations: [],
+            icon: "filetype-xlsx",
+            action: () =>
+                this.store.exportAs("xlsx", this.store.history$.value),
+        },
+    ]
 
     constructor(
         private mainStore: MainStore,

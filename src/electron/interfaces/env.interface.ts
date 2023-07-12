@@ -11,4 +11,5 @@ export interface IEnv {
     TERMS_ACCEPTED: boolean
     LANGUAGE: string | null
     OPEN_HISTORY_RESUlT_URL: string
+    HISTORY_RESULTS_LIMIT: number | undefined
 }

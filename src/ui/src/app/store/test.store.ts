@@ -1,5 +1,16 @@
 import { Injectable } from "@angular/core"
-import { BehaviorSubject, concatMap, from, interval, map, of, tap } from "rxjs"
+import {
+    BehaviorSubject,
+    concatMap,
+    from,
+    interval,
+    map,
+    of,
+    switchMap,
+    take,
+    tap,
+    withLatestFrom,
+} from "rxjs"
 import { TestVisualizationState } from "../dto/test-visualization-state.dto"
 import { ITestVisualizationState } from "../interfaces/test-visualization-state.interface"
 import { IBasicNetworkInfo } from "../../../../measurement/interfaces/basic-network-info.interface"
@@ -9,6 +20,7 @@ import { TestPhaseState } from "../dto/test-phase-state.dto"
 import { EMeasurementStatus } from "../../../../measurement/enums/measurement-status.enum"
 import { Router } from "@angular/router"
 import { MainStore } from "./main.store"
+import { IPaginator } from "../interfaces/paginator.interface"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
@@ -25,6 +37,11 @@ export class TestStore {
     simpleHistoryResult$ = new BehaviorSubject<ISimpleHistoryResult | null>(
         null
     )
+    history$ = new BehaviorSubject<ISimpleHistoryResult[]>([])
+    historyPaginator$ = new BehaviorSubject<IPaginator>({
+        offset: 0,
+    })
+    allHistoryLoaded$ = new BehaviorSubject<boolean>(false)
 
     constructor(private mainStore: MainStore, private router: Router) {}
 
@@ -47,10 +64,37 @@ export class TestStore {
     }
 
     getMeasurementHistory() {
-        if (this.mainStore.error$.value) {
+        if (this.mainStore.error$.value || this.allHistoryLoaded$.value) {
             return of([])
         }
-        return from(window.electronAPI.getMeasurementHistory())
+        return from(this.mainStore.env$).pipe(
+            withLatestFrom(this.historyPaginator$, this.history$),
+            take(1),
+            switchMap(([env, paginator, history]) => {
+                if (env?.HISTORY_RESULTS_LIMIT) {
+                    this.historyPaginator$.next({
+                        offset: paginator.offset + env.HISTORY_RESULTS_LIMIT,
+                        limit: env.HISTORY_RESULTS_LIMIT,
+                    })
+                    return window.electronAPI.getMeasurementHistory(
+                        paginator.offset,
+                        env.HISTORY_RESULTS_LIMIT
+                    )
+                } else if (!history.length) {
+                    return window.electronAPI.getMeasurementHistory(
+                        paginator.offset
+                    )
+                }
+                return of(null)
+            }),
+            tap((history) => {
+                if (history) {
+                    this.history$.next([...this.history$.value, ...history])
+                } else {
+                    this.allHistoryLoaded$.next(true)
+                }
+            })
+        )
     }
 
     getMeasurementResult(testUuid: string | null) {

@@ -61,8 +61,7 @@
     }
 
     mat-header-cell {
-        color: rgba($color-primary, 0.5);
-        font-size: rem(14);
+        background-color: #ecf3e5;
         font-weight: 700 !important;
 
         :not(:only-child) {

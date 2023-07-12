@@ -165,8 +165,8 @@
     <app-paginator
         *ngIf="paginator"
         [length]="data?.totalElements ?? 0"
-        [pageSize]="paginator.size"
-        [pageIndex]="paginator.page"
+        [pageSize]="paginator.limit ?? 0"
+        [pageIndex]="paginator.offset"
         (page)="changePage($event)"
         [pageSizeOptions]="AVAILABLE_SIZES"
     >

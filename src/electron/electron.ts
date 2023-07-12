@@ -140,6 +140,9 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         TERMS_ACCEPTED: (Store.I.get(TERMS_ACCEPTED) as boolean) || false,
         LANGUAGE: Store.I.get(LANGUAGE) as string,
         OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
+        HISTORY_RESULTS_LIMIT: process.env.HISTORY_RESULTS_LIMIT
+            ? parseInt(process.env.HISTORY_RESULTS_LIMIT)
+            : undefined,
     }
 })
 
@@ -160,10 +163,10 @@ ipcMain.handle(Events.GET_MEASUREMENT_RESULT, async (event, testUuid) => {
     }
 })
 
-ipcMain.handle(Events.GET_MEASUREMENT_HISTORY, async (event) => {
+ipcMain.handle(Events.GET_MEASUREMENT_HISTORY, async (event, offset, limit) => {
     const webContents = event.sender
     try {
-        return await ControlServer.I.getMeasurementHistory()
+        return await ControlServer.I.getMeasurementHistory(offset, limit)
     } catch (e) {
         webContents.send(Events.ERROR, e)
     }

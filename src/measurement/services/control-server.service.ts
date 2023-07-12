@@ -213,15 +213,19 @@ export class ControlServer {
         }
     }
 
-    async getMeasurementHistory() {
+    async getMeasurementHistory(offset = 0, limit?: number) {
         if (!process.env.HISTORY_PATH) {
             return []
         }
         let retVal: ISimpleHistoryResult[] | undefined
-        const body = {
+        const body: { [key: string]: any } = {
             language: I18nService.I.getActiveLanguage(),
             timezone: dayjs.tz.guess(),
             uuid: Store.I.get(CLIENT_UUID) as string,
+            result_offset: offset,
+        }
+        if (limit) {
+            body.result_limit = limit
         }
         Logger.I.info(
             ELoggerMessage.POST_REQUEST,
@@ -236,6 +240,7 @@ export class ControlServer {
                     { headers: this.headers }
                 )
             ).data
+            Logger.I.warn("Response is %o", resp)
             if (resp?.error.length) {
                 throw new Error(resp.error)
             }

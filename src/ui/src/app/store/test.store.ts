@@ -152,17 +152,15 @@ export class TestStore {
             return
         }
         this.http
-            .post(exportUrl + "/pdf", this.getExportParams("pdf", results))
+            .post(
+                exportUrl + "/pdf/" + this.transloco.getActiveLang(),
+                this.getExportParams("pdf", results)
+            )
             .pipe(
                 switchMap((resp: any) => {
-                    const historyUrl =
-                        this.mainStore.env$.value?.FULL_HISTORY_RESULT_URL?.replace(
-                            "$lang",
-                            this.transloco.getActiveLang()
-                        )
-                    if (resp["file"] && historyUrl) {
+                    if (resp["file"]) {
                         return this.http.get(
-                            historyUrl + resp["file"].replace("L", ""),
+                            exportUrl + "/pdf/" + resp["file"],
                             {
                                 responseType: "blob",
                                 observe: "response",
@@ -174,7 +172,7 @@ export class TestStore {
             )
             .subscribe((data: any) => {
                 if (data?.body)
-                    saveAs(data.body, `${new Date().toUTCString()}.pdf`)
+                    saveAs(data.body, `${new Date().toISOString()}.pdf`)
             })
     }
 
@@ -190,7 +188,7 @@ export class TestStore {
             })
             .subscribe((data) => {
                 if (data.body)
-                    saveAs(data.body, `${new Date().toUTCString()}.${format}`)
+                    saveAs(data.body, `${new Date().toISOString()}.${format}`)
             })
     }
 

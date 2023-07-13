@@ -149,9 +149,9 @@ export class TestStore {
     exportAsPdf(results: ISimpleHistoryResult[]) {
         const exportUrl = this.mainStore.env$.value?.HISTORY_EXPORT_URL
         if (!exportUrl) {
-            return
+            return of(null)
         }
-        this.http
+        return this.http
             .post(
                 exportUrl + "/pdf/" + this.transloco.getActiveLang(),
                 this.getExportParams("pdf", results)
@@ -168,28 +168,33 @@ export class TestStore {
                         )
                     }
                     return of(null)
+                }),
+                tap((data: any) => {
+                    if (data?.body)
+                        saveAs(data.body, `${new Date().toISOString()}.pdf`)
                 })
             )
-            .subscribe((data: any) => {
-                if (data?.body)
-                    saveAs(data.body, `${new Date().toISOString()}.pdf`)
-            })
     }
 
     exportAs(format: "csv" | "xlsx", results: ISimpleHistoryResult[]) {
         const exportUrl = this.mainStore.env$.value?.HISTORY_SEARCH_URL
         if (!exportUrl) {
-            return
+            return of(null)
         }
-        this.http
+        return this.http
             .post(exportUrl, this.getExportParams(format, results), {
                 responseType: "blob",
                 observe: "response",
             })
-            .subscribe((data) => {
-                if (data.body)
-                    saveAs(data.body, `${new Date().toISOString()}.${format}`)
-            })
+            .pipe(
+                tap((data) => {
+                    if (data.body)
+                        saveAs(
+                            data.body,
+                            `${new Date().toISOString()}.${format}`
+                        )
+                })
+            )
     }
 
     private getExportParams(format: string, results: ISimpleHistoryResult[]) {

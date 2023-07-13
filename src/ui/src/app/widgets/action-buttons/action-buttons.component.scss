@@ -1,3 +1,4 @@
+@use "sass:math";
 @import "../../../assets/styles/core.scss";
 
 :host {
@@ -11,5 +12,34 @@
     height: rem($font-size-xxl * 2.5);
     margin-left: 1ex;
     padding: 0;
+    position: relative;
     width: rem($font-size-xxl * 2.5);
+
+    &:disabled {
+        & > * {
+            opacity: 0.5;
+        }
+
+        &::before {
+            animation: spin 1s linear infinite;
+            content: "⟳";
+            display: inline-block;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            font-size: rem($font-size-xxl);
+            height: rem($font-size-xxl);
+            line-height: 1.05rem;
+            margin-left: rem(math.div(-$font-size-xxl, 2));
+            margin-top: rem(math.div(-$font-size-xxl, 2));
+            width: rem($font-size-xxl);
+            transform-origin: 43% 47%;
+        }
+    }
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
 }

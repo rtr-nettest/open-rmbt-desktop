@@ -25,6 +25,8 @@
 }
 
 .app-icon {
+    margin-left: -0.5rem;
+    width: rem($font-size-xxl * 2.5);
     & + span {
         @include screen-lg {
             display: none;

@@ -9,11 +9,16 @@ $container-width: 100%;
 }
 
 .app-main {
+    align-self: center;
     display: flex;
     flex: 1;
     flex-direction: column;
     padding: 0 rem(30) rem(30);
     width: 100%;
+
+    &--no-result {
+        text-align: center;
+    }
 }
 
 .app-title {

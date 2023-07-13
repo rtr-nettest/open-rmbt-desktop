@@ -51,5 +51,6 @@
     "Measurement failed.": "Measurement failed.",
     "Fetching the history...": "Fetching the history...",
     "Could not load the history.": "Could not load the history.",
-    "Time": "Time"
+    "Time": "Time",
+    "Detailed results": "Detailed results"
 }

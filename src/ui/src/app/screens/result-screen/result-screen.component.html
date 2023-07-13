@@ -23,6 +23,13 @@
             <app-export-warning></app-export-warning>
             <div class="app-main" *transloco="let t">
                 <h1 class="app-title">
+                    <button
+                        mat-icon-button
+                        (click)="weHaveToGoBack()"
+                        style="margin-right: 1ex"
+                    >
+                        <i class="app-icon app-icon--chevron-left"></i>
+                    </button>
                     {{ t("Measurement result from") }}
                     {{ result.measurementDate | date }}
                     <app-action-buttons
@@ -69,10 +76,13 @@
 </ng-template>
 
 <ng-template #noResult>
-    <main *ngIf="error$ | async as error" class="app-main">
+    <main *ngIf="error$ | async as error" class="app-main app-main--no-result">
         {{ "Measurement failed." | transloco }} {{ error.message }}
     </main>
-    <main *ngIf="(error$ | async) === null" class="app-main">
+    <main
+        *ngIf="(error$ | async) === null"
+        class="app-main app-main--no-result"
+    >
         {{ "Fetching the result..." | transloco }}
     </main>
 </ng-template>

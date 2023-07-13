@@ -21,6 +21,7 @@ export class MainStore {
     settings$ = new BehaviorSubject<IUserSettings | null>(null)
     error$ = new BehaviorSubject<Error | null>(null)
     news$ = new BehaviorSubject<INewsItem[] | null>(null)
+    referrer$ = new BehaviorSubject<string | null>(null)
 
     constructor() {
         window.electronAPI.onError((error) => {

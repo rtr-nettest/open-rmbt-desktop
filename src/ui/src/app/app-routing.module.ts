@@ -10,6 +10,7 @@ import { SettingsScreenComponent } from "./screens/settings-screen/settings-scre
 import { NewsScreenComponent } from "./screens/news-screen/news-screen.component"
 import { EnvResolver } from "./resolvers/env.resolver"
 import { HistoryScreenComponent } from "./screens/history-screen/history-screen.component"
+import { ReferrerResolver } from "./resolvers/referrer.resolver"
 
 const routes: Routes = [
     {
@@ -23,6 +24,9 @@ const routes: Routes = [
     {
         path: ERoutes.TEST_RESULT,
         component: ResultScreenComponent,
+        resolve: {
+            refferer: () => inject(ReferrerResolver).resolve(),
+        },
     },
     {
         path: ERoutes.HISTORY,

@@ -4,7 +4,7 @@
         mat-icon-button
         *ngFor="let item of items; let i = index"
         (click)="handleClick($event, i)"
-        [disabled]="disabledItems.has(i)"
+        [disabled]="(disabledItems$ | async)!.has(i)"
     >
         <i class="app-icon app-icon--{{ item.icon }}" *ngIf="item.icon"></i>
     </button>

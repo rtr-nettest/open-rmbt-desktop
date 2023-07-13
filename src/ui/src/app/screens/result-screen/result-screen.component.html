@@ -25,6 +25,9 @@
                 <h1 class="app-title">
                     {{ t("Measurement result from") }}
                     {{ result.measurementDate | date }}
+                    <app-action-buttons
+                        [items]="actionButtons"
+                    ></app-action-buttons>
                 </h1>
                 <div class="app-wrapper">
                     <app-table

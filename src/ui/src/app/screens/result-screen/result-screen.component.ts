@@ -10,6 +10,7 @@ import { IDetailedHistoryResultItem } from "../../../../../measurement/interface
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
 import { ISort } from "src/app/interfaces/sort.interface"
 import { tap } from "rxjs"
+import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 
 @Component({
     selector: "app-result-screen",
@@ -46,6 +47,17 @@ export class ResultScreenComponent {
         active: "",
         direction: "",
     }
+    actionButtons: IMainMenuItem[] = [
+        {
+            label: "",
+            translations: [],
+            icon: "filetype-pdf",
+            action: () =>
+                this.store.exportAsPdf([
+                    this.store.simpleHistoryResult$.value!,
+                ]),
+        },
+    ]
 
     constructor(
         private store: TestStore,

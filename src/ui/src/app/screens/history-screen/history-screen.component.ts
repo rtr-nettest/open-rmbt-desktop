@@ -1,4 +1,9 @@
-import { Component, HostListener, OnInit } from "@angular/core"
+import {
+    ChangeDetectionStrategy,
+    Component,
+    HostListener,
+    OnInit,
+} from "@angular/core"
 import { ISort } from "src/app/interfaces/sort.interface"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
 import { TestStore } from "src/app/store/test.store"
@@ -26,6 +31,7 @@ export interface IHistoryRow {
     selector: "app-history-screen",
     templateUrl: "./history-screen.component.html",
     styleUrls: ["./history-screen.component.scss"],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HistoryScreenComponent implements OnInit {
     columns: ITableColumn<ISimpleHistoryResult>[] = [

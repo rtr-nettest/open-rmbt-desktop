@@ -1,4 +1,4 @@
 export interface IPaginator {
-    page: number
-    size: number
+    offset: number
+    limit?: number
 }

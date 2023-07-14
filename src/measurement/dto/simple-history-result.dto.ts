@@ -47,6 +47,26 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         )
     }
 
+    static fromRTRHistoryResult(response: any) {
+        return new SimpleHistoryResult(
+            dayjs(response?.time).toISOString(),
+            "",
+            response.speed_download ? Number(response.speed_download) * 1e3 : 0,
+            response.speed_upload ? Number(response.speed_upload) * 1e3 : 0,
+            response.ping ? Number(response.ping) : 0,
+            "",
+            "",
+            response.test_uuid ?? "",
+            false,
+            [],
+            [],
+            [],
+            response.speed_download_classification ?? 0,
+            response.speed_upload_classification ?? 0,
+            response.ping_classification ?? 0
+        )
+    }
+
     static fromRTRMeasurementResult(
         uuid: string,
         response: any,

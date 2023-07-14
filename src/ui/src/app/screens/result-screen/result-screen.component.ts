@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core"
-import { ActivatedRoute } from "@angular/router"
+import { ActivatedRoute, Router } from "@angular/router"
 import { TranslocoService } from "@ngneat/transloco"
 import { getSignificantDigits } from "src/app/helpers/number"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
@@ -9,7 +9,9 @@ import { ISimpleHistoryResult } from "../../../../../measurement/interfaces/simp
 import { IDetailedHistoryResultItem } from "../../../../../measurement/interfaces/detailed-history-result-item.interface"
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
 import { ISort } from "src/app/interfaces/sort.interface"
-import { tap } from "rxjs"
+import { of, tap } from "rxjs"
+import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
+import { ERoutes } from "src/app/enums/routes.enum"
 
 @Component({
     selector: "app-result-screen",
@@ -30,7 +32,7 @@ export class ResultScreenComponent {
     ]
     env$ = this.mainStore.env$.pipe(
         tap((env) => {
-            this.openResultURL =
+            this.openResultBaseURL =
                 env?.OPEN_HISTORY_RESUlT_URL?.replace(
                     "$lang",
                     this.transloco.getActiveLang()
@@ -38,6 +40,7 @@ export class ResultScreenComponent {
         })
     )
     error$ = this.mainStore.error$
+    openResultBaseURL = ""
     openResultURL = ""
     result$ = this.store.getMeasurementResult(
         this.route.snapshot.paramMap.get("testUuid")
@@ -46,11 +49,23 @@ export class ResultScreenComponent {
         active: "",
         direction: "",
     }
+    actionButtons: IMainMenuItem[] = [
+        {
+            label: "",
+            translations: [],
+            icon: "filetype-pdf",
+            action: () =>
+                this.store.exportAsPdf([
+                    this.store.simpleHistoryResult$.value!,
+                ]),
+        },
+    ]
 
     constructor(
         private store: TestStore,
         private mainStore: MainStore,
         private route: ActivatedRoute,
+        private router: Router,
         private transloco: TranslocoService
     ) {}
 
@@ -134,15 +149,46 @@ export class ResultScreenComponent {
         }
         return {
             content:
-                result.detailedHistoryResult?.map((item) =>
-                    this.openResultURL && /^O[-0-9a-zA-Z]+$/.test(item.value)
+                result.detailedHistoryResult?.map((item) => {
+                    const isOpenResultId = /^O[-0-9a-zA-Z]+$/.test(item.value)
+                    if (
+                        this.openResultBaseURL &&
+                        isOpenResultId &&
+                        !this.openResultURL
+                    ) {
+                        this.openResultURL = `${this.openResultBaseURL}${item.value}`
+                        this.addOpenResultButton()
+                    }
+                    return this.openResultURL && isOpenResultId
                         ? {
                               title: item.title,
-                              value: `<a href="${this.openResultURL}${item.value}" target="_blank">${item.value}</a>`,
+                              value: `<a href="${this.openResultURL}" target="_blank">${item.value}</a>`,
                           }
                         : item
-                ) ?? [],
+                }) ?? [],
             totalElements: result.detailedHistoryResult?.length ?? 0,
         }
+    }
+
+    weHaveToGoBack() {
+        if (this.mainStore.referrer$.value?.includes(ERoutes.HISTORY)) {
+            this.router.navigate(["/", ERoutes.HISTORY])
+        } else {
+            this.router.navigate(["/"])
+        }
+    }
+
+    private addOpenResultButton() {
+        this.actionButtons.push({
+            label: "",
+            translations: [],
+            icon: "new-window",
+            action: () => {
+                if (this.openResultURL) {
+                    window.open(this.openResultURL, "_blank")
+                }
+                return of(null)
+            },
+        })
     }
 }

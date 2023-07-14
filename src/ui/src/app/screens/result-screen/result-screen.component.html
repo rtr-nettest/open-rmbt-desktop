@@ -2,6 +2,7 @@
 <ng-container
     [ngTemplateOutlet]="(env$ | async)?.FLAVOR === 'ont' ? ont : rtr"
 ></ng-container>
+<app-scroll-top></app-scroll-top>
 
 <ng-template #ont>
     <main
@@ -23,8 +24,18 @@
             <app-export-warning></app-export-warning>
             <div class="app-main" *transloco="let t">
                 <h1 class="app-title">
+                    <button
+                        mat-icon-button
+                        (click)="weHaveToGoBack()"
+                        style="margin-right: 1ex"
+                    >
+                        <i class="app-icon app-icon--chevron-left"></i>
+                    </button>
                     {{ t("Measurement result from") }}
                     {{ result.measurementDate | date }}
+                    <app-action-buttons
+                        [items]="actionButtons"
+                    ></app-action-buttons>
                 </h1>
                 <div class="app-wrapper">
                     <app-table
@@ -66,10 +77,13 @@
 </ng-template>
 
 <ng-template #noResult>
-    <main *ngIf="error$ | async as error" class="app-main">
-        Measurement failed. {{ error.message }}
+    <main *ngIf="error$ | async as error" class="app-main app-main--no-result">
+        {{ "Measurement failed." | transloco }} {{ error.message }}
     </main>
-    <main *ngIf="(error$ | async) === null" class="app-main">
-        Fetching the result...
+    <main
+        *ngIf="(error$ | async) === null"
+        class="app-main app-main--no-result"
+    >
+        {{ "Fetching the result..." | transloco }}
     </main>
 </ng-template>

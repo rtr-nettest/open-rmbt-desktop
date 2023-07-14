@@ -163,4 +163,32 @@ export class DBService {
             return []
         }
     }
+
+    async getAllMeasurements() {
+        try {
+            const resp = this.db?.exec(`SELECT * FROM ${MEASUREMENT_TABLE}`)[0]
+            if (!resp) {
+                return []
+            }
+            const results = resp.values.map((columnValues) => {
+                return resp.columns.reduce((acc, c, i) => {
+                    let parsedVal = columnValues[i]
+                    if (parsedVal) {
+                        try {
+                            parsedVal = JSON.parse(parsedVal.toString())
+                        } catch (e) {}
+                    }
+                    return { ...acc, [c]: parsedVal }
+                }, {})
+            })
+            return results.map((r) =>
+                SimpleHistoryResult.fromLocalMeasurementResult(
+                    r as unknown as IMeasurementResult
+                )
+            )
+        } catch (e) {
+            Logger.I.warn("Get all error: %o", e)
+            return []
+        }
+    }
 }

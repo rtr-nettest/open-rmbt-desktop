@@ -45,5 +45,15 @@
     "IPv4": "IPv4",
     "IPv6": "IPv6",
     "Measurement result from": "Measurement result from",
-    "This result is only available locally.": "This result is only available locally."
+    "This result is only available locally.": "This result is only available locally.",
+    "Details...": "Details...",
+    "Fetching the result...": "Fetching the result...",
+    "Measurement failed.": "Measurement failed.",
+    "Fetching the history...": "Fetching the history...",
+    "Could not load the history.": "Could not load the history.",
+    "Time": "Time",
+    "Detailed results": "Detailed results",
+    "Settings": "Settings",
+    "Back to top": "Back to top ↑",
+    "Agree": "Zustimmung"
 }

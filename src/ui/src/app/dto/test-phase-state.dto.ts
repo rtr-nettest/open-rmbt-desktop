@@ -3,9 +3,10 @@ import { EMeasurementStatus } from "../../../../measurement/enums/measurement-st
 import { IPing } from "../../../../measurement/interfaces/measurement-result.interface"
 import { IOverallResult } from "../../../../measurement/interfaces/overall-result.interface"
 import { ETestStatuses } from "../enums/test-statuses.enum"
-import { speedLog } from "../helpers/number"
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
 import { STATE_UPDATE_TIMEOUT } from "../store/test.store"
+import { inject } from "@angular/core"
+import { ConversionService } from "../services/conversion.service"
 
 export class TestPhaseState implements ITestPhaseState {
     counter: number = -1
@@ -23,6 +24,7 @@ export class TestPhaseState implements ITestPhaseState {
     pings: IPing[] = []
 
     private startDuration = 0
+    private conversion = new ConversionService()
 
     constructor(options?: Partial<ITestPhaseState>) {
         if (options) {
@@ -55,7 +57,7 @@ export class TestPhaseState implements ITestPhaseState {
                     ...acc,
                     {
                         x: msec / 1e3 - shift,
-                        y: speedLog(r.speed / 1e6),
+                        y: this.conversion.speedLog(r.speed / 1e6),
                     },
                 ]
             } else {
@@ -82,7 +84,7 @@ export class TestPhaseState implements ITestPhaseState {
             ...(this.chart || []),
             {
                 x: this.duration - this.startDuration,
-                y: speedLog(this.counter),
+                y: this.conversion.speedLog(this.counter),
             },
         ]
     }

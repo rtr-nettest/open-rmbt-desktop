@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, NgZone } from "@angular/core"
 import { tap } from "rxjs"
-import { getSignificantDigits } from "src/app/helpers/number"
 import { ITestPhaseState } from "src/app/interfaces/test-phase-state.interface"
 import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
 import { TranslocoService } from "@ngneat/transloco"
+import { ConversionService } from "src/app/services/conversion.service"
 
 @Component({
     selector: "app-gauge",
@@ -22,6 +22,7 @@ export class GaugeComponent {
     )
 
     constructor(
+        private conversion: ConversionService,
         private store: TestStore,
         private ngZone: NgZone,
         private transloco: TranslocoService
@@ -180,7 +181,7 @@ export class GaugeComponent {
                 '<tspan style="fill:#59b200">' +
                 directionSymbol +
                 "</tspan>\u200a" +
-                getSignificantDigits(speedMbit)
+                this.conversion.getSignificantDigits(speedMbit)
             speedUnitEl.textContent = this.transloco.translate("Mbps")
 
             //enable smoothing animations on speed gauge, as soon as initial speed value is set

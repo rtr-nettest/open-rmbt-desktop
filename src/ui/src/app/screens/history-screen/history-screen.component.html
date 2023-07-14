@@ -28,10 +28,13 @@
 <app-scroll-top></app-scroll-top>
 
 <ng-template #noResult>
-    <main *ngIf="error$ | async as error" class="app-main">
+    <main *ngIf="error$ | async as error" class="app-main app-main--no-result">
         {{ "Could not load the history." | transloco }} {{ error.message }}
     </main>
-    <main *ngIf="(error$ | async) === null" class="app-main">
+    <main
+        *ngIf="(error$ | async) === null"
+        class="app-main app-main--no-result"
+    >
         {{ "Fetching the history..." | transloco }}
     </main>
 </ng-template>

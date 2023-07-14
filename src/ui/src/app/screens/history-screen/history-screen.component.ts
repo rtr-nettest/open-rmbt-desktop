@@ -12,11 +12,12 @@ import { ERoutes } from "src/app/enums/routes.enum"
 import { map, withLatestFrom } from "rxjs/operators"
 import { Observable } from "rxjs"
 import { Translation, TranslocoService } from "@ngneat/transloco"
-import { getSignificantDigits } from "src/app/helpers/number"
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
 import { MainStore } from "src/app/store/main.store"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 import { IPaginator } from "src/app/interfaces/paginator.interface"
+import { ClassificationService } from "src/app/services/classification.service"
+import { ConversionService } from "src/app/services/conversion.service"
 
 export interface IHistoryRow {
     id: string
@@ -47,14 +48,17 @@ export class HistoryScreenComponent implements OnInit {
         {
             columnDef: "download",
             header: "Download",
+            isHtml: true,
         },
         {
             columnDef: "upload",
             header: "Upload",
+            isHtml: true,
         },
         {
             columnDef: "ping",
             header: "Ping",
+            isHtml: true,
         },
         {
             columnDef: "details",
@@ -109,6 +113,8 @@ export class HistoryScreenComponent implements OnInit {
     ]
 
     constructor(
+        private classification: ClassificationService,
+        private conversion: ConversionService,
         private mainStore: MainStore,
         private store: TestStore,
         private transloco: TranslocoService
@@ -151,12 +157,22 @@ export class HistoryScreenComponent implements OnInit {
                     .replace("T", " ")
                     .replace(/\.[0-9]+Z$/, ""),
                 download:
-                    getSignificantDigits(hi.downloadKbit / 1e3) +
+                    this.classification.getIconByClass(hi.downloadClass) +
+                    this.conversion.getSignificantDigits(
+                        hi.downloadKbit / 1e3
+                    ) +
                     " " +
                     t["Mbps"],
                 upload:
-                    getSignificantDigits(hi.uploadKbit / 1e3) + " " + t["Mbps"],
-                ping: hi.ping + " " + t["ms"],
+                    this.classification.getIconByClass(hi.uploadClass) +
+                    this.conversion.getSignificantDigits(hi.uploadKbit / 1e3) +
+                    " " +
+                    t["Mbps"],
+                ping:
+                    this.classification.getIconByClass(hi.pingClass) +
+                    hi.ping +
+                    " " +
+                    t["ms"],
                 details: t["Details"] + "...",
             }
         }

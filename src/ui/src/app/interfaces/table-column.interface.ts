@@ -16,6 +16,8 @@ export interface ITableColumn<T = any> {
     footer?: string
     header: string
     isSortable?: boolean
+    isComponent?: boolean
+    isHtml?: boolean
     justify?: "flex-start" | "center" | "flex-end"
     key?: string
     link?: (...args: any[]) => string

@@ -17,6 +17,7 @@ export class MainStore {
 
     assets$ = new BehaviorSubject<{ [key: string]: IMainAsset }>({})
     env$ = new BehaviorSubject<IEnv | null>(null)
+    inProgress$ = new BehaviorSubject<boolean>(false)
     project$ = new BehaviorSubject<IMainProject | null>(null)
     settings$ = new BehaviorSubject<IUserSettings | null>(null)
     error$ = new BehaviorSubject<Error | null>(null)

@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core"
 import {
     BehaviorSubject,
+    catchError,
     concatMap,
     from,
     interval,
@@ -24,6 +25,8 @@ import { IPaginator } from "../interfaces/paginator.interface"
 import { HttpClient, HttpParams } from "@angular/common/http"
 import { saveAs } from "file-saver"
 import { TranslocoService } from "@ngneat/transloco"
+import { MessageService } from "../services/message.service"
+import { ERROR_OCCURED } from "../constants/strings"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
@@ -50,7 +53,8 @@ export class TestStore {
         private mainStore: MainStore,
         private router: Router,
         private http: HttpClient,
-        private transloco: TranslocoService
+        private transloco: TranslocoService,
+        private message: MessageService
     ) {}
 
     launchTest() {
@@ -151,6 +155,7 @@ export class TestStore {
         if (!exportUrl) {
             return of(null)
         }
+        this.mainStore.inProgress$.next(true)
         return this.http
             .post(
                 exportUrl + "/pdf/" + this.transloco.getActiveLang(),
@@ -172,6 +177,13 @@ export class TestStore {
                 tap((data: any) => {
                     if (data?.body)
                         saveAs(data.body, `${new Date().toISOString()}.pdf`)
+
+                    this.mainStore.inProgress$.next(false)
+                }),
+                catchError(() => {
+                    this.mainStore.inProgress$.next(false)
+                    this.message.openSnackbar(ERROR_OCCURED)
+                    return of(null)
                 })
             )
     }
@@ -181,6 +193,8 @@ export class TestStore {
         if (!exportUrl) {
             return of(null)
         }
+
+        this.mainStore.inProgress$.next(true)
         return this.http
             .post(exportUrl, this.getExportParams(format, results), {
                 responseType: "blob",
@@ -193,6 +207,13 @@ export class TestStore {
                             data.body,
                             `${new Date().toISOString()}.${format}`
                         )
+
+                    this.mainStore.inProgress$.next(false)
+                }),
+                catchError(() => {
+                    this.mainStore.inProgress$.next(false)
+                    this.message.openSnackbar(ERROR_OCCURED)
+                    return of(null)
                 })
             )
     }

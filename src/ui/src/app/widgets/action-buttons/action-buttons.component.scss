@@ -18,22 +18,6 @@
         & > * {
             opacity: 0.5;
         }
-
-        &::before {
-            animation: spin 1s linear infinite;
-            content: "⟳";
-            display: inline-block;
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            font-size: rem($font-size-xxl);
-            height: rem($font-size-xxl);
-            line-height: 1.05rem;
-            margin-left: rem(math.div(-$font-size-xxl, 2) + 1);
-            margin-top: rem(math.div(-$font-size-xxl, 2));
-            width: rem($font-size-xxl);
-            transform-origin: 43% 47%;
-        }
     }
 }
 

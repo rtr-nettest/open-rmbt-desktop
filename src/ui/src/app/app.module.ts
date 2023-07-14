@@ -24,6 +24,7 @@ import { MatButtonModule } from "@angular/material/button"
 import { MatTooltipModule } from "@angular/material/tooltip"
 import { MatSnackBarModule } from "@angular/material/snack-bar"
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
+import { MatProgressBarModule } from "@angular/material/progress-bar"
 import { HttpClientModule } from "@angular/common/http"
 import { TranslocoRootModule } from "./transloco-root.module"
 import { TestHeaderComponent } from "./widgets/test-header/test-header.component"
@@ -86,9 +87,9 @@ import { SettingsLocaleComponent } from "./widgets/settings-locale/settings-loca
 import { FormsModule } from "@angular/forms"
 import { EIPVersion } from "../../../measurement/enums/ip-version.enum"
 import { MainStore } from "./store/main.store"
-import { HistoryScreenComponent } from "./screens/history-screen/history-screen.component";
-import { ActionButtonsComponent } from './widgets/action-buttons/action-buttons.component';
-import { ScrollTopComponent } from './widgets/scroll-top/scroll-top.component'
+import { HistoryScreenComponent } from "./screens/history-screen/history-screen.component"
+import { ActionButtonsComponent } from "./widgets/action-buttons/action-buttons.component"
+import { ScrollTopComponent } from "./widgets/scroll-top/scroll-top.component"
 
 Chart.register(
     BarElement,
@@ -181,6 +182,7 @@ declare global {
         MatDialogModule,
         MatIconModule,
         MatPaginatorModule,
+        MatProgressBarModule,
         MatProgressSpinnerModule,
         MatSnackBarModule,
         MatTableModule,

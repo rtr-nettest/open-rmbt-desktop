@@ -1,10 +1,7 @@
 <app-header></app-header>
 <app-body>
     <app-main-menu></app-main-menu>
-    <app-main-content
-        *ngIf="result$ | async as result; else noResult"
-        [style.flex-direction]="'column'"
-    >
+    <app-main-content *ngIf="result$ | async as result; else noResult">
         <app-export-warning></app-export-warning>
         <div class="app-main" *transloco="let t">
             <h1 class="app-title">
@@ -28,13 +25,7 @@
 <app-scroll-top></app-scroll-top>
 
 <ng-template #noResult>
-    <main *ngIf="error$ | async as error" class="app-main app-main--no-result">
-        {{ "Could not load the history." | transloco }} {{ error.message }}
-    </main>
-    <main
-        *ngIf="(error$ | async) === null"
-        class="app-main app-main--no-result"
-    >
+    <main class="app-main app-main--no-result">
         {{ "Fetching the history..." | transloco }}
     </main>
 </ng-template>

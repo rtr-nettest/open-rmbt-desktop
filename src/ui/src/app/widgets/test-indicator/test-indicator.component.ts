@@ -2,7 +2,7 @@ import { Component, Input } from "@angular/core"
 import { ITestPhaseState } from "../../interfaces/test-phase-state.interface"
 import { ETestStatuses } from "../../enums/test-statuses.enum"
 import { TranslocoService } from "@ngneat/transloco"
-import { convertMs } from "src/app/helpers/convert-ms"
+import { ConversionService } from "src/app/services/conversion.service"
 
 @Component({
     selector: "nt-test-indicator",
@@ -15,7 +15,7 @@ export class TestIndicatorComponent {
     get counter() {
         let parsedVal = Number(this.data?.counter)
         if (!isNaN(parsedVal)) {
-            const retVal = convertMs(parsedVal)
+            const retVal = this.conversion.convertMs(parsedVal)
             return retVal >= 0 ? retVal.toLocaleString() : "-"
         }
         return "-"
@@ -45,5 +45,8 @@ export class TestIndicatorComponent {
         )
     }
 
-    constructor(private transloco: TranslocoService) {}
+    constructor(
+        private transloco: TranslocoService,
+        private conversion: ConversionService
+    ) {}
 }

@@ -48,12 +48,19 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
     }
 
     static fromRTRHistoryResult(response: any) {
+        const downKbit = response.speed_download
+            ? Number(response.speed_download) * 1e3
+            : 0
+        const upKbit = response.speed_upload
+            ? Number(response.speed_upload) * 1e3
+            : 0
+        const pingMs = response.ping ? Number(response.ping) : 0
         return new SimpleHistoryResult(
             dayjs(response?.time).toISOString(),
             "",
-            response.speed_download ? Number(response.speed_download) * 1e3 : 0,
-            response.speed_upload ? Number(response.speed_upload) * 1e3 : 0,
-            response.ping ? Number(response.ping) : 0,
+            downKbit,
+            upKbit,
+            pingMs,
             "",
             "",
             response.test_uuid ?? "",
@@ -61,9 +68,21 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             [],
             [],
             [],
-            response.speed_download_classification ?? 0,
-            response.speed_upload_classification ?? 0,
-            response.ping_classification ?? 0
+            ClassificationService.I.classify(
+                downKbit,
+                THRESHOLD_DOWNLOAD,
+                "biggerBetter"
+            ),
+            ClassificationService.I.classify(
+                upKbit,
+                THRESHOLD_UPLOAD,
+                "biggerBetter"
+            ),
+            ClassificationService.I.classify(
+                pingMs * 1e6,
+                THRESHOLD_PING,
+                "smallerBetter"
+            )
         )
     }
 

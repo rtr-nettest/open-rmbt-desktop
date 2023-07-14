@@ -37,9 +37,7 @@
             </ng-container>
             <!-- END MAT-HEADER-CELL-->
 
-            <ng-container
-                *ngIf="column.columnDef === 'component'; else defaultCell"
-            >
+            <ng-container *ngIf="column.isComponent; else defaultCell">
                 <mat-cell
                     *matCellDef="let element; let i = dataIndex"
                     [style]="justify(column)"
@@ -51,13 +49,11 @@
                 </mat-cell>
             </ng-container>
 
-            <ng-container
-                *ngIf="column.columnDef === 'value'; else defaultCell"
-            >
+            <ng-container *ngIf="column.isHtml; else defaultCell">
                 <mat-cell
                     *matCellDef="let element; let i = dataIndex"
                     [style]="justify(column)"
-                    [innerHtml]="element.value"
+                    [innerHtml]="element[column.columnDef]"
                 >
                 </mat-cell>
             </ng-container>

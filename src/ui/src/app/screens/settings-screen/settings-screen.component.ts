@@ -35,6 +35,7 @@ export class SettingsScreenComponent extends BaseScreen implements OnInit {
         {
             columnDef: "component",
             header: "",
+            isComponent: true,
         },
     ]
     data$: Observable<IBasicResponse<ISettingsRow>> = combineLatest([

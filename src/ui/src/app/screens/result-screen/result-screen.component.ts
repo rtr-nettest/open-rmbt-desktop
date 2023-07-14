@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core"
 import { ActivatedRoute, Router } from "@angular/router"
 import { TranslocoService } from "@ngneat/transloco"
-import { getSignificantDigits } from "src/app/helpers/number"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
 import { MainStore } from "src/app/store/main.store"
 import { TestStore } from "src/app/store/test.store"
@@ -12,6 +11,8 @@ import { ISort } from "src/app/interfaces/sort.interface"
 import { of, tap } from "rxjs"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 import { ERoutes } from "src/app/enums/routes.enum"
+import { ClassificationService } from "src/app/services/classification.service"
+import { ConversionService } from "src/app/services/conversion.service"
 
 @Component({
     selector: "app-result-screen",
@@ -28,6 +29,7 @@ export class ResultScreenComponent {
         {
             columnDef: "value",
             header: "",
+            isHtml: true,
         },
     ]
     env$ = this.mainStore.env$.pipe(
@@ -62,6 +64,8 @@ export class ResultScreenComponent {
     ]
 
     constructor(
+        private classification: ClassificationService,
+        private conversion: ConversionService,
         private store: TestStore,
         private mainStore: MainStore,
         private route: ActivatedRoute,
@@ -69,31 +73,20 @@ export class ResultScreenComponent {
         private transloco: TranslocoService
     ) {}
 
-    getIconByClass(classification?: number) {
-        switch (classification) {
-            case 1:
-                return '<i class="app-icon--class app-icon--class-red"></i>'
-            case 2:
-                return '<i class="app-icon--class app-icon--class-yellow"></i>'
-            case 3:
-                return '<i class="app-icon--class app-icon--class-green"></i>'
-            case 4:
-                return '<i class="app-icon--class app-icon--class-greenest"></i>'
-            default:
-                return ""
-        }
-    }
-
     getSpeedInMbps(speed: number) {
         return (
-            getSignificantDigits(speed / 1e3) +
+            this.conversion.getSignificantDigits(speed / 1e3) +
             " " +
             this.transloco.translate("Mbps")
         )
     }
 
     getPingInMs(ping: number) {
-        return getSignificantDigits(ping) + " " + this.transloco.translate("ms")
+        return (
+            this.conversion.getSignificantDigits(ping) +
+            " " +
+            this.transloco.translate("ms")
+        )
     }
 
     getBasicResults(
@@ -107,8 +100,9 @@ export class ResultScreenComponent {
                         {
                             title: "Download",
                             value:
-                                this.getIconByClass(result.downloadClass) +
-                                this.getSpeedInMbps(value),
+                                this.classification.getIconByClass(
+                                    result.downloadClass
+                                ) + this.getSpeedInMbps(value),
                         },
                     ]
                 case "uploadKbit":
@@ -117,8 +111,9 @@ export class ResultScreenComponent {
                         {
                             title: "Upload",
                             value:
-                                this.getIconByClass(result.uploadClass) +
-                                this.getSpeedInMbps(value),
+                                this.classification.getIconByClass(
+                                    result.uploadClass
+                                ) + this.getSpeedInMbps(value),
                         },
                     ]
                 case "ping":
@@ -127,8 +122,9 @@ export class ResultScreenComponent {
                         {
                             title: "Ping",
                             value:
-                                this.getIconByClass(result.pingClass) +
-                                this.getPingInMs(value),
+                                this.classification.getIconByClass(
+                                    result.pingClass
+                                ) + this.getPingInMs(value),
                         },
                     ]
                 default:

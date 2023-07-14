@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core"
-import { fromEvent, map, startWith, tap } from "rxjs"
-import { getSignificantDigits } from "src/app/helpers/number"
+import { tap } from "rxjs"
 import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
 import { TranslocoService } from "@ngneat/transloco"
+import { ConversionService } from "src/app/services/conversion.service"
 
 @Component({
     selector: "app-interim-results",
@@ -14,19 +14,19 @@ import { TranslocoService } from "@ngneat/transloco"
 export class InterimResultsComponent {
     visualization$ = this.store.visualization$.pipe(
         tap((state) => {
-            const ping = getSignificantDigits(
+            const ping = this.conversionService.getSignificantDigits(
                 state.phases[EMeasurementStatus.DOWN].ping
             )
             this.ping =
                 ping < 0 ? "-" : ping + " " + this.transloco.translate("ms")
-            const download = getSignificantDigits(
+            const download = this.conversionService.getSignificantDigits(
                 state.phases[EMeasurementStatus.DOWN].down
             )
             this.download =
                 download < 0
                     ? "-"
                     : download + " " + this.transloco.translate("Mbps")
-            const upload = getSignificantDigits(
+            const upload = this.conversionService.getSignificantDigits(
                 state.phases[EMeasurementStatus.UP].up
             )
             this.upload =
@@ -43,6 +43,7 @@ export class InterimResultsComponent {
     phases = EMeasurementStatus
 
     constructor(
+        private conversionService: ConversionService,
         private store: TestStore,
         private transloco: TranslocoService
     ) {}

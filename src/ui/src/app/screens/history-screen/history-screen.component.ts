@@ -18,6 +18,8 @@ import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 import { IPaginator } from "src/app/interfaces/paginator.interface"
 import { ClassificationService } from "src/app/services/classification.service"
 import { ConversionService } from "src/app/services/conversion.service"
+import { BaseScreen } from "../base-screen/base-screen.component"
+import { MessageService } from "src/app/services/message.service"
 
 export interface IHistoryRow {
     id: string
@@ -35,7 +37,7 @@ export interface IHistoryRow {
     styleUrls: ["./history-screen.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HistoryScreenComponent implements OnInit {
+export class HistoryScreenComponent extends BaseScreen implements OnInit {
     columns: ITableColumn<ISimpleHistoryResult>[] = [
         {
             columnDef: "count",
@@ -67,7 +69,6 @@ export class HistoryScreenComponent implements OnInit {
             transformValue: () => this.transloco.translate("Details..."),
         },
     ]
-    error$ = this.mainStore.error$
     loading = false
     observer?: IntersectionObserver
     result$: Observable<IBasicResponse<IHistoryRow>> = this.store.history$.pipe(
@@ -113,12 +114,15 @@ export class HistoryScreenComponent implements OnInit {
     ]
 
     constructor(
+        mainStore: MainStore,
+        message: MessageService,
         private classification: ClassificationService,
         private conversion: ConversionService,
-        private mainStore: MainStore,
         private store: TestStore,
         private transloco: TranslocoService
-    ) {}
+    ) {
+        super(mainStore, message)
+    }
 
     ngOnInit(): void {
         this.store.allHistoryLoaded$.next(false)

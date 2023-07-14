@@ -20,6 +20,9 @@
         @media screen and (min-width: 1025px) {
             display: none;
         }
+        @include screen-sm {
+            height: 0;
+        }
     }
 
     &--large-fixed {

@@ -87,7 +87,8 @@ import { FormsModule } from "@angular/forms"
 import { EIPVersion } from "../../../measurement/enums/ip-version.enum"
 import { MainStore } from "./store/main.store"
 import { HistoryScreenComponent } from "./screens/history-screen/history-screen.component";
-import { ActionButtonsComponent } from './widgets/action-buttons/action-buttons.component'
+import { ActionButtonsComponent } from './widgets/action-buttons/action-buttons.component';
+import { ScrollTopComponent } from './widgets/scroll-top/scroll-top.component'
 
 Chart.register(
     BarElement,
@@ -168,6 +169,7 @@ declare global {
         SettingsLocaleComponent,
         HistoryScreenComponent,
         ActionButtonsComponent,
+        ScrollTopComponent,
     ],
     imports: [
         AppRoutingModule,

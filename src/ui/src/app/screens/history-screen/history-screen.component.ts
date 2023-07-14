@@ -11,11 +11,12 @@ import { ISimpleHistoryResult } from "../../../../../measurement/interfaces/simp
 import { ERoutes } from "src/app/enums/routes.enum"
 import { map, withLatestFrom } from "rxjs/operators"
 import { Observable } from "rxjs"
-import { TranslocoService } from "@ngneat/transloco"
+import { Translation, TranslocoService } from "@ngneat/transloco"
 import { getSignificantDigits } from "src/app/helpers/number"
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
 import { MainStore } from "src/app/store/main.store"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
+import { IPaginator } from "src/app/interfaces/paginator.interface"
 
 export interface IHistoryRow {
     id: string
@@ -74,25 +75,7 @@ export class HistoryScreenComponent implements OnInit {
             if (!history.length) {
                 return { content: [], totalElements: 0 }
             }
-            const content = history.map((hi, index) => {
-                return {
-                    id: hi.testUuid!,
-                    count: paginator.limit ? index + 1 : history.length - index,
-                    time: hi.measurementDate
-                        .replace("T", " ")
-                        .replace(/\.[0-9]+Z$/, ""),
-                    download:
-                        getSignificantDigits(hi.downloadKbit / 1e3) +
-                        " " +
-                        t["Mbps"],
-                    upload:
-                        getSignificantDigits(hi.uploadKbit / 1e3) +
-                        " " +
-                        t["Mbps"],
-                    ping: hi.ping + " " + t["ms"],
-                    details: t["Details"] + "...",
-                }
-            })
+            const content = history.map(this.historyItemToRow(t, paginator))
             return {
                 content,
                 totalElements: content.length,
@@ -146,7 +129,7 @@ export class HistoryScreenComponent implements OnInit {
             .subscribe(() => (this.loading = false))
     }
 
-    @HostListener("document:mousewheel")
+    @HostListener("body:scroll")
     onScroll() {
         const body = document.querySelector("app-main-content")
         if (!body) {
@@ -157,4 +140,24 @@ export class HistoryScreenComponent implements OnInit {
             this.loadMore()
         }
     }
+
+    private historyItemToRow =
+        (t: Translation, paginator: IPaginator) =>
+        (hi: ISimpleHistoryResult, index: number) => {
+            return {
+                id: hi.testUuid!,
+                count: paginator.limit ? index + 1 : history.length - index,
+                time: hi.measurementDate
+                    .replace("T", " ")
+                    .replace(/\.[0-9]+Z$/, ""),
+                download:
+                    getSignificantDigits(hi.downloadKbit / 1e3) +
+                    " " +
+                    t["Mbps"],
+                upload:
+                    getSignificantDigits(hi.uploadKbit / 1e3) + " " + t["Mbps"],
+                ping: hi.ping + " " + t["ms"],
+                details: t["Details"] + "...",
+            }
+        }
 }

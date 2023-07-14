@@ -2,6 +2,7 @@
 <ng-container
     [ngTemplateOutlet]="(env$ | async)?.FLAVOR === 'ont' ? ont : rtr"
 ></ng-container>
+<app-scroll-top></app-scroll-top>
 
 <ng-template #ont>
     <main

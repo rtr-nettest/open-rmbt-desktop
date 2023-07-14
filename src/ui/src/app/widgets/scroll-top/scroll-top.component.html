@@ -1,0 +1,10 @@
+<ng-container *ngIf="isVisible">
+    <button
+        color="primary"
+        mat-button
+        *transloco="let t"
+        (click)="handleClick($event)"
+    >
+        {{ t("Back to top") }}
+    </button>
+</ng-container>

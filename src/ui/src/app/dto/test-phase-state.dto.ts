@@ -69,7 +69,7 @@ export class TestPhaseState implements ITestPhaseState {
     setChartFromPings(pings: IPing[]): void {
         this.chart = pings.map((p, i) => ({
             x: i,
-            y: Math.round(p.value_server / 1e6),
+            y: p.value_server / 1e6,
         }))
     }
 

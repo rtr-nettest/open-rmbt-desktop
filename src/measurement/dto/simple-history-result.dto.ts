@@ -1,4 +1,9 @@
 import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+import timezone from "dayjs/plugin/timezone" // dependent on utc plugin
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
 import {
     IMeasurementResult,
     IPing,
@@ -14,10 +19,12 @@ import {
 } from "../services/classification.service"
 import { RMBTClient } from "../services/rmbt-client.service"
 
+export const RESULT_DATE_FORMAT = "YYYY-MM-DD HH:mm:ss"
+
 export class SimpleHistoryResult implements ISimpleHistoryResult {
     static fromLocalMeasurementResult(result: IMeasurementResult) {
         return new SimpleHistoryResult(
-            dayjs(result.time).toISOString(),
+            dayjs(result.time).format(RESULT_DATE_FORMAT),
             result.measurement_server ?? "-",
             result.test_speed_download,
             result.test_speed_upload,
@@ -49,14 +56,18 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
 
     static fromRTRHistoryResult(response: any) {
         const downKbit = response.speed_download
-            ? Number(response.speed_download) * 1e3
+            ? parseFloat(response.speed_download.replace(",", "")) * 1e3
             : 0
         const upKbit = response.speed_upload
-            ? Number(response.speed_upload) * 1e3
+            ? parseFloat(response.speed_upload.replace(",", "")) * 1e3
             : 0
-        const pingMs = response.ping ? Number(response.ping) : 0
+        const pingMs = response.ping
+            ? parseFloat(response.ping.replace(",", ""))
+            : 0
         return new SimpleHistoryResult(
-            dayjs(response?.time).toISOString(),
+            dayjs(response?.time)
+                .tz(response.timezone)
+                .format(RESULT_DATE_FORMAT),
             "",
             downKbit,
             upKbit,
@@ -93,7 +104,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         testResultDetail: any
     ) {
         return new SimpleHistoryResult(
-            dayjs(response.time).toISOString(),
+            dayjs(response.time).format(RESULT_DATE_FORMAT),
             openTestsResponse?.server_name,
             response.measurement_result?.download_kbit,
             response.measurement_result?.upload_kbit,

@@ -158,6 +158,7 @@ export class HistoryScreenComponent extends BaseScreen implements OnInit {
     private historyItemToRow =
         (t: Translation, paginator: IPaginator, historyLength: number) =>
         (hi: ISimpleHistoryResult, index: number) => {
+            const locale = this.transloco.getActiveLang()
             return {
                 id: hi.testUuid!,
                 count: paginator.limit ? index + 1 : historyLength - index,
@@ -165,23 +166,25 @@ export class HistoryScreenComponent extends BaseScreen implements OnInit {
                     hi.measurementDate,
                     "medium",
                     undefined,
-                    this.transloco.getActiveLang()
+                    locale
                 )!,
                 download:
                     this.classification.getIconByClass(hi.downloadClass) +
-                    this.conversion.getSignificantDigits(
-                        hi.downloadKbit / 1e3
-                    ) +
+                    this.conversion
+                        .getSignificantDigits(hi.downloadKbit / 1e3)
+                        .toLocaleString(locale) +
                     " " +
                     t["Mbps"],
                 upload:
                     this.classification.getIconByClass(hi.uploadClass) +
-                    this.conversion.getSignificantDigits(hi.uploadKbit / 1e3) +
+                    this.conversion
+                        .getSignificantDigits(hi.uploadKbit / 1e3)
+                        .toLocaleString(locale) +
                     " " +
                     t["Mbps"],
                 ping:
                     this.classification.getIconByClass(hi.pingClass) +
-                    hi.ping +
+                    hi.ping.toLocaleString(locale) +
                     " " +
                     t["ms"],
                 details: t["Details"] + "...",

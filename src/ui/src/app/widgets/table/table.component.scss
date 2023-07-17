@@ -77,6 +77,12 @@
         &-count {
             flex: 0 0 10%;
         }
+
+        &-download,
+        &-upload,
+        &-ping {
+            flex-wrap: wrap;
+        }
     }
 
     &--wide {

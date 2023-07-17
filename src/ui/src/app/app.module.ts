@@ -90,6 +90,8 @@ import { MainStore } from "./store/main.store"
 import { HistoryScreenComponent } from "./screens/history-screen/history-screen.component"
 import { ActionButtonsComponent } from "./widgets/action-buttons/action-buttons.component"
 import { ScrollTopComponent } from "./widgets/scroll-top/scroll-top.component"
+import localeDe from "@angular/common/locales/de"
+import { registerLocaleData } from "@angular/common"
 
 Chart.register(
     BarElement,
@@ -202,4 +204,8 @@ declare global {
         },
     ],
 })
-export class AppModule {}
+export class AppModule {
+    constructor() {
+        registerLocaleData(localeDe)
+    }
+}

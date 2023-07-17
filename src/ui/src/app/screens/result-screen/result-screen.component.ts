@@ -62,6 +62,7 @@ export class ResultScreenComponent {
                 ]),
         },
     ]
+    locale = this.transloco.getActiveLang()
 
     constructor(
         private classification: ClassificationService,

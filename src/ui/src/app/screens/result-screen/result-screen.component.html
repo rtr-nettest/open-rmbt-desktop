@@ -32,7 +32,10 @@
                         <i class="app-icon app-icon--chevron-left"></i>
                     </button>
                     {{ t("Measurement result from") }}
-                    {{ result.measurementDate | date : "medium" }}
+                    {{
+                        result.measurementDate
+                            | date : "medium" : undefined : locale
+                    }}
                     <app-action-buttons
                         [items]="actionButtons"
                     ></app-action-buttons>

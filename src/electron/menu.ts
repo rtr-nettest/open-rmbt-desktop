@@ -1,3 +1,4 @@
+import { I18nService } from "../measurement/services/i18n.service"
 import { Events } from "./enums/events.enum"
 
 const { app, Menu } = require("electron")
@@ -67,45 +68,21 @@ const template = [
                   ]),
         ],
     },
-    // { role: 'viewMenu' }
-    {
-        label: "View",
-        submenu: [
-            { role: "reload" },
-            { role: "forceReload" },
-            { role: "toggleDevTools" },
-            { type: "separator" },
-            { role: "resetZoom" },
-            { role: "zoomIn" },
-            { role: "zoomOut" },
-            { type: "separator" },
-            { role: "togglefullscreen" },
-        ],
-    },
     // { role: 'windowMenu' }
     {
         label: "Window",
-        submenu: [
-            { role: "minimize" },
-            { role: "zoom" },
-            ...(isMac
-                ? [
-                      { type: "separator" },
-                      { role: "front" },
-                      { type: "separator" },
-                      { role: "window" },
-                  ]
-                : [{ role: "close" }]),
-        ],
+        submenu: [{ role: "minimize" }],
     },
     {
         role: "help",
         submenu: [
             {
-                label: "Learn More",
+                label: "Help",
                 click: async () => {
                     const { shell } = require("electron")
-                    await shell.openExternal("https://electronjs.org")
+                    await shell.openExternal(
+                        `https://www.rtr.at/${I18nService.I.getActiveLanguage()}/tk/netztesthilfe`
+                    )
                 },
             },
         ],

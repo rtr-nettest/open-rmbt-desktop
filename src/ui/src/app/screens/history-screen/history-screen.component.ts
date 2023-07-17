@@ -20,6 +20,7 @@ import { ClassificationService } from "src/app/services/classification.service"
 import { ConversionService } from "src/app/services/conversion.service"
 import { BaseScreen } from "../base-screen/base-screen.component"
 import { MessageService } from "src/app/services/message.service"
+import { DatePipe } from "@angular/common"
 
 export interface IHistoryRow {
     id: string
@@ -121,7 +122,8 @@ export class HistoryScreenComponent extends BaseScreen implements OnInit {
         private classification: ClassificationService,
         private conversion: ConversionService,
         private store: TestStore,
-        private transloco: TranslocoService
+        private transloco: TranslocoService,
+        private datePipe: DatePipe
     ) {
         super(mainStore, message)
     }
@@ -159,7 +161,12 @@ export class HistoryScreenComponent extends BaseScreen implements OnInit {
             return {
                 id: hi.testUuid!,
                 count: paginator.limit ? index + 1 : historyLength - index,
-                time: hi.measurementDate,
+                time: this.datePipe.transform(
+                    hi.measurementDate,
+                    "medium",
+                    undefined,
+                    this.transloco.getActiveLang()
+                )!,
                 download:
                     this.classification.getIconByClass(hi.downloadClass) +
                     this.conversion.getSignificantDigits(

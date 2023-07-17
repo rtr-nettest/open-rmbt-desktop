@@ -91,7 +91,7 @@ import { HistoryScreenComponent } from "./screens/history-screen/history-screen.
 import { ActionButtonsComponent } from "./widgets/action-buttons/action-buttons.component"
 import { ScrollTopComponent } from "./widgets/scroll-top/scroll-top.component"
 import localeDe from "@angular/common/locales/de"
-import { registerLocaleData } from "@angular/common"
+import { DatePipe, registerLocaleData } from "@angular/common"
 
 Chart.register(
     BarElement,
@@ -201,6 +201,9 @@ declare global {
             useFactory: MainStore.factory,
             deps: [MainStore],
             multi: true,
+        },
+        {
+            provide: DatePipe,
         },
     ],
 })

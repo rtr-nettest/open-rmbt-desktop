@@ -17,6 +17,15 @@
                     [sort]="sort"
                     [shouldHideHeader]="false"
                 ></app-table>
+                <button
+                    *ngIf="!allLoaded"
+                    mat-flat-button
+                    color="primary"
+                    (click)="loadMore()"
+                    [disabled]="loading"
+                >
+                    {{ loading ? t("Loading") : t("Load more") }}
+                </button>
             </div>
         </div>
         <app-footer></app-footer>

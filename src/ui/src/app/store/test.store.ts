@@ -47,7 +47,6 @@ export class TestStore {
     historyPaginator$ = new BehaviorSubject<IPaginator>({
         offset: 0,
     })
-    allHistoryLoaded$ = new BehaviorSubject<boolean>(false)
 
     constructor(
         private mainStore: MainStore,
@@ -76,13 +75,14 @@ export class TestStore {
     }
 
     getMeasurementHistory() {
-        if (this.mainStore.error$.value || this.allHistoryLoaded$.value) {
+        if (this.mainStore.error$.value) {
             return of([])
         }
-        return from(this.mainStore.env$).pipe(
-            withLatestFrom(this.historyPaginator$, this.history$),
+        const env = this.mainStore.env$.value
+        const startPaginator = this.historyPaginator$.value
+        return this.historyPaginator$.pipe(
             take(1),
-            switchMap(([env, paginator, history]) => {
+            switchMap((paginator) => {
                 if (env?.HISTORY_RESULTS_LIMIT) {
                     this.historyPaginator$.next({
                         offset: paginator.offset + env.HISTORY_RESULTS_LIMIT,
@@ -92,21 +92,25 @@ export class TestStore {
                         paginator.offset,
                         env.HISTORY_RESULTS_LIMIT
                     )
-                } else if (!history.length) {
+                } else {
                     return window.electronAPI.getMeasurementHistory(
                         paginator.offset
                     )
                 }
-                return of(null)
             }),
             tap((history) => {
-                if (history) {
+                if (env?.HISTORY_RESULTS_LIMIT && history) {
                     this.history$.next([...this.history$.value, ...history])
-                } else {
-                    this.allHistoryLoaded$.next(true)
+                } else if (!env?.HISTORY_RESULTS_LIMIT && history) {
+                    this.history$.next(history)
                 }
             })
         )
+    }
+
+    resetMeasurementHistory() {
+        this.history$.next([])
+        this.historyPaginator$.next({ offset: 0 })
     }
 
     getMeasurementResult(testUuid: string | null) {

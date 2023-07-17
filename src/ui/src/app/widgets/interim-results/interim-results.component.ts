@@ -14,25 +14,34 @@ import { ConversionService } from "src/app/services/conversion.service"
 export class InterimResultsComponent {
     visualization$ = this.store.visualization$.pipe(
         tap((state) => {
+            const locale = this.transloco.getActiveLang()
             const ping = this.conversionService.getSignificantDigits(
                 state.phases[EMeasurementStatus.DOWN].ping
             )
             this.ping =
-                ping < 0 ? "-" : ping + " " + this.transloco.translate("ms")
+                ping < 0
+                    ? "-"
+                    : ping.toLocaleString(locale) +
+                      " " +
+                      this.transloco.translate("ms")
             const download = this.conversionService.getSignificantDigits(
                 state.phases[EMeasurementStatus.DOWN].down
             )
             this.download =
                 download < 0
                     ? "-"
-                    : download + " " + this.transloco.translate("Mbps")
+                    : download.toLocaleString(locale) +
+                      " " +
+                      this.transloco.translate("Mbps")
             const upload = this.conversionService.getSignificantDigits(
                 state.phases[EMeasurementStatus.UP].up
             )
             this.upload =
                 upload < 0
                     ? "-"
-                    : upload + " " + this.transloco.translate("Mbps")
+                    : upload.toLocaleString(locale) +
+                      " " +
+                      this.transloco.translate("Mbps")
         })
     )
 

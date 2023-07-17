@@ -2,6 +2,7 @@ import {
     ChangeDetectionStrategy,
     Component,
     HostListener,
+    OnDestroy,
     OnInit,
 } from "@angular/core"
 import { ISort } from "src/app/interfaces/sort.interface"
@@ -38,7 +39,10 @@ export interface IHistoryRow {
     styleUrls: ["./history-screen.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HistoryScreenComponent extends BaseScreen implements OnInit {
+export class HistoryScreenComponent
+    extends BaseScreen
+    implements OnInit, OnDestroy
+{
     columns: ITableColumn<ISimpleHistoryResult>[] = [
         {
             columnDef: "count",
@@ -71,7 +75,8 @@ export class HistoryScreenComponent extends BaseScreen implements OnInit {
         },
     ]
     loading = false
-    observer?: IntersectionObserver
+    allLoaded = false
+    isLodaMoreButtonVisible = !!this.mainStore.env$.value?.HISTORY_RESULTS_LIMIT
     result$: Observable<IBasicResponse<IHistoryRow>> = this.store.history$.pipe(
         withLatestFrom(
             this.transloco.selectTranslation(),
@@ -129,18 +134,27 @@ export class HistoryScreenComponent extends BaseScreen implements OnInit {
     }
 
     ngOnInit(): void {
-        this.store.allHistoryLoaded$.next(false)
+        this.allLoaded = false
         this.loadMore()
     }
 
+    override ngOnDestroy(): void {
+        this.store.resetMeasurementHistory()
+        super.ngOnDestroy()
+    }
+
     loadMore() {
-        if (this.loading || this.store.allHistoryLoaded$.value) {
+        console.log("this.allLoaded", this.allLoaded)
+        if (this.loading || this.allLoaded) {
             return
         }
         this.loading = true
-        this.store
-            .getMeasurementHistory()
-            .subscribe(() => (this.loading = false))
+        this.store.getMeasurementHistory().subscribe((history) => {
+            this.loading = false
+            if (!history || !this.mainStore.env$.value?.HISTORY_RESULTS_LIMIT) {
+                this.allLoaded = true
+            }
+        })
     }
 
     @HostListener("body:scroll")

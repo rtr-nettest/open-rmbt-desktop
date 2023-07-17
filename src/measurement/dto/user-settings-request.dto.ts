@@ -6,6 +6,7 @@ import { EMeasurementServerType } from "../enums/measurement-server-type.enum"
 import os from "os"
 import { CLIENT_UUID, Store, TERMS_ACCEPTED } from "../services/store.service"
 import { I18nService } from "../services/i18n.service"
+import { uuid } from "uuidv4"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -16,7 +17,7 @@ export class UserSettingsRequest implements IUserSettingsRequest {
     timezone = dayjs.tz.guess()
     terms_and_conditions_accepted = false
     terms_and_conditions_accepted_version?: number
-    uuid = (Store.I.get(CLIENT_UUID) as string) ?? ""
+    uuid = (Store.I.get(CLIENT_UUID) as string) ?? uuid()
     operating_system = `${os.type}, ${os.release}`
 
     // RTR BE compatibility

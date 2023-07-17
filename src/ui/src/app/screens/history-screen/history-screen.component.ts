@@ -80,7 +80,9 @@ export class HistoryScreenComponent extends BaseScreen implements OnInit {
             if (!history.length) {
                 return { content: [], totalElements: 0 }
             }
-            const content = history.map(this.historyItemToRow(t, paginator))
+            const content = history.map(
+                this.historyItemToRow(t, paginator, history.length)
+            )
             return {
                 content,
                 totalElements: content.length,
@@ -142,7 +144,7 @@ export class HistoryScreenComponent extends BaseScreen implements OnInit {
     @HostListener("body:scroll")
     onScroll() {
         const body = document.querySelector("app-main-content")
-        if (!body) {
+        if (!body || !this.mainStore.env$.value?.HISTORY_RESULTS_LIMIT) {
             return
         }
         const bodyBottom = body.getBoundingClientRect().bottom
@@ -152,14 +154,12 @@ export class HistoryScreenComponent extends BaseScreen implements OnInit {
     }
 
     private historyItemToRow =
-        (t: Translation, paginator: IPaginator) =>
+        (t: Translation, paginator: IPaginator, historyLength: number) =>
         (hi: ISimpleHistoryResult, index: number) => {
             return {
                 id: hi.testUuid!,
-                count: paginator.limit ? index + 1 : history.length - index,
-                time: hi.measurementDate
-                    .replace("T", " ")
-                    .replace(/\.[0-9]+Z$/, ""),
+                count: paginator.limit ? index + 1 : historyLength - index,
+                time: hi.measurementDate,
                 download:
                     this.classification.getIconByClass(hi.downloadClass) +
                     this.conversion.getSignificantDigits(

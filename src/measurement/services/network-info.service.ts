@@ -71,7 +71,7 @@ export class NetworkInfoService {
         return IPInfo
     }
 
-    async getNetworkType(): Promise<number> {
+    async getNetworkType(): Promise<number | undefined> {
         let type: string | undefined
         try {
             if (process.platform === "win32") {
@@ -91,7 +91,7 @@ export class NetworkInfoService {
             case "ethernet":
                 return 106
             default:
-                return 0
+                return undefined
         }
     }
 }

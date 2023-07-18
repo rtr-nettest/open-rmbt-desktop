@@ -44,7 +44,7 @@ export class NetInterfaceInfoWindowsService implements NetInterfaceInfo {
         const blocks = []
         for (const line of lines) {
             let key = ""
-            let lineLowered = line.toLowerCase()
+            let lineLowered = line.toLowerCase().replace("-", "")
             switch (true) {
                 case lineLowered.includes("wifi"):
                     key = "wifi"

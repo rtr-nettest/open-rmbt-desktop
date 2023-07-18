@@ -2,6 +2,7 @@ import { EMeasurementServerType } from "../enums/measurement-server-type.enum"
 import { IGeolocation } from "./geolocation.interface"
 
 export interface IMeasurementRegistrationRequest {
+    app_version?: string
     capabilities?: { [key: string]: any }
     client: EMeasurementServerType
     language: string

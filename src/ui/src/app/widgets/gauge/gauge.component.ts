@@ -109,6 +109,7 @@ export class GaugeComponent {
     }
 
     private drawLoop(phaseState: ITestPhaseState) {
+        const locale = this.transloco.getActiveLang()
         let { phase: status, progress, counter } = phaseState
         let barSelector = null
         let directionSymbol = null
@@ -181,7 +182,9 @@ export class GaugeComponent {
                 '<tspan style="fill:#59b200">' +
                 directionSymbol +
                 "</tspan>\u200a" +
-                this.conversion.getSignificantDigits(speedMbit)
+                this.conversion
+                    .getSignificantDigits(speedMbit)
+                    .toLocaleString(locale)
             speedUnitEl.textContent = this.transloco.translate("Mbps")
 
             //enable smoothing animations on speed gauge, as soon as initial speed value is set

@@ -18,9 +18,7 @@
         min-height: rem(50);
     }
 
-    &__cell--ellipsis,
-    mat-header-cell > *,
-    mat-cell > * {
+    &__cell--ellipsis {
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
@@ -76,12 +74,14 @@
             flex: 0 0 30%;
         }
 
-        &-time {
-            flex: 0 0 25%;
-        }
-
         &-count {
             flex: 0 0 10%;
+        }
+
+        &-download,
+        &-upload,
+        &-ping {
+            flex-wrap: wrap;
         }
     }
 

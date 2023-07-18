@@ -26,6 +26,11 @@ $container-width: 100%;
     margin-bottom: 1em;
 }
 
+.app-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
 app-footer {
     height: auto;
     padding-right: 0;

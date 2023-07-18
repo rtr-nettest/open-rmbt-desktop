@@ -2,6 +2,7 @@ import {
     ChangeDetectionStrategy,
     Component,
     HostListener,
+    OnDestroy,
     OnInit,
 } from "@angular/core"
 import { ISort } from "src/app/interfaces/sort.interface"
@@ -20,6 +21,7 @@ import { ClassificationService } from "src/app/services/classification.service"
 import { ConversionService } from "src/app/services/conversion.service"
 import { BaseScreen } from "../base-screen/base-screen.component"
 import { MessageService } from "src/app/services/message.service"
+import { DatePipe } from "@angular/common"
 
 export interface IHistoryRow {
     id: string
@@ -37,7 +39,10 @@ export interface IHistoryRow {
     styleUrls: ["./history-screen.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HistoryScreenComponent extends BaseScreen implements OnInit {
+export class HistoryScreenComponent
+    extends BaseScreen
+    implements OnInit, OnDestroy
+{
     columns: ITableColumn<ISimpleHistoryResult>[] = [
         {
             columnDef: "count",
@@ -70,7 +75,8 @@ export class HistoryScreenComponent extends BaseScreen implements OnInit {
         },
     ]
     loading = false
-    observer?: IntersectionObserver
+    allLoaded = false
+    isLodaMoreButtonVisible = !!this.mainStore.env$.value?.HISTORY_RESULTS_LIMIT
     result$: Observable<IBasicResponse<IHistoryRow>> = this.store.history$.pipe(
         withLatestFrom(
             this.transloco.selectTranslation(),
@@ -121,24 +127,34 @@ export class HistoryScreenComponent extends BaseScreen implements OnInit {
         private classification: ClassificationService,
         private conversion: ConversionService,
         private store: TestStore,
-        private transloco: TranslocoService
+        private transloco: TranslocoService,
+        private datePipe: DatePipe
     ) {
         super(mainStore, message)
     }
 
     ngOnInit(): void {
-        this.store.allHistoryLoaded$.next(false)
+        this.allLoaded = false
         this.loadMore()
     }
 
+    override ngOnDestroy(): void {
+        this.store.resetMeasurementHistory()
+        super.ngOnDestroy()
+    }
+
     loadMore() {
-        if (this.loading || this.store.allHistoryLoaded$.value) {
+        console.log("this.allLoaded", this.allLoaded)
+        if (this.loading || this.allLoaded) {
             return
         }
         this.loading = true
-        this.store
-            .getMeasurementHistory()
-            .subscribe(() => (this.loading = false))
+        this.store.getMeasurementHistory().subscribe((history) => {
+            this.loading = false
+            if (!history || !this.mainStore.env$.value?.HISTORY_RESULTS_LIMIT) {
+                this.allLoaded = true
+            }
+        })
     }
 
     @HostListener("body:scroll")
@@ -156,25 +172,33 @@ export class HistoryScreenComponent extends BaseScreen implements OnInit {
     private historyItemToRow =
         (t: Translation, paginator: IPaginator, historyLength: number) =>
         (hi: ISimpleHistoryResult, index: number) => {
+            const locale = this.transloco.getActiveLang()
             return {
                 id: hi.testUuid!,
                 count: paginator.limit ? index + 1 : historyLength - index,
-                time: hi.measurementDate,
+                time: this.datePipe.transform(
+                    hi.measurementDate,
+                    "medium",
+                    undefined,
+                    locale
+                )!,
                 download:
                     this.classification.getIconByClass(hi.downloadClass) +
-                    this.conversion.getSignificantDigits(
-                        hi.downloadKbit / 1e3
-                    ) +
+                    this.conversion
+                        .getSignificantDigits(hi.downloadKbit / 1e3)
+                        .toLocaleString(locale) +
                     " " +
                     t["Mbps"],
                 upload:
                     this.classification.getIconByClass(hi.uploadClass) +
-                    this.conversion.getSignificantDigits(hi.uploadKbit / 1e3) +
+                    this.conversion
+                        .getSignificantDigits(hi.uploadKbit / 1e3)
+                        .toLocaleString(locale) +
                     " " +
                     t["Mbps"],
                 ping:
                     this.classification.getIconByClass(hi.pingClass) +
-                    hi.ping +
+                    hi.ping.toLocaleString(locale) +
                     " " +
                     t["ms"],
                 details: t["Details"] + "...",

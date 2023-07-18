@@ -62,6 +62,7 @@ export class ResultScreenComponent {
                 ]),
         },
     ]
+    locale = this.transloco.getActiveLang()
 
     constructor(
         private classification: ClassificationService,
@@ -74,16 +75,20 @@ export class ResultScreenComponent {
     ) {}
 
     getSpeedInMbps(speed: number) {
+        const locale = this.transloco.getActiveLang()
         return (
-            this.conversion.getSignificantDigits(speed / 1e3) +
+            this.conversion
+                .getSignificantDigits(speed / 1e3)
+                .toLocaleString(locale) +
             " " +
             this.transloco.translate("Mbps")
         )
     }
 
     getPingInMs(ping: number) {
+        const locale = this.transloco.getActiveLang()
         return (
-            this.conversion.getSignificantDigits(ping) +
+            this.conversion.getSignificantDigits(ping).toLocaleString(locale) +
             " " +
             this.transloco.translate("ms")
         )

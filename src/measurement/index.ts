@@ -100,10 +100,10 @@ export class MeasurementRunner {
             ) {
                 this.rmbtClient!.measurementStatus = EMeasurementStatus.END
             }
-        } catch (e) {
+        } catch (e: any) {
             if (e) {
-                // Logger.I.error(e)
-                throw e
+                Logger.I.error(e)
+                throw e.message
             }
         } finally {
             this.setCPUUsage()

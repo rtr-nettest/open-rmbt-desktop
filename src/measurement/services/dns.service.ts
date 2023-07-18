@@ -12,6 +12,9 @@ export class DNSService {
     private constructor() {}
 
     async resolve(hostname: string, ipv?: EIPVersion) {
+        if (!hostname) {
+            return undefined
+        }
         let ips: string[] = []
         if (!ipv) {
             Logger.I.info(
@@ -26,8 +29,8 @@ export class DNSService {
             ips = await dns.resolve6(hostname)
         }
         if (ips.length) {
-            Logger.I.info("IP version is %s. Using address: %s", ipv, ips[0])
-            return ips[0]
+            Logger.I.info("IP version is %s. The addresses are: %o", ipv, ips)
+            return ips[ips.length - 1]
         }
         throw new Error("Could not resolve the hostname")
     }

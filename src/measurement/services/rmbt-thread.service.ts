@@ -54,15 +54,7 @@ export class RMBTThread implements IMessageHandlerContext {
     ) {}
 
     async connect(result: IMeasurementThreadResult): Promise<RMBTThread> {
-        let host: string | undefined
-        try {
-            host = await DNSService.I.resolve(
-                this.params.test_server_address,
-                this.params.ip_version
-            )
-        } catch (e) {
-            this.errorListener(e as Error)
-        }
+        const host = this.params.test_server_address
         return new Promise((resolve) => {
             this.threadResult = result
             const options: net.NetConnectOpts & tls.ConnectionOptions = {

@@ -19,5 +19,4 @@ export interface IMeasurementRegistrationResponse {
     uuid?: string
     test_server_type?: EMeasurementServerType
     error?: string[]
-    ip_version?: EIPVersion
 }

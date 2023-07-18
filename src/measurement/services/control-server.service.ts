@@ -10,7 +10,6 @@ import { Logger } from "./logger.service"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import tz from "dayjs/plugin/timezone"
-import { RMBTClient } from "./rmbt-client.service"
 import { ELoggerMessage } from "../enums/logger-message.enum"
 import {
     CLIENT_UUID,
@@ -26,6 +25,8 @@ import { EIPVersion } from "../enums/ip-version.enum"
 import { I18nService } from "./i18n.service"
 import * as pack from "../../../package.json"
 import { EMeasurementFinalStatus } from "../enums/measurement-final-status"
+import { DNSService } from "./dns.service"
+import { Agent } from "https"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -38,6 +39,22 @@ export class ControlServer {
     }
 
     private constructor() {}
+
+    private async getHost() {
+        const ipv = Store.I.get(IP_VERSION) as EIPVersion
+        if (!ipv) {
+            const resolved = await DNSService.I.resolve(
+                process.env.CONTROL_SERVER_URL!.replace("https://", ""),
+                ipv
+            )
+            if (resolved && ipv === EIPVersion.v6) {
+                return "https://[" + resolved + "]"
+            } else if (resolved) {
+                return "https://" + resolved
+            }
+        }
+        return process.env.CONTROL_SERVER_URL!
+    }
 
     private get headers() {
         const headers: { [key: string]: string } = {
@@ -150,19 +167,28 @@ export class ControlServer {
             process.env.MESUREMENT_REGISTRATION_PATH,
             request
         )
+        const hostName = new URL(await this.getHost())
         const response = (
             await axios.post(
-                `${process.env.CONTROL_SERVER_URL}${process.env.MESUREMENT_REGISTRATION_PATH}`,
+                `${hostName}${process.env.MESUREMENT_REGISTRATION_PATH}`,
                 request,
-                { headers: this.headers }
+                {
+                    headers: this.headers,
+                    httpsAgent: new Agent({ rejectUnauthorized: false }),
+                }
             )
         ).data as IMeasurementRegistrationResponse
         if (response?.test_token && response?.test_uuid) {
             Logger.I.info("Registered measurement: %o", response)
-            response.ip_version = Store.I.get(IP_VERSION) as EIPVersion
+            response.test_server_address =
+                (await DNSService.I.resolve(
+                    response.test_server_address,
+                    Store.I.get(IP_VERSION) as EIPVersion
+                )) ?? response.test_server_address
             return response
         }
         if (response?.error?.length) {
+            Logger.I.error("Registration error: %o", response.error)
             throw new Error(response.error.join(" "))
         }
         Logger.I.error("Registration response: %o", response)

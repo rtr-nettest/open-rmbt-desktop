@@ -13,8 +13,6 @@ import { InitMessageHandler } from "./message-handlers/init-message-handler.serv
 import { UploadMessageHandler } from "./message-handlers/upload-message-handler.service"
 import { IMessageHandlerContext } from "../interfaces/message-handler.interface"
 import { ELoggerMessage } from "../enums/logger-message.enum"
-import { DNSService } from "./dns.service"
-import { EIPVersion } from "../enums/ip-version.enum"
 
 export interface IPreDownloadResult {
     chunkSize: number

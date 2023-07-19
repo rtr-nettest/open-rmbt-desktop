@@ -5,7 +5,10 @@ import { IMeasurementResult } from "../interfaces/measurement-result.interface"
 import { IMeasurementServerResponse } from "../interfaces/measurement-server-response.interface"
 import { ISimpleHistoryResult } from "../interfaces/simple-history-result.interface"
 import { IUserSettingsRequest } from "../interfaces/user-settings-request.interface"
-import { IUserSetingsResponse } from "../interfaces/user-settings-response.interface"
+import {
+    IUserSetingsResponse,
+    IUserSettings,
+} from "../interfaces/user-settings-response.interface"
 import { Logger } from "./logger.service"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
@@ -16,6 +19,7 @@ import {
     IP_VERSION,
     LANGUAGE,
     LAST_NEWS_UID,
+    SETTINGS,
     Store,
 } from "./store.service"
 import { DBService } from "./db.service"
@@ -25,8 +29,9 @@ import { EIPVersion } from "../enums/ip-version.enum"
 import { I18nService } from "./i18n.service"
 import * as pack from "../../../package.json"
 import { EMeasurementFinalStatus } from "../enums/measurement-final-status"
-import { DNSService } from "./dns.service"
 import { Agent } from "https"
+import { NetworkInfoService } from "./network-info.service"
+import { UserSettingsRequest } from "../dto/user-settings-request.dto"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -41,8 +46,26 @@ export class ControlServer {
     private constructor() {}
 
     private async getHost() {
-        DNSService.I.setPrefferedIPVersion()
-        return process.env.CONTROL_SERVER_URL!
+        const ipv = Store.I.get(IP_VERSION) as EIPVersion
+        const defaultHost = process.env.CONTROL_SERVER_URL!
+        const settings = Store.I.get(SETTINGS) as IUserSettings
+        const settingsRequest = new UserSettingsRequest()
+        const ipv6Host = settings.urls.control_ipv6_only
+        const ipv4Host = settings.urls.control_ipv4_only
+        let resolved: string | undefined
+        if (ipv6Host && ipv === EIPVersion.v6) {
+            resolved = (
+                await NetworkInfoService.I.getIPInfo(settings, settingsRequest)
+            ).publicV6
+            return resolved ? "https://" + ipv6Host : defaultHost
+        } else if (ipv4Host && ipv === EIPVersion.v4) {
+            resolved = (
+                await NetworkInfoService.I.getIPInfo(settings, settingsRequest)
+            ).publicV4
+            return resolved ? "https://" + ipv4Host : defaultHost
+        } else {
+            return defaultHost
+        }
     }
 
     private get headers() {
@@ -142,6 +165,7 @@ export class ControlServer {
         if (response?.settings?.length) {
             Logger.I.info("Using settings: %o", response.settings[0])
             Store.I.set(CLIENT_UUID, response.settings[0].uuid)
+            Store.I.set(SETTINGS, response.settings[0])
             return response.settings[0]
         }
         if (response?.error?.length) {
@@ -169,11 +193,6 @@ export class ControlServer {
         ).data as IMeasurementRegistrationResponse
         if (response?.test_token && response?.test_uuid) {
             Logger.I.info("Registered measurement: %o", response)
-            response.test_server_address =
-                (await DNSService.I.resolve(
-                    response.test_server_address,
-                    Store.I.get(IP_VERSION) as EIPVersion
-                )) ?? response.test_server_address
             return response
         }
         if (response?.error?.length) {

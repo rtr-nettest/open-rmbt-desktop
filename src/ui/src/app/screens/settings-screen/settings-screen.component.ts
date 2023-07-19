@@ -41,8 +41,9 @@ export class SettingsScreenComponent extends BaseScreen implements OnInit {
     data$: Observable<IBasicResponse<ISettingsRow>> = combineLatest([
         this.mainStore.env$,
         this.transloco.selectTranslation(),
+        this.mainStore.settings$,
     ]).pipe(
-        map(([env, t]) => {
+        map(([env, t, settings]) => {
             const content: ISettingsRow[] = [
                 {
                     title: t["Client UUID"],
@@ -56,21 +57,25 @@ export class SettingsScreenComponent extends BaseScreen implements OnInit {
                     title: t["Open source"],
                     component: SettingsRepoLinkComponent,
                 },
-                {
+            ]
+            if (settings?.ipInfo?.publicV4) {
+                content.push({
                     title: t["IPv4 only"],
                     component: SettingsIpComponent,
                     parameters: {
                         ipVersion: EIPVersion.v4,
                     },
-                },
-                {
+                })
+            }
+            if (settings?.ipInfo?.publicV6) {
+                content.push({
                     title: t["IPv6 only"],
                     component: SettingsIpComponent,
                     parameters: {
                         ipVersion: EIPVersion.v6,
                     },
-                },
-            ]
+                })
+            }
             if (env?.ENABLE_LANGUAGE_SWITCH === "true") {
                 content.push({
                     title: t["Language"],

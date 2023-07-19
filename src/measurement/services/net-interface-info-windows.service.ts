@@ -33,7 +33,7 @@ export class NetInterfaceInfoWindowsService implements NetInterfaceInfo {
 
     async getActiveInterfaceType() {
         const activeInterfaces = await this.getActiveInterfaces()
-        if (activeInterfaces.length <= 0 && activeInterfaces.length > 1) {
+        if (activeInterfaces.length <= 0 || activeInterfaces.length > 1) {
             return ""
         }
         return activeInterfaces[0].key

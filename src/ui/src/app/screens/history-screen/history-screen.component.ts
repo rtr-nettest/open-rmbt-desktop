@@ -37,7 +37,6 @@ export interface IHistoryRow {
     selector: "app-history-screen",
     templateUrl: "./history-screen.component.html",
     styleUrls: ["./history-screen.component.scss"],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HistoryScreenComponent
     extends BaseScreen
@@ -144,7 +143,6 @@ export class HistoryScreenComponent
     }
 
     loadMore() {
-        console.log("this.allLoaded", this.allLoaded)
         if (this.loading || this.allLoaded) {
             return
         }

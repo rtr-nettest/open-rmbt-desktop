@@ -1,6 +1,7 @@
 import { EIPVersion } from "../enums/ip-version.enum"
 import dns from "dns/promises"
 import { Logger } from "./logger.service"
+import { IP_VERSION, Store } from "./store.service"
 
 export class DNSService {
     private static instance = new DNSService()
@@ -10,6 +11,15 @@ export class DNSService {
     }
 
     private constructor() {}
+
+    setPrefferedIPVersion() {
+        const ipv = Store.I.get(IP_VERSION) as EIPVersion
+        if (!ipv || ipv === EIPVersion.v6) {
+            dns.setDefaultResultOrder("verbatim")
+        } else {
+            dns.setDefaultResultOrder("ipv4first")
+        }
+    }
 
     async resolve(hostname: string, ipv?: EIPVersion) {
         if (!hostname) {

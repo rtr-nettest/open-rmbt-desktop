@@ -41,18 +41,7 @@ export class ControlServer {
     private constructor() {}
 
     private async getHost() {
-        const ipv = Store.I.get(IP_VERSION) as EIPVersion
-        if (ipv) {
-            const resolved = await DNSService.I.resolve(
-                process.env.CONTROL_SERVER_URL!.replace("https://", ""),
-                ipv
-            )
-            if (resolved && ipv === EIPVersion.v6) {
-                return "https://[" + resolved + "]"
-            } else if (resolved) {
-                return "https://" + resolved
-            }
-        }
+        DNSService.I.setPrefferedIPVersion()
         return process.env.CONTROL_SERVER_URL!
     }
 

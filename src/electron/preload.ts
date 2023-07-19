@@ -27,4 +27,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.removeAllListeners(Events.ERROR)
         ipcRenderer.on(Events.ERROR, (event, error) => callback(error))
     },
+    onOpenSettings: (callback: () => any) => {
+        ipcRenderer.removeAllListeners(Events.OPEN_SETTINGS)
+        ipcRenderer.on(Events.OPEN_SETTINGS, callback)
+    },
 })

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, protocol, shell } from "electron"
+import { app, BrowserWindow, ipcMain, Menu, protocol, shell } from "electron"
 if (require("electron-squirrel-startup")) app.quit()
 import path from "path"
 import { MeasurementRunner } from "../measurement"
@@ -15,6 +15,7 @@ import { CrowdinService } from "../measurement/services/crowdin.service"
 import { ControlServer } from "../measurement/services/control-server.service"
 import pack from "../../package.json"
 import { EIPVersion } from "../measurement/enums/ip-version.enum"
+import { menu } from "./menu"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -46,9 +47,11 @@ const createWindow = () => {
         return { action: "deny" }
     })
 
+    Menu.setApplicationMenu(menu)
+
     if (process.env.DEV === "true") {
-        win.webContents.openDevTools()
         win.loadURL("http://localhost:4200/")
+        win.webContents.openDevTools()
     } else {
         win.loadURL(`${Protocol.scheme}://index.html`)
     }

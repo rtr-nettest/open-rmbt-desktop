@@ -59,7 +59,7 @@ export class MeasurementResult implements IMeasurementResult {
         this.client_software_version = registrationRequest.app_version
         this.client_uuid = registrationRequest.uuid ?? ""
         this.num_threads_ul = threadResults.reduce(
-            (acc, thread, i) => (thread.up.bytes.length ? acc + i : acc),
+            (acc, thread) => (thread.up.bytes.length ? (acc += 1) : acc),
             0
         )
         this.operating_system = registrationRequest.operating_system ?? ""

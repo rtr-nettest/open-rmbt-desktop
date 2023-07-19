@@ -27,7 +27,7 @@ export class NetInterfaceInfoUnixService implements NetInterfaceInfo {
     async getActiveInterfaceType() {
         const activeInterfaces =
             await NetInterfaceInfoUnixService.I.getActiveInterfaces()
-        if (activeInterfaces.length <= 0 && activeInterfaces.length > 1) {
+        if (activeInterfaces.length <= 0 || activeInterfaces.length > 1) {
             return ""
         }
         const iface: string = await new Promise((res, rej) => {

@@ -1,6 +1,6 @@
 @import "../../../assets/styles/core.scss";
 
-$container-width: 80%;
+$container-width: 100%;
 
 :host {
     display: flex;
@@ -9,17 +9,22 @@ $container-width: 80%;
 }
 
 .app-main {
-    align-items: center;
+    align-self: center;
     display: flex;
     flex: 1;
     flex-direction: column;
-    justify-content: center;
-    padding: rem(30);
+    padding: 0 rem(30) rem(30);
     width: 100%;
 
-    &--ont {
-        padding: 0 rem(30) rem(30);
+    &--no-result {
+        text-align: center;
     }
+}
+
+.app-title {
+    align-items: center;
+    display: flex;
+    margin-bottom: 1em;
 }
 
 .app-wrapper {
@@ -27,18 +32,12 @@ $container-width: 80%;
     width: $container-width;
 
     & > * {
-        flex: 0 0 50%;
+        flex: 1;
     }
 
-    & > app-spacer {
-        flex: 0 0 10%;
+    &:not(:last-of-type) {
+        margin-bottom: 1.5em;
     }
-}
-
-.app-title {
-    font-size: rem(12);
-    margin-bottom: rem(40);
-    width: $container-width;
 }
 
 .app-btn {
@@ -57,6 +56,36 @@ $container-width: 80%;
     text-decoration: none !important;
 }
 
+.app-charts {
+    margin: rem(20) 0 rem(40) rem(-10);
+
+    &__col {
+        height: rem(200);
+        padding: 0 rem(10);
+        width: 33%;
+    }
+
+    @include screen-sm {
+        display: block;
+
+        &__col {
+            width: auto;
+        }
+    }
+}
+
 app-test-boxes {
     width: 100%;
+}
+
+app-footer {
+    height: auto;
+    padding-right: 0;
+    padding-bottom: rem(20);
+    position: relative;
+}
+
+app-main-content {
+    align-items: initial;
+    overflow: auto;
 }

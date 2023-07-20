@@ -12,7 +12,7 @@ import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
 import { MessageService } from "src/app/services/message.service"
 import {
-    ERROR_OCCURED_DURING_MEASUREMENT,
+    ERROR_OCCURED,
     ERROR_OCCURED_SENDING_RESULTS,
 } from "src/app/constants/strings"
 import { ITestVisualizationState } from "src/app/interfaces/test-visualization-state.interface"
@@ -37,7 +37,7 @@ export class TestScreenComponent implements OnDestroy {
                     state.currentPhaseName ===
                     EMeasurementStatus.SUBMITTING_RESULTS
                         ? ERROR_OCCURED_SENDING_RESULTS
-                        : ERROR_OCCURED_DURING_MEASUREMENT
+                        : ERROR_OCCURED
                 const navigate = () =>
                     state.currentPhaseName ===
                     EMeasurementStatus.SUBMITTING_RESULTS

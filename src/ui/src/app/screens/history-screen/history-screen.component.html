@@ -1,0 +1,40 @@
+<app-header></app-header>
+<app-body>
+    <app-main-menu></app-main-menu>
+    <app-main-content *ngIf="result$ | async as result; else noResult">
+        <app-export-warning></app-export-warning>
+        <div class="app-main" *transloco="let t">
+            <h1 class="app-title">
+                {{ t("History") }}
+                <app-action-buttons
+                    [items]="actionButtons"
+                ></app-action-buttons>
+            </h1>
+            <div class="app-wrapper">
+                <app-table
+                    [columns]="columns"
+                    [data]="result"
+                    [sort]="sort"
+                    [shouldHideHeader]="false"
+                ></app-table>
+                <button
+                    *ngIf="!allLoaded"
+                    mat-flat-button
+                    color="primary"
+                    (click)="loadMore()"
+                    [disabled]="loading"
+                >
+                    {{ loading ? t("Loading") : t("Load more") }}
+                </button>
+            </div>
+        </div>
+        <app-footer></app-footer>
+    </app-main-content>
+</app-body>
+<app-scroll-top></app-scroll-top>
+
+<ng-template #noResult>
+    <main class="app-main app-main--no-result">
+        {{ "Fetching the history..." | transloco }}
+    </main>
+</ng-template>

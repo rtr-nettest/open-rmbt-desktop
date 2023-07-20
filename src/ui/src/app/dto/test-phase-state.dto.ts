@@ -1,10 +1,12 @@
+import { Point } from "chart.js"
 import { EMeasurementStatus } from "../../../../measurement/enums/measurement-status.enum"
 import { IPing } from "../../../../measurement/interfaces/measurement-result.interface"
 import { IOverallResult } from "../../../../measurement/interfaces/overall-result.interface"
 import { ETestStatuses } from "../enums/test-statuses.enum"
-import { speedLog } from "../helpers/number"
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
 import { STATE_UPDATE_TIMEOUT } from "../store/test.store"
+import { inject } from "@angular/core"
+import { ConversionService } from "../services/conversion.service"
 
 export class TestPhaseState implements ITestPhaseState {
     counter: number = -1
@@ -22,6 +24,7 @@ export class TestPhaseState implements ITestPhaseState {
     pings: IPing[] = []
 
     private startDuration = 0
+    private conversion = new ConversionService()
 
     constructor(options?: Partial<ITestPhaseState>) {
         if (options) {
@@ -29,7 +32,7 @@ export class TestPhaseState implements ITestPhaseState {
         }
     }
 
-    setChartFromOverallSpeed(overallResults: IOverallResult[]) {
+    setONTChartFromOverallSpeed(overallResults: IOverallResult[]) {
         this.chart = overallResults.map((r) => ({
             x: (r.nsec * 100) / overallResults[overallResults.length - 1].nsec,
             y: r.speed / 1e6,
@@ -40,10 +43,33 @@ export class TestPhaseState implements ITestPhaseState {
         }
     }
 
+    setRTRChartFromOverallSpeed(overallResults: IOverallResult[]) {
+        let skippedMs = 1
+        let shift = 0
+        this.chart = overallResults.reduce((acc, r, i) => {
+            const msec = r.nsec / 1e6
+            if (msec > 0 && msec >= STATE_UPDATE_TIMEOUT * skippedMs) {
+                skippedMs++
+                if (!shift) {
+                    shift = msec / 1e3
+                }
+                return [
+                    ...acc,
+                    {
+                        x: msec / 1e3 - shift,
+                        y: this.conversion.speedLog(r.speed / 1e6),
+                    },
+                ]
+            } else {
+                return acc
+            }
+        }, [] as Point[])
+    }
+
     setChartFromPings(pings: IPing[]): void {
         this.chart = pings.map((p, i) => ({
             x: i,
-            y: Math.round(p.value_server / 1e6),
+            y: p.value_server / 1e6,
         }))
     }
 
@@ -58,7 +84,7 @@ export class TestPhaseState implements ITestPhaseState {
             ...(this.chart || []),
             {
                 x: this.duration - this.startDuration,
-                y: speedLog(this.counter),
+                y: this.conversion.speedLog(this.counter),
             },
         ]
     }

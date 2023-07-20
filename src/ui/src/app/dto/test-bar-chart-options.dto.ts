@@ -17,7 +17,7 @@ export class TestBarChartOptions {
     scales = {
         x: {
             grid: {
-                color: EColors.SECONDARY_10,
+                display: false,
             },
             title: {
                 display: true,
@@ -25,9 +25,6 @@ export class TestBarChartOptions {
                 font: {
                     size: 12,
                 },
-            },
-            ticks: {
-                callback: () => "",
             },
         },
         y: {
@@ -51,7 +48,6 @@ export class TestBarChartOptions {
                     size: 12,
                 },
                 maxTicksLimit: 6,
-                stepSize: 10,
                 callback: (value: any) => {
                     return `${value} ${this.t.translate("ms")}`
                 },

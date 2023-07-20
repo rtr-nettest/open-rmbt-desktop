@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from "@angular/core"
+import { ChangeDetectionStrategy, Component, Input } from "@angular/core"
 import { ActivatedRoute, Router } from "@angular/router"
 import { map } from "rxjs"
 import { THIS_INTERRUPTS_ACTION } from "src/app/constants/strings"
@@ -12,6 +12,7 @@ import { MessageService } from "src/app/services/message.service"
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent {
+    @Input() fixed = false
     private noGo = "javascript:;"
     link$ = this.activeRoute.url.pipe(
         map((segments) => {

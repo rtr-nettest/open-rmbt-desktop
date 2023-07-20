@@ -2,22 +2,26 @@
 
 :host {
     align-self: start;
-    flex: 0 0 30%;
+    flex: 0 0 20%;
     height: 100%;
     z-index: 10;
 
     @include screen-lg {
-        flex: 0 0 rem(48);
+        flex: 0 0 rem(70);
     }
 }
 
 .app-aside {
+    background: white;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 100%;
+    position: fixed;
+    top: 0;
+    bottom: rem(24);
 }
 
 .app-list {
     list-style: none;
+    margin-top: rem(30);
 }

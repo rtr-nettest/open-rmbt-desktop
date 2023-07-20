@@ -3,6 +3,9 @@
     <app-main-menu></app-main-menu>
     <app-main-content>
         <div class="app-main" *transloco="let t">
+            <h1 class="app-title">
+                {{ t("Settings") }}
+            </h1>
             <div class="app-wrapper">
                 <app-table
                     [columns]="columns"
@@ -13,5 +16,5 @@
             </div>
         </div>
     </app-main-content>
+    <app-footer></app-footer>
 </app-body>
-<app-footer></app-footer>

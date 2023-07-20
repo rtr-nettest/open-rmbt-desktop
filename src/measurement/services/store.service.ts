@@ -5,6 +5,7 @@ export const TERMS_ACCEPTED = "termsAccepted"
 export const LAST_NEWS_UID = "lastNewsUid"
 export const IP_VERSION = "ipVersion"
 export const LANGUAGE = "language"
+export const SETTINGS = "settings"
 
 export class Store {
     private static instance = new ElectronStore()

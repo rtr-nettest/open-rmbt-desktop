@@ -27,13 +27,13 @@
 .app-chart {
     position: relative;
 
-    nt-test-chart {
+    app-test-chart {
         height: 18vh;
         width: 40vw;
     }
 
     &--ping {
-        nt-test-chart {
+        app-test-chart {
             height: 14vh;
         }
     }

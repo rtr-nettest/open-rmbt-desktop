@@ -4,9 +4,11 @@ import { IUserSettingsRequest } from "../interfaces/user-settings-request.interf
 import os from "os"
 import { Logger } from "./logger.service"
 import { ELoggerMessage } from "../enums/logger-message.enum"
+import { NetInterfaceInfoUnixService } from "./net-interface-info-unix.service"
+import { NetInterfaceInfoWindowsService } from "./net-interface-info-windows.service"
 
-export class IPInfoService {
-    private static instance = new IPInfoService()
+export class NetworkInfoService {
+    private static instance = new NetworkInfoService()
 
     static get I() {
         return this.instance
@@ -38,6 +40,7 @@ export class IPInfoService {
                 .data.ip
         } catch (e) {}
 
+        const interfaces = []
         for (const iface of Object.values(os.networkInterfaces())) {
             if (!iface) {
                 break
@@ -50,6 +53,7 @@ export class IPInfoService {
                 ) {
                     continue
                 }
+                interfaces.push(alias)
                 if (alias.family === "IPv4") {
                     privateV4 = alias.address
                 } else if (alias.family === "IPv6") {
@@ -65,5 +69,29 @@ export class IPInfoService {
         }
         Logger.I.info("IPs are %o", IPInfo)
         return IPInfo
+    }
+
+    async getNetworkType(): Promise<number | undefined> {
+        let type: string | undefined
+        try {
+            if (process.platform === "win32") {
+                type =
+                    await NetInterfaceInfoWindowsService.I.getActiveInterfaceType()
+            } else {
+                type =
+                    await NetInterfaceInfoUnixService.I.getActiveInterfaceType()
+            }
+        } catch (e) {
+            Logger.I.error(e)
+            return 0
+        }
+        switch (type) {
+            case "wifi":
+                return 99
+            case "ethernet":
+                return 106
+            default:
+                return undefined
+        }
     }
 }

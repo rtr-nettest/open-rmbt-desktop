@@ -10,4 +10,9 @@ export interface IEnv {
     IP_VERSION: string | null
     TERMS_ACCEPTED: boolean
     LANGUAGE: string | null
+    OPEN_HISTORY_RESUlT_URL: string
+    HISTORY_RESULTS_LIMIT: number | undefined
+    HISTORY_SEARCH_URL: string | undefined
+    HISTORY_EXPORT_URL: string | undefined
+    FULL_HISTORY_RESULT_URL: string | undefined
 }

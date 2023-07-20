@@ -14,11 +14,10 @@ import { ELoggerMessage } from "./enums/logger-message.enum"
 import { IUserSettings } from "./interfaces/user-settings-response.interface"
 import { IMeasurementServerResponse } from "./interfaces/measurement-server-response.interface"
 import { config } from "dotenv"
-import { IPInfoService } from "./services/ip-info.service"
+import { NetworkInfoService } from "./services/network-info.service"
 import { DBService } from "./services/db.service"
 import "reflect-metadata"
 import { EMeasurementFinalStatus } from "./enums/measurement-final-status"
-import { Store } from "./services/store.service"
 
 config({
     path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
@@ -55,7 +54,7 @@ export class MeasurementRunner {
             this.settings = await ControlServer.I.getUserSettings(
                 this.settingsRequest
             )
-            const ipInfo = await IPInfoService.I.getIPInfo(
+            const ipInfo = await NetworkInfoService.I.getIPInfo(
                 this.settings,
                 this.settingsRequest
             )
@@ -78,6 +77,10 @@ export class MeasurementRunner {
 
             const threadResults = await this.rmbtClient!.scheduleMeasurement()
             this.setCPUUsage()
+            this.registrationRequest = {
+                ...this.registrationRequest!,
+                networkType: await NetworkInfoService.I.getNetworkType(),
+            }
             const result = new MeasurementResult(
                 this.registrationRequest!,
                 this.rmbtClient!.params!,
@@ -97,10 +100,10 @@ export class MeasurementRunner {
             ) {
                 this.rmbtClient!.measurementStatus = EMeasurementStatus.END
             }
-        } catch (e) {
+        } catch (e: any) {
             if (e) {
-                // Logger.I.error(e)
-                throw e
+                Logger.I.error(e)
+                throw e.message
             }
         } finally {
             this.setCPUUsage()
@@ -142,10 +145,6 @@ export class MeasurementRunner {
             serverName: this.rmbtClient?.params.test_server_name ?? "-",
             providerName: this.rmbtClient?.params.provider ?? "-",
         }
-    }
-
-    async getMeasurementResult(testUuid: string) {
-        return await ControlServer.I.getMeasurementResult(testUuid)
     }
 
     getCPUUsage(): ICPU | undefined {

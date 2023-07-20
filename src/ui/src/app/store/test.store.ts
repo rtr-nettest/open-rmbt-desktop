@@ -1,5 +1,17 @@
 import { Injectable } from "@angular/core"
-import { BehaviorSubject, concatMap, from, interval, map, of } from "rxjs"
+import {
+    BehaviorSubject,
+    catchError,
+    concatMap,
+    from,
+    interval,
+    map,
+    of,
+    switchMap,
+    take,
+    tap,
+    withLatestFrom,
+} from "rxjs"
 import { TestVisualizationState } from "../dto/test-visualization-state.dto"
 import { ITestVisualizationState } from "../interfaces/test-visualization-state.interface"
 import { IBasicNetworkInfo } from "../../../../measurement/interfaces/basic-network-info.interface"
@@ -9,6 +21,12 @@ import { TestPhaseState } from "../dto/test-phase-state.dto"
 import { EMeasurementStatus } from "../../../../measurement/enums/measurement-status.enum"
 import { Router } from "@angular/router"
 import { MainStore } from "./main.store"
+import { IPaginator } from "../interfaces/paginator.interface"
+import { HttpClient, HttpParams } from "@angular/common/http"
+import { saveAs } from "file-saver"
+import { TranslocoService } from "@ngneat/transloco"
+import { MessageService } from "../services/message.service"
+import { ERROR_OCCURED } from "../constants/strings"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
@@ -25,8 +43,18 @@ export class TestStore {
     simpleHistoryResult$ = new BehaviorSubject<ISimpleHistoryResult | null>(
         null
     )
+    history$ = new BehaviorSubject<ISimpleHistoryResult[]>([])
+    historyPaginator$ = new BehaviorSubject<IPaginator>({
+        offset: 0,
+    })
 
-    constructor(private mainStore: MainStore, private router: Router) {}
+    constructor(
+        private mainStore: MainStore,
+        private router: Router,
+        private http: HttpClient,
+        private transloco: TranslocoService,
+        private message: MessageService
+    ) {}
 
     launchTest() {
         this.resetState()
@@ -46,6 +74,45 @@ export class TestStore {
         )
     }
 
+    getMeasurementHistory() {
+        if (this.mainStore.error$.value) {
+            return of([])
+        }
+        const env = this.mainStore.env$.value
+        const startPaginator = this.historyPaginator$.value
+        return this.historyPaginator$.pipe(
+            take(1),
+            switchMap((paginator) => {
+                if (env?.HISTORY_RESULTS_LIMIT) {
+                    this.historyPaginator$.next({
+                        offset: paginator.offset + env.HISTORY_RESULTS_LIMIT,
+                        limit: env.HISTORY_RESULTS_LIMIT,
+                    })
+                    return window.electronAPI.getMeasurementHistory(
+                        paginator.offset,
+                        env.HISTORY_RESULTS_LIMIT
+                    )
+                } else {
+                    return window.electronAPI.getMeasurementHistory(
+                        paginator.offset
+                    )
+                }
+            }),
+            tap((history) => {
+                if (env?.HISTORY_RESULTS_LIMIT && history) {
+                    this.history$.next([...this.history$.value, ...history])
+                } else if (!env?.HISTORY_RESULTS_LIMIT && history) {
+                    this.history$.next(history)
+                }
+            })
+        )
+    }
+
+    resetMeasurementHistory() {
+        this.history$.next([])
+        this.historyPaginator$.next({ offset: 0 })
+    }
+
     getMeasurementResult(testUuid: string | null) {
         if (!testUuid || this.mainStore.error$.value) {
             return of(null)
@@ -59,17 +126,12 @@ export class TestStore {
                     up: result.uploadKbit / 1000,
                     ping: result.ping / 1e6,
                 })
-                const newState = TestVisualizationState.from(
+                const newState = TestVisualizationState.fromHistoryResult(
+                    result,
                     this.visualization$.value,
                     newPhase,
                     this.mainStore.env$.value?.FLAVOR ?? "rtr"
                 )
-                newState.phases[
-                    EMeasurementStatus.DOWN
-                ].setChartFromOverallSpeed?.(result.downloadOverTime ?? [])
-                newState.phases[
-                    EMeasurementStatus.UP
-                ].setChartFromOverallSpeed?.(result.uploadOverTime ?? [])
                 this.visualization$.next(newState)
                 this.basicNetworkInfo$.next({
                     serverName: result.measurementServerName,
@@ -90,6 +152,84 @@ export class TestStore {
                 return result
             })
         )
+    }
+
+    exportAsPdf(results: ISimpleHistoryResult[]) {
+        const exportUrl = this.mainStore.env$.value?.HISTORY_EXPORT_URL
+        if (!exportUrl) {
+            return of(null)
+        }
+        this.mainStore.inProgress$.next(true)
+        return this.http
+            .post(
+                exportUrl + "/pdf/" + this.transloco.getActiveLang(),
+                this.getExportParams("pdf", results)
+            )
+            .pipe(
+                switchMap((resp: any) => {
+                    if (resp["file"]) {
+                        return this.http.get(
+                            exportUrl + "/pdf/" + resp["file"],
+                            {
+                                responseType: "blob",
+                                observe: "response",
+                            }
+                        )
+                    }
+                    return of(null)
+                }),
+                tap((data: any) => {
+                    if (data?.body)
+                        saveAs(data.body, `${new Date().toISOString()}.pdf`)
+
+                    this.mainStore.inProgress$.next(false)
+                }),
+                catchError(() => {
+                    this.mainStore.inProgress$.next(false)
+                    this.message.openSnackbar(ERROR_OCCURED)
+                    return of(null)
+                })
+            )
+    }
+
+    exportAs(format: "csv" | "xlsx", results: ISimpleHistoryResult[]) {
+        const exportUrl = this.mainStore.env$.value?.HISTORY_SEARCH_URL
+        if (!exportUrl) {
+            return of(null)
+        }
+
+        this.mainStore.inProgress$.next(true)
+        return this.http
+            .post(exportUrl, this.getExportParams(format, results), {
+                responseType: "blob",
+                observe: "response",
+            })
+            .pipe(
+                tap((data) => {
+                    if (data.body)
+                        saveAs(
+                            data.body,
+                            `${new Date().toISOString()}.${format}`
+                        )
+
+                    this.mainStore.inProgress$.next(false)
+                }),
+                catchError(() => {
+                    this.mainStore.inProgress$.next(false)
+                    this.message.openSnackbar(ERROR_OCCURED)
+                    return of(null)
+                })
+            )
+    }
+
+    private getExportParams(format: string, results: ISimpleHistoryResult[]) {
+        return new HttpParams({
+            fromObject: {
+                test_uuid: results.map((hi) => "T" + hi.testUuid).join(","),
+                format,
+                max_results: 1000,
+            },
+        })
     }
 
     private resetState() {

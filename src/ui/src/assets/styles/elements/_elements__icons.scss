@@ -1,8 +1,68 @@
 .app-icon {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    display: inline-block;
+    height: 100%;
+    width: 100%;
+
+    &--test {
+        background-image: url("/assets/images/test-icon.svg");
+    }
+
+    &--loop {
+        background-image: url("/assets/images/loop-icon.svg");
+    }
+
+    &--map {
+        background-image: url("/assets/images/map-icon.svg");
+    }
+
+    &--history {
+        background-image: url("/assets/images/history-icon.svg");
+    }
+
+    &--statistics {
+        background-image: url("/assets/images/statistics-icon.svg");
+    }
+
+    &--help {
+        background-image: url("/assets/images/help-icon.svg");
+    }
+
+    &--certified {
+        background-image: url("/assets/images/certified-icon.svg");
+    }
+
+    &--settings {
+        background-image: url("/assets/images/settings-icon.svg");
+    }
+
+    &--filetype-csv {
+        background-image: url("/assets/images/filetype-csv-icon.svg");
+    }
+
+    &--filetype-pdf {
+        background-image: url("/assets/images/filetype-pdf-icon.svg");
+    }
+
+    &--filetype-xlsx {
+        background-image: url("/assets/images/filetype-xlsx-icon.svg");
+    }
+
+    &--new-window {
+        background-image: url("/assets/images/new-window-icon.svg");
+    }
+
+    &--chevron-left {
+        background-image: url("/assets/images/chevron-left-icon.svg");
+    }
+
     &--class {
         background-size: 165px 148.5px !important;
         display: inline-block;
         height: 16px;
+        margin-right: 1ex;
         width: 16px;
 
         &-gray {

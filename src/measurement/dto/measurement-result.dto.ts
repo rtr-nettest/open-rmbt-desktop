@@ -12,11 +12,14 @@ import { IOverallResult } from "../interfaces/overall-result.interface"
 import { TransferDirection } from "../services/rmbt-client.service"
 
 export class MeasurementResult implements IMeasurementResult {
+    client_language?: string
     client_name?: string
+    client_software_version?: string
     client_version?: string
     client_uuid: string
     cpu?: ICPU
-    network_type = 0 // TODO: detect the real one, 0 == Unknown
+    network_type = 0
+    num_threads_ul?: number
     operating_system: string
     pings: IPing[]
     platform: string
@@ -50,9 +53,15 @@ export class MeasurementResult implements IMeasurementResult {
         cpu?: ICPU,
         testStatus?: EMeasurementFinalStatus
     ) {
+        this.client_language = registrationRequest.language
         this.client_name = registrationRequest.client
         this.client_version = threadResults[0]?.client_version ?? ""
+        this.client_software_version = registrationRequest.app_version
         this.client_uuid = registrationRequest.uuid ?? ""
+        this.num_threads_ul = threadResults.reduce(
+            (acc, thread) => (thread.up.bytes.length ? (acc += 1) : acc),
+            0
+        )
         this.operating_system = registrationRequest.operating_system ?? ""
         this.pings = MeasurementResult.getPings(threadResults)
         this.test_ping_shortest = MeasurementResult.getShortestPing(this.pings)
@@ -78,6 +87,7 @@ export class MeasurementResult implements IMeasurementResult {
         this.provider_name = registrationResponse.provider
         this.ip_address = registrationResponse.client_remote_ip
         this.test_status = testStatus
+        this.network_type = registrationRequest.networkType ?? 0
     }
 
     static getPings(threadResults: IMeasurementThreadResult[]) {

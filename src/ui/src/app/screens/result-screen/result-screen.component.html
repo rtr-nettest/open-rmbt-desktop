@@ -2,6 +2,7 @@
 <ng-container
     [ngTemplateOutlet]="(env$ | async)?.FLAVOR === 'ont' ? ont : rtr"
 ></ng-container>
+<app-scroll-top></app-scroll-top>
 
 <ng-template #ont>
     <main
@@ -21,68 +22,71 @@
             [style.flex-direction]="'column'"
         >
             <app-export-warning></app-export-warning>
-            <div class="app-main">
-                <header class="app-title">
-                    Measurement result from {{ result.measurementDate | date }}
-                </header>
+            <div class="app-main" *transloco="let t">
+                <h1 class="app-title">
+                    <button
+                        mat-icon-button
+                        (click)="weHaveToGoBack()"
+                        style="margin-right: 1ex"
+                    >
+                        <i class="app-icon app-icon--chevron-left"></i>
+                    </button>
+                    {{ t("Measurement result from") }}
+                    {{
+                        result.measurementDate
+                            | date : "medium" : undefined : locale
+                    }}
+                    <app-action-buttons
+                        [items]="actionButtons"
+                    ></app-action-buttons>
+                </h1>
                 <div class="app-wrapper">
-                    <app-dl
-                        [items]="{
-                            'Server name': result.measurementServerName,
-                            'IP Address': result.ipAddress,
-                            Provider: result.providerName
-                        }"
-                    ></app-dl>
-                    <app-spacer></app-spacer>
-                    <div>
-                        <app-dl
-                            [items]="{
-                                Download: getSpeedInMbps(result.downloadKbit),
-                                Upload: getSpeedInMbps(result.uploadKbit),
-                                Ping: getPingInMs(result.ping)
-                            }"
-                            [icons]="
-                                result.downloadClass &&
-                                result.uploadClass &&
-                                result.pingClass
-                                    ? {
-                                          Download: getIconStyleByClass(
-                                              result.downloadClass
-                                          ),
-                                          Upload: getIconStyleByClass(
-                                              result.uploadClass
-                                          ),
-                                          Ping: getIconStyleByClass(
-                                              result.pingClass
-                                          )
-                                      }
-                                    : undefined
-                            "
-                        ></app-dl>
-                        <div style="margin-top: 30px">
-                            <a
-                                class="app-link"
-                                [href]="result.fullResultLink"
-                                target="_blank"
-                                >More results</a
-                            >
+                    <app-table
+                        [columns]="columns"
+                        [data]="getBasicResults(result)"
+                        [sort]="sort"
+                    ></app-table>
+                </div>
+                <ng-container
+                    *ngIf="getDetailedResults(result) as detailedResult"
+                >
+                    <div class="app-wrapper app-charts">
+                        <div class="app-charts__col">
+                            <h3 class="app-title">{{ t("Ping") }}</h3>
+                            <app-test-chart phase="ping"></app-test-chart>
+                        </div>
+                        <div class="app-charts__col">
+                            <h3 class="app-title">{{ t("Download") }}</h3>
+                            <app-test-chart phase="download"></app-test-chart>
+                        </div>
+                        <div class="app-charts__col">
+                            <h3 class="app-title">{{ t("Upload") }}</h3>
+                            <app-test-chart phase="upload"></app-test-chart>
                         </div>
                     </div>
-                </div>
-                <footer class="app-footer">
-                    <a routerLink="/test" class="app-btn">Start a new test</a>
-                </footer>
+                    <h3 class="app-title">{{ t("Detailed results") }}</h3>
+                    <div class="app-wrapper">
+                        <app-table
+                            [columns]="columns"
+                            [data]="detailedResult"
+                            [sort]="sort"
+                        ></app-table>
+                    </div>
+                </ng-container>
             </div>
+            <app-footer></app-footer>
         </app-main-content>
     </app-body>
-    <app-footer></app-footer>
 </ng-template>
 
 <ng-template #noResult>
-    <main *ngIf="error$ | async as error" class="app-main">
-        Measurement failed. {{ error.message }}
+    <main *ngIf="error$ | async as error" class="app-main app-main--no-result">
+        {{ "Measurement failed." | transloco }} {{ error.message }}
     </main>
-    <main *ngIf="(error$ | async) === null" class="app-main">
-        Fetching the result...
+    <main
+        *ngIf="(error$ | async) === null"
+        class="app-main app-main--no-result"
+    >
+        {{ "Fetching the result..." | transloco }}
     </main>
 </ng-template>

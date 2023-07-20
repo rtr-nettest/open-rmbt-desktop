@@ -31,6 +31,7 @@ $app-theme: mat.define-light-theme(
 }
 
 .mdc-button[mat-button] {
+    background: white;
     border: 2px solid;
     padding: rem(8) rem(14);
 }

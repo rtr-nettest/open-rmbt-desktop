@@ -1,0 +1,28 @@
+@use "sass:math";
+@import "../../../assets/styles/core.scss";
+
+:host {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+    position: relative;
+}
+
+.app-button {
+    height: rem($font-size-xxl * 2.5);
+    margin-left: 1ex;
+    position: relative;
+    width: rem($font-size-xxl * 2.5);
+
+    &:disabled {
+        & > * {
+            opacity: 0.5;
+        }
+    }
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}

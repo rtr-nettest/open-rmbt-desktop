@@ -54,12 +54,15 @@ export class TestChartComponent {
             switch (visualization.currentPhaseName) {
                 case EMeasurementStatus.INIT:
                     this.chart?.resetData()
-                    if (this.flavor === "rtr") {
+                    if (this.phase === "ping") {
                         this.initChart()
                     }
                     break
                 case EMeasurementStatus.PING:
                     if (this.flavor !== "rtr") {
+                        this.initChart()
+                    }
+                    if (this.phase === "download") {
                         this.initChart()
                     }
                     break
@@ -72,6 +75,9 @@ export class TestChartComponent {
                         this.chart?.setData(
                             visualization.phases[EMeasurementStatus.PING]
                         )
+                    }
+                    if (this.phase === "upload") {
+                        this.initChart()
                     }
                     break
                 case EMeasurementStatus.UP:

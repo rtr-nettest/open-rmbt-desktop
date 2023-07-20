@@ -48,13 +48,12 @@ export class ControlServer {
 
     private async getHost() {
         const ipv = Store.I.get(IP_VERSION) as EIPVersion
-        const defaultHost = process.env.CONTROL_SERVER_URL!
         const settings = Store.I.get(SETTINGS) as IUserSettings
         const settingsRequest = new UserSettingsRequest()
         const ipv6Host = settings.urls.control_ipv6_only
         const ipv4Host = settings.urls.control_ipv4_only
         let resolved: string | undefined
-        let retVal = defaultHost
+        let retVal = process.env.CONTROL_SERVER_URL!
         if (ipv6Host && ipv === EIPVersion.v6) {
             resolved = (
                 await NetworkInfoService.I.getIPInfo(settings, settingsRequest)

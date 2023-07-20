@@ -32,6 +32,7 @@ import { EMeasurementFinalStatus } from "../enums/measurement-final-status"
 import { Agent } from "https"
 import { NetworkInfoService } from "./network-info.service"
 import { UserSettingsRequest } from "../dto/user-settings-request.dto"
+import * as dns from "dns"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -53,19 +54,25 @@ export class ControlServer {
         const ipv6Host = settings.urls.control_ipv6_only
         const ipv4Host = settings.urls.control_ipv4_only
         let resolved: string | undefined
-        let retVal = ""
+        let retVal = defaultHost
         if (ipv6Host && ipv === EIPVersion.v6) {
             resolved = (
                 await NetworkInfoService.I.getIPInfo(settings, settingsRequest)
             ).publicV6
-            retVal = resolved ? "https://" + ipv6Host : defaultHost
+            if (resolved) {
+                dns.setDefaultResultOrder("verbatim")
+                retVal = "https://" + ipv6Host
+            }
         } else if (ipv4Host && ipv === EIPVersion.v4) {
             resolved = (
                 await NetworkInfoService.I.getIPInfo(settings, settingsRequest)
             ).publicV4
-            retVal = resolved ? "https://" + ipv4Host : defaultHost
+            if (resolved) {
+                dns.setDefaultResultOrder("ipv4first")
+                retVal = "https://" + ipv4Host
+            }
         } else {
-            retVal = defaultHost
+            dns.setDefaultResultOrder("verbatim")
         }
         Logger.I.info(`The current control server is: ${retVal}`)
         return retVal

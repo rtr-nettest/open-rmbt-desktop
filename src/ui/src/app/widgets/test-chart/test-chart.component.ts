@@ -57,10 +57,12 @@ export class TestChartComponent {
 
     private handleChanges(visualization: ITestVisualizationState) {
         this.ngZone.runOutsideAngular(async () => {
+            if (!this.chart) {
+                this.initChart()
+            }
             switch (visualization.currentPhaseName) {
                 case EMeasurementStatus.INIT:
                     this.chart?.resetData()
-                    this.initChart()
                     break
                 case EMeasurementStatus.DOWN:
                     if (this.phase === "download") {

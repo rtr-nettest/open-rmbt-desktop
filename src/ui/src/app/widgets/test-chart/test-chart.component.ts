@@ -54,30 +54,32 @@ export class TestChartComponent {
             switch (visualization.currentPhaseName) {
                 case EMeasurementStatus.INIT:
                     this.chart?.resetData()
-                    if (this.phase === "ping") {
-                        setTimeout(() => this.initChart(), 300)
-                    }
                     break
                 case EMeasurementStatus.PING:
                     if (this.flavor !== "rtr") {
                         this.initChart()
                     }
-                    if (this.phase === "download") {
-                        setTimeout(() => this.initChart(), 300)
-                    }
                     break
                 case EMeasurementStatus.DOWN:
                     if (this.phase === "download") {
+                        await new Promise((res, rej) => {
+                            this.initChart()
+                            res(void 0)
+                        })
                         this.chart?.updateData(
                             visualization.phases[EMeasurementStatus.DOWN]
                         )
                     } else if (this.phase === "ping") {
+                        await new Promise((res, rej) => {
+                            this.initChart()
+                            res(void 0)
+                        })
                         this.chart?.setData(
                             visualization.phases[EMeasurementStatus.PING]
                         )
                     }
                     if (this.phase === "upload") {
-                        setTimeout(() => this.initChart(), 300)
+                        this.initChart()
                     }
                     break
                 case EMeasurementStatus.UP:

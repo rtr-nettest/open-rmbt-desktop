@@ -53,19 +53,22 @@ export class ControlServer {
         const ipv6Host = settings.urls.control_ipv6_only
         const ipv4Host = settings.urls.control_ipv4_only
         let resolved: string | undefined
+        let retVal = ""
         if (ipv6Host && ipv === EIPVersion.v6) {
             resolved = (
                 await NetworkInfoService.I.getIPInfo(settings, settingsRequest)
             ).publicV6
-            return resolved ? "https://" + ipv6Host : defaultHost
+            retVal = resolved ? "https://" + ipv6Host : defaultHost
         } else if (ipv4Host && ipv === EIPVersion.v4) {
             resolved = (
                 await NetworkInfoService.I.getIPInfo(settings, settingsRequest)
             ).publicV4
-            return resolved ? "https://" + ipv4Host : defaultHost
+            retVal = resolved ? "https://" + ipv4Host : defaultHost
         } else {
-            return defaultHost
+            retVal = defaultHost
         }
+        Logger.I.info(`The current control server is: ${retVal}`)
+        return retVal
     }
 
     private get headers() {

@@ -55,7 +55,7 @@ export class TestChartComponent {
                 case EMeasurementStatus.INIT:
                     this.chart?.resetData()
                     if (this.phase === "ping") {
-                        this.initChart()
+                        setTimeout(() => this.initChart(), 300)
                     }
                     break
                 case EMeasurementStatus.PING:
@@ -63,7 +63,7 @@ export class TestChartComponent {
                         this.initChart()
                     }
                     if (this.phase === "download") {
-                        this.initChart()
+                        setTimeout(() => this.initChart(), 300)
                     }
                     break
                 case EMeasurementStatus.DOWN:
@@ -77,7 +77,7 @@ export class TestChartComponent {
                         )
                     }
                     if (this.phase === "upload") {
-                        this.initChart()
+                        setTimeout(() => this.initChart(), 300)
                     }
                     break
                 case EMeasurementStatus.UP:

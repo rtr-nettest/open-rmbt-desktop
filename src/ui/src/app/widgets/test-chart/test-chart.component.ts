@@ -55,11 +55,6 @@ export class TestChartComponent {
                 case EMeasurementStatus.INIT:
                     this.chart?.resetData()
                     break
-                case EMeasurementStatus.PING:
-                    if (this.flavor !== "rtr") {
-                        this.initChart()
-                    }
-                    break
                 case EMeasurementStatus.DOWN:
                     if (this.phase === "download") {
                         await new Promise((res, rej) => {
@@ -77,8 +72,7 @@ export class TestChartComponent {
                         this.chart?.setData(
                             visualization.phases[EMeasurementStatus.PING]
                         )
-                    }
-                    if (this.phase === "upload") {
+                    } else if (this.phase === "upload") {
                         this.initChart()
                     }
                     break

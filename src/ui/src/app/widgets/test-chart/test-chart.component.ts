@@ -32,11 +32,17 @@ export class TestChartComponent {
             withLatestFrom(this.mainStore.env$),
             map(([s, env]) => {
                 this.flavor = env?.FLAVOR || "rtr"
-                this.handleChanges(s)
+                if (this.canvas) {
+                    this.handleChanges(s)
+                }
                 return s
             })
         )
     flavor?: string
+
+    get canvas() {
+        return document.getElementById(this.id) as HTMLCanvasElement
+    }
 
     get id() {
         return `${this.phase}_chart`
@@ -54,26 +60,17 @@ export class TestChartComponent {
             switch (visualization.currentPhaseName) {
                 case EMeasurementStatus.INIT:
                     this.chart?.resetData()
+                    this.initChart()
                     break
                 case EMeasurementStatus.DOWN:
                     if (this.phase === "download") {
-                        await new Promise((res, rej) => {
-                            this.initChart()
-                            res(void 0)
-                        })
                         this.chart?.updateData(
                             visualization.phases[EMeasurementStatus.DOWN]
                         )
                     } else if (this.phase === "ping") {
-                        await new Promise((res, rej) => {
-                            this.initChart()
-                            res(void 0)
-                        })
                         this.chart?.setData(
                             visualization.phases[EMeasurementStatus.PING]
                         )
-                    } else if (this.phase === "upload") {
-                        this.initChart()
                     }
                     break
                 case EMeasurementStatus.UP:
@@ -107,8 +104,7 @@ export class TestChartComponent {
         if (this.chart) {
             return
         }
-        const canvas = document.getElementById(this.id) as HTMLCanvasElement
-        const ctx = canvas?.getContext("2d")
+        const ctx = this.canvas?.getContext("2d")
         if (!ctx) {
             return
         }

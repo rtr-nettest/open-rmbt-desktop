@@ -15,18 +15,18 @@ module.exports = {
     rebuildConfig: {},
     makers: [
         {
-            name: "@electron-forge/maker-squirrel",
+            name: "@electron-forge/maker-appx",
             config: {
-                name: "open-rmbt-desktop",
-                authors: "Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
-                description: "RTR Desktop app",
-                // https://www.files.certum.eu/documents/manual_en/Code-Signing-signing-the-code-using-tools-like-Singtool-and-Jarsigner_v2.3.pdf
-                signWithParams: "/fd sha256 /a /t http://time.certum.pl/",
-                loadingGif: path.join(
-                    process.env.ASSETS_FOLDER,
-                    "images",
-                    "splash.gif"
-                ),
+                assets: path.resolve(__dirname, "app-icon"),
+                devCert:
+                    "C:\\Users\\%USERNAME%\\AppData\\Roaming\\electron-windows-store\\developmentca\\developmentca.pfx",
+                manifest: path.resolve(__dirname, "AppXManifest.xml"),
+                packageDescription: "RTR Desktop App",
+                packageDisplayName: "RMBT Desktop",
+                packageName: "RMBTDesktop",
+                publisher: "CN=developmentca",
+                windowsKit:
+                    "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.19041.0\\x64",
             },
         },
         {

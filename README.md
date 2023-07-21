@@ -52,11 +52,29 @@ or
 
 The app will be placed in the `out` folder at the root of the project.
 
-To build the installer of the Electron app in the prod mode use
+## Distribution
+
+### AppStore
+
+Requires macOS Ventura or later.
+
+1. Build the distributable with
 
     npm run make
 
-The installer will be placed in the `out/make` folder at the root of the project.
+It will be placed in the `out/make` folder at the root of the project.
+
+### Windows Store
+
+Requires Windows 10 or later.
+
+1. Install Windows SDK (https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/).
+2. Configure the `@electron-forge/maker-appx` options in `src/assets/<FLAVOR>/forge.config.js`. For the details see: https://github.com/electron-userland/electron-windows-store.
+3. Build the distributable with
+
+    npm run make
+
+It will be placed in the `out/make` folder at the root of the project.
 
 ## Configuration
 

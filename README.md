@@ -20,49 +20,47 @@ Install packages by running `npm i` or `yarn install` in the root folder and in 
 
 To download translations from the Crowdin API run
 
-    npm run prepare:translations
-
-or
-
-    yarn prepare:translations
+```sh
+$ npm run prepare:translations
+```
 
 To run a measurement from the command line use
 
-    npm run start:cli
+```sh
+$ npm run start:cli
+```
 
-or
+To launch the app in the dev mode use
 
-    yarn start:cli
+```sh
+$ npm run start:all
+```
 
-To launch an Electron app in the dev mode use
+To build the app in the prod mode without launching it use
 
-    npm run start:all
-
-or
-
-    yarn start:all
-
-To build the Electron app in the prod mode without launching it use
-
-    npm run package
-
-or
-
-    yarn package
+```sh
+$ npm run package
+```
 
 The app will be placed in the `out` folder at the root of the project.
 
 ## Distribution
 
-### AppStore
+### Mac App Store
 
-Requires macOS Ventura or later.
+Requires macOS Ventura or later, XCode 11 or later.
 
-1. Build the distributable with
+1. Download the Mac Installer Distribution certificate from https://developer.apple.com/account/resources/certificates/list and install it your Mac's Keychain.
+2. Put the name of the installed certificate in the `.env` file as `DISTRIBUTION_MAC_IDENTITY`.
+3. Build the distributable with
 
-    npm run make
+```sh
+$ npm run make
+```
 
 It will be placed in the `out/make` folder at the root of the project.
+
+_Note: by default macOS overwrites already installed packages, so, if you want to see the app in the menu and in the apps folder, make sure to remove it from anywhere else, including the `out` folder_
 
 ### Windows Store
 
@@ -72,7 +70,9 @@ Requires Windows 10 or later.
 2. Configure the `@electron-forge/maker-appx` options in `src/assets/<FLAVOR>/forge.config.js`. For the details see: https://github.com/electron-userland/electron-windows-store.
 3. Build the distributable with
 
-    npm run make
+```sh
+$ npm run make
+```
 
 It will be placed in the `out/make` folder at the root of the project.
 
@@ -121,3 +121,4 @@ The project contains a `.env.example` file. You can use it as an example to conf
 | `CROWDIN_UPDATE_AT_RUNTIME`        | If set to true, will try to download translations via the Crowdin API when user launches the app.                                                                                                                                                  |
 | `NEWS_PATH`                        | A control server endpoint starting with `/` which returns a list of news available for the platform.                                                                                                                                               |
 | `ENABLE_LANGUAGE_SWITCH`           | If set to true, will allow changing the app language from the settings.                                                                                                                                                                            |
+| `DISTRIBUTION_MAC_IDENTITY`        | The name of the Mac Installer Distribution Certificate installed in your local Keychain.                                                                                                                                                           |

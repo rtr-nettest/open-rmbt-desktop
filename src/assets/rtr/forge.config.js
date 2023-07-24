@@ -2,7 +2,7 @@ const path = require("path")
 
 module.exports = {
     packagerConfig: {
-        icon: path.join(process.env.ASSETS_FOLDER, "app-icon", "icon"),
+        icon: path.resolve(__dirname, "app-icon", "icon"),
         ignore: [
             "src/",
             "log/",
@@ -11,6 +11,9 @@ module.exports = {
             ".config.js",
             ".example",
         ],
+        osxSign: {
+            platform: "mas",
+        },
     },
     rebuildConfig: {},
     makers: [
@@ -30,9 +33,9 @@ module.exports = {
             },
         },
         {
-            name: "@electron-forge/maker-dmg",
+            name: "@electron-forge/maker-pkg",
             config: {
-                format: "ULFO",
+                identity: process.env.DISTRIBUTION_MAC_IDENTITY,
             },
         },
         {

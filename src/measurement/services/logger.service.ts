@@ -21,14 +21,17 @@ export class Logger {
         if (!this.instance) {
             const streams: pino.StreamEntry[] = []
 
-            if (isMainThread || process.env.LOG_WORKERS === "true") {
+            if (
+                process.env.DEV === "true" &&
+                (isMainThread || process.env.LOG_WORKERS === "true")
+            ) {
                 if (process.env.LOG_TO_CONSOLE === "true") {
                     streams.push({ stream: pretty() })
                 } else {
                     console.log("Logging to console is disabled.")
                 }
                 if (process.env.LOG_TO_FILE === "true") {
-                    const logDir = path.join(__dirname, "..", "log")
+                    const logDir = path.join(process.cwd(), "log")
                     if (!fs.existsSync(logDir)) {
                         fs.mkdirSync(logDir)
                     }

@@ -57,10 +57,9 @@ export class CrowdinService {
                 "Translations file is converted to translations format"
             )
             if (
-                translations[TERMS_AND_CONDITIONS] !==
-                Store.I.get(TERMS_ACCEPTED)
+                translations[TERMS_AND_CONDITIONS] !== Store.get(TERMS_ACCEPTED)
             ) {
-                Store.I.set(TERMS_ACCEPTED, "")
+                Store.set(TERMS_ACCEPTED, "")
             }
             return translations
         } catch (e) {

@@ -22,7 +22,7 @@ export class EnvResolver {
     }
 
     private resolveLang(env: IEnv) {
-        const storedLanguage = env?.LANGUAGE
+        const storedLanguage = env?.ACTIVE_LANGUAGE
         if (TranslocoConfigExt["availableLangs"].includes(storedLanguage)) {
             this.transloco.setActiveLang(storedLanguage!)
         }

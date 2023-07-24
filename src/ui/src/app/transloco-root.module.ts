@@ -58,16 +58,17 @@ export class TranslocoHttpLoader implements TranslocoLoader {
             useValue: translocoConfig({
                 availableLangs: TranslocoConfigExt["availableLangs"],
                 defaultLang: (() => {
-                    const systemLang =
+                    let systemLang =
                         Intl.DateTimeFormat().resolvedOptions().locale
                     if (
-                        TranslocoConfigExt["availableLangs"].includes(
+                        !TranslocoConfigExt["availableLangs"].includes(
                             systemLang
                         )
                     ) {
-                        return systemLang
+                        systemLang = TranslocoConfigExt["defaultLang"]
                     }
-                    return TranslocoConfigExt["defaultLang"]
+                    window.electronAPI.setDefaultLanguage(systemLang)
+                    return systemLang
                 })(),
                 reRenderOnLangChange: true,
                 prodMode: !isDevMode(),

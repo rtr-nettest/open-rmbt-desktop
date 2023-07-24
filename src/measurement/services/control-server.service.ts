@@ -17,7 +17,6 @@ import { ELoggerMessage } from "../enums/logger-message.enum"
 import {
     CLIENT_UUID,
     IP_VERSION,
-    LANGUAGE,
     LAST_NEWS_UID,
     SETTINGS,
     Store,
@@ -47,8 +46,8 @@ export class ControlServer {
     private constructor() {}
 
     private async getHost() {
-        const ipv = Store.I.get(IP_VERSION) as EIPVersion
-        const settings = Store.I.get(SETTINGS) as IUserSettings
+        const ipv = Store.get(IP_VERSION) as EIPVersion
+        const settings = Store.get(SETTINGS) as IUserSettings
         const settingsRequest = new UserSettingsRequest()
         const ipv6Host = settings.urls.control_ipv6_only
         const ipv4Host = settings.urls.control_ipv4_only
@@ -91,13 +90,13 @@ export class ControlServer {
         if (!process.env.NEWS_PATH) {
             return null
         }
-        const lastNewsUid = Store.I.get(LAST_NEWS_UID) as number
+        const lastNewsUid = Store.get(LAST_NEWS_UID) as number
         const newsRequest: INewsRequest = {
             language: I18nService.I.getActiveLanguage(),
             plattform: "Desktop",
             softwareVersionCode: pack.version.replaceAll(".", ""),
             lastNewsUid,
-            uuid: Store.I.get(CLIENT_UUID) as string,
+            uuid: Store.get(CLIENT_UUID) as string,
         }
         Logger.I.info(
             ELoggerMessage.POST_REQUEST,
@@ -115,7 +114,7 @@ export class ControlServer {
                 throw response.error
             }
             if (response.news?.[0]?.uid) {
-                Store.I.set(LAST_NEWS_UID, response.news[0].uid)
+                Store.set(LAST_NEWS_UID, response.news[0].uid)
             }
             Logger.I.info("News are %o", response.news)
             return response.news ?? null
@@ -173,8 +172,8 @@ export class ControlServer {
         ).data as IUserSetingsResponse
         if (response?.settings?.length) {
             Logger.I.info("Using settings: %o", response.settings[0])
-            Store.I.set(CLIENT_UUID, response.settings[0].uuid)
-            Store.I.set(SETTINGS, response.settings[0])
+            Store.set(CLIENT_UUID, response.settings[0].uuid)
+            Store.set(SETTINGS, response.settings[0])
             return response.settings[0]
         }
         if (response?.error?.length) {
@@ -264,7 +263,7 @@ export class ControlServer {
         const body: { [key: string]: any } = {
             language: I18nService.I.getActiveLanguage(),
             timezone: dayjs.tz.guess(),
-            uuid: Store.I.get(CLIENT_UUID) as string,
+            uuid: Store.get(CLIENT_UUID) as string,
             result_offset: offset,
         }
         if (limit) {
@@ -359,7 +358,7 @@ export class ControlServer {
                         `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_DETAILS_PATH}`,
                         {
                             ...body,
-                            language: Store.I.get(LANGUAGE) as string,
+                            language: I18nService.I.getActiveLanguage(),
                         },
                         { headers: this.headers }
                     )

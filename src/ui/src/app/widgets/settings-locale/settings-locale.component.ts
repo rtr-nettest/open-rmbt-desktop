@@ -19,6 +19,6 @@ export class SettingsLocaleComponent {
 
     change(event: MatSelectChange) {
         this.transloco.setActiveLang(event.value.iso)
-        window.electronAPI.setLanguage(event.value.iso)
+        window.electronAPI.setActiveLanguage(event.value.iso)
     }
 }

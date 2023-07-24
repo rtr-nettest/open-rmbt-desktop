@@ -17,7 +17,7 @@ export class UserSettingsRequest implements IUserSettingsRequest {
     timezone = dayjs.tz.guess()
     terms_and_conditions_accepted = false
     terms_and_conditions_accepted_version?: number
-    uuid = (Store.I.get(CLIENT_UUID) as string) ?? v4()
+    uuid = (Store.get(CLIENT_UUID) as string) ?? v4()
     operating_system = `${os.type}, ${os.release}`
 
     // RTR BE compatibility
@@ -25,7 +25,7 @@ export class UserSettingsRequest implements IUserSettingsRequest {
     type = "DESKTOP"
 
     constructor(public platform = "DESKTOP") {
-        const termsAccepted = Store.I.get(TERMS_ACCEPTED)
+        const termsAccepted = Store.get(TERMS_ACCEPTED)
         if (termsAccepted) {
             this.terms_and_conditions_accepted = true
             this.terms_and_conditions_accepted_version = 5

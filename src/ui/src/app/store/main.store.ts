@@ -6,6 +6,8 @@ import { IMainProject } from "../interfaces/main-project.interface"
 import { IUserSettings } from "../../../../measurement/interfaces/user-settings-response.interface"
 import { INewsItem } from "../../../../measurement/interfaces/news.interface"
 import { EIPVersion } from "../../../../measurement/enums/ip-version.enum"
+import { Router } from "@angular/router"
+import { ERoutes } from "../enums/routes.enum"
 
 @Injectable({
     providedIn: "root",
@@ -24,10 +26,13 @@ export class MainStore {
     news$ = new BehaviorSubject<INewsItem[] | null>(null)
     referrer$ = new BehaviorSubject<string | null>(null)
 
-    constructor() {
+    constructor(private router: Router) {
         window.electronAPI.onError((error) => {
             console.error(error)
             this.error$.next(new Error("Server communication error"))
+        })
+        window.electronAPI.onOpenSettings(() => {
+            this.router.navigate(["/", ERoutes.SETTINGS])
         })
     }
 

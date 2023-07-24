@@ -131,6 +131,7 @@ declare global {
                 limit?: number
             ) => Promise<ISimpleHistoryResult[]>
             onError: (callback: (error: Error) => any) => Promise<any>
+            onOpenSettings: (callback: () => any) => Promise<any>
         }
     }
 }

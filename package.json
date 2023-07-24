@@ -1,5 +1,6 @@
 {
     "name": "open-rmbt-desktop",
+    "productName": "RMBT Desktop",
     "version": "0.2.0",
     "description": "open-rmbt-desktop application",
     "main": "dist/main.js",
@@ -19,7 +20,7 @@
         "package": "npm run build:all && electron-forge package",
         "make": "npm run build:all && electron-forge make"
     },
-    "author": "Polina Gurina",
+    "author": "Specure",
     "license": "Apache-2.0",
     "devDependencies": {
         "@electron-forge/cli": "^6.2.1",

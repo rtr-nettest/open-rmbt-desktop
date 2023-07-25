@@ -48,14 +48,14 @@ The app will be placed in the `out` folder at the root of the project.
 
 ### Mac App Store
 
-Requires macOS Ventura or later, XCode 11 or later.
+Requires macOS Ventura or later, XCode 12.2.0 or later.
 
 1. Download the Mac Installer Distribution certificate from https://developer.apple.com/account/resources/certificates/list and install it your Mac's Keychain. Put the name of the installed certificate into the `.env` file as `APPLE_DEVELOPER_IDENTITY`.
 2. Set up the `.env` file with your `APPLE_ID`, `APPLE_PASSWORD`, and `APPLE_TEAM_ID`. See https://www.electronforge.io/guides/code-signing/code-signing-macos#option-1-using-an-app-specific-password for details.
 3. Build the distributable with
 
 ```sh
-$ npm run make
+$ npm run make:app-store
 ```
 
 It will be placed in the `out/make` folder at the root of the project.

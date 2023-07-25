@@ -21,6 +21,7 @@ module.exports = {
             appleIdPassword: process.env.APPLE_PASSWORD,
             teamId: process.env.APPLE_TEAM_ID,
         },
+        appBundleId: process.env.APP_BUNDLE_ID,
     },
     rebuildConfig: {},
     makers: [

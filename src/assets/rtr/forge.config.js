@@ -1,6 +1,11 @@
 const path = require("path")
 
 module.exports = {
+    hooks: {
+        preMake: (config) => {
+            console.log(config)
+        },
+    },
     packagerConfig: {
         icon: path.resolve(__dirname, "app-icon", "icon"),
         ignore: [
@@ -13,7 +18,15 @@ module.exports = {
         ],
         osxSign: {
             platform: "mas",
-            entitlements: path.resolve(__dirname, "entitlements.plist"),
+            provisioningProfile: path.resolve(
+                __dirname,
+                "RMBTDesktop_Distribution_Profile.provisionprofile"
+            ),
+            // optionsForFile: () => {
+            //     return {
+            //         entitlements: path.resolve(__dirname, "entitlements.plist"),
+            //     }
+            // },
         },
         osxNotarization: {
             tool: "notarytool",

@@ -50,8 +50,8 @@ The app will be placed in the `out` folder at the root of the project.
 
 Requires macOS Ventura or later, XCode 11 or later.
 
-1. Download the Mac Installer Distribution certificate from https://developer.apple.com/account/resources/certificates/list and install it your Mac's Keychain.
-2. Put the name of the installed certificate in the `.env` file as `DISTRIBUTION_MAC_IDENTITY`.
+1. Download the Mac Installer Distribution certificate from https://developer.apple.com/account/resources/certificates/list and install it your Mac's Keychain. Put the name of the installed certificate into the `.env` file as `APPLE_DEVELOPER_IDENTITY`.
+2. Set up the `.env` file with your `APPLE_ID`, `APPLE_PASSWORD`, and `APPLE_TEAM_ID`. See https://www.electronforge.io/guides/code-signing/code-signing-macos#option-1-using-an-app-specific-password for details.
 3. Build the distributable with
 
 ```sh
@@ -60,7 +60,7 @@ $ npm run make
 
 It will be placed in the `out/make` folder at the root of the project.
 
-_Note: by default macOS overwrites already installed packages, so, if you want to see the app in the menu and in the apps folder, make sure to remove it from anywhere else, including the `out` folder_
+_Note: by default macOS overwrites already installed packages, so, if you want to see the app in the menu and in the Applications folder, make sure to remove RMBTDesktop.app from anywhere else, including the `out` folder, before installing the \*.pkg_
 
 ### Windows Store
 
@@ -121,4 +121,7 @@ The project contains a `.env.example` file. You can use it as an example to conf
 | `CROWDIN_UPDATE_AT_RUNTIME`        | If set to true, will try to download translations via the Crowdin API when user launches the app.                                                                                                                                                  |
 | `NEWS_PATH`                        | A control server endpoint starting with `/` which returns a list of news available for the platform.                                                                                                                                               |
 | `ENABLE_LANGUAGE_SWITCH`           | If set to true, will allow changing the app language from the settings.                                                                                                                                                                            |
-| `DISTRIBUTION_MAC_IDENTITY`        | The name of the Mac Installer Distribution Certificate installed in your local Keychain.                                                                                                                                                           |
+| `APPLE_DEVELOPER_IDENTITY`         | The name of the Mac Installer Distribution Certificate installed in your local Keychain.                                                                                                                                                           |
+| `APPLE_ID`                         | Apple ID associated with your Apple Developer account.                                                                                                                                                                                             |
+| `APPLE_PASSWORD`                   | App-specific password. See https://support.apple.com/en-us/HT204397 for details.                                                                                                                                                                   |
+| `APPLE_TEAM_ID`                    | The Apple Team ID you want to notarize under. You can find Team IDs for team you belong to by going to https://developer.apple.com/account/#/membership.                                                                                           |

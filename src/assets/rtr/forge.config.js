@@ -15,6 +15,12 @@ module.exports = {
             platform: "mas",
             entitlements: path.resolve(__dirname, "entitlements.plist"),
         },
+        osxNotarization: {
+            tool: "notarytool",
+            appleId: process.env.APPLE_ID,
+            appleIdPassword: process.env.APPLE_PASSWORD,
+            teamId: process.env.APPLE_TEAM_ID,
+        },
     },
     rebuildConfig: {},
     makers: [
@@ -36,7 +42,7 @@ module.exports = {
         {
             name: "@electron-forge/maker-pkg",
             config: {
-                identity: process.env.DISTRIBUTION_MAC_IDENTITY,
+                identity: process.env.APPLE_DEVELOPER_IDENTITY,
             },
         },
         {

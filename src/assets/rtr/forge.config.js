@@ -13,6 +13,7 @@ module.exports = {
         ],
         osxSign: {
             platform: "mas",
+            entitlements: path.resolve(__dirname, "entitlements.plist"),
         },
     },
     rebuildConfig: {},

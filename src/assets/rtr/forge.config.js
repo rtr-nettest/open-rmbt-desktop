@@ -17,16 +17,17 @@ module.exports = {
             ".example",
         ],
         osxSign: {
+            identity: process.env.APPLE_CODESIGN_IDENTITY,
             platform: "mas",
             provisioningProfile: path.resolve(
                 __dirname,
                 "RMBTDesktop_Distribution_Profile.provisionprofile"
             ),
-            // optionsForFile: () => {
-            //     return {
-            //         entitlements: path.resolve(__dirname, "entitlements.plist"),
-            //     }
-            // },
+            optionsForFile: () => {
+                return {
+                    entitlements: path.resolve(__dirname, "entitlements.plist"),
+                }
+            },
         },
         osxNotarization: {
             tool: "notarytool",
@@ -56,7 +57,7 @@ module.exports = {
         {
             name: "@electron-forge/maker-pkg",
             config: {
-                identity: process.env.APPLE_DEVELOPER_IDENTITY,
+                identity: process.env.APPLE_INSTALLER_IDENTITY,
             },
         },
         {

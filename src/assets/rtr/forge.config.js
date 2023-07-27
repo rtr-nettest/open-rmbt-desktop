@@ -34,15 +34,13 @@ module.exports = {
             name: "@electron-forge/maker-appx",
             config: {
                 assets: path.resolve(__dirname, "app-icon"),
-                devCert:
-                    "C:\\Users\\%USERNAME%\\AppData\\Roaming\\electron-windows-store\\developmentca\\developmentca.pfx",
+                devCert: process.env.WINDOWS_CERT_PATH,
                 manifest: path.resolve(__dirname, "AppXManifest.xml"),
                 packageDescription: "RTR Desktop App",
                 packageDisplayName: "RMBT Desktop",
                 packageName: "RMBTDesktop",
-                publisher: "CN=developmentca",
-                windowsKit:
-                    "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.19041.0\\x64",
+                publisher: process.env.WINDOWS_PUBLISHER_IDENTITY,
+                windowsKit: process.env.WINDOWS_KITS_PATH,
             },
         },
         {

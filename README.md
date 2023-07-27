@@ -70,7 +70,7 @@ _Note: by default macOS overwrites already installed packages, so, if you want t
 Requires Windows 10 or later.
 
 1. Install Windows SDK (https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/).
-2. Configure the `@electron-forge/maker-appx` options in `src/assets/<FLAVOR>/forge.config.js`. For the details see: https://github.com/electron-userland/electron-windows-store.
+2. Set `WINDOWS_CERT_PATH`, `WINDOWS_KITS_PATH`, and `WINDOWS_PUBLISHER_IDENTITY` in the `.env` file. You can also configure any additional parameters in the `@electron-forge/maker-appx` options in `src/assets/<FLAVOR>/forge.config.js`. For the details see: https://github.com/electron-userland/electron-windows-store.
 3. Build the distributable with
 
 ```sh

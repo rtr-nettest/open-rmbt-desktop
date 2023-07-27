@@ -15,16 +15,18 @@ module.exports = {
     rebuildConfig: {},
     makers: [
         {
-            name: "@electron-forge/maker-squirrel",
+            name: "@electron-forge/maker-appx",
             config: {
-                name: "open-rmbt-desktop",
-                authors: "Specure GmbH",
-                description: "Open Nettest Desktop app",
-                loadingGif: path.join(
-                    process.env.ASSETS_FOLDER,
-                    "images",
-                    "splash.gif"
-                ),
+                assets: path.resolve(__dirname, "app-icon"),
+                devCert:
+                    "C:\\Users\\%USERNAME%\\AppData\\Roaming\\electron-windows-store\\developmentca\\developmentca.pfx",
+                manifest: path.resolve(__dirname, "AppXManifest.xml"),
+                packageDescription: "Open Nettest Desktop App",
+                packageDisplayName: "Open Nettest Desktop",
+                packageName: "ONTDesktop",
+                publisher: "CN=developmentca",
+                windowsKit:
+                    "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.19041.0\\x64",
             },
         },
         {

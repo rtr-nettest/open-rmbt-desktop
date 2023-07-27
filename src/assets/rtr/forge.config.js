@@ -1,5 +1,6 @@
 const path = require("path")
 const { codeSignApp } = require("../../../scripts/codesign-app.js")
+const packJson = require("../../../package.json")
 
 module.exports = {
     hooks: {
@@ -51,7 +52,10 @@ module.exports = {
         },
         {
             name: "@electron-forge/maker-deb",
-            config: {},
+            config: {
+                maintainer: "RTR-GmbH",
+                homepage: packJson.repository,
+            },
         },
         {
             name: "@electron-forge/maker-rpm",

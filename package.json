@@ -1,7 +1,7 @@
 {
     "name": "open-rmbt-desktop",
     "productName": "RMBTDesktop",
-    "version": "0.2.1",
+    "version": "0.2.6",
     "description": "RTR Desktop App",
     "main": "dist/main.js",
     "engines": {
@@ -46,6 +46,7 @@
         "jest": "^29.5.0",
         "node-loader": "^2.0.0",
         "node-noop": "^1.0.0",
+        "plist": "^3.1.0",
         "shx": "^0.3.4",
         "start-server-and-test": "^2.0.0",
         "stream-throttle": "^0.1.3",

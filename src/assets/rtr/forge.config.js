@@ -1,40 +1,31 @@
 const path = require("path")
+const { codeSignApp } = require("../../../scripts/codesign-app.js")
 
 module.exports = {
     hooks: {
-        preMake: (config) => {
-            console.log(config)
+        postPackage: async () => {
+            if (process.platform === "darwin") {
+                await codeSignApp(
+                    path.resolve(__dirname, "entitlements.plist"),
+                    path.resolve(
+                        __dirname,
+                        "RMBTDesktop_Distribution_Profile.provisionprofile"
+                    )
+                )
+            }
         },
     },
     packagerConfig: {
         icon: path.resolve(__dirname, "app-icon", "icon"),
         ignore: [
+            "coverage/",
             "src/",
             "log/",
-            "node_modules",
+            "node_modules/",
             ".prettierrc",
             ".config.js",
             ".example",
         ],
-        osxSign: {
-            identity: process.env.APPLE_CODESIGN_IDENTITY,
-            platform: "mas",
-            provisioningProfile: path.resolve(
-                __dirname,
-                "RMBTDesktop_Distribution_Profile.provisionprofile"
-            ),
-            optionsForFile: () => {
-                return {
-                    entitlements: path.resolve(__dirname, "entitlements.plist"),
-                }
-            },
-        },
-        osxNotarization: {
-            tool: "notarytool",
-            appleId: process.env.APPLE_ID,
-            appleIdPassword: process.env.APPLE_PASSWORD,
-            teamId: process.env.APPLE_TEAM_ID,
-        },
         appBundleId: process.env.APP_BUNDLE_ID,
     },
     rebuildConfig: {},

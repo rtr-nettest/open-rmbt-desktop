@@ -61,3 +61,4 @@ out/
 .webpack
 src/measurement/services/worker.service.js
 coverage/
+*.provisionprofile

@@ -50,10 +50,10 @@ The app will be placed in the `out` folder at the root of the project.
 
 Requires macOS Ventura or later, XCode 12.2.0 or later.
 
-1. Download the Mac App Distribution and Mac Installer Distribution certificates from https://developer.apple.com/account/resources/certificates/list and install it your Mac's system keychain. Put the name of the installed certificates into the `.env` file as `APPLE_CODESIGN_IDENTITY` and `APPLE_INSTALLER_IDENTITY` respectively.
+1. Download the Distribution and Mac Installer Distribution certificates from https://developer.apple.com/account/resources/certificates/list and install them in your Mac's default keychain. Put the name of the installed certificates into the `.env` file as `APPLE_CODESIGN_IDENTITY` and `APPLE_INSTALLER_IDENTITY` respectively.
 2. Donwload the distribution provisioning profile from https://developer.apple.com/account/resources/profiles/list and put it into the `src/assets/<FLAVOR>` folder as `RMBTDesktop_Distribution_Profile.provisionprofile`.
 3. Set up the `.env` file with your `APPLE_ID`, `APPLE_PASSWORD`, and `APPLE_TEAM_ID`. See https://www.electronforge.io/guides/code-signing/code-signing-macos#option-1-using-an-app-specific-password for details.
-4. Build the distributable with
+4. Remove the `out` folder, if exists, then build the distributable with
 
 ```sh
 $ npm run make:app-store
@@ -61,7 +61,9 @@ $ npm run make:app-store
 
 It will be placed in the `out/make` folder at the root of the project.
 
-_Note: by default macOS overwrites already installed packages, so, if you want to see the app in the menu and in the Applications folder, make sure to remove RMBTDesktop.app from anywhere else, including the `out` folder, before installing the \*.pkg_
+5. To upload the `*.pkg` file to AppStore use Transporter: https://apps.apple.com/us/app/transporter/id1450874784.
+
+_Note: by default macOS overwrites already installed packages, so, if you want to see the app in the menu and in the Applications folder on your dev machine, make sure to remove RMBTDesktop.app from anywhere else, including the `out` folder, before installing the `*.pkg`_
 
 ### Windows Store
 
@@ -122,8 +124,8 @@ The project contains a `.env.example` file. You can use it as an example to conf
 | `CROWDIN_UPDATE_AT_RUNTIME`        | If set to true, will try to download translations via the Crowdin API when user launches the app.                                                                                                                                                  |
 | `NEWS_PATH`                        | A control server endpoint starting with `/` which returns a list of news available for the platform.                                                                                                                                               |
 | `ENABLE_LANGUAGE_SWITCH`           | If set to true, will allow changing the app language from the settings.                                                                                                                                                                            |
-| `APPLE_CODESIGN_IDENTITY`          | The name of the Mac App Distribution Certificate installed in your system Keychain.                                                                                                                                                                |
-| `APPLE_INSTALLER_IDENTITY`         | The name of the Mac Installer Distribution Certificate installed in your system Keychain.                                                                                                                                                          |
+| `APPLE_CODESIGN_IDENTITY`          | The name of the Mac App Distribution Certificate installed in your default Keychain.                                                                                                                                                               |
+| `APPLE_INSTALLER_IDENTITY`         | The name of the Mac Installer Distribution Certificate installed in your default Keychain.                                                                                                                                                         |
 | `APPLE_ID`                         | Apple ID associated with your Apple Developer account.                                                                                                                                                                                             |
 | `APPLE_PASSWORD`                   | App-specific password. See https://support.apple.com/en-us/HT204397 for details.                                                                                                                                                                   |
 | `APPLE_TEAM_ID`                    | The Apple Team ID you want to notarize under. You can find Team IDs for team you belong to by going to https://developer.apple.com/account/#/membership.                                                                                           |

@@ -71,10 +71,11 @@ Requires Windows 10 or later.
 
 1. Install Windows SDK (https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/).
 2. Set `WINDOWS_KITS_PATH` in the `.env` file. You can also configure any additional parameters in the `@electron-forge/maker-appx` options in `src/assets/<FLAVOR>/forge.config.js`. For the details see: https://github.com/electron-userland/electron-windows-store.
-3. Build the distributable with
+3. Make sure that `src\assets\<FLAVOR>\AppXManifest.xml` contains the correct Publisher and Version in the `<Identity>` field.
+4. Build the distributable with
 
 ```sh
-$ npm run make
+$ npm run make:windows
 ```
 
 It will be placed in the `out/make` folder at the root of the project.

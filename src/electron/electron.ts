@@ -1,5 +1,4 @@
 import { app, BrowserWindow, ipcMain, Menu, protocol, shell } from "electron"
-if (require("electron-squirrel-startup")) app.quit()
 import path from "path"
 import { MeasurementRunner } from "../measurement"
 import { Events } from "./enums/events.enum"

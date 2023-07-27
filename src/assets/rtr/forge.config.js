@@ -1,6 +1,8 @@
 const path = require("path")
 const { codeSignApp } = require("../../../scripts/codesign-app.js")
 const packJson = require("../../../package.json")
+const { promisify } = require("util")
+const { exec } = require("child_process")
 
 module.exports = {
     hooks: {
@@ -13,6 +15,31 @@ module.exports = {
                             __dirname,
                             "RMBTDesktop_Distribution_Profile.provisionprofile"
                         )
+                    )
+                } catch (e) {
+                    console.warn(e)
+                }
+            }
+        },
+        postMake: async () => {
+            if (
+                process.platform === "win32" &&
+                !process.env.WINDOWS_CERT_PATH
+            ) {
+                const pExec = promisify(exec)
+                try {
+                    await pExec(
+                        `"${path.join(
+                            process.env.WINDOWS_KITS_PATH,
+                            "signtool.exe"
+                        )}" sign  -fd SHA256 -v /a /t "http://time.certum.pl/" "${path.join(
+                            process.cwd(),
+                            "out",
+                            "make",
+                            "appx",
+                            "x64",
+                            packJson.productName + ".appx"
+                        )}"`
                     )
                 } catch (e) {
                     console.warn(e)
@@ -47,9 +74,9 @@ module.exports = {
                 packageDisplayName: "RMBT Desktop",
                 authors: "Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
                 description: "RTR Desktop app",
-                signtoolParams: process.env.WINDOWS_CERT_PATH
-                    ? undefined
-                    : ["/fd sha256", "/a", "/t http://time.certum.pl/"],
+                // signtoolParams: process.env.WINDOWS_CERT_PATH
+                //     ? undefined
+                //     : ["/fd sha256", "/a", "/t http://time.certum.pl/"],
                 packageName: "RMBTDesktop",
                 publisher:
                     process.env.WINDOWS_PUBLISHER_IDENTITY ||

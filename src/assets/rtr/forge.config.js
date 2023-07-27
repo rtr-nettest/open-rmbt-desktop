@@ -35,12 +35,21 @@ module.exports = {
             name: "@electron-forge/maker-appx",
             config: {
                 assets: path.resolve(__dirname, "app-icon"),
-                devCert: process.env.WINDOWS_CERT_PATH,
+                ...(process.env.WINDOWS_CERT_PATH
+                    ? { devCert: process.env.WINDOWS_CERT_PATH }
+                    : {}),
                 manifest: path.resolve(__dirname, "AppXManifest.xml"),
                 packageDescription: "RTR Desktop App",
                 packageDisplayName: "RMBT Desktop",
+                authors: "Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
+                description: "RTR Desktop app",
+                signtoolParams: process.env.WINDOWS_CERT_PATH
+                    ? undefined
+                    : ["/fd sha256", "/a", "/t http://time.certum.pl/"],
                 packageName: "RMBTDesktop",
-                publisher: process.env.WINDOWS_PUBLISHER_IDENTITY,
+                publisher:
+                    process.env.WINDOWS_PUBLISHER_IDENTITY ||
+                    "CN=Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
                 windowsKit: process.env.WINDOWS_KITS_PATH,
             },
         },

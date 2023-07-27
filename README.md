@@ -70,7 +70,7 @@ _Note: by default macOS overwrites already installed packages, so, if you want t
 Requires Windows 10 or later.
 
 1. Install Windows SDK (https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/).
-2. Set `WINDOWS_CERT_PATH`, `WINDOWS_KITS_PATH`, and `WINDOWS_PUBLISHER_IDENTITY` in the `.env` file. You can also configure any additional parameters in the `@electron-forge/maker-appx` options in `src/assets/<FLAVOR>/forge.config.js`. For the details see: https://github.com/electron-userland/electron-windows-store.
+2. Set `WINDOWS_KITS_PATH` in the `.env` file. You can also configure any additional parameters in the `@electron-forge/maker-appx` options in `src/assets/<FLAVOR>/forge.config.js`. For the details see: https://github.com/electron-userland/electron-windows-store.
 3. Build the distributable with
 
 ```sh
@@ -129,3 +129,6 @@ The project contains a `.env.example` file. You can use it as an example to conf
 | `APPLE_ID`                         | Apple ID associated with your Apple Developer account.                                                                                                                                                                                             |
 | `APPLE_PASSWORD`                   | App-specific password. See https://support.apple.com/en-us/HT204397 for details.                                                                                                                                                                   |
 | `APPLE_TEAM_ID`                    | The Apple Team ID you want to notarize under. You can find Team IDs for team you belong to by going to https://developer.apple.com/account/#/membership.                                                                                           |
+| `WINDOWS_KITS_PATH`                | Full path to your local Windows Kits installation                                                                                                                                                                                                  |
+| `WINDOWS_CERT_PATH`                | Full path to your certificate.pfx                                                                                                                                                                                                                  |
+| `WINDOWS_PUBLISHER_IDENTITY`       | Your publisher identity                                                                                                                                                                                                                            |

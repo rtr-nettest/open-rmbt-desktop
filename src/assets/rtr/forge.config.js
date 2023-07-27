@@ -6,13 +6,17 @@ module.exports = {
     hooks: {
         postPackage: async () => {
             if (process.platform === "darwin") {
-                await codeSignApp(
-                    path.resolve(__dirname, "entitlements.plist"),
-                    path.resolve(
-                        __dirname,
-                        "RMBTDesktop_Distribution_Profile.provisionprofile"
+                try {
+                    await codeSignApp(
+                        path.resolve(__dirname, "entitlements.plist"),
+                        path.resolve(
+                            __dirname,
+                            "RMBTDesktop_Distribution_Profile.provisionprofile"
+                        )
                     )
-                )
+                } catch (e) {
+                    console.warn(e)
+                }
             }
         },
     },
@@ -64,11 +68,20 @@ module.exports = {
             config: {
                 maintainer: "RTR-GmbH",
                 homepage: packJson.repository,
+                options: {
+                    bin: packJson.productName,
+                },
             },
         },
         {
             name: "@electron-forge/maker-rpm",
-            config: {},
+            config: {
+                maintainer: "RTR-GmbH",
+                homepage: packJson.repository,
+                options: {
+                    bin: packJson.productName,
+                },
+            },
         },
     ],
 }

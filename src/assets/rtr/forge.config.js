@@ -45,7 +45,8 @@ module.exports = {
                     "/t http://time.certum.pl/",
                 ],
                 packageName: "RMBTDesktop",
-                publisher: process.env.WINDOWS_PUBLISHER_IDENTITY,
+                publisher:
+                    "CN=Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
                 windowsKit: process.env.WINDOWS_KITS_PATH,
             },
         },

@@ -3,22 +3,19 @@ const { codeSignApp } = require("../../../scripts/codesign-app.js")
 const packJson = require("../../../package.json")
 const { promisify } = require("util")
 const { exec } = require("child_process")
+const pExec = promisify(exec)
 
 module.exports = {
     hooks: {
         postPackage: async () => {
             if (process.platform === "darwin") {
-                try {
-                    await codeSignApp(
-                        path.resolve(__dirname, "entitlements.plist"),
-                        path.resolve(
-                            __dirname,
-                            "RMBTDesktop_Distribution_Profile.provisionprofile"
-                        )
+                await codeSignApp(
+                    path.resolve(__dirname, "entitlements.plist"),
+                    path.resolve(
+                        __dirname,
+                        "RMBTDesktop_Distribution_Profile.provisionprofile"
                     )
-                } catch (e) {
-                    console.warn(e)
-                }
+                )
             }
         },
         postMake: async () => {
@@ -26,24 +23,19 @@ module.exports = {
                 process.platform === "win32" &&
                 !process.env.WINDOWS_CERT_PATH
             ) {
-                const pExec = promisify(exec)
-                try {
-                    await pExec(
-                        `"${path.join(
-                            process.env.WINDOWS_KITS_PATH,
-                            "signtool.exe"
-                        )}" sign  -fd SHA256 -v /a /t "http://time.certum.pl/" "${path.join(
-                            process.cwd(),
-                            "out",
-                            "make",
-                            "appx",
-                            "x64",
-                            packJson.productName + ".appx"
-                        )}"`
-                    )
-                } catch (e) {
-                    console.warn(e)
-                }
+                await pExec(
+                    `"${path.join(
+                        process.env.WINDOWS_KITS_PATH,
+                        "signtool.exe"
+                    )}" sign  -fd SHA256 -v /a /t "http://time.certum.pl/" "${path.join(
+                        process.cwd(),
+                        "out",
+                        "make",
+                        "appx",
+                        "x64",
+                        packJson.productName + ".appx"
+                    )}"`
+                )
             }
         },
     },
@@ -69,7 +61,13 @@ module.exports = {
                 ...(process.env.WINDOWS_CERT_PATH
                     ? { devCert: process.env.WINDOWS_CERT_PATH }
                     : {}),
-                manifest: path.resolve(__dirname, "AppXManifest.xml"),
+                manifest: path.resolve(
+                    __dirname,
+                    process.env.WINDOWS_PUBLISHER_IDENTITY ===
+                        "CN=developmentca"
+                        ? "AppXManifest.dev.xml"
+                        : "AppXManifest.xml"
+                ),
                 packageDescription: "RTR Desktop App",
                 packageDisplayName: "RMBT Desktop",
                 authors: "Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",

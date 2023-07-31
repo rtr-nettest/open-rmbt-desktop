@@ -91,20 +91,24 @@ module.exports = {
         {
             name: "@electron-forge/maker-deb",
             config: {
-                maintainer: "RTR-GmbH",
-                homepage: packJson.repository,
                 options: {
                     bin: packJson.productName,
+                    icon: path.resolve(__dirname, "app-icon", "icon.png"),
+                    maintainer: "RTR-GmbH",
+                    homepage: packJson.repository,
+                    productName: "RMBT Desktop",
                 },
             },
         },
         {
             name: "@electron-forge/maker-rpm",
             config: {
-                maintainer: "RTR-GmbH",
-                homepage: packJson.repository,
                 options: {
                     bin: packJson.productName,
+                    icon: path.resolve(__dirname, "app-icon", "icon.png"),
+                    maintainer: "RTR-GmbH",
+                    homepage: packJson.repository,
+                    productName: "RMBT Desktop",
                 },
             },
         },

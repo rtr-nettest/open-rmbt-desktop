@@ -80,6 +80,20 @@ $ npm run make:windows
 
 It will be placed in the `out/make` folder at the root of the project.
 
+### Linux
+
+To build a `*.deb` package, you will need a Linux or a macOS machine with `fakeroot` and `dpkg` installed.
+
+To buila a `*.rpm` package, you will need a Linux machine with `rpm` and `rpm-build` installed.
+
+After the necessary packages are installed, run:
+
+```sh
+$ npm run make:linux
+```
+
+Both `deb` and `rpm` packages will be placed in the `out/make` folder at the root of the project. `RPM`s built on macOS are not valid and can be diresgarded.
+
 ## Configuration
 
 The project contains a `.env.example` file. You can use it as an example to configure the variables needed to successfully run a measurement. The path to your custom `.env` file can be passed through an environment variable `RMBT_DESKTOP_DOTENV_CONFIG_PATH`. Otherwise the client will read the variables from a `.env` file in the root of the project, if such exists.

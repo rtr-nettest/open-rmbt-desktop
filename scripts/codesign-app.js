@@ -1,6 +1,7 @@
 const { exec } = require("child_process")
 const { promisify } = require("util")
 const fsp = require("fs/promises")
+const fs = require("fs")
 const path = require("path")
 const plist = require("plist")
 const packJson = require("../package.json")
@@ -23,7 +24,10 @@ const outChildEntitlements = path.resolve(
 )
 
 async function codeSignApp(entitlementsPath, provisionPath) {
-    await updatePlist()
+    const plistUpdated = await updatePlist()
+    if (!plistUpdated) {
+        return
+    }
     await updateEntitlements(entitlementsPath)
     await embedProvisionProfile(provisionPath)
     await collectAppsToSign(outApp)
@@ -48,12 +52,16 @@ async function updatePlist() {
         "Contents",
         "Info.plist"
     )
+    if (!fs.existsSync(filePath)) {
+        return false
+    }
     const plistFile = (await fsp.readFile(filePath)).toString()
     const parsedPlist = plist.parse(plistFile)
     console.log("parsedPlist", parsedPlist)
     parsedPlist["ElectronTeamID"] = process.env.APPLE_TEAM_ID
     parsedPlist["ITSAppUsesNonExemptEncryption"] = false
     await fsp.writeFile(filePath, plist.build(parsedPlist))
+    return true
 }
 
 async function embedProvisionProfile(provisionPath) {

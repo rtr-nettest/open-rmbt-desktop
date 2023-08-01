@@ -1,6 +1,9 @@
 // We're patching @electron-forge/maker-appx, because electron-windows-store does not support signing with hardware tokens
 
-const { MakerAppX } = require("@electron-forge/maker-appx")
+const {
+    MakerAppX,
+    createDefaultCertificate,
+} = require("@electron-forge/maker-appx")
 const { MakerBase } = require("@electron-forge/maker-base")
 const path = require("path")
 const zip = require("electron-windows-store/lib/zip")
@@ -37,7 +40,8 @@ module.exports = function patchMakerAppX() {
             .then(() => {
                 if (
                     process.platform === "win32" &&
-                    !process.env.WINDOWS_CERT_PATH
+                    process.env.WINDOWS_PUBLISHER_IDENTITY !==
+                        "CN=developmentca"
                 ) {
                     return pExec(
                         `"${path.join(
@@ -85,6 +89,16 @@ module.exports = function patchMakerAppX() {
             throw new Error(
                 "Please set config.forge.windowsStoreConfig.publisher or author.name in package.json for the appx target"
             )
+        }
+
+        if (
+            !opts.devCert &&
+            process.env.WINDOWS_PUBLISHER_IDENTITY === "CN=developmentca"
+        ) {
+            opts.devCert = await createDefaultCertificate(opts.publisher, {
+                certFilePath: outPath,
+                program: opts,
+            })
         }
 
         if (opts.packageVersion.includes("-")) {

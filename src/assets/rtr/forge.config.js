@@ -1,9 +1,8 @@
 const path = require("path")
 const { codeSignApp } = require("../../../scripts/codesign-app.js")
 const packJson = require("../../../package.json")
-const { promisify } = require("util")
-const { exec } = require("child_process")
-const pExec = promisify(exec)
+const patchMakerAppX = require("../../../scripts/patch-maker-appx.js")
+patchMakerAppX()
 
 module.exports = {
     hooks: {
@@ -15,26 +14,6 @@ module.exports = {
                         __dirname,
                         "RMBTDesktop_Distribution_Profile.provisionprofile"
                     )
-                )
-            }
-        },
-        postMake: async () => {
-            if (
-                process.platform === "win32" &&
-                !process.env.WINDOWS_CERT_PATH
-            ) {
-                await pExec(
-                    `"${path.join(
-                        process.env.WINDOWS_KITS_PATH,
-                        "signtool.exe"
-                    )}" sign  -fd SHA256 -v /a /t "http://time.certum.pl/" "${path.join(
-                        process.cwd(),
-                        "out",
-                        "make",
-                        "appx",
-                        "x64",
-                        packJson.productName + ".appx"
-                    )}"`
                 )
             }
         },
@@ -78,7 +57,7 @@ module.exports = {
                 packageName: "RMBTDesktop",
                 publisher:
                     process.env.WINDOWS_PUBLISHER_IDENTITY ||
-                    "CN=Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
+                    "CN=Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH), O=Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH), L=Wien, C=AT, SERIALNUMBER=208312t, OID.2.5.4.15=Private Organization, STREET=Mariahilfer Straße 77-79, PostalCode=1060, OID.1.3.6.1.4.1.311.60.2.1.1=Wien, OID.1.3.6.1.4.1.311.60.2.1.3=AT",
                 windowsKit: process.env.WINDOWS_KITS_PATH,
             },
         },

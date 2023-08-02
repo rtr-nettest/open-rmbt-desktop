@@ -47,9 +47,9 @@ module.exports = function patchMakerAppX() {
                         `"${path.join(
                             program.windowsKit,
                             "signtool.exe"
-                        )}" sign /n ${
+                        )}" sign /n "${
                             program.publisher
-                        }  -fd SHA256 -v /a /t "http://time.certum.pl/" "${path.join(
+                        }"  -fd SHA256 -v /a /t "http://time.certum.pl/" "${path.join(
                             program.outputDirectory,
                             program.packageName + ".appx"
                         )}"`

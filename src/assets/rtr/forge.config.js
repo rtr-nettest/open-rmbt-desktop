@@ -51,9 +51,6 @@ module.exports = {
                 packageDisplayName: "RMBT Desktop",
                 authors: "Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
                 description: "RTR Desktop app",
-                // signtoolParams: process.env.WINDOWS_CERT_PATH
-                //     ? undefined
-                //     : ["/fd sha256", "/a", "/t http://time.certum.pl/"],
                 packageName: "RMBTDesktop",
                 publisher:
                     process.env.WINDOWS_PUBLISHER_IDENTITY ||

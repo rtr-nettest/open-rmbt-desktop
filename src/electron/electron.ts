@@ -40,6 +40,14 @@ const createWindow = () => {
             preload: path.join(__dirname, "preload.js"),
             nodeIntegration: true,
         },
+        icon: path.join(
+            __dirname,
+            "..",
+            "assets",
+            "rtr",
+            "app-icon",
+            "icon_linux.png"
+        ),
     })
 
     win.webContents.setWindowOpenHandler(({ url }) => {

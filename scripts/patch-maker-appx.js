@@ -47,7 +47,9 @@ module.exports = function patchMakerAppX() {
                         `"${path.join(
                             program.windowsKit,
                             "signtool.exe"
-                        )}" sign  -fd SHA256 -v /a /t "http://time.certum.pl/" "${path.join(
+                        )}" sign /n ${
+                            program.publisher
+                        }  -fd SHA256 -v /a /t "http://time.certum.pl/" "${path.join(
                             program.outputDirectory,
                             program.packageName + ".appx"
                         )}"`
@@ -71,7 +73,6 @@ module.exports = function patchMakerAppX() {
         await this.ensureDirectory(outPath)
 
         const opts = {
-            publisher: `CN=${packageJSON.author}`,
             flatten: false,
             deploy: false,
             packageVersion: `${packageJSON.version}.0`,

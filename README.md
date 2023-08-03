@@ -59,7 +59,7 @@ Requires macOS Ventura or later, XCode 12.2.0 or later.
 $ npm run make:app-store
 ```
 
-It will be placed in the `out/make` folder at the root of the project.
+It will be placed in the `out/make` folder at the root of the project. There will also be a zip archive in the folder for the Github Releases.
 
 5. To upload the `*.pkg` file to AppStore use Transporter: https://apps.apple.com/us/app/transporter/id1450874784.
 

@@ -55,6 +55,7 @@ const createWindow = () => {
         win.webContents.openDevTools()
     } else {
         win.loadURL(`${Protocol.scheme}://index.html`)
+        require("update-electron-app")()
     }
 }
 

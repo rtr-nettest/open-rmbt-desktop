@@ -18,7 +18,9 @@ import { EIPVersion } from "../measurement/enums/ip-version.enum"
 import { menu } from "./menu"
 
 if (process.env.DEV !== "true") {
-    require("update-electron-app")()
+    require("update-electron-app")({
+        repo: pack.repository,
+    })
 }
 
 const createWindow = () => {

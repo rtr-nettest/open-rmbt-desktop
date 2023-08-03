@@ -17,6 +17,10 @@ import pack from "../../package.json"
 import { EIPVersion } from "../measurement/enums/ip-version.enum"
 import { menu } from "./menu"
 
+if (process.env.DEV !== "true") {
+    require("update-electron-app")()
+}
+
 const createWindow = () => {
     if (process.env.DEV !== "true") {
         // Needs to happen before creating/loading the browser window;
@@ -55,7 +59,6 @@ const createWindow = () => {
         win.webContents.openDevTools()
     } else {
         win.loadURL(`${Protocol.scheme}://index.html`)
-        require("update-electron-app")()
     }
 }
 

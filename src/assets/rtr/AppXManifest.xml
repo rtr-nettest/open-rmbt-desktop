@@ -3,13 +3,13 @@
    xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
    xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
    xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities">
-  <Identity Name="RMBTDesktop"
+  <Identity Name="RundfunkundTelekomRegulie.RTR-Netztest"
     ProcessorArchitecture="x64"
-    Publisher="CN=Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH), O=Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH), L=Wien, C=AT, SERIALNUMBER=208312t, OID.2.5.4.15=Private Organization, STREET=Mariahilfer Straße 77-79, PostalCode=1060, OID.1.3.6.1.4.1.311.60.2.1.1=Wien, OID.1.3.6.1.4.1.311.60.2.1.3=AT"
+    Publisher="CN=0F2FE87F-3FC2-475F-B440-0E556517BC3C"
     Version="0.2.6.0" />
   <Properties>
-    <DisplayName>RMBT Desktop</DisplayName>
-    <PublisherDisplayName>Reserved</PublisherDisplayName>
+    <DisplayName>RTR-Netztest</DisplayName>
+    <PublisherDisplayName>Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)</PublisherDisplayName>
     <Description>No description entered</Description>
     <Logo>assets\SampleAppx.50x50.png</Logo>
   </Properties>
@@ -26,7 +26,7 @@
     <Application Id="RMBTDesktop" Executable="app\RMBTDesktop.exe" EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
        BackgroundColor="#2d62b7"
-       DisplayName="RMBT Desktop"
+       DisplayName="RTR-Netztest"
        Square150x150Logo="assets\SampleAppx.150x150.png"
        Square44x44Logo="assets\SampleAppx.44x44.png"
        Description="RTR Desktop App">

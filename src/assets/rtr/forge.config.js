@@ -54,7 +54,7 @@ module.exports = {
                 packageName: "RundfunkundTelekomRegulie.RTR-Netztest",
                 publisher:
                     process.env.WINDOWS_PUBLISHER_IDENTITY ||
-                    "CN=Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH), O=Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH), L=Wien, C=AT, SERIALNUMBER=208312t, OID.2.5.4.15=Private Organization, STREET=Mariahilfer Straße 77-79, PostalCode=1060, OID.1.3.6.1.4.1.311.60.2.1.1=Wien, OID.1.3.6.1.4.1.311.60.2.1.3=AT",
+                    "CN=0F2FE87F-3FC2-475F-B440-0E556517BC3C",
                 windowsKit: process.env.WINDOWS_KITS_PATH,
             },
         },

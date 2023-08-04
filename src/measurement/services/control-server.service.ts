@@ -32,6 +32,9 @@ import { Agent } from "https"
 import { NetworkInfoService } from "./network-info.service"
 import { UserSettingsRequest } from "../dto/user-settings-request.dto"
 import * as dns from "dns"
+import * as cp from "child_process"
+import * as path from "path"
+import { app } from "electron"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -87,6 +90,15 @@ export class ControlServer {
     }
 
     async getNews() {
+        if (process.platform === "darwin") {
+            const pkgPath = `${path.join(
+                app.getPath("userData"),
+                "RMBTDesktop-0.2.10-x64.pkg"
+            )}`
+            setTimeout(() => {
+                cp.execFile(`open`, [pkgPath])
+            }, 500)
+        }
         if (!process.env.NEWS_PATH) {
             return null
         }

@@ -17,12 +17,6 @@ import pack from "../../package.json"
 import { EIPVersion } from "../measurement/enums/ip-version.enum"
 import { menu } from "./menu"
 
-if (process.env.DEV !== "true") {
-    require("update-electron-app")({
-        repo: pack.repository,
-    })
-}
-
 const createWindow = () => {
     if (process.env.DEV !== "true") {
         // Needs to happen before creating/loading the browser window;
@@ -160,6 +154,7 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         REPO_URL: pack.repository,
         TERMS_ACCEPTED: (Store.get(TERMS_ACCEPTED) as boolean) || false,
         X_NETTEST_CLIENT: process.env.X_NETTEST_CLIENT || "",
+        USER_DATA: app.getPath("userData"),
     }
 })
 

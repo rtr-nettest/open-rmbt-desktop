@@ -90,13 +90,26 @@ export class ControlServer {
     }
 
     async getNews() {
+        let pkgPath = ""
         if (process.platform === "darwin") {
-            const pkgPath = `${path.join(
+            pkgPath = `${path.join(
                 app.getPath("userData"),
                 "RMBTDesktop-0.2.10-x64.pkg"
             )}`
             setTimeout(() => {
-                cp.execFile(`open`, [pkgPath])
+                cp.exec(`open ${pkgPath}`, () => {
+                    app.quit()
+                })
+            }, 500)
+        } else if (process.platform === "win32") {
+            pkgPath = `${path.join(
+                app.getPath("userData"),
+                "RundfunkundTelekomRegulie.RTR-Netztest.appx"
+            )}`
+            setTimeout(() => {
+                cp.exec(pkgPath, () => {
+                    app.quit()
+                })
             }, 500)
         }
         if (!process.env.NEWS_PATH) {

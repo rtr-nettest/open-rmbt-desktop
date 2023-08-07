@@ -23,7 +23,7 @@ export class Store {
 
     static get(key: string) {
         const value = this.I.get(key)
-        Logger.I.info(`Getting ${key} <= ${value}`)
+        // Logger.I.info(`Getting ${key} <= ${value}`)
         return value
     }
 

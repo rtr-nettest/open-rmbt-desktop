@@ -154,7 +154,7 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         REPO_URL: pack.repository,
         TERMS_ACCEPTED: (Store.get(TERMS_ACCEPTED) as boolean) || false,
         X_NETTEST_CLIENT: process.env.X_NETTEST_CLIENT || "",
-        USER_DATA: app.getPath("userData"),
+        USER_DATA: app.getPath("temp"),
     }
 })
 

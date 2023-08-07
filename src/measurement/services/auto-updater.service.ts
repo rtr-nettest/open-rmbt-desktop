@@ -76,7 +76,7 @@ export class AutoUpdater {
         if (!download?.browser_download_url) {
             return
         }
-        const pkgPath = path.join(app.getPath("userData"), download.name)
+        const pkgPath = path.join(app.getPath("temp"), download.name)
         const outStream = fs.createWriteStream(pkgPath)
         const downloadStream = await axios.get(download.browser_download_url, {
             responseType: "stream",

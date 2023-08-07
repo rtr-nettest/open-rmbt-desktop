@@ -6,7 +6,7 @@
   <Identity Name="RundfunkundTelekomRegulie.RTR-Netztest"
     ProcessorArchitecture="x64"
     Publisher="CN=0F2FE87F-3FC2-475F-B440-0E556517BC3C"
-    Version="0.2.6.0" />
+    Version="0.2.10.0" />
   <Properties>
     <DisplayName>RTR-Netztest</DisplayName>
     <PublisherDisplayName>Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)</PublisherDisplayName>

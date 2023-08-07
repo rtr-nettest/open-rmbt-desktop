@@ -6,7 +6,7 @@
   <Identity Name="RMBTDesktop"
     ProcessorArchitecture="x64"
     Publisher="CN=developmentca"
-    Version="0.2.6.1" />
+    Version="0.2.10.0" />
   <Properties>
     <DisplayName>RMBT Desktop</DisplayName>
     <PublisherDisplayName>Reserved</PublisherDisplayName>

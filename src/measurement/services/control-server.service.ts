@@ -32,9 +32,6 @@ import { Agent } from "https"
 import { NetworkInfoService } from "./network-info.service"
 import { UserSettingsRequest } from "../dto/user-settings-request.dto"
 import * as dns from "dns"
-import * as cp from "child_process"
-import * as path from "path"
-import { app } from "electron"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -90,28 +87,6 @@ export class ControlServer {
     }
 
     async getNews() {
-        let pkgPath = ""
-        if (process.platform === "darwin") {
-            pkgPath = `${path.join(
-                app.getPath("userData"),
-                "RMBTDesktop-0.2.10-x64.pkg"
-            )}`
-            setTimeout(() => {
-                cp.exec(`open ${pkgPath}`, () => {
-                    app.quit()
-                })
-            }, 500)
-        } else if (process.platform === "win32") {
-            pkgPath = `${path.join(
-                app.getPath("userData"),
-                "RundfunkundTelekomRegulie.RTR-Netztest.appx"
-            )}`
-            setTimeout(() => {
-                cp.exec(pkgPath, () => {
-                    app.quit()
-                })
-            }, 500)
-        }
         if (!process.env.NEWS_PATH) {
             return null
         }

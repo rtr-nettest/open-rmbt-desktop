@@ -7,7 +7,10 @@ patchMakerAppX()
 module.exports = {
     hooks: {
         postPackage: async () => {
-            if (process.platform === "darwin") {
+            if (
+                process.platform === "darwin" &&
+                process.env.APP_STORE === "true"
+            ) {
                 await codeSignApp(
                     path.resolve(__dirname, "entitlements.plist"),
                     path.resolve(
@@ -30,6 +33,17 @@ module.exports = {
             ".example",
         ],
         appBundleId: process.env.APP_BUNDLE_ID,
+        ...(process.env.APP_STORE !== "true"
+            ? {
+                  osxSign: {},
+                  osxNotarize: {
+                      tool: "notarytool",
+                      appleId: process.env.APPLE_ID,
+                      appleIdPassword: process.env.APPLE_PASSWORD,
+                      teamId: process.env.APPLE_TEAM_ID,
+                  },
+              }
+            : {}),
     },
     rebuildConfig: {},
     makers: [

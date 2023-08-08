@@ -50,10 +50,11 @@ The app will be placed in the `out` folder at the root of the project.
 
 Requires macOS Ventura or later, XCode 12.2.0 or later.
 
-1. Create and download Distribution and Mac Installer Distribution certificates from https://developer.apple.com/account/resources/certificates/list (more info at https://developer.apple.com/help/account/create-certificates/create-developer-id-certificates/), then install them in your Mac's default keychain. Put the name of the installed certificates into the `.env` file as `APPLE_CODESIGN_IDENTITY` and `APPLE_INSTALLER_IDENTITY` respectively.
-2. Create and donwload a distribution provisioning profile from https://developer.apple.com/account/resources/profiles/list and put it into the `src/assets/<FLAVOR>` folder as `RMBTDesktop_Distribution_Profile.provisionprofile`.
-3. Set up the `.env` file with your `APPLE_ID`, `APPLE_PASSWORD`, and `APPLE_TEAM_ID`. See https://www.electronforge.io/guides/code-signing/code-signing-macos#option-1-using-an-app-specific-password for details.
-4. Remove the `out` folder, if exists, then build the distributable with
+1. Create and download Distribution, Mac Installer Distribution, and Developer ID certificates from https://developer.apple.com/account/resources/certificates/list (more info at https://developer.apple.com/help/account/create-certificates/create-developer-id-certificates/), then install them in your Mac's default keychain. You may have to restart the system to apply the changes.
+2. Put the name of the installed certificates into the `.env` file as `APPLE_CODESIGN_IDENTITY` and `APPLE_INSTALLER_IDENTITY` respectively.
+3. Create and donwload a distribution provisioning profile from https://developer.apple.com/account/resources/profiles/list and put it into the `src/assets/<FLAVOR>` folder as `RMBTDesktop_Distribution_Profile.provisionprofile`.
+4. Set up the `.env` file with your `APPLE_ID`, `APPLE_PASSWORD`, and `APPLE_TEAM_ID`. See https://www.electronforge.io/guides/code-signing/code-signing-macos#option-1-using-an-app-specific-password for details.
+5. Remove the `out` folder, if exists, then build the distributable with
 
 ```sh
 $ npm run make:app-store
@@ -67,7 +68,7 @@ $ npm run make:macos
 
 to get a `*.dmg` file for standalone distribution (e.g. via GitHub Releases).
 
-It will be placed in the `out/make` folder at the root of the project. There will also be a zip archive in the folder for the Github Releases.
+In both cases, a `*.pkg` and a `*.dmg` will be placed in the `out/make` folder at the root of the project.
 
 5. To upload the `*.pkg` file to AppStore use Transporter: https://apps.apple.com/us/app/transporter/id1450874784.
 

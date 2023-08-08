@@ -32,22 +32,26 @@ export class AutoUpdater {
 
     async removeTmpFiles() {
         try {
-            cp.execFileSync(`hdiutil`, [
-                "detach",
-                `/Volumes/${pack.productName}`,
-            ])
-            for (const file in fs.readdirSync(app.getPath("temp"))) {
-                if (file.includes(pack.productName)) {
-                    cp.execFileSync("rm", [
-                        "-rf",
-                        path.resolve(app.getPath("temp"), file),
-                    ])
+            const extensions = ["pkg", "dmg", "appx"]
+            for (const ext of extensions) {
+                const file = `${pack.productName}-${pack.version}-x64.${ext}`
+                const fullPath = path.resolve(app.getPath("temp"), file)
+                if (fs.existsSync(fullPath)) {
+                    fs.unlinkSync(fullPath)
                 }
             }
+            cp.execFile(`hdiutil`, ["detach", `/Volumes/${pack.productName}`])
         } catch (e) {}
     }
 
     async checkForNewRelease() {
+        await this.removeTmpFiles()
+        if (
+            process.env.APP_STORE === "true" ||
+            process.env.MS_STORE === "true"
+        ) {
+            return
+        }
         try {
             const latestRelease = (
                 await axios.get(
@@ -79,7 +83,6 @@ export class AutoUpdater {
                 }
                 const response = await dialog.showMessageBox(dialogOpts)
                 if (response.response === 0) {
-                    await this.removeTmpFiles()
                     await this.downloadLatestRelease(file)
                 }
             }

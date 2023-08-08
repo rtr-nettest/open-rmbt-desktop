@@ -1,11 +1,11 @@
 import * as path from "path"
 import * as cp from "child_process"
-import * as fs from "fs"
-import { app, dialog } from "electron"
+import { app, dialog, BrowserWindow } from "electron"
 import axios from "axios"
 import { Logger } from "./logger.service"
 import semverGt from "semver/functions/gt"
 import * as pack from "../../../package.json"
+import { download } from "electron-dl"
 
 interface ILatestReleaseAsset {
     name: string
@@ -67,41 +67,34 @@ export class AutoUpdater {
     }
 
     async downloadLatestRelease(latestRelease: ILatestRelease) {
-        const download = latestRelease?.assets.find((a) => {
+        const file = latestRelease?.assets.find((a) => {
             return (
                 (process.platform === "darwin" && a.name.match(/pkg$/i)) ||
                 (process.platform === "win32" && a.name.match(/appx$/i))
             )
         })
-        if (!download?.browser_download_url) {
+        if (!file?.browser_download_url) {
             return
         }
-        const pkgPath = path.join(app.getPath("temp"), download.name)
-        const outStream = fs.createWriteStream(pkgPath)
-        const downloadStream = await axios.get(download.browser_download_url, {
-            responseType: "stream",
-        })
-        downloadStream.data.pipe(outStream)
-        return new Promise((res, rej) => {
-            outStream.on("error", () => {
-                outStream.close()
-                rej()
-            })
-            outStream.on("close", async () => {
-                const dialogOpts = {
-                    type: "info" as const,
-                    buttons: ["Install"],
-                    title: "Application Update",
-                    message: latestRelease.name,
-                    detail: "The new version is ready for installation.",
-                }
-                const response = await dialog.showMessageBox(dialogOpts)
-                if (response.response === 0) {
-                    this.installPackage(pkgPath)
-                }
-                res(void 0)
-            })
-        })
+        const pkgPath = path.join(app.getPath("temp"), file.name)
+        await download(
+            BrowserWindow.getFocusedWindow()!,
+            file.browser_download_url,
+            {
+                directory: app.getPath("temp"),
+            }
+        )
+        const dialogOpts = {
+            type: "info" as const,
+            buttons: ["Install"],
+            title: "Application Update",
+            message: latestRelease.name,
+            detail: "The new version is ready for installation.",
+        }
+        const response = await dialog.showMessageBox(dialogOpts)
+        if (response.response === 0) {
+            this.installPackage(pkgPath)
+        }
     }
 
     installPackage(pkgPath: string) {

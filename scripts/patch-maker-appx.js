@@ -38,11 +38,7 @@ module.exports = function patchMakerAppX() {
             .then(() => finalSay(program))
             .then(() => makeappx(program))
             .then(() => {
-                if (
-                    process.platform === "win32" &&
-                    process.env.WINDOWS_PUBLISHER_IDENTITY !==
-                        "CN=developmentca"
-                ) {
+                if (process.env.MS_STORE !== "true") {
                     return pExec(
                         `"${path.join(
                             program.windowsKit,

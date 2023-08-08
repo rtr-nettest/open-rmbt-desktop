@@ -75,10 +75,18 @@ Requires Windows 10 or later.
 4. Build the distributable with
 
 ```sh
+$ npm run make:microsoft-store
+```
+
+to sign it with a `*.pfx` certificate and be able to upload it to Microsoft Store, or with
+
+```sh
 $ npm run make:windows
 ```
 
-It will be placed in the `out/make` folder at the root of the project.
+to sign it with a hardware token.
+
+The file will be placed in the `out/make` folder at the root of the project.
 
 ### Linux
 

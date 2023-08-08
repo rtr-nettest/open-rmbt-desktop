@@ -20,6 +20,7 @@
         "package": "npm run build:all && electron-forge package",
         "make": "npm run build:all && electron-forge make",
         "make:windows": "npm run build:all && electron-forge make --platform=win32 --arch=x64",
+        "make:microsoft-store": "npm run build:all && cross-env MS_STORE=true electron-forge make --platform=win32 --arch=x64",
         "make:app-store": "npm run build:all && electron-forge make --platform=mas --arch=x64",
         "make:linux": "npm run build:all && electron-forge make --platform=linux --arch=x64"
     },

@@ -65,6 +65,13 @@ module.exports = {
             },
         },
         {
+            name: "@electron-forge/maker-dmg",
+            config: {
+                format: "ULFO",
+                icon: path.resolve(__dirname, "app-icon", "icon.icns"),
+            },
+        },
+        {
             name: "@electron-forge/maker-deb",
             config: {
                 options: {

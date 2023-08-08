@@ -6,6 +6,7 @@ import { Logger } from "./logger.service"
 import semverGt from "semver/functions/gt"
 import * as pack from "../../../package.json"
 import { download } from "electron-dl"
+import * as fs from "fs"
 
 interface ILatestReleaseAsset {
     name: string
@@ -29,6 +30,23 @@ export class AutoUpdater {
 
     private constructor() {}
 
+    async removeTmpFiles() {
+        try {
+            cp.execFileSync(`hdiutil`, [
+                "detach",
+                `/Volumes/${pack.productName}`,
+            ])
+            for (const file in fs.readdirSync(app.getPath("temp"))) {
+                if (file.includes(pack.productName)) {
+                    cp.execFileSync("rm", [
+                        "-rf",
+                        path.resolve(app.getPath("temp"), file),
+                    ])
+                }
+            }
+        } catch (e) {}
+    }
+
     async checkForNewRelease() {
         try {
             const latestRelease = (
@@ -45,20 +63,24 @@ export class AutoUpdater {
             ).data as ILatestRelease | null
             const latestVersion =
                 latestRelease?.tag_name.replace("v", "") ?? pack.version
-            if (
-                semverGt(latestVersion, pack.version) &&
-                latestRelease?.assets.length
-            ) {
+            const file = latestRelease?.assets.find((a) => {
+                return (
+                    (process.platform === "darwin" && a.name.match(/dmg$/i)) ||
+                    (process.platform === "win32" && a.name.match(/appx$/i))
+                )
+            })
+            if (semverGt(latestVersion, pack.version) && file) {
                 const dialogOpts = {
                     type: "info" as const,
                     buttons: ["Download and install", "Later"],
                     title: "Application Update",
-                    message: latestRelease.name,
+                    message: latestRelease!.name,
                     detail: "A new version is available. Would you like to install it?",
                 }
                 const response = await dialog.showMessageBox(dialogOpts)
                 if (response.response === 0) {
-                    await this.downloadLatestRelease(latestRelease)
+                    await this.removeTmpFiles()
+                    await this.downloadLatestRelease(file)
                 }
             }
         } catch (e) {
@@ -66,13 +88,7 @@ export class AutoUpdater {
         }
     }
 
-    async downloadLatestRelease(latestRelease: ILatestRelease) {
-        const file = latestRelease?.assets.find((a) => {
-            return (
-                (process.platform === "darwin" && a.name.match(/pkg$/i)) ||
-                (process.platform === "win32" && a.name.match(/appx$/i))
-            )
-        })
+    async downloadLatestRelease(file: ILatestReleaseAsset) {
         if (!file?.browser_download_url) {
             return
         }
@@ -88,7 +104,7 @@ export class AutoUpdater {
             type: "info" as const,
             buttons: ["Install"],
             title: "Application Update",
-            message: latestRelease.name,
+            message: "",
             detail: "The new version is ready for installation.",
         }
         const response = await dialog.showMessageBox(dialogOpts)
@@ -100,7 +116,7 @@ export class AutoUpdater {
     installPackage(pkgPath: string) {
         if (process.platform === "darwin") {
             setTimeout(() => {
-                cp.execFile(`open`, [pkgPath])
+                cp.execFile("open", [pkgPath])
                 app.quit()
             }, 300)
         } else if (process.platform === "win32") {
@@ -108,7 +124,7 @@ export class AutoUpdater {
                 cp.exec(pkgPath, () => {
                     app.quit()
                 })
-            }, 500)
+            }, 300)
         }
     }
 }

@@ -5,7 +5,6 @@ const fs = require("fs")
 const path = require("path")
 const plist = require("plist")
 const packJson = require("../package.json")
-const { notarize } = require("@electron/notarize")
 
 let appsToSign = []
 
@@ -43,15 +42,6 @@ async function codeSignApp(entitlementsPath, provisionPath) {
         } else {
             await sign(app)
         }
-    }
-    if (process.env.APP_STORE !== "true") {
-        await notarize({
-            appBundleId: process.env.APP_BUNDLE_ID,
-            appPath: path.resolve(outApp, `${packJson.productName}.app`),
-            appleId: process.env.APPLE_ID,
-            appleIdPassword: process.env.APPLE_PASSWORD,
-            teamId: process.env.APPLE_TEAM_ID,
-        })
     }
 }
 

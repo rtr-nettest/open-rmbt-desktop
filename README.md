@@ -46,26 +46,35 @@ The app will be placed in the `out` folder at the root of the project.
 
 ## Distribution
 
-### Mac App Store
+### macOS
 
 Requires macOS Ventura or later, XCode 12.2.0 or later.
 
-1. Download the Distribution and Mac Installer Distribution certificates from https://developer.apple.com/account/resources/certificates/list and install them in your Mac's default keychain. Put the name of the installed certificates into the `.env` file as `APPLE_CODESIGN_IDENTITY` and `APPLE_INSTALLER_IDENTITY` respectively.
-2. Donwload the distribution provisioning profile from https://developer.apple.com/account/resources/profiles/list and put it into the `src/assets/<FLAVOR>` folder as `RMBTDesktop_Distribution_Profile.provisionprofile`.
-3. Set up the `.env` file with your `APPLE_ID`, `APPLE_PASSWORD`, and `APPLE_TEAM_ID`. See https://www.electronforge.io/guides/code-signing/code-signing-macos#option-1-using-an-app-specific-password for details.
-4. Remove the `out` folder, if exists, then build the distributable with
+1. Create and download Distribution, Mac Installer Distribution, and Developer ID certificates from https://developer.apple.com/account/resources/certificates/list (more info at https://developer.apple.com/help/account/create-certificates/create-developer-id-certificates/), then install them in your Mac's default keychain. You may have to restart the system to apply the changes.
+2. Put the name of the installed certificates into the `.env` file as `APPLE_CODESIGN_IDENTITY` and `APPLE_INSTALLER_IDENTITY` respectively.
+3. Create and donwload a distribution provisioning profile from https://developer.apple.com/account/resources/profiles/list and put it into the `src/assets/<FLAVOR>` folder as `RMBTDesktop_Distribution_Profile.provisionprofile`.
+4. Set up the `.env` file with your `APPLE_ID`, `APPLE_PASSWORD`, and `APPLE_TEAM_ID`. See https://www.electronforge.io/guides/code-signing/code-signing-macos#option-1-using-an-app-specific-password for details.
+5. Remove the `out` folder, if exists, then build the distributable with
 
 ```sh
 $ npm run make:app-store
 ```
 
-It will be placed in the `out/make` folder at the root of the project.
+to get a `*.pkg` file for App Store, or with
+
+```sh
+$ npm run make:macos
+```
+
+to get a `*.dmg` file for standalone distribution (e.g. via GitHub Releases).
+
+In both cases, a `*.pkg` and a `*.dmg` will be placed in the `out/make` folder at the root of the project.
 
 5. To upload the `*.pkg` file to AppStore use Transporter: https://apps.apple.com/us/app/transporter/id1450874784.
 
 _Note: by default macOS overwrites already installed packages, so, if you want to see the app in the menu and in the Applications folder on your dev machine, make sure to remove RMBTDesktop.app from anywhere else, including the `out` folder, before installing the `*.pkg`_
 
-### Windows Store
+### Windows
 
 Requires Windows 10 or later.
 
@@ -75,10 +84,34 @@ Requires Windows 10 or later.
 4. Build the distributable with
 
 ```sh
+$ npm run make:microsoft-store
+```
+
+to sign it with a `*.pfx` certificate and be able to upload it to Microsoft Store, or with
+
+```sh
 $ npm run make:windows
 ```
 
-It will be placed in the `out/make` folder at the root of the project.
+to sign it with a hardware token.
+
+The file will be placed in the `out/make` folder at the root of the project.
+
+### Linux
+
+To build a `*.deb` package, you will need a Linux or a macOS machine with `fakeroot` and `dpkg` installed. Run:
+
+```sh
+$ npm run make:deb
+```
+
+To buila a `*.rpm` package, you will need a Linux machine with `rpm` and `rpm-build` installed. Run:
+
+```sh
+$ npm run make:rpm
+```
+
+Both `deb` and `rpm` packages will be placed in the `out/make` folder at the root of the project. `RPM`s built on macOS are not valid and can be discarded.
 
 ## Configuration
 

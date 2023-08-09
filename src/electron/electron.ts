@@ -40,6 +40,7 @@ const createWindow = () => {
             preload: path.join(__dirname, "preload.js"),
             nodeIntegration: true,
         },
+        icon: path.join(__dirname, "assets", "images", "icon-linux.png"),
     })
 
     win.webContents.setWindowOpenHandler(({ url }) => {
@@ -153,6 +154,7 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         REPO_URL: pack.repository,
         TERMS_ACCEPTED: (Store.get(TERMS_ACCEPTED) as boolean) || false,
         X_NETTEST_CLIENT: process.env.X_NETTEST_CLIENT || "",
+        USER_DATA: app.getPath("temp"),
     }
 })
 

@@ -1,10 +1,16 @@
 const path = require("path")
 const { codeSignApp } = require("../../../scripts/codesign-app.js")
+const packJson = require("../../../package.json")
+const patchMakerAppX = require("../../../scripts/patch-maker-appx.js")
+patchMakerAppX()
 
 module.exports = {
     hooks: {
         postPackage: async () => {
-            if (process.platform === "darwin") {
+            if (
+                process.platform === "darwin" &&
+                process.env.APP_STORE === "true"
+            ) {
                 await codeSignApp(
                     path.resolve(__dirname, "entitlements.plist"),
                     path.resolve(
@@ -27,6 +33,17 @@ module.exports = {
             ".example",
         ],
         appBundleId: process.env.APP_BUNDLE_ID,
+        ...(process.env.APP_STORE !== "true"
+            ? {
+                  osxSign: {},
+                  osxNotarize: {
+                      tool: "notarytool",
+                      appleId: process.env.APPLE_ID,
+                      appleIdPassword: process.env.APPLE_PASSWORD,
+                      teamId: process.env.APPLE_TEAM_ID,
+                  },
+              }
+            : {}),
     },
     rebuildConfig: {},
     makers: [
@@ -37,34 +54,83 @@ module.exports = {
                 ...(process.env.WINDOWS_CERT_PATH
                     ? { devCert: process.env.WINDOWS_CERT_PATH }
                     : {}),
-                manifest: path.resolve(__dirname, "AppXManifest.xml"),
+                manifest: path.resolve(
+                    __dirname,
+                    process.env.WINDOWS_PUBLISHER_IDENTITY ===
+                        "CN=developmentca"
+                        ? "AppXManifest.dev.xml"
+                        : "AppXManifest.xml"
+                ),
                 packageDescription: "RTR Desktop App",
                 packageDisplayName: "RMBT Desktop",
                 authors: "Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
                 description: "RTR Desktop app",
-                signtoolParams: process.env.WINDOWS_CERT_PATH
-                    ? undefined
-                    : ["/fd sha256", "/a", "/t http://time.certum.pl/"],
-                packageName: "RMBTDesktop",
+                packageName: "RundfunkundTelekomRegulie.RTR-Netztest",
                 publisher:
                     process.env.WINDOWS_PUBLISHER_IDENTITY ||
-                    "CN=Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
+                    "CN=0F2FE87F-3FC2-475F-B440-0E556517BC3C",
                 windowsKit: process.env.WINDOWS_KITS_PATH,
             },
         },
-        {
-            name: "@electron-forge/maker-pkg",
-            config: {
-                identity: process.env.APPLE_INSTALLER_IDENTITY,
-            },
-        },
-        {
-            name: "@electron-forge/maker-deb",
-            config: {},
-        },
-        {
-            name: "@electron-forge/maker-rpm",
-            config: {},
-        },
+        ...[
+            process.env.APP_STORE === "true"
+                ? {
+                      name: "@electron-forge/maker-pkg",
+                      config: {
+                          identity: process.env.APPLE_INSTALLER_IDENTITY,
+                      },
+                  }
+                : {
+                      name: "@electron-forge/maker-dmg",
+                      config: {
+                          format: "ULFO",
+                          icon: path.resolve(
+                              __dirname,
+                              "app-icon",
+                              "icon.icns"
+                          ),
+                      },
+                  },
+        ],
+        ...(process.env.DEB === "true"
+            ? [
+                  {
+                      name: "@electron-forge/maker-deb",
+                      config: {
+                          options: {
+                              bin: packJson.productName,
+                              icon: path.resolve(
+                                  __dirname,
+                                  "app-icon",
+                                  "icon.png"
+                              ),
+                              maintainer: "RTR-GmbH",
+                              homepage: packJson.repository,
+                              productName: "RMBT Desktop",
+                          },
+                      },
+                  },
+              ]
+            : []),
+        ...(process.env.RPM === "true"
+            ? [
+                  {
+                      name: "@electron-forge/maker-rpm",
+                      config: {
+                          options: {
+                              bin: packJson.productName,
+                              icon: path.resolve(
+                                  __dirname,
+                                  "app-icon",
+                                  "icon.png"
+                              ),
+                              maintainer: "RTR-GmbH",
+                              homepage: packJson.repository,
+                              productName: "RMBT Desktop",
+                          },
+                      },
+                  },
+              ]
+            : []),
     ],
 }

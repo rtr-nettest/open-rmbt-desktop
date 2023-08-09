@@ -20,7 +20,9 @@
     <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.14316.0" MaxVersionTested="10.0.14316.0" />
   </Dependencies>
   <Capabilities>
-    <rescap:Capability Name="runFullTrust"/>
+    <uap:Capability Name="internetClient"/>
+    <uap:Capability Name="internetClientServer"/>
+    <uap:DeviceCapability Name="wiFiControl"/>
   </Capabilities>
   <Applications>
     <Application Id="RMBTDesktop" Executable="app\RMBTDesktop.exe" EntryPoint="Windows.FullTrustApplication">

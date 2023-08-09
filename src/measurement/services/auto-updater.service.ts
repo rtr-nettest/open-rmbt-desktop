@@ -7,6 +7,7 @@ import semverGt from "semver/functions/gt"
 import * as pack from "../../../package.json"
 import { download } from "electron-dl"
 import * as fs from "fs"
+import { t } from "./i18n.service"
 
 interface ILatestReleaseAsset {
     name: string
@@ -76,10 +77,12 @@ export class AutoUpdater {
             if (semverGt(latestVersion, pack.version) && file) {
                 const dialogOpts = {
                     type: "info" as const,
-                    buttons: ["Download and install", "Later"],
-                    title: "Application Update",
+                    buttons: [t("Download and install"), t("Later")],
+                    title: t("Application Update"),
                     message: latestRelease!.name,
-                    detail: "A new version is available. Would you like to install it?",
+                    detail: t(
+                        "A new version is available. Would you like to install it?"
+                    ),
                 }
                 const response = await dialog.showMessageBox(dialogOpts)
                 if (response.response === 0) {
@@ -96,19 +99,18 @@ export class AutoUpdater {
             return
         }
         const pkgPath = path.join(app.getPath("temp"), file.name)
-        await download(
-            BrowserWindow.getFocusedWindow()!,
-            file.browser_download_url,
-            {
-                directory: app.getPath("temp"),
-            }
-        )
+        const focusedWindow = BrowserWindow.getFocusedWindow()
+        if (!focusedWindow) {
+            return
+        }
+        await download(focusedWindow, file.browser_download_url, {
+            directory: app.getPath("temp"),
+        })
         const dialogOpts = {
             type: "info" as const,
-            buttons: ["Install"],
-            title: "Application Update",
-            message: "",
-            detail: "The new version is ready for installation.",
+            buttons: [t("Install")],
+            title: t("Application Update"),
+            message: t("The new version is ready for installation."),
         }
         const response = await dialog.showMessageBox(dialogOpts)
         if (response.response === 0) {

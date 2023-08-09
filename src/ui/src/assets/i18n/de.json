@@ -56,5 +56,11 @@
     "Back to top": "DE-Back to top ↑",
     "Agree": "DE-Zustimmung",
     "Loading": "DE-Loading",
-    "Load more": "DE-Load more"
+    "Load more": "DE-Load more",
+    "Application Update": "DE-Application Update",
+    "A new version is available. Would you like to install it?": "DE-A new version is available. Would you like to install it?",
+    "Download and install": "DE-Download and install",
+    "Later": "DE-Later",
+    "Install": "DE-Install",
+    "The new version is ready for installation.": "DE-The new version is ready for installation."
 }

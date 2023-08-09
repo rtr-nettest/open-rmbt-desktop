@@ -56,5 +56,11 @@
     "Back to top": "Back to top ↑",
     "Agree": "Agree",
     "Loading": "Loading",
-    "Load more": "Load more"
+    "Load more": "Load more",
+    "Application Update": "Application Update",
+    "A new version is available. Would you like to install it?": "A new version is available. Would you like to install it?",
+    "Download and install": "Download and install",
+    "Later": "Later",
+    "Install": "Install",
+    "The new version is ready for installation.": "The new version is ready for installation."
 }

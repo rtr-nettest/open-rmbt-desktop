@@ -72,19 +72,26 @@ module.exports = {
                 windowsKit: process.env.WINDOWS_KITS_PATH,
             },
         },
-        {
-            name: "@electron-forge/maker-pkg",
-            config: {
-                identity: process.env.APPLE_INSTALLER_IDENTITY,
-            },
-        },
-        {
-            name: "@electron-forge/maker-dmg",
-            config: {
-                format: "ULFO",
-                icon: path.resolve(__dirname, "app-icon", "icon.icns"),
-            },
-        },
+        ...[
+            process.env.APP_STORE === "true"
+                ? {
+                      name: "@electron-forge/maker-pkg",
+                      config: {
+                          identity: process.env.APPLE_INSTALLER_IDENTITY,
+                      },
+                  }
+                : {
+                      name: "@electron-forge/maker-dmg",
+                      config: {
+                          format: "ULFO",
+                          icon: path.resolve(
+                              __dirname,
+                              "app-icon",
+                              "icon.icns"
+                          ),
+                      },
+                  },
+        ],
         ...(process.env.DEB === "true"
             ? [
                   {

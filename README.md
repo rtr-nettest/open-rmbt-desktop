@@ -46,7 +46,7 @@ The app will be placed in the `out` folder at the root of the project.
 
 ## Distribution
 
-### Mac App Store
+### macOS
 
 Requires macOS Ventura or later, XCode 12.2.0 or later.
 
@@ -74,7 +74,7 @@ In both cases, a `*.pkg` and a `*.dmg` will be placed in the `out/make` folder a
 
 _Note: by default macOS overwrites already installed packages, so, if you want to see the app in the menu and in the Applications folder on your dev machine, make sure to remove RMBTDesktop.app from anywhere else, including the `out` folder, before installing the `*.pkg`_
 
-### Windows Store
+### Windows
 
 Requires Windows 10 or later.
 
@@ -99,17 +99,19 @@ The file will be placed in the `out/make` folder at the root of the project.
 
 ### Linux
 
-To build a `*.deb` package, you will need a Linux or a macOS machine with `fakeroot` and `dpkg` installed.
-
-To buila a `*.rpm` package, you will need a Linux machine with `rpm` and `rpm-build` installed.
-
-After the necessary packages are installed, run:
+To build a `*.deb` package, you will need a Linux or a macOS machine with `fakeroot` and `dpkg` installed. Run:
 
 ```sh
-$ npm run make:linux
+$ npm run make:deb
 ```
 
-Both `deb` and `rpm` packages will be placed in the `out/make` folder at the root of the project. `RPM`s built on macOS are not valid and can be diresgarded.
+To buila a `*.rpm` package, you will need a Linux machine with `rpm` and `rpm-build` installed. Run:
+
+```sh
+$ npm run make:rpm
+```
+
+Both `deb` and `rpm` packages will be placed in the `out/make` folder at the root of the project. `RPM`s built on macOS are not valid and can be discarded.
 
 ## Configuration
 

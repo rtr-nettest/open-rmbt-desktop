@@ -85,29 +85,45 @@ module.exports = {
                 icon: path.resolve(__dirname, "app-icon", "icon.icns"),
             },
         },
-        {
-            name: "@electron-forge/maker-deb",
-            config: {
-                options: {
-                    bin: packJson.productName,
-                    icon: path.resolve(__dirname, "app-icon", "icon.png"),
-                    maintainer: "RTR-GmbH",
-                    homepage: packJson.repository,
-                    productName: "RMBT Desktop",
-                },
-            },
-        },
-        {
-            name: "@electron-forge/maker-rpm",
-            config: {
-                options: {
-                    bin: packJson.productName,
-                    icon: path.resolve(__dirname, "app-icon", "icon.png"),
-                    maintainer: "RTR-GmbH",
-                    homepage: packJson.repository,
-                    productName: "RMBT Desktop",
-                },
-            },
-        },
+        ...(process.env.DEB === "true"
+            ? [
+                  {
+                      name: "@electron-forge/maker-deb",
+                      config: {
+                          options: {
+                              bin: packJson.productName,
+                              icon: path.resolve(
+                                  __dirname,
+                                  "app-icon",
+                                  "icon.png"
+                              ),
+                              maintainer: "RTR-GmbH",
+                              homepage: packJson.repository,
+                              productName: "RMBT Desktop",
+                          },
+                      },
+                  },
+              ]
+            : []),
+        ...(process.env.RPM === "true"
+            ? [
+                  {
+                      name: "@electron-forge/maker-rpm",
+                      config: {
+                          options: {
+                              bin: packJson.productName,
+                              icon: path.resolve(
+                                  __dirname,
+                                  "app-icon",
+                                  "icon.png"
+                              ),
+                              maintainer: "RTR-GmbH",
+                              homepage: packJson.repository,
+                              productName: "RMBT Desktop",
+                          },
+                      },
+                  },
+              ]
+            : []),
     ],
 }

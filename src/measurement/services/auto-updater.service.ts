@@ -9,6 +9,11 @@ import { download } from "electron-dl"
 import * as fs from "fs"
 import { t } from "./i18n.service"
 
+const extensionsMap = {
+    win32: "exe",
+    darwin: "dmg",
+}
+
 interface ILatestReleaseAsset {
     name: string
     browser_download_url: string
@@ -33,8 +38,7 @@ export class AutoUpdater {
 
     async removeTmpFiles() {
         try {
-            const extensions = ["pkg", "dmg", "appx"]
-            for (const ext of extensions) {
+            for (const ext of Object.values(extensionsMap)) {
                 const file = `${pack.productName}-${pack.version}-x64.${ext}`
                 const fullPath = path.resolve(app.getPath("temp"), file)
                 if (fs.existsSync(fullPath)) {
@@ -47,12 +51,6 @@ export class AutoUpdater {
 
     async checkForNewRelease() {
         await this.removeTmpFiles()
-        if (
-            process.env.APP_STORE === "true" ||
-            process.env.MS_STORE === "true"
-        ) {
-            return
-        }
         try {
             const latestRelease = (
                 await axios.get(
@@ -70,8 +68,10 @@ export class AutoUpdater {
                 latestRelease?.tag_name.replace("v", "") ?? pack.version
             const file = latestRelease?.assets.find((a) => {
                 return (
-                    (process.platform === "darwin" && a.name.match(/dmg$/i)) ||
-                    (process.platform === "win32" && a.name.match(/appx$/i))
+                    (process.platform === "darwin" &&
+                        a.name.endsWith(extensionsMap.darwin)) ||
+                    (process.platform === "win32" &&
+                        a.name.endsWith(extensionsMap.win32))
                 )
             })
             if (semverGt(latestVersion, pack.version) && file) {

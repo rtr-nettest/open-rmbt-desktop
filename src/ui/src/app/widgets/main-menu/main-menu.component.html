@@ -1,21 +1,23 @@
-<aside class="app-aside">
-    <div>
-        <app-header [fixed]="true"></app-header>
-        <ul *ngIf="menu$ | async as menu" class="app-list">
-            <ng-container *ngFor="let item of menu; trackBy: trackBy">
-                <li *ngIf="!item.hidden" class="app-list-item">
-                    <app-main-menu-item
-                        [item]="item"
-                        (menuClick)="handleClick($event, item)"
-                    ></app-main-menu-item>
-                </li>
-            </ng-container>
-        </ul>
-    </div>
-    <footer class="app-footer" *ngIf="settingsItem">
-        <app-main-menu-item
-            [item]="settingsItem"
-            (menuClick)="handleClick($event, settingsItem)"
-        ></app-main-menu-item>
-    </footer>
-</aside>
+<ng-container *ngIf="env$ | async as env">
+    <aside *ngIf="env.FLAVOR !== 'ont'" class="app-aside">
+        <div>
+            <app-header [fixed]="true"></app-header>
+            <ul *ngIf="menu$ | async as menu" class="app-list">
+                <ng-container *ngFor="let item of menu; trackBy: trackBy">
+                    <li *ngIf="!item.hidden" class="app-list-item">
+                        <app-main-menu-item
+                            [item]="item"
+                            (menuClick)="handleClick($event, item)"
+                        ></app-main-menu-item>
+                    </li>
+                </ng-container>
+            </ul>
+        </div>
+        <footer class="app-footer" *ngIf="settingsItem">
+            <app-main-menu-item
+                [item]="settingsItem"
+                (menuClick)="handleClick($event, settingsItem)"
+            ></app-main-menu-item>
+        </footer>
+    </aside>
+</ng-container>

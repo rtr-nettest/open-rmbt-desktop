@@ -1,19 +1,23 @@
-<ng-container
-    *ngTemplateOutlet="
-        !!item?.url
-            ? external
-            : item?.route !== null && item?.route !== undefined
-            ? default
-            : noRoute;
-        context: { $implicit: item }
-    "
-></ng-container>
+<ng-container *ngIf="env$ | async as env">
+    <ng-container
+        *ngTemplateOutlet="
+            !!item?.url
+                ? external
+                : item?.route !== null && item?.route !== undefined
+                ? default
+                : noRoute;
+            context: { $implicit: item, env }
+        "
+    ></ng-container>
+</ng-container>
 
-<ng-template #default let-item>
+<ng-template #default let-item let-env="env">
     <a
         mat-button
         color="primary"
-        class="app-menu-item {{ item.className }}"
+        class="app-menu-item {{ item.className }} app-menu-item--{{
+            env.FLAVOR
+        }}"
         [routerLink]="item.route"
         routerLinkActive="app-menu-item--active"
         (click)="menuClick.emit($event)"
@@ -25,11 +29,13 @@
     </a>
 </ng-template>
 
-<ng-template #external let-item>
+<ng-template #external let-item let-env="env">
     <a
         mat-button
         color="primary"
-        class="app-menu-item {{ item.className }}"
+        class="app-menu-item {{ item.className }} app-menu-item--{{
+            env.FLAVOR
+        }}"
         [href]="item.url"
         role="menuitem"
         target="_blank"
@@ -40,12 +46,14 @@
     </a>
 </ng-template>
 
-<ng-template #noRoute let-item>
+<ng-template #noRoute let-item let-env="env">
     <a
         mat-button
         color="primary"
         href="javascript:;"
-        class="app-menu-item {{ item.className }}"
+        class="app-menu-item {{ item.className }} app-menu-item--{{
+            env.FLAVOR
+        }}"
         (click)="menuClick.emit($event)"
         role="menuitem"
     >
@@ -56,6 +64,8 @@
 </ng-template>
 
 <ng-template #linkText let-item>
-    <i class="app-icon app-icon--{{ item.icon }}" *ngIf="item.icon"></i>
-    <span>{{ item.label | transloco }}</span>
+    <ng-container *ngIf="env$ | async as env">
+        <i class="app-icon app-icon--{{ item.icon }}"></i>
+        <span>{{ item.label | transloco }}</span>
+    </ng-container>
 </ng-template>

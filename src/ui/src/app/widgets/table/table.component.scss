@@ -16,6 +16,7 @@
 
     mat-header-row {
         min-height: rem(50);
+        z-index: 9 !important;
     }
 
     &__cell--ellipsis {

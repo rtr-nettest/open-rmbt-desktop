@@ -92,6 +92,7 @@ import { ActionButtonsComponent } from "./widgets/action-buttons/action-buttons.
 import { ScrollTopComponent } from "./widgets/scroll-top/scroll-top.component"
 import localeDe from "@angular/common/locales/de"
 import { DatePipe, registerLocaleData } from "@angular/common"
+import { HeaderMenuComponent } from "./widgets/header-menu/header-menu.component"
 
 Chart.register(
     BarElement,
@@ -175,6 +176,7 @@ declare global {
         HistoryScreenComponent,
         ActionButtonsComponent,
         ScrollTopComponent,
+        HeaderMenuComponent,
     ],
     imports: [
         AppRoutingModule,

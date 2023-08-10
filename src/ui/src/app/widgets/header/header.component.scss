@@ -36,4 +36,22 @@
             display: none;
         }
     }
+
+    &--ont {
+        align-items: center;
+        background: white;
+        display: flex;
+        justify-content: space-between;
+        height: auto;
+        padding: rem(0) rem(24);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+    }
+}
+
+.app-header-placeholder {
+    height: rem(96);
 }

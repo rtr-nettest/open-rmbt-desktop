@@ -1,8 +1,8 @@
 const path = require("path")
 const { codeSignApp } = require("../../../scripts/codesign-app.js")
 const packJson = require("../../../package.json")
-const patchMakerAppX = require("../../../scripts/patch-maker-appx.js")
-patchMakerAppX()
+// const patchMakerAppX = require("../../../scripts/patch-maker-appx.js")
+// patchMakerAppX()
 
 module.exports = {
     hooks: {
@@ -48,30 +48,53 @@ module.exports = {
     rebuildConfig: {},
     makers: [
         {
-            name: "@electron-forge/maker-appx",
+            name: "@electron-forge/maker-squirrel",
             config: {
-                assets: path.resolve(__dirname, "app-icon"),
-                ...(process.env.WINDOWS_CERT_PATH
-                    ? { devCert: process.env.WINDOWS_CERT_PATH }
-                    : {}),
-                manifest: path.resolve(
-                    __dirname,
-                    process.env.WINDOWS_PUBLISHER_IDENTITY ===
-                        "CN=developmentca"
-                        ? "AppXManifest.dev.xml"
-                        : "AppXManifest.xml"
-                ),
-                packageDescription: "RTR Desktop App",
-                packageDisplayName: "RMBT Desktop",
+                name: "RMBTDesktop",
                 authors: "Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
                 description: "RTR Desktop app",
-                packageName: "RundfunkundTelekomRegulie.RTR-Netztest",
-                publisher:
-                    process.env.WINDOWS_PUBLISHER_IDENTITY ||
-                    "CN=0F2FE87F-3FC2-475F-B440-0E556517BC3C",
-                windowsKit: process.env.WINDOWS_KITS_PATH,
+                ...(process.env.WINDOWS_CERT_PATH
+                    ? {
+                          certificateFile: process.env.WINDOWS_CERT_PATH,
+                      }
+                    : {
+                          // https://www.files.certum.eu/documents/manual_en/Code-Signing-signing-the-code-using-tools-like-Singtool-and-Jarsigner_v2.3.pdf
+                          signWithParams:
+                              "/fd sha256 /a /t http://time.certum.pl/",
+                      }),
+                loadingGif: path.join(
+                    process.env.ASSETS_FOLDER,
+                    "images",
+                    "splash.gif"
+                ),
+                setupIcon: path.resolve(__dirname, "app-icon", "icon.ico"),
             },
         },
+        // {
+        //     name: "@electron-forge/maker-appx",
+        //     config: {
+        //         assets: path.resolve(__dirname, "app-icon"),
+        //         ...(process.env.WINDOWS_CERT_PATH
+        //             ? { devCert: process.env.WINDOWS_CERT_PATH }
+        //             : {}),
+        //         manifest: path.resolve(
+        //             __dirname,
+        //             process.env.WINDOWS_PUBLISHER_IDENTITY ===
+        //                 "CN=developmentca"
+        //                 ? "AppXManifest.dev.xml"
+        //                 : "AppXManifest.xml"
+        //         ),
+        //         packageDescription: "RTR Desktop App",
+        //         packageDisplayName: "RMBT Desktop",
+        //         authors: "Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
+        //         description: "RTR Desktop app",
+        //         packageName: "RundfunkundTelekomRegulie.RTR-Netztest",
+        //         publisher:
+        //             process.env.WINDOWS_PUBLISHER_IDENTITY ||
+        //             "CN=0F2FE87F-3FC2-475F-B440-0E556517BC3C",
+        //         windowsKit: process.env.WINDOWS_KITS_PATH,
+        //     },
+        // },
         ...[
             process.env.APP_STORE === "true"
                 ? {

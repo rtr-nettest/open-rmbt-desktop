@@ -7,7 +7,8 @@
 }
 
 .app-title {
-    margin-bottom: rem(40);
+    font-size: rem(48);
+    font-weight: bold;
 }
 
 .app-link-wrapper {
@@ -44,4 +45,11 @@
     @include screen-xs {
         display: none;
     }
+}
+
+.app-wrapper {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }

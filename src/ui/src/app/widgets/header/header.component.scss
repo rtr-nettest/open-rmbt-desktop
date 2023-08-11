@@ -55,3 +55,15 @@
 .app-header-placeholder {
     height: rem(96);
 }
+
+.app-menu-item {
+    display: flex;
+
+    &--active {
+        color: $color-primary;
+    }
+
+    & > * {
+        flex: 0 0 rem(24);
+    }
+}

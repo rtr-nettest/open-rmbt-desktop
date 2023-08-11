@@ -29,10 +29,10 @@ export class TranslocoHttpLoader implements TranslocoLoader {
                 }
             }),
             switchMap((remote) => {
-                if (!remote || !remote.length) {
-                    return this.http.get(`/assets/i18n/${lang}.json`)
+                if (remote) {
+                    return of(remote!)
                 }
-                return of(remote)
+                return this.http.get(`/assets/i18n/${lang}.json`)
             })
         )
     }

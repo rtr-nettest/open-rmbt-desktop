@@ -13,6 +13,15 @@
                     src="/assets/images/logo-header.svg"
             /></a>
             <app-header-menu></app-header-menu>
+            <a
+                routerLink="/settings"
+                (click)="handleClick($event, link)"
+                routerLinkActive="app-menu-item--active"
+                class="app-menu-item"
+                mat-icon-button
+            >
+                <mat-icon>settings</mat-icon>
+            </a>
         </header>
         <div class="app-header-placeholder"></div>
     </ng-container>

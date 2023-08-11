@@ -10,6 +10,7 @@ import { TERMS_AND_CONDITIONS } from "src/app/constants/strings"
 })
 export class TermsConditionsScreenComponent implements OnInit {
     isRead = false
+    timeSinceLoad = 0
 
     constructor(private router: Router, private transloco: TranslocoService) {}
 
@@ -21,10 +22,11 @@ export class TermsConditionsScreenComponent implements OnInit {
         return new Promise((resolve) => {
             let body: Element | null
             const interval = setInterval(() => {
+                this.timeSinceLoad += 300
                 body = document.querySelector(".app-article>p:last-of-type")
-                if (body) {
+                if (body || this.timeSinceLoad >= 2400) {
                     clearInterval(interval)
-                    resolve(body)
+                    resolve(body || document.querySelector(".app-article")!)
                 }
             }, 300)
         })

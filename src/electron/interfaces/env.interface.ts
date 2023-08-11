@@ -15,4 +15,5 @@ export interface IEnv {
     REPO_URL: string
     TERMS_ACCEPTED: boolean
     X_NETTEST_CLIENT: string
+    USER_DATA: string
 }

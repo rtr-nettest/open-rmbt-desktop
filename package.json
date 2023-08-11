@@ -1,7 +1,7 @@
 {
     "name": "open-rmbt-desktop",
     "productName": "RMBTDesktop",
-    "version": "0.2.6",
+    "version": "0.2.10",
     "description": "RTR Desktop App",
     "main": "dist/main.js",
     "engines": {
@@ -18,8 +18,13 @@
         "electron": "electron",
         "test": "jest --coverage",
         "package": "npm run build:all && electron-forge package",
+        "make": "npm run build:all && electron-forge make",
         "make:windows": "npm run build:all && electron-forge make --platform=win32 --arch=x64",
-        "make:app-store": "npm run build:all && electron-forge make --platform=mas --arch=x64"
+        "make:microsoft-store": "npm run build:all && cross-env MS_STORE=true electron-forge make --platform=win32 --arch=x64",
+        "make:macos": "npm run build:all && electron-forge make --platform=darwin --arch=x64",
+        "make:app-store": "npm run build:all && cross-env APP_STORE=true electron-forge make --platform=mas --arch=x64",
+        "make:deb": "npm run build:all && cross-env DEB=true electron-forge make --platform=linux --arch=x64",
+        "make:rpm": "npm run build:all && cross-env RPM=true electron-forge make --platform=linux --arch=x64"
     },
     "author": "Specure",
     "license": "Apache-2.0",
@@ -30,12 +35,14 @@
         "@electron-forge/maker-dmg": "^6.2.1",
         "@electron-forge/maker-pkg": "^6.2.1",
         "@electron-forge/maker-rpm": "^6.2.1",
+        "@electron-forge/maker-squirrel": "^6.3.0",
         "@electron-forge/maker-zip": "^6.2.1",
         "@electron-forge/plugin-webpack": "^6.2.1",
         "@tsconfig/node18": "^2.0.1",
         "@types/jest": "^29.5.2",
         "@types/node": "^20.3.1",
         "@types/node-os-utils": "^1.3.1",
+        "@types/semver": "^7.5.0",
         "@types/sql.js": "^1.4.4",
         "@types/stream-throttle": "^0.1.1",
         "@vercel/webpack-asset-relocator-loader": "^1.7.3",
@@ -62,6 +69,8 @@
         "axios": "^1.4.0",
         "dayjs": "^1.11.8",
         "dotenv": "^16.3.1",
+        "electron-dl": "^3.5.0",
+        "electron-squirrel-startup": "^1.0.0",
         "electron-store": "^8.1.0",
         "event-loop-lag": "^1.4.0",
         "node-os-utils": "^1.3.7",
@@ -69,6 +78,7 @@
         "pino-pretty": "^10.0.0",
         "reflect-metadata": "^0.1.13",
         "sql.js": "^1.8.0",
+        "update-electron-app": "^2.0.1",
         "uuidv4": "^6.2.13",
         "xliff": "^6.1.0"
     }

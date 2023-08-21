@@ -118,6 +118,7 @@ declare global {
             acceptTerms: (terms: string) => Promise<void>
             registerClient: () => Promise<IUserSettings>
             setIpVersion: (ipv: EIPVersion | null) => Promise<void>
+            setActiveClient: (client: string) => Promise<void>
             setActiveLanguage: (language: string) => Promise<void>
             setActiveServer: (
                 server: IMeasurementServerResponse

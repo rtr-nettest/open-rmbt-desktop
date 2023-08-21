@@ -15,6 +15,7 @@ import utc from "dayjs/plugin/utc"
 import tz from "dayjs/plugin/timezone"
 import { ELoggerMessage } from "../enums/logger-message.enum"
 import {
+    ACTIVE_CLIENT,
     ACTIVE_SERVER,
     CLIENT_UUID,
     IP_VERSION,
@@ -82,8 +83,9 @@ export class ControlServer {
         const headers: { [key: string]: string } = {
             "Content-Type": "application/json",
         }
-        if (process.env.X_NETTEST_CLIENT) {
-            headers["X-Nettest-Client"] = process.env.X_NETTEST_CLIENT
+        const activeClient = Store.I.get(ACTIVE_CLIENT) as string
+        if (activeClient) {
+            headers["X-Nettest-Client"] = activeClient
         }
         return headers
     }

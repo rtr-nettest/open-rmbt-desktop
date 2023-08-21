@@ -9,6 +9,7 @@ export const ACTIVE_LANGUAGE = "activeLanguage"
 export const DEFAULT_LANGUAGE = "defaultLanguage"
 export const SETTINGS = "settings"
 export const ACTIVE_SERVER = "activeServer"
+export const ACTIVE_CLIENT = "activeClient"
 
 export class Store {
     private static instance = new ElectronStore()

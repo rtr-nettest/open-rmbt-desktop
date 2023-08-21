@@ -6,6 +6,7 @@ import { Events } from "./enums/events.enum"
 import { IEnv } from "./interfaces/env.interface"
 import Protocol from "./protocol"
 import {
+    ACTIVE_CLIENT,
     ACTIVE_LANGUAGE,
     ACTIVE_SERVER,
     DEFAULT_LANGUAGE,
@@ -119,6 +120,10 @@ ipcMain.on(Events.SET_IP_VERSION, (event, ipv: EIPVersion | null) => {
     Store.set(IP_VERSION, ipv)
 })
 
+ipcMain.on(Events.SET_ACTIVE_CLIENT, (event, client: string) => {
+    Store.set(ACTIVE_LANGUAGE, client)
+})
+
 ipcMain.on(Events.SET_ACTIVE_LANGUAGE, (event, language: string) => {
     Store.set(ACTIVE_LANGUAGE, language)
 })
@@ -167,7 +172,7 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
         REPO_URL: pack.repository,
         TERMS_ACCEPTED: (Store.get(TERMS_ACCEPTED) as boolean) || false,
-        X_NETTEST_CLIENT: process.env.X_NETTEST_CLIENT || "",
+        X_NETTEST_CLIENT: (Store.get(ACTIVE_CLIENT) as string) || "",
         USER_DATA: app.getPath("temp"),
         MEASUREMENT_SERVERS_PATH: process.env.MEASUREMENT_SERVERS_PATH || "",
         CONTROL_SERVER_URL: process.env.CONTROL_SERVER_URL || "",

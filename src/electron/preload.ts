@@ -13,6 +13,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     registerClient: () => ipcRenderer.invoke(Events.REGISTER_CLIENT),
     setIpVersion: (ipv: EIPVersion | null) =>
         ipcRenderer.send(Events.SET_IP_VERSION, ipv),
+    setActiveClient: (client: string) =>
+        ipcRenderer.send(Events.SET_ACTIVE_CLIENT, client),
     setActiveLanguage: (language: string) =>
         ipcRenderer.send(Events.SET_ACTIVE_LANGUAGE, language),
     setActiveServer: (server: IMeasurementServerResponse) =>

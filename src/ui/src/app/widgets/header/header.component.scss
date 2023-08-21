@@ -58,12 +58,13 @@
 
 .app-menu-item {
     display: flex;
+    justify-content: center;
 
     &--active {
         color: $color-primary;
     }
 
     & > * {
-        flex: 0 0 rem(24);
+        flex: 0 0 rem(26);
     }
 }

@@ -1,7 +1,11 @@
 <ng-container *transloco="let t">
     <div class="app-server-select">
-        <p>{{ t("test.measurement_server") }}&nbsp;&nbsp;</p>
-        <mat-form-field *ngIf="servers$ | async as servers">
+        <p style="align-items: center; display: flex; padding-top: 0.1rem">
+            {{ t("test.measurement_server") }}&nbsp;&nbsp;
+        </p>
+        <mat-form-field
+            *ngIf="servers$ | async as servers; else loadingServers"
+        >
             <mat-select
                 (selectionChange)="changeServer($event)"
                 [value]="activeServer"
@@ -17,3 +21,7 @@
         </mat-form-field>
     </div>
 </ng-container>
+
+<ng-template #loadingServers>
+    <div class="app-loading-servers"></div>
+</ng-template>

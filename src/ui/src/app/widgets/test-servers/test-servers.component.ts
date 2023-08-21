@@ -2,7 +2,7 @@ import { Component, OnInit } from "@angular/core"
 import { MatSelectChange } from "@angular/material/select"
 import { TestStore } from "src/app/store/test.store"
 import { IMeasurementServerResponse } from "../../../../../measurement/interfaces/measurement-server-response.interface"
-import { tap } from "rxjs"
+import { map } from "rxjs"
 
 @Component({
     selector: "app-test-servers",
@@ -11,11 +11,13 @@ import { tap } from "rxjs"
 })
 export class TestServersComponent implements OnInit {
     servers$ = this.store.servers$.pipe(
-        tap((servers) => {
+        map((servers) => {
             if (servers.length) {
                 this.activeServer =
                     servers.find((s) => !!s.active) ?? servers[0]
+                return servers
             }
+            return null
         })
     )
     activeServer?: IMeasurementServerResponse

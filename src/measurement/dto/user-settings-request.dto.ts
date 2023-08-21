@@ -13,7 +13,10 @@ dayjs.extend(tz)
 
 export class UserSettingsRequest implements IUserSettingsRequest {
     language = I18nService.I.getActiveLanguage()
-    name = EMeasurementServerType.RMBT
+    name =
+        process.env.FLAVOR === "ont"
+            ? EMeasurementServerType.RMBTws
+            : EMeasurementServerType.RMBT
     timezone = dayjs.tz.guess()
     terms_and_conditions_accepted = false
     terms_and_conditions_accepted_version?: number

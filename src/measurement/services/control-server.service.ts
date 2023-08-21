@@ -73,6 +73,7 @@ export class ControlServer {
         } else {
             dns.setDefaultResultOrder("verbatim")
         }
+        retVal = new URL(retVal).href.replace(/\/$/, "")
         Logger.I.info(`The current control server is: ${retVal}`)
         return retVal
     }
@@ -195,7 +196,7 @@ export class ControlServer {
             process.env.MESUREMENT_REGISTRATION_PATH,
             request
         )
-        const hostName = new URL(await this.getHost())
+        const hostName = await this.getHost()
         const response = (
             await axios.post(
                 `${hostName}${process.env.MESUREMENT_REGISTRATION_PATH}`,
@@ -416,7 +417,9 @@ export class ControlServer {
     private handleError(e: any) {
         if (e.response) {
             Logger.I.error(e.response)
-            if (e.response.data?.error?.length) {
+            if (typeof e.response.data?.error === "string") {
+                throw new Error(e.response.data.error)
+            } else if (e.response.data?.error?.length) {
                 throw new Error(e.response.data.error.join(". "))
             } else {
                 throw e.response.data

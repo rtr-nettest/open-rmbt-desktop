@@ -17,6 +17,7 @@ import { ControlServer } from "../measurement/services/control-server.service"
 import pack from "../../package.json"
 import { EIPVersion } from "../measurement/enums/ip-version.enum"
 import { menu } from "./menu"
+import { UserSettingsRequest } from "../measurement/dto/user-settings-request.dto"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -156,6 +157,8 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         TERMS_ACCEPTED: (Store.get(TERMS_ACCEPTED) as boolean) || false,
         X_NETTEST_CLIENT: process.env.X_NETTEST_CLIENT || "",
         USER_DATA: app.getPath("temp"),
+        MEASUREMENT_SERVERS_PATH: process.env.MEASUREMENT_SERVERS_PATH || "",
+        CONTROL_SERVER_URL: process.env.CONTROL_SERVER_URL || "",
     }
 })
 
@@ -180,6 +183,17 @@ ipcMain.handle(Events.GET_MEASUREMENT_HISTORY, async (event, offset, limit) => {
     const webContents = event.sender
     try {
         return await ControlServer.I.getMeasurementHistory(offset, limit)
+    } catch (e) {
+        webContents.send(Events.ERROR, e)
+    }
+})
+
+ipcMain.handle(Events.GET_SERVERS, async (event) => {
+    const webContents = event.sender
+    try {
+        return await ControlServer.I.getMeasurementServersFromApi(
+            new UserSettingsRequest()
+        )
     } catch (e) {
         webContents.send(Events.ERROR, e)
     }

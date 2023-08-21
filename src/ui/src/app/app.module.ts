@@ -93,6 +93,8 @@ import { ScrollTopComponent } from "./widgets/scroll-top/scroll-top.component"
 import localeDe from "@angular/common/locales/de"
 import { DatePipe, registerLocaleData } from "@angular/common"
 import { HeaderMenuComponent } from "./widgets/header-menu/header-menu.component"
+import { IMeasurementServerResponse } from "../../../measurement/interfaces/measurement-server-response.interface";
+import { TestServersComponent } from './widgets/test-servers/test-servers.component'
 
 Chart.register(
     BarElement,
@@ -116,9 +118,13 @@ declare global {
             registerClient: () => Promise<IUserSettings>
             setIpVersion: (ipv: EIPVersion | null) => Promise<void>
             setActiveLanguage: (language: string) => Promise<void>
+            setActiveServer: (
+                server: IMeasurementServerResponse
+            ) => Promise<void>
             setDefaultLanguage: (language: string) => Promise<void>
             runMeasurement: () => Promise<void>
             abortMeasurement: () => Promise<void>
+            getServers: () => Promise<IMeasurementServerResponse[]>
             getEnv: () => Promise<IEnv>
             getCPUUsage: () => Promise<ICPU>
             getMeasurementState: () => Promise<
@@ -177,6 +183,7 @@ declare global {
         ActionButtonsComponent,
         ScrollTopComponent,
         HeaderMenuComponent,
+        TestServersComponent,
     ],
     imports: [
         AppRoutingModule,

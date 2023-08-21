@@ -16,4 +16,6 @@ export interface IEnv {
     TERMS_ACCEPTED: boolean
     X_NETTEST_CLIENT: string
     USER_DATA: string
+    CONTROL_SERVER_URL: string
+    MEASUREMENT_SERVERS_PATH: string
 }

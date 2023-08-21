@@ -15,6 +15,7 @@ import utc from "dayjs/plugin/utc"
 import tz from "dayjs/plugin/timezone"
 import { ELoggerMessage } from "../enums/logger-message.enum"
 import {
+    ACTIVE_SERVER,
     CLIENT_UUID,
     IP_VERSION,
     LAST_NEWS_UID,
@@ -124,11 +125,11 @@ export class ControlServer {
         }
     }
 
-    async getMeasurementServerFromApi(
+    async getMeasurementServersFromApi(
         request: IUserSettingsRequest
-    ): Promise<IMeasurementServerResponse | undefined> {
+    ): Promise<IMeasurementServerResponse[]> {
         if (!process.env.MEASUREMENT_SERVERS_PATH) {
-            return undefined
+            return []
         }
         Logger.I.info(
             ELoggerMessage.GET_REQUEST,
@@ -140,21 +141,27 @@ export class ControlServer {
                 { headers: this.headers }
             )
         ).data as IMeasurementServerResponse[]
+        const activeServer = Store.I.get(
+            ACTIVE_SERVER
+        ) as IMeasurementServerResponse
+        let filteredServers: IMeasurementServerResponse[] = []
         if (servers?.length) {
-            const filteredServer = servers.find((s) =>
+            filteredServers = servers.filter((s) =>
                 s.serverTypeDetails.some(
                     (std) => std.serverType === request.name
                 )
             )
-            if (filteredServer) {
+            for (const filteredServer of filteredServers) {
                 filteredServer.serverTypeDetails =
                     filteredServer.serverTypeDetails.filter(
                         (std) => std.serverType === request.name
                     )
+                if (activeServer?.webAddress === filteredServer.webAddress) {
+                    activeServer.active = true
+                }
             }
-            Logger.I.info("Using server: %o", filteredServer)
-            return filteredServer
         }
+        return filteredServers
     }
 
     async getUserSettings(request: IUserSettingsRequest) {

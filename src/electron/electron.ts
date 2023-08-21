@@ -156,6 +156,7 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         ENABLE_LANGUAGE_SWITCH: process.env.ENABLE_LANGUAGE_SWITCH || "",
         ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",
         FLAVOR: process.env.FLAVOR || "rtr",
+        WEBSITE_HOST: new URL(process.env.FULL_HISTORY_RESULT_URL ?? "").origin,
         FULL_HISTORY_RESULT_URL: process.env.FULL_HISTORY_RESULT_URL,
         HISTORY_EXPORT_URL: process.env.HISTORY_EXPORT_URL,
         HISTORY_RESULTS_LIMIT: process.env.HISTORY_RESULTS_LIMIT

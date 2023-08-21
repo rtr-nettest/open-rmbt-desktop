@@ -30,15 +30,14 @@
 </ng-template>
 
 <ng-template #ont>
-    <div class="app-link-wrapper">
+    <div class="app-link-wrapper" *transloco="let t">
         <app-test-servers></app-test-servers>
-        <!-- TODO: take the href and the text from the CMS -->
         <a
             class="app-link"
-            href="https://nettest.com/en/methodology"
+            [href]="getMethodologyLink(t('test.learn_about_route'))"
             target="_blank"
             ><mat-icon>info</mat-icon
-            ><span>Learn more about the methodology of the measurement</span></a
+            ><span>{{ t("test.learn_about_methodology") }}</span></a
         >
     </div>
 </ng-template>

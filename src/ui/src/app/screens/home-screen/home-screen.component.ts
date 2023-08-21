@@ -99,4 +99,10 @@ export class HomeScreenComponent extends BaseScreen {
             return '<i class="app-icon--class app-icon--class-green"></i>'
         }
     }
+
+    getMethodologyLink(path: string) {
+        return `${
+            this.env$.value?.WEBSITE_HOST
+        }/${this.transloco.getActiveLang()}/${path}`
+    }
 }

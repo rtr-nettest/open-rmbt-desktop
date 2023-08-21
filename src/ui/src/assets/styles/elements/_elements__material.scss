@@ -58,3 +58,37 @@ $app-theme: mat.define-light-theme(
 app-settings-locale .mat-mdc-select {
     font-size: 1em;
 }
+
+.app-server-select {
+    .mat-form-field {
+        width: auto !important;
+    }
+    .mat-mdc-form-field-infix {
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        width: auto;
+    }
+    .mat-mdc-form-field .mat-mdc-form-field-focus-overlay {
+        display: none;
+    }
+    .mdc-text-field {
+        background: none !important;
+        height: 2rem;
+        padding: 0;
+    }
+    .mat-mdc-select {
+        font-size: 1rem;
+    }
+    .mat-mdc-select-value {
+        max-width: 100% !important;
+        width: auto !important;
+    }
+    .mdc-line-ripple {
+        display: none;
+    }
+}
+
+.mat-mdc-option {
+    font-size: 1rem;
+}

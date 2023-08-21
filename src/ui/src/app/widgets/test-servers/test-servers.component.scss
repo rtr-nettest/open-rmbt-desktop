@@ -1,0 +1,17 @@
+@import "src/assets/styles/core";
+
+.app-server-select {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    p {
+        white-space: nowrap;
+    }
+    mat-select {
+        mat-select-trigger {
+            p {
+                color: $color-link;
+            }
+        }
+    }
+}

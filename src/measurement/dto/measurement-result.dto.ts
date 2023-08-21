@@ -43,6 +43,7 @@ export class MeasurementResult implements IMeasurementResult {
     provider_name?: string
     ip_address?: string | undefined
     sent_to_server = false
+    signals: string[] = []
 
     constructor(
         registrationRequest: IMeasurementRegistrationRequest,

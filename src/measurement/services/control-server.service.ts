@@ -158,11 +158,11 @@ export class ControlServer {
                         (std) => std.serverType === request.name
                     )
                 if (activeServer?.webAddress === filteredServer.webAddress) {
-                    activeServer.active = true
+                    filteredServer.active = true
                 }
             }
         }
-        return filteredServers
+        return filteredServers.sort((a, b) => a.distance - b.distance)
     }
 
     async getUserSettings(request: IUserSettingsRequest) {

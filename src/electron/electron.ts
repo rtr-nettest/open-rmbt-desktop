@@ -7,6 +7,7 @@ import { IEnv } from "./interfaces/env.interface"
 import Protocol from "./protocol"
 import {
     ACTIVE_LANGUAGE,
+    ACTIVE_SERVER,
     DEFAULT_LANGUAGE,
     IP_VERSION,
     Store,
@@ -18,6 +19,7 @@ import pack from "../../package.json"
 import { EIPVersion } from "../measurement/enums/ip-version.enum"
 import { menu } from "./menu"
 import { UserSettingsRequest } from "../measurement/dto/user-settings-request.dto"
+import { IMeasurementServerResponse } from "../measurement/interfaces/measurement-server-response.interface"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -54,7 +56,9 @@ const createWindow = () => {
 
     if (process.env.DEV === "true") {
         win.loadURL("http://localhost:4200/")
-        win.webContents.openDevTools()
+        setTimeout(() => {
+            win.webContents.openDevTools()
+        }, 300)
     } else {
         win.loadURL(`${Protocol.scheme}://index.html`)
     }
@@ -122,6 +126,13 @@ ipcMain.on(Events.SET_ACTIVE_LANGUAGE, (event, language: string) => {
 ipcMain.on(Events.SET_DEFAULT_LANGUAGE, (event, language: string) => {
     Store.set(DEFAULT_LANGUAGE, language)
 })
+
+ipcMain.on(
+    Events.SET_ACTIVE_SERVER,
+    (event, server: IMeasurementServerResponse) => {
+        Store.set(ACTIVE_SERVER, server)
+    }
+)
 
 ipcMain.on(Events.RUN_MEASUREMENT, async (event) => {
     const webContents = event.sender

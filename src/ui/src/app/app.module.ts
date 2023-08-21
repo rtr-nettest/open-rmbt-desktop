@@ -93,8 +93,9 @@ import { ScrollTopComponent } from "./widgets/scroll-top/scroll-top.component"
 import localeDe from "@angular/common/locales/de"
 import { DatePipe, registerLocaleData } from "@angular/common"
 import { HeaderMenuComponent } from "./widgets/header-menu/header-menu.component"
-import { IMeasurementServerResponse } from "../../../measurement/interfaces/measurement-server-response.interface";
-import { TestServersComponent } from './widgets/test-servers/test-servers.component'
+import { IMeasurementServerResponse } from "../../../measurement/interfaces/measurement-server-response.interface"
+import { TestServersComponent } from "./widgets/test-servers/test-servers.component"
+import { DistancePipe } from "./pipes/distance.pipe"
 
 Chart.register(
     BarElement,
@@ -147,6 +148,7 @@ declare global {
     declarations: [
         AppComponent,
         BodyComponent,
+        DistancePipe,
         DlComponent,
         ExportWarningComponent,
         FooterComponent,

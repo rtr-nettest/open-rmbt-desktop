@@ -161,6 +161,16 @@ export class TestStore {
         })
     }
 
+    setActiveServer(server: IMeasurementServerResponse) {
+        window.electronAPI.setActiveServer(server)
+        const updatedServers = this.servers$.value.map((s) =>
+            s.webAddress === server.webAddress
+                ? { ...s, active: true }
+                : { ...s, active: false }
+        )
+        this.servers$.next(updatedServers)
+    }
+
     exportAsPdf(results: ISimpleHistoryResult[]) {
         const exportUrl = this.mainStore.env$.value?.HISTORY_EXPORT_URL
         if (!exportUrl) {

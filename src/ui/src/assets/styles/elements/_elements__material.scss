@@ -64,6 +64,7 @@ app-settings-locale .mat-mdc-select {
         width: auto !important;
     }
     .mat-mdc-form-field-infix {
+        display: flex;
         margin: 0 !important;
         padding: 0 !important;
         border: 0 !important;
@@ -87,6 +88,9 @@ app-settings-locale .mat-mdc-select {
     .mat-mdc-select-value {
         max-width: 100% !important;
         width: auto !important;
+    }
+    .mat-mdc-select-arrow-wrapper {
+        height: 1rem;
     }
     .mat-mdc-form-field-subscript-wrapper {
         display: none;

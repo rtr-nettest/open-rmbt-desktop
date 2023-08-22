@@ -108,6 +108,12 @@ app-settings-locale .mat-mdc-select {
     .mat-mdc-select-value {
         color: $color-primary;
     }
+
+    &--settings {
+        .mat-mdc-select-trigger {
+            font-size: 1em;
+        }
+    }
 }
 
 .mat-mdc-option {

@@ -18,18 +18,7 @@
                 region.
             </p>
         </div>
-        <div class="app-client-select">
-            <mat-form-field>
-                <mat-select
-                    (selectionChange)="changeClient($event.value)"
-                    [value]="activeClient"
-                >
-                    <mat-option *ngFor="let client of clients" [value]="client">
-                        {{ client.name }}
-                    </mat-option>
-                </mat-select>
-            </mat-form-field>
-        </div>
+        <app-client-select></app-client-select>
         <div>
             <button (click)="letsGo()" mat-flat-button color="primary">
                 Let's go

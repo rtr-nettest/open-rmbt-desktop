@@ -14,6 +14,7 @@ import { MainStore } from "src/app/store/main.store"
 })
 export class HeaderComponent {
     @Input() fixed = false
+    @Input() hideMenu = false
     private noGo = "javascript:;"
     link$ = this.activeRoute.url.pipe(
         map((segments) => {

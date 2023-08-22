@@ -59,7 +59,8 @@ app-settings-locale .mat-mdc-select {
     font-size: 1em;
 }
 
-.app-server-select {
+.app-server-select,
+.app-client-select {
     .mat-form-field {
         width: auto !important;
     }
@@ -97,6 +98,15 @@ app-settings-locale .mat-mdc-select {
     }
     .mdc-line-ripple {
         display: none;
+    }
+}
+
+.app-client-select {
+    .mat-mdc-select-trigger {
+        font-size: rem(16);
+    }
+    .mat-mdc-select-value {
+        color: $color-primary;
     }
 }
 

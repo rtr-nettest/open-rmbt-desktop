@@ -1,5 +1,12 @@
 import { Injectable } from "@angular/core"
-import { BehaviorSubject, firstValueFrom, from, tap } from "rxjs"
+import {
+    BehaviorSubject,
+    Observable,
+    firstValueFrom,
+    from,
+    lastValueFrom,
+    tap,
+} from "rxjs"
 import { IEnv } from "../../../../electron/interfaces/env.interface"
 import { IMainAsset } from "../interfaces/main-asset.interface"
 import { IMainProject } from "../interfaces/main-project.interface"
@@ -8,6 +15,8 @@ import { INewsItem } from "../../../../measurement/interfaces/news.interface"
 import { EIPVersion } from "../../../../measurement/enums/ip-version.enum"
 import { Router } from "@angular/router"
 import { ERoutes } from "../enums/routes.enum"
+import { Translation, TranslocoService } from "@ngneat/transloco"
+import { TranslocoHttpLoader } from "../transloco-root.module"
 
 @Injectable({
     providedIn: "root",
@@ -26,7 +35,11 @@ export class MainStore {
     news$ = new BehaviorSubject<INewsItem[] | null>(null)
     referrer$ = new BehaviorSubject<string | null>(null)
 
-    constructor(private router: Router) {
+    constructor(
+        private router: Router,
+        private transloco: TranslocoService,
+        private transLoader: TranslocoHttpLoader
+    ) {
         window.electronAPI.onError((error) => {
             console.error(error)
             this.error$.next(new Error("Server communication error"))
@@ -63,5 +76,17 @@ export class MainStore {
             this.env$.next({ ...currentEnv, IP_VERSION: ipVersion })
             window.electronAPI.setIpVersion(ipVersion)
         }
+    }
+
+    setClient(client: string) {
+        window.electronAPI.setActiveClient(client)
+        const newEnv = { ...this.env$.value, X_NETTEST_CLIENT: client } as IEnv
+        this.env$.next(newEnv)
+        const loader$ = this.transLoader.getTranslation(
+            this.transloco.getActiveLang()
+        ) as Observable<Translation>
+        lastValueFrom(loader$).then((dict) => {
+            this.transloco.setTranslation(dict)
+        })
     }
 }

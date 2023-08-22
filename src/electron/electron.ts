@@ -121,7 +121,7 @@ ipcMain.on(Events.SET_IP_VERSION, (event, ipv: EIPVersion | null) => {
 })
 
 ipcMain.on(Events.SET_ACTIVE_CLIENT, (event, client: string) => {
-    Store.set(ACTIVE_LANGUAGE, client)
+    Store.set(ACTIVE_CLIENT, client)
 })
 
 ipcMain.on(Events.SET_ACTIVE_LANGUAGE, (event, language: string) => {

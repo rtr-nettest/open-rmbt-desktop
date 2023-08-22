@@ -95,7 +95,8 @@ import { DatePipe, registerLocaleData } from "@angular/common"
 import { HeaderMenuComponent } from "./widgets/header-menu/header-menu.component"
 import { IMeasurementServerResponse } from "../../../measurement/interfaces/measurement-server-response.interface"
 import { TestServersComponent } from "./widgets/test-servers/test-servers.component"
-import { DistancePipe } from "./pipes/distance.pipe"
+import { DistancePipe } from "./pipes/distance.pipe";
+import { ClientScreenComponent } from './screens/client-screen/client-screen.component'
 
 Chart.register(
     BarElement,
@@ -187,6 +188,7 @@ declare global {
         ScrollTopComponent,
         HeaderMenuComponent,
         TestServersComponent,
+        ClientScreenComponent,
     ],
     imports: [
         AppRoutingModule,

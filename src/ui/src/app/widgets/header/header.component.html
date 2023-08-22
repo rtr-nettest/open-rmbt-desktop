@@ -6,14 +6,21 @@
 
 <ng-template #ont>
     <ng-container *ngIf="link$ | async as link">
-        <header class="app-header app-header--ont">
+        <header
+            class="app-header app-header--ont app-header--{{
+                hideMenu ? 'transparent' : 'opaque'
+            }}"
+        >
             <a [routerLink]="link" (click)="handleClick($event, link)"
                 ><img
                     (click)="handleClick($event, link)"
                     src="/assets/images/logo-header.svg"
             /></a>
-            <app-header-menu></app-header-menu>
-            <div style="width: 142px; display: flex; justify-content: end">
+            <app-header-menu *ngIf="!hideMenu"></app-header-menu>
+            <div
+                *ngIf="!hideMenu"
+                style="width: 142px; display: flex; justify-content: end"
+            >
                 <a
                     routerLink="/settings"
                     (click)="handleClick($event, link)"
@@ -25,7 +32,7 @@
                 </a>
             </div>
         </header>
-        <div class="app-header-placeholder"></div>
+        <div *ngIf="!hideMenu" class="app-header-placeholder"></div>
     </ng-container>
 </ng-template>
 

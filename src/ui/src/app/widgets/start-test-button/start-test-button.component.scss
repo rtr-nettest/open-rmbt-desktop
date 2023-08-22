@@ -113,10 +113,12 @@ $tertiary-button-gradient: linear-gradient(84.79deg, #09bd5e 0%, #ffcc00 100%),
     height: rem(84);
     font-size: rem(24);
     font-weight: bold;
+    line-height: 1;
     margin-bottom: rem(72);
     margin-top: rem(72);
+    min-width: rem(232);
     overflow: hidden;
-    width: rem(232);
+    text-align: center;
     -webkit-mask-image: -webkit-radial-gradient(white, black);
 
     &::before {

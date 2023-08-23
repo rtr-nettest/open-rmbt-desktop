@@ -3,6 +3,7 @@ import { MatSelectChange } from "@angular/material/select"
 import { TestStore } from "src/app/store/test.store"
 import { IMeasurementServerResponse } from "../../../../../measurement/interfaces/measurement-server-response.interface"
 import { map } from "rxjs"
+import { CMSService } from "src/app/services/cms.service"
 
 @Component({
     selector: "app-test-servers",
@@ -10,6 +11,7 @@ import { map } from "rxjs"
     styleUrls: ["./test-servers.component.scss"],
 })
 export class TestServersComponent implements OnInit {
+    project$ = this.cms.getProject()
     servers$ = this.store.servers$.pipe(
         map((servers) => {
             if (servers.length) {
@@ -22,7 +24,7 @@ export class TestServersComponent implements OnInit {
     )
     activeServer?: IMeasurementServerResponse
 
-    constructor(private store: TestStore) {}
+    constructor(private store: TestStore, private cms: CMSService) {}
 
     ngOnInit(): void {
         this.store.getServers()

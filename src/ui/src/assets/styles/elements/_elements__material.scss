@@ -84,7 +84,7 @@ app-settings-locale .mat-mdc-select {
     }
     .mat-mdc-select,
     .mat-mdc-select-trigger {
-        font-size: 1rem;
+        font-size: $font-size-m + px;
     }
     .mat-mdc-select-value {
         max-width: 100% !important;
@@ -103,7 +103,7 @@ app-settings-locale .mat-mdc-select {
 
 .app-client-select {
     .mat-mdc-select-trigger {
-        font-size: rem(16);
+        font-size: rem($font-size-l);
     }
     .mat-mdc-select-value {
         color: $color-primary;
@@ -111,7 +111,7 @@ app-settings-locale .mat-mdc-select {
 
     &--settings {
         .mat-mdc-select-trigger {
-            font-size: 1em;
+            font-size: $font-size-m + px;
         }
     }
 }

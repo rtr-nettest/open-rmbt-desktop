@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input } from "@angular/core"
 import { ActivatedRoute, Router } from "@angular/router"
 import { TranslocoService } from "@ngneat/transloco"
-import { concatMap, map, switchMap } from "rxjs"
+import { concatMap, map, of } from "rxjs"
 import { THIS_INTERRUPTS_ACTION } from "src/app/constants/strings"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { CMSService } from "src/app/services/cms.service"
@@ -32,8 +32,17 @@ export class HeaderComponent {
             this.cms.getAssetByName(
                 `logo-header.${
                     env?.X_NETTEST_CLIENT
-                }.${this.transloco.getDefaultLang()}.svg`
+                }.${this.transloco.getActiveLang()}.svg`
             )
+        ),
+        concatMap((asset) =>
+            asset
+                ? of(asset)
+                : this.cms.getAssetByName(
+                      `logo-header.${
+                          this.mainStore.env$.value?.X_NETTEST_CLIENT
+                      }.${this.transloco.getDefaultLang()}.svg`
+                  )
         ),
         map((asset) => asset?.url || "/assets/images/logo-header.svg")
     )

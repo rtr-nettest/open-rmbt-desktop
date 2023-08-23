@@ -11,10 +11,13 @@
                 hideMenu ? 'transparent' : 'opaque'
             }}"
         >
-            <a [routerLink]="link" (click)="handleClick($event, link)"
+            <a
+                class="app-logo"
+                [routerLink]="link"
+                (click)="handleClick($event, link)"
                 ><img
                     (click)="handleClick($event, link)"
-                    src="/assets/images/logo-header.svg"
+                    [src]="ontLogo$ | async"
             /></a>
             <app-header-menu *ngIf="!hideMenu"></app-header-menu>
             <div

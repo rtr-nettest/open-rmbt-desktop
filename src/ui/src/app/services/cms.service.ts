@@ -86,7 +86,16 @@ export class CMSService {
                                         } as IMainAsset)
                                       : null
                               ),
-                              catchError(() => of(null))
+                              catchError(() => of(null)),
+                              tap((asset) => {
+                                  if (asset?.name) {
+                                      const newAssets = {
+                                          ...this.mainStore.assets$.value,
+                                          [asset.name]: asset,
+                                      }
+                                      this.mainStore.assets$.next(newAssets)
+                                  }
+                              })
                           )
             )
         )

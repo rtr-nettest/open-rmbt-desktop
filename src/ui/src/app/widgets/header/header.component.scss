@@ -7,6 +7,7 @@
     img {
         height: auto;
         max-height: 100%;
+        max-width: 100%;
         width: auto;
     }
 
@@ -58,6 +59,12 @@
 
 .app-header-placeholder {
     height: rem(96);
+}
+
+.app-logo {
+    display: flex;
+    height: rem(96);
+    width: rem(142);
 }
 
 .app-menu-item {

@@ -11,4 +11,5 @@ export interface IMeasurementServerResponse {
     webAddress: string
     distance: number
     serverTypeDetails: IMeasurementServerTypeDetails[]
+    active: boolean
 }

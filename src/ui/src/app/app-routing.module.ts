@@ -11,6 +11,7 @@ import { NewsScreenComponent } from "./screens/news-screen/news-screen.component
 import { EnvResolver } from "./resolvers/env.resolver"
 import { HistoryScreenComponent } from "./screens/history-screen/history-screen.component"
 import { ReferrerResolver } from "./resolvers/referrer.resolver"
+import { ClientScreenComponent } from "./screens/client-screen/client-screen.component"
 
 const routes: Routes = [
     {
@@ -39,6 +40,10 @@ const routes: Routes = [
     {
         path: ERoutes.SETTINGS,
         component: SettingsScreenComponent,
+    },
+    {
+        path: ERoutes.CLIENT,
+        component: ClientScreenComponent,
     },
     {
         path: "**",

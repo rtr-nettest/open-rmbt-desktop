@@ -69,13 +69,74 @@
     }
 }
 
-.app-start-button {
-    background: linear-gradient(
-        45deg,
-        $color-button-gradient-1 0%,
-        $color-button-gradient-2 100%
+$primary-button-gradient: linear-gradient(84.79deg, #0958bd 0%, #00acb1 100%),
+    linear-gradient(
+        84.79deg,
+        rgba(9, 88, 189, 0.2) 0%,
+        rgba(0, 172, 177, 0.2) 100%
     );
-    border-radius: rem(30);
-    height: rem(48);
-    padding: rem(26);
+$secondary-button-gradient: linear-gradient(84.79deg, #00acb1 0%, #09bd5e 100%),
+    linear-gradient(
+        84.79deg,
+        rgba(0, 172, 177, 0.2) 0%,
+        rgba(9, 189, 94, 0.2) 100%
+    );
+$tertiary-button-gradient: linear-gradient(84.79deg, #09bd5e 0%, #ffcc00 100%),
+    linear-gradient(
+        84.79deg,
+        rgba(9, 189, 94, 0.2) 0%,
+        rgba(255, 204, 0, 0.2) 100%
+    );
+
+@keyframes pulse {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 100%;
+    }
+}
+
+@keyframes hover {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 100%;
+    }
+}
+
+.app-start-button {
+    background: $primary-button-gradient;
+    border: rgb(205, 230, 241) 10px solid;
+    border-radius: rem(42);
+    height: rem(84);
+    font-size: rem(24);
+    font-weight: bold;
+    line-height: 1;
+    margin-bottom: rem(72);
+    margin-top: rem(72);
+    min-width: rem(232);
+    overflow: hidden;
+    text-align: center;
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+
+    &::before {
+        animation: pulse 1s ease-out 10ms infinite alternate;
+        background: $secondary-button-gradient;
+        content: "";
+        display: block;
+        height: 100%;
+        position: absolute;
+        width: 100%;
+    }
+
+    &:hover {
+        border-color: rgb(232, 243, 213);
+        transition: border-color 300ms;
+        &::before {
+            animation: hover 300ms ease-out;
+            background: $tertiary-button-gradient;
+        }
+    }
 }

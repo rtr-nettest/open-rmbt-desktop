@@ -1,0 +1,37 @@
+@import "../../../assets/styles/core.scss";
+
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+app-body {
+    justify-content: center;
+}
+
+app-main-content {
+    align-items: start;
+    flex-direction: column;
+    flex: 0 1 rem(640);
+    justify-content: center;
+}
+
+.app-title {
+    font-size: rem(24);
+    font-weight: normal;
+    line-height: rem(40);
+    margin-bottom: rem(24);
+}
+
+.app-text {
+    font-size: rem(16);
+
+    ::ng-deep p {
+        margin-bottom: rem(24);
+    }
+}
+
+app-client-select {
+    margin-bottom: rem(48);
+}

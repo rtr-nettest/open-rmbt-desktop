@@ -7,6 +7,7 @@ import { ERoutes } from "src/app/enums/routes.enum"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 import { CMSService } from "src/app/services/cms.service"
 import { MessageService } from "src/app/services/message.service"
+import { MainStore } from "src/app/store/main.store"
 
 @Component({
     selector: "app-main-menu",
@@ -46,10 +47,12 @@ export class MainMenuComponent {
         })
     )
     settingsItem?: IMainMenuItem
+    env$ = this.mainStore.env$
 
     constructor(
         private activeRoute: ActivatedRoute,
         private cmsService: CMSService,
+        private mainStore: MainStore,
         private message: MessageService,
         private router: Router,
         private transloco: TranslocoService

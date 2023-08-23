@@ -14,6 +14,7 @@ import { Observable, combineLatest, map } from "rxjs"
 import { TranslocoService } from "@ngneat/transloco"
 import { BaseScreen } from "../base-screen/base-screen.component"
 import { MessageService } from "src/app/services/message.service"
+import { ClientSelectComponent } from "src/app/widgets/client-select/client-select.component"
 
 export interface ISettingsRow {
     title: string
@@ -80,6 +81,15 @@ export class SettingsScreenComponent extends BaseScreen implements OnInit {
                 content.push({
                     title: t["Language"],
                     component: SettingsLocaleComponent,
+                })
+            }
+            if (env?.FLAVOR === "ont") {
+                content.push({
+                    title: t["Region"],
+                    component: ClientSelectComponent,
+                    parameters: {
+                        className: "app-client-select--settings",
+                    },
                 })
             }
             return {

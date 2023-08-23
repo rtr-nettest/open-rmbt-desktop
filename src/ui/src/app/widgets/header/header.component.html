@@ -1,16 +1,59 @@
-<ng-container *ngIf="link$ | async as link">
-    <header class="app-header app-header--large{{ fixed ? '-fixed' : '' }}">
-        <a [routerLink]="link" (click)="handleClick($event, link)"
-            ><img
-                (click)="handleClick($event, link)"
-                src="/assets/images/logo-header.svg"
-        /></a>
-    </header>
-    <header class="app-header app-header--small{{ fixed ? '-fixed' : '' }}">
-        <a [routerLink]="link"
-            ><img
-                (click)="handleClick($event, link)"
-                src="/assets/images/logo-header-small.svg"
-        /></a>
-    </header>
+<ng-container *ngIf="env$ | async as env">
+    <ng-container *ngIf="env.FLAVOR === 'ont'; else rtr">
+        <ng-container *ngTemplateOutlet="ont"></ng-container>
+    </ng-container>
 </ng-container>
+
+<ng-template #ont>
+    <ng-container *ngIf="link$ | async as link">
+        <header
+            class="app-header app-header--ont app-header--{{
+                hideMenu ? 'transparent' : 'opaque'
+            }}"
+        >
+            <a
+                class="app-logo"
+                [routerLink]="link"
+                (click)="handleClick($event, link)"
+                ><img
+                    (click)="handleClick($event, link)"
+                    [src]="ontLogo$ | async"
+            /></a>
+            <app-header-menu *ngIf="!hideMenu"></app-header-menu>
+            <div
+                *ngIf="!hideMenu"
+                style="width: 142px; display: flex; justify-content: end"
+            >
+                <a
+                    routerLink="/settings"
+                    (click)="handleClick($event, link)"
+                    routerLinkActive="app-menu-item--active"
+                    class="app-menu-item"
+                    mat-icon-button
+                >
+                    <mat-icon>settings</mat-icon>
+                </a>
+            </div>
+        </header>
+        <div *ngIf="!hideMenu" class="app-header-placeholder"></div>
+    </ng-container>
+</ng-template>
+
+<ng-template #rtr>
+    <ng-container *ngIf="link$ | async as link">
+        <header class="app-header app-header--large{{ fixed ? '-fixed' : '' }}">
+            <a [routerLink]="link" (click)="handleClick($event, link)"
+                ><img
+                    (click)="handleClick($event, link)"
+                    src="/assets/images/logo-header.svg"
+            /></a>
+        </header>
+        <header class="app-header app-header--small{{ fixed ? '-fixed' : '' }}">
+            <a [routerLink]="link"
+                ><img
+                    (click)="handleClick($event, link)"
+                    src="/assets/images/logo-header-small.svg"
+            /></a>
+        </header>
+    </ng-container>
+</ng-template>

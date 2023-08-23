@@ -6,7 +6,10 @@
             <mat-spinner style="margin: auto"></mat-spinner>
         </div>
         <ng-container *ngIf="!showProgress">
-            <div class="app-wrapper" *transloco="let t">
+            <div
+                class="app-wrapper app-wrapper--{{ env?.FLAVOR }}"
+                *transloco="let t"
+            >
                 <h1 class="app-title" *ngIf="env?.FLAVOR === 'ont'">
                     {{ t("test.title") }}
                 </h1>

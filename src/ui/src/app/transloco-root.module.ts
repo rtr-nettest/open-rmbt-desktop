@@ -24,7 +24,7 @@ export class TranslocoHttpLoader implements TranslocoLoader {
                 } else if (env.CROWDIN_UPDATE_AT_RUNTIME === "true") {
                     return from(window.electronAPI.getTranslations(lang))
                 } else {
-                    return of([])
+                    return of(null)
                 }
             }),
             switchMap((remote) => {

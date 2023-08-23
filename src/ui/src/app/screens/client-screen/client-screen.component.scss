@@ -27,7 +27,7 @@ app-main-content {
 .app-text {
     font-size: rem(16);
 
-    p {
+    ::ng-deep p {
         margin-bottom: rem(24);
     }
 }

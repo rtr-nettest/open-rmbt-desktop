@@ -1,27 +1,12 @@
 <app-header [hideMenu]="true"></app-header>
-<app-body>
+<app-body *transloco="let t">
     <app-main-content>
-        <h2 class="app-title">
-            Thank you for choosing our service to help you with your internet
-            measurements.
-        </h2>
-        <div class="app-text">
-            <p>
-                To ensure that you have the best measurement experience
-                possible, we kindly request that you select your region from the
-                options provided below. By doing so, we can tailor our services
-                to your specific needs and provide you with accurate and
-                relevant information.
-            </p>
-            <p>
-                To optimize your measurement experience, please select your
-                region.
-            </p>
-        </div>
+        <h2 class="app-title">{{ t("client-picker.title") }}</h2>
+        <div class="app-text" [innerHTML]="t('client-picker.text')"></div>
         <app-client-select></app-client-select>
         <div>
             <button (click)="letsGo()" mat-flat-button color="primary">
-                Let's go
+                {{ t("client-picker.button") }}
             </button>
         </div>
     </app-main-content>

@@ -2,13 +2,16 @@
     *ngIf="clients$ | async as clients"
     class="app-client-select {{ parameters ? parameters['className'] : '' }}"
 >
-    <mat-form-field>
+    <mat-form-field *transloco="let t">
         <mat-select
             (selectionChange)="changeClient($event.value)"
             [value]="activeClient"
         >
-            <mat-option *ngFor="let client of clients" [value]="client">
-                {{ client.name }}
+            <mat-option
+                *ngFor="let client of clients; let i = index"
+                [value]="client"
+            >
+                {{ client.name }}{{ i === 0 ? " (" + t("Default") + ")" : "" }}
             </mat-option>
         </mat-select>
     </mat-form-field>

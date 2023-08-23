@@ -1,10 +1,10 @@
 import { Component } from "@angular/core"
-import { map } from "rxjs"
-import { CLIENTS } from "src/app/constants/clients"
+import { combineLatest, map } from "rxjs"
 import {
     IDynamicComponent,
     IDynamicComponentParameters,
 } from "src/app/interfaces/dynamic-component.interface"
+import { CMSService } from "src/app/services/cms.service"
 import { MainStore } from "src/app/store/main.store"
 
 @Component({
@@ -14,17 +14,20 @@ import { MainStore } from "src/app/store/main.store"
 })
 export class ClientSelectComponent implements IDynamicComponent {
     parameters?: IDynamicComponentParameters
-    clients$ = this.mainStore.env$.pipe(
-        map((env) => {
+    clients$ = combineLatest([
+        this.mainStore.env$,
+        this.cms.getProjects(),
+    ]).pipe(
+        map(([env, projects]) => {
             this.activeClient =
-                CLIENTS.find((c) => c.slug === env?.X_NETTEST_CLIENT) ??
-                CLIENTS[0]
-            return CLIENTS
+                projects.find((c) => c.slug === env?.X_NETTEST_CLIENT) ??
+                projects[0]
+            return projects
         })
     )
     activeClient?: any
 
-    constructor(private mainStore: MainStore) {}
+    constructor(private mainStore: MainStore, private cms: CMSService) {}
 
     changeClient(client: any) {
         this.activeClient = client

@@ -7,6 +7,7 @@ import { IMainProject } from "../interfaces/main-project.interface"
 import { MainStore } from "../store/main.store"
 import { IMainMenuItem } from "../interfaces/main-menu-item.interface"
 import { environment } from "../constants/environment"
+import { CLIENTS } from "../constants/clients"
 
 @Injectable({
     providedIn: "root",
@@ -31,6 +32,18 @@ export class CMSService {
 
     getMenu(): Observable<IMainMenuItem[]> {
         return of(environment.menu)
+    }
+
+    getProjects(): Observable<IMainProject[]> {
+        return this.http
+            .get<IMainProject[]>(`${this.apiUrl}/projects`, {
+                headers: this.headers,
+            })
+            .pipe(
+                map((projects) =>
+                    projects.filter((p) => CLIENTS.includes(p.slug))
+                )
+            )
     }
 
     getProject(): Observable<IMainProject> {

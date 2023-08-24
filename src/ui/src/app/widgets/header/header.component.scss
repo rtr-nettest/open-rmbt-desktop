@@ -7,6 +7,7 @@
     img {
         height: auto;
         max-height: 100%;
+        max-width: 100%;
         width: auto;
     }
 
@@ -35,5 +36,48 @@
         @media screen and (min-width: 1921px) {
             display: none;
         }
+    }
+
+    &--ont {
+        align-items: center;
+        background: white;
+        display: flex;
+        justify-content: space-between;
+        height: rem(96);
+        padding: rem(0) rem(24);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+    }
+
+    &--transparent {
+        background: none;
+    }
+}
+
+.app-header-placeholder {
+    height: rem(96);
+}
+
+.app-logo {
+    display: flex;
+    height: rem(96);
+    padding-bottom: rem(20);
+    padding-top: rem(20);
+    width: rem(142);
+}
+
+.app-menu-item {
+    display: flex;
+    justify-content: center;
+
+    &--active {
+        color: $color-primary;
+    }
+
+    & > * {
+        flex: 0 0 rem(26);
     }
 }

@@ -19,6 +19,7 @@ import { DBService } from "./services/db.service"
 import "reflect-metadata"
 import { EMeasurementFinalStatus } from "./enums/measurement-final-status"
 import { AutoUpdater } from "./services/auto-updater.service"
+import { ACTIVE_SERVER, Store } from "./services/store.service"
 
 config({
     path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
@@ -188,10 +189,16 @@ export class MeasurementRunner {
     }
 
     private async setMeasurementServer() {
-        this.measurementServer =
-            await ControlServer.I.getMeasurementServerFromApi(
-                this.settingsRequest!
-            )
+        this.measurementServer = Store.I.get(
+            ACTIVE_SERVER
+        ) as IMeasurementServerResponse
+        if (!this.measurementServer) {
+            const measurementServers =
+                await ControlServer.I.getMeasurementServersFromApi(
+                    this.settingsRequest!
+                )
+            this.measurementServer = measurementServers[0]
+        }
     }
 
     private async registerMeasurement() {

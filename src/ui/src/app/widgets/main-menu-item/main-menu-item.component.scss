@@ -22,6 +22,28 @@
     &--disabled {
         opacity: 0.5;
     }
+
+    &--ont {
+        border-bottom: rem(4) solid transparent;
+        font-size: rem($font-size-m);
+        height: 100%;
+        padding: rem(36) 1.125rem;
+
+        &.app-menu-item--active {
+            background: white;
+            border-bottom-color: $color-primary;
+            color: $color-primary !important;
+        }
+
+        .app-icon {
+            display: none;
+            & + span {
+                @include screen-lg {
+                    display: block;
+                }
+            }
+        }
+    }
 }
 
 .app-icon {

@@ -67,7 +67,7 @@ export class HomeScreenComponent extends BaseScreen {
         .pipe(
             takeUntil(this.destroyed$),
             tap(([terms, env]) => {
-                if (terms !== env.TERMS_ACCEPTED) {
+                if (terms !== env.TERMS_ACCEPTED && env.FLAVOR !== "ont") {
                     this.router.navigate(["/", ERoutes.TERMS_CONDITIONS])
                 } else {
                     this.mainStore.registerClient()
@@ -98,5 +98,11 @@ export class HomeScreenComponent extends BaseScreen {
         } else {
             return '<i class="app-icon--class app-icon--class-green"></i>'
         }
+    }
+
+    getMethodologyLink(path: string) {
+        return `${
+            this.env$.value?.WEBSITE_HOST
+        }/${this.transloco.getActiveLang()}/${path}`
     }
 }

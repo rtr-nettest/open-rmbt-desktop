@@ -10,7 +10,6 @@ import {
     switchMap,
     take,
     tap,
-    withLatestFrom,
 } from "rxjs"
 import { TestVisualizationState } from "../dto/test-visualization-state.dto"
 import { ITestVisualizationState } from "../interfaces/test-visualization-state.interface"
@@ -27,6 +26,7 @@ import { saveAs } from "file-saver"
 import { TranslocoService } from "@ngneat/transloco"
 import { MessageService } from "../services/message.service"
 import { ERROR_OCCURED } from "../constants/strings"
+import { IMeasurementServerResponse } from "../../../../measurement/interfaces/measurement-server-response.interface"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
@@ -47,6 +47,7 @@ export class TestStore {
     historyPaginator$ = new BehaviorSubject<IPaginator>({
         offset: 0,
     })
+    servers$ = new BehaviorSubject<IMeasurementServerResponse[]>([])
 
     constructor(
         private mainStore: MainStore,
@@ -152,6 +153,22 @@ export class TestStore {
                 return result
             })
         )
+    }
+
+    getServers() {
+        window.electronAPI.getServers().then((servers) => {
+            this.servers$.next(servers)
+        })
+    }
+
+    setActiveServer(server: IMeasurementServerResponse) {
+        window.electronAPI.setActiveServer(server)
+        const updatedServers = this.servers$.value.map((s) =>
+            s.webAddress === server.webAddress
+                ? { ...s, active: true }
+                : { ...s, active: false }
+        )
+        this.servers$.next(updatedServers)
     }
 
     exportAsPdf(results: ISimpleHistoryResult[]) {

@@ -92,6 +92,12 @@ import { ActionButtonsComponent } from "./widgets/action-buttons/action-buttons.
 import { ScrollTopComponent } from "./widgets/scroll-top/scroll-top.component"
 import localeDe from "@angular/common/locales/de"
 import { DatePipe, registerLocaleData } from "@angular/common"
+import { HeaderMenuComponent } from "./widgets/header-menu/header-menu.component"
+import { IMeasurementServerResponse } from "../../../measurement/interfaces/measurement-server-response.interface"
+import { TestServersComponent } from "./widgets/test-servers/test-servers.component"
+import { DistancePipe } from "./pipes/distance.pipe";
+import { ClientScreenComponent } from './screens/client-screen/client-screen.component';
+import { ClientSelectComponent } from './widgets/client-select/client-select.component'
 
 Chart.register(
     BarElement,
@@ -114,10 +120,15 @@ declare global {
             acceptTerms: (terms: string) => Promise<void>
             registerClient: () => Promise<IUserSettings>
             setIpVersion: (ipv: EIPVersion | null) => Promise<void>
+            setActiveClient: (client: string) => Promise<void>
             setActiveLanguage: (language: string) => Promise<void>
+            setActiveServer: (
+                server: IMeasurementServerResponse
+            ) => Promise<void>
             setDefaultLanguage: (language: string) => Promise<void>
             runMeasurement: () => Promise<void>
             abortMeasurement: () => Promise<void>
+            getServers: () => Promise<IMeasurementServerResponse[]>
             getEnv: () => Promise<IEnv>
             getCPUUsage: () => Promise<ICPU>
             getMeasurementState: () => Promise<
@@ -140,6 +151,7 @@ declare global {
     declarations: [
         AppComponent,
         BodyComponent,
+        DistancePipe,
         DlComponent,
         ExportWarningComponent,
         FooterComponent,
@@ -175,6 +187,10 @@ declare global {
         HistoryScreenComponent,
         ActionButtonsComponent,
         ScrollTopComponent,
+        HeaderMenuComponent,
+        TestServersComponent,
+        ClientScreenComponent,
+        ClientSelectComponent,
     ],
     imports: [
         AppRoutingModule,

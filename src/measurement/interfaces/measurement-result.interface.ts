@@ -15,6 +15,7 @@ export interface IMeasurementResult {
     pings: IPing[]
     platform?: string
     speed_detail: ISpeedItem[]
+    signals: string[]
     test_bytes_download: number
     test_bytes_upload: number
     test_nsec_download: number

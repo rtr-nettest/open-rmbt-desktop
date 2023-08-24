@@ -78,24 +78,14 @@ _Note: by default macOS overwrites already installed packages, so, if you want t
 
 Requires Windows 10 or later.
 
-1. Install Windows SDK (https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/).
-2. Set `WINDOWS_KITS_PATH` in the `.env` file. You can also configure any additional parameters in the `@electron-forge/maker-appx` options in `src/assets/<FLAVOR>/forge.config.js`. For the details see: https://github.com/electron-userland/electron-windows-store.
-3. Make sure that `src\assets\<FLAVOR>\AppXManifest.xml` contains the correct Publisher and Version in the `<Identity>` field.
-4. Build the distributable with
-
-```sh
-$ npm run make:microsoft-store
-```
-
-to sign it with a `*.pfx` certificate and be able to upload it to Microsoft Store, or with
+1. Configure, if needed, `@electron-forge/maker-squirrel` options of `src/assets/<FLAVOR>/forge.config.js`.
+2. Build the distributable with
 
 ```sh
 $ npm run make:windows
 ```
 
-to sign it with a hardware token.
-
-The file will be placed in the `out/make` folder at the root of the project.
+A setup `*.exe` will be placed in the `out/make` folder at the root of the project.
 
 ### Linux
 
@@ -142,7 +132,6 @@ The project contains a `.env.example` file. You can use it as an example to conf
 | Variable                           | Description                                                                                                                                                                                                                                        |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `HISTORY_RESULTS_LIMIT`            | An amount of history entries to load at a time (i.e. page size). If omitted, all the available entries will be shown to the user at once.                                                                                                          |
-| `X_NETTEST_CLIENT`                 | An identificator sent to the control server in an `X-Nettest-Client` HTTP header and used by Specure control servers to internally differentiate between the app's flavors.                                                                        |
 | `MEASUREMENT_SERVERS_PATH`         | A control server endpoint starting with `/` which returns a list of measurement servers from which the client will try to pick one to run a measurement against.                                                                                   |
 | `LOG_TO_CONSOLE`                   | If set to `true` will output the client's logs to the stdout and stderr.                                                                                                                                                                           |
 | `LOG_TO_FILE`                      | If set to `true` will output the client's logs to a file in the `log` folder in the root of the project.                                                                                                                                           |
@@ -163,6 +152,4 @@ The project contains a `.env.example` file. You can use it as an example to conf
 | `APPLE_ID`                         | Apple ID associated with your Apple Developer account.                                                                                                                                                                                             |
 | `APPLE_PASSWORD`                   | App-specific password. See https://support.apple.com/en-us/HT204397 for details.                                                                                                                                                                   |
 | `APPLE_TEAM_ID`                    | The Apple Team ID you want to notarize under. You can find Team IDs for team you belong to by going to https://developer.apple.com/account/#/membership.                                                                                           |
-| `WINDOWS_KITS_PATH`                | Full path to your local Windows Kits installation                                                                                                                                                                                                  |
 | `WINDOWS_CERT_PATH`                | Full path to your certificate.pfx                                                                                                                                                                                                                  |
-| `WINDOWS_PUBLISHER_IDENTITY`       | Your publisher identity                                                                                                                                                                                                                            |

@@ -1,0 +1,14 @@
+<app-header [hideMenu]="true"></app-header>
+<app-body *transloco="let t">
+    <app-main-content>
+        <h2 class="app-title">{{ t("client-picker.title") }}</h2>
+        <div class="app-text" [innerHTML]="t('client-picker.text')"></div>
+        <app-client-select></app-client-select>
+        <div>
+            <button (click)="letsGo()" mat-flat-button color="primary">
+                {{ t("client-picker.button") }}
+            </button>
+        </div>
+    </app-main-content>
+    <app-footer></app-footer>
+</app-body>

@@ -50,9 +50,7 @@ module.exports = {
         {
             name: "@electron-forge/maker-squirrel",
             config: {
-                name: "RMBTDesktop",
                 authors: "Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
-                description: "RTR Desktop app",
                 ...(process.env.WINDOWS_CERT_PATH
                     ? {
                           certificateFile: process.env.WINDOWS_CERT_PATH,
@@ -68,33 +66,9 @@ module.exports = {
                     "splash.gif"
                 ),
                 setupIcon: path.resolve(__dirname, "app-icon", "icon.ico"),
+                iconUrl: "https://www.netztest.at/favicon.ico",
             },
         },
-        // {
-        //     name: "@electron-forge/maker-appx",
-        //     config: {
-        //         assets: path.resolve(__dirname, "app-icon"),
-        //         ...(process.env.WINDOWS_CERT_PATH
-        //             ? { devCert: process.env.WINDOWS_CERT_PATH }
-        //             : {}),
-        //         manifest: path.resolve(
-        //             __dirname,
-        //             process.env.WINDOWS_PUBLISHER_IDENTITY ===
-        //                 "CN=developmentca"
-        //                 ? "AppXManifest.dev.xml"
-        //                 : "AppXManifest.xml"
-        //         ),
-        //         packageDescription: "RTR Desktop App",
-        //         packageDisplayName: "RMBT Desktop",
-        //         authors: "Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
-        //         description: "RTR Desktop app",
-        //         packageName: "RundfunkundTelekomRegulie.RTR-Netztest",
-        //         publisher:
-        //             process.env.WINDOWS_PUBLISHER_IDENTITY ||
-        //             "CN=0F2FE87F-3FC2-475F-B440-0E556517BC3C",
-        //         windowsKit: process.env.WINDOWS_KITS_PATH,
-        //     },
-        // },
         ...[
             process.env.APP_STORE === "true"
                 ? {

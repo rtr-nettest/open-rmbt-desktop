@@ -6,7 +6,9 @@ import { Events } from "./enums/events.enum"
 import { IEnv } from "./interfaces/env.interface"
 import Protocol from "./protocol"
 import {
+    ACTIVE_CLIENT,
     ACTIVE_LANGUAGE,
+    ACTIVE_SERVER,
     DEFAULT_LANGUAGE,
     IP_VERSION,
     Store,
@@ -17,6 +19,8 @@ import { ControlServer } from "../measurement/services/control-server.service"
 import pack from "../../package.json"
 import { EIPVersion } from "../measurement/enums/ip-version.enum"
 import { menu } from "./menu"
+import { UserSettingsRequest } from "../measurement/dto/user-settings-request.dto"
+import { IMeasurementServerResponse } from "../measurement/interfaces/measurement-server-response.interface"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -53,7 +57,9 @@ const createWindow = () => {
 
     if (process.env.DEV === "true") {
         win.loadURL("http://localhost:4200/")
-        win.webContents.openDevTools()
+        setTimeout(() => {
+            win.webContents.openDevTools()
+        }, 300)
     } else {
         win.loadURL(`${Protocol.scheme}://index.html`)
     }
@@ -114,6 +120,10 @@ ipcMain.on(Events.SET_IP_VERSION, (event, ipv: EIPVersion | null) => {
     Store.set(IP_VERSION, ipv)
 })
 
+ipcMain.on(Events.SET_ACTIVE_CLIENT, (event, client: string) => {
+    Store.set(ACTIVE_CLIENT, client)
+})
+
 ipcMain.on(Events.SET_ACTIVE_LANGUAGE, (event, language: string) => {
     Store.set(ACTIVE_LANGUAGE, language)
 })
@@ -121,6 +131,13 @@ ipcMain.on(Events.SET_ACTIVE_LANGUAGE, (event, language: string) => {
 ipcMain.on(Events.SET_DEFAULT_LANGUAGE, (event, language: string) => {
     Store.set(DEFAULT_LANGUAGE, language)
 })
+
+ipcMain.on(
+    Events.SET_ACTIVE_SERVER,
+    (event, server: IMeasurementServerResponse) => {
+        Store.set(ACTIVE_SERVER, server)
+    }
+)
 
 ipcMain.on(Events.RUN_MEASUREMENT, async (event) => {
     const webContents = event.sender
@@ -144,6 +161,7 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         ENABLE_LANGUAGE_SWITCH: process.env.ENABLE_LANGUAGE_SWITCH || "",
         ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",
         FLAVOR: process.env.FLAVOR || "rtr",
+        WEBSITE_HOST: new URL(process.env.FULL_HISTORY_RESULT_URL ?? "").origin,
         FULL_HISTORY_RESULT_URL: process.env.FULL_HISTORY_RESULT_URL,
         HISTORY_EXPORT_URL: process.env.HISTORY_EXPORT_URL,
         HISTORY_RESULTS_LIMIT: process.env.HISTORY_RESULTS_LIMIT
@@ -154,8 +172,10 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
         REPO_URL: pack.repository,
         TERMS_ACCEPTED: (Store.get(TERMS_ACCEPTED) as boolean) || false,
-        X_NETTEST_CLIENT: process.env.X_NETTEST_CLIENT || "",
+        X_NETTEST_CLIENT: (Store.get(ACTIVE_CLIENT) as string) || "",
         USER_DATA: app.getPath("temp"),
+        MEASUREMENT_SERVERS_PATH: process.env.MEASUREMENT_SERVERS_PATH || "",
+        CONTROL_SERVER_URL: process.env.CONTROL_SERVER_URL || "",
     }
 })
 
@@ -180,6 +200,17 @@ ipcMain.handle(Events.GET_MEASUREMENT_HISTORY, async (event, offset, limit) => {
     const webContents = event.sender
     try {
         return await ControlServer.I.getMeasurementHistory(offset, limit)
+    } catch (e) {
+        webContents.send(Events.ERROR, e)
+    }
+})
+
+ipcMain.handle(Events.GET_SERVERS, async (event) => {
+    const webContents = event.sender
+    try {
+        return await ControlServer.I.getMeasurementServersFromApi(
+            new UserSettingsRequest()
+        )
     } catch (e) {
         webContents.send(Events.ERROR, e)
     }

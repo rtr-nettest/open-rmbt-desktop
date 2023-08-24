@@ -15,6 +15,8 @@ import utc from "dayjs/plugin/utc"
 import tz from "dayjs/plugin/timezone"
 import { ELoggerMessage } from "../enums/logger-message.enum"
 import {
+    ACTIVE_CLIENT,
+    ACTIVE_SERVER,
     CLIENT_UUID,
     IP_VERSION,
     LAST_NEWS_UID,
@@ -72,6 +74,7 @@ export class ControlServer {
         } else {
             dns.setDefaultResultOrder("verbatim")
         }
+        retVal = new URL(retVal).href.replace(/\/$/, "")
         Logger.I.info(`The current control server is: ${retVal}`)
         return retVal
     }
@@ -80,8 +83,9 @@ export class ControlServer {
         const headers: { [key: string]: string } = {
             "Content-Type": "application/json",
         }
-        if (process.env.X_NETTEST_CLIENT) {
-            headers["X-Nettest-Client"] = process.env.X_NETTEST_CLIENT
+        const activeClient = Store.I.get(ACTIVE_CLIENT) as string
+        if (activeClient) {
+            headers["X-Nettest-Client"] = activeClient
         }
         return headers
     }
@@ -124,11 +128,11 @@ export class ControlServer {
         }
     }
 
-    async getMeasurementServerFromApi(
+    async getMeasurementServersFromApi(
         request: IUserSettingsRequest
-    ): Promise<IMeasurementServerResponse | undefined> {
+    ): Promise<IMeasurementServerResponse[]> {
         if (!process.env.MEASUREMENT_SERVERS_PATH) {
-            return undefined
+            return []
         }
         Logger.I.info(
             ELoggerMessage.GET_REQUEST,
@@ -140,21 +144,27 @@ export class ControlServer {
                 { headers: this.headers }
             )
         ).data as IMeasurementServerResponse[]
+        const activeServer = Store.I.get(
+            ACTIVE_SERVER
+        ) as IMeasurementServerResponse
+        let filteredServers: IMeasurementServerResponse[] = []
         if (servers?.length) {
-            const filteredServer = servers.find((s) =>
+            filteredServers = servers.filter((s) =>
                 s.serverTypeDetails.some(
                     (std) => std.serverType === request.name
                 )
             )
-            if (filteredServer) {
+            for (const filteredServer of filteredServers) {
                 filteredServer.serverTypeDetails =
                     filteredServer.serverTypeDetails.filter(
                         (std) => std.serverType === request.name
                     )
+                if (activeServer?.webAddress === filteredServer.webAddress) {
+                    filteredServer.active = true
+                }
             }
-            Logger.I.info("Using server: %o", filteredServer)
-            return filteredServer
         }
+        return filteredServers.sort((a, b) => a.distance - b.distance)
     }
 
     async getUserSettings(request: IUserSettingsRequest) {
@@ -188,7 +198,7 @@ export class ControlServer {
             process.env.MESUREMENT_REGISTRATION_PATH,
             request
         )
-        const hostName = new URL(await this.getHost())
+        const hostName = await this.getHost()
         const response = (
             await axios.post(
                 `${hostName}${process.env.MESUREMENT_REGISTRATION_PATH}`,
@@ -409,7 +419,9 @@ export class ControlServer {
     private handleError(e: any) {
         if (e.response) {
             Logger.I.error(e.response)
-            if (e.response.data?.error?.length) {
+            if (typeof e.response.data?.error === "string") {
+                throw new Error(e.response.data.error)
+            } else if (e.response.data?.error?.length) {
                 throw new Error(e.response.data.error.join(". "))
             } else {
                 throw e.response.data

@@ -115,6 +115,7 @@ export class SettingsScreenComponent extends BaseScreen implements OnInit {
         direction: "",
     }
     tableClassNames = ["app-table--wide"]
+    env$ = this.mainStore.env$
 
     constructor(
         mainStore: MainStore,

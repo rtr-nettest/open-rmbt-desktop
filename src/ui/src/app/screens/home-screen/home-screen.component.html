@@ -1,6 +1,6 @@
 <app-header></app-header>
 <app-body>
-    <app-main-menu></app-main-menu>
+    <app-main-menu *ngIf="(env$ | async)?.FLAVOR !== 'ont'"></app-main-menu>
     <app-main-content *ngIf="env$ | async as env">
         <div *ngIf="showProgress" style="width: 100%">
             <mat-spinner style="margin: auto"></mat-spinner>

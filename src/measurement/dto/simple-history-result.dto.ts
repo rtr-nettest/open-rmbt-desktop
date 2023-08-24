@@ -59,7 +59,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             dayjs(response.measurementDate)
                 .tz(dayjs.tz.guess())
                 .format(RESULT_DATE_FORMAT),
-            "",
+            response.clientProvider,
             response.download,
             response.upload,
             response.ping,

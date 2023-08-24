@@ -1,6 +1,6 @@
 <app-header></app-header>
 <app-body>
-    <app-main-menu></app-main-menu>
+    <app-main-menu *ngIf="(env$ | async)?.FLAVOR !== 'ont'"></app-main-menu>
     <app-main-content *ngIf="result$ | async as result; else noResult">
         <app-export-warning></app-export-warning>
         <div class="app-main" *transloco="let t">
@@ -12,7 +12,7 @@
             </h1>
             <div class="app-wrapper">
                 <app-table
-                    [columns]="columns"
+                    [columns]="(columns$ | async)!"
                     [data]="result"
                     [sort]="sort"
                     [shouldHideHeader]="false"

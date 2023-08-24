@@ -23,7 +23,7 @@ import { BaseScreen } from "../base-screen/base-screen.component"
 import { MessageService } from "src/app/services/message.service"
 import { DatePipe } from "@angular/common"
 
-export interface IHistoryRow {
+export interface IHistoryRowRTR {
     id: string
     count: number
     time: string
@@ -31,6 +31,17 @@ export interface IHistoryRow {
     upload: string
     ping: string
     details: string
+}
+
+export interface IHistoryRowONT {
+    id: string
+    date: string
+    time: string
+    os: string
+    providerName: string
+    download: string
+    upload: string
+    ping: string
 }
 
 @Component({
@@ -42,58 +53,124 @@ export class HistoryScreenComponent
     extends BaseScreen
     implements OnInit, OnDestroy
 {
-    columns: ITableColumn<ISimpleHistoryResult>[] = [
-        {
-            columnDef: "count",
-            header: "#",
-        },
-        {
-            columnDef: "time",
-            header: "Time",
-        },
-        {
-            columnDef: "download",
-            header: "Download",
-            isHtml: true,
-        },
-        {
-            columnDef: "upload",
-            header: "Upload",
-            isHtml: true,
-        },
-        {
-            columnDef: "ping",
-            header: "Ping",
-            isHtml: true,
-        },
-        {
-            columnDef: "details",
-            header: "",
-            link: (id) => "/" + ERoutes.TEST_RESULT.replace(":testUuid", id),
-            transformValue: () => this.transloco.translate("Details..."),
-        },
-    ]
+    columns$: Observable<ITableColumn<ISimpleHistoryResult>[]> =
+        this.mainStore.env$.pipe(
+            map((env) => {
+                const locale = this.transloco.getActiveLang()
+                if (env?.FLAVOR === "ont") {
+                    return [
+                        {
+                            columnDef: "date",
+                            header: "history.table.date",
+                            link: (id) =>
+                                "/" +
+                                ERoutes.TEST_RESULT.replace(":testUuid", id),
+                        },
+                        {
+                            columnDef: "time",
+                            header: "history.table.time",
+                        },
+                        {
+                            columnDef: "os",
+                            header: "OS",
+                        },
+                        {
+                            columnDef: "providerName",
+                            header: "history.table.operator",
+                        },
+                        {
+                            columnDef: "download",
+                            isSortable: true,
+                            header: "history.table.download",
+                            justify: "flex-end",
+                        },
+                        {
+                            columnDef: "upload",
+                            isSortable: true,
+                            header: "history.table.upload",
+                            justify: "flex-end",
+                        },
+                        {
+                            columnDef: "ping",
+                            isSortable: true,
+                            header: "history.table.ping",
+                            justify: "flex-end",
+                        },
+                    ]
+                } else {
+                    return [
+                        {
+                            columnDef: "count",
+                            header: "#",
+                        },
+                        {
+                            columnDef: "time",
+                            header: "Time",
+                        },
+                        {
+                            columnDef: "download",
+                            header: "Download",
+                            isHtml: true,
+                        },
+                        {
+                            columnDef: "upload",
+                            header: "Upload",
+                            isHtml: true,
+                        },
+                        {
+                            columnDef: "ping",
+                            header: "Ping",
+                            isHtml: true,
+                        },
+                        {
+                            columnDef: "details",
+                            header: "",
+                            link: (id) =>
+                                "/" +
+                                ERoutes.TEST_RESULT.replace(":testUuid", id),
+                            transformValue: () =>
+                                this.transloco.translate("Details..."),
+                        },
+                    ]
+                }
+            })
+        )
     loading = false
     allLoaded = false
     isLodaMoreButtonVisible = !!this.mainStore.env$.value?.HISTORY_RESULTS_LIMIT
-    result$: Observable<IBasicResponse<IHistoryRow>> = this.store.history$.pipe(
-        withLatestFrom(
-            this.transloco.selectTranslation(),
-            this.store.historyPaginator$
-        ),
-        map(([history, t, paginator]) => {
-            if (!history.length) {
-                return { content: [], totalElements: 0 }
-            }
-            const content = history.map(
-                this.historyItemToRow(t, paginator, history.length)
-            )
-            return {
-                content,
-                totalElements: content.length,
-            }
-        })
-    )
+    result$: Observable<IBasicResponse<IHistoryRowRTR | IHistoryRowONT>> =
+        this.store.history$.pipe(
+            withLatestFrom(
+                this.transloco.selectTranslation(),
+                this.store.historyPaginator$,
+                this.mainStore.env$
+            ),
+            map(([history, t, paginator, env]) => {
+                if (!history.length) {
+                    return { content: [], totalElements: 0 }
+                }
+                const content =
+                    env?.FLAVOR === "ont"
+                        ? history.map(
+                              this.historyItemToRowONT(
+                                  t,
+                                  paginator,
+                                  history.length
+                              )
+                          )
+                        : history.map(
+                              this.historyItemToRowRTR(
+                                  t,
+                                  paginator,
+                                  history.length
+                              )
+                          )
+                return {
+                    content,
+                    totalElements: content.length,
+                }
+            })
+        )
     sort: ISort = {
         active: "time",
         direction: "desc",
@@ -119,6 +196,7 @@ export class HistoryScreenComponent
                 this.store.exportAs("xlsx", this.store.history$.value),
         },
     ]
+    env$ = this.mainStore.env$
 
     constructor(
         mainStore: MainStore,
@@ -173,9 +251,41 @@ export class HistoryScreenComponent
         }
     }
 
-    private historyItemToRow =
+    private historyItemToRowONT =
         (t: Translation, paginator: IPaginator, historyLength: number) =>
-        (hi: ISimpleHistoryResult, index: number) => {
+        (hi: ISimpleHistoryResult, index: number): IHistoryRowONT => {
+            const locale = this.transloco.getActiveLang()
+            return {
+                id: hi.testUuid!,
+                date: this.datePipe.transform(
+                    hi.measurementDate,
+                    "mediumDate",
+                    undefined,
+                    locale
+                )!,
+                time: this.datePipe.transform(
+                    hi.measurementDate,
+                    "mediumTime",
+                    undefined,
+                    locale
+                )!,
+                download: this.conversion
+                    .getSignificantDigits(hi.downloadKbit / 1e3)
+                    .toLocaleString(locale),
+                upload: this.conversion
+                    .getSignificantDigits(hi.uploadKbit / 1e3)
+                    .toLocaleString(locale),
+                os: "-",
+                ping: this.conversion
+                    .getSignificantDigits(hi.ping)
+                    .toLocaleString(locale),
+                providerName: hi.providerName,
+            }
+        }
+
+    private historyItemToRowRTR =
+        (t: Translation, paginator: IPaginator, historyLength: number) =>
+        (hi: ISimpleHistoryResult, index: number): IHistoryRowRTR => {
             const locale = this.transloco.getActiveLang()
             return {
                 id: hi.testUuid!,

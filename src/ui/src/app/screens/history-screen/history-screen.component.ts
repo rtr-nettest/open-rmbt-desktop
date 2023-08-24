@@ -149,7 +149,13 @@ export class HistoryScreenComponent
         this.loading = true
         this.store.getMeasurementHistory().subscribe((history) => {
             this.loading = false
-            if (!history || !this.mainStore.env$.value?.HISTORY_RESULTS_LIMIT) {
+            const limit = this.mainStore.env$.value?.HISTORY_RESULTS_LIMIT ?? 0
+            if (
+                !history ||
+                !history.length ||
+                !limit ||
+                history.length < limit
+            ) {
                 this.allLoaded = true
             }
         })

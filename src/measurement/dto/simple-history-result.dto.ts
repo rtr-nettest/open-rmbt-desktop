@@ -54,6 +54,40 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         )
     }
 
+    static fromONTHistoryResult(response: any) {
+        return new SimpleHistoryResult(
+            dayjs(response.measurementDate)
+                .tz(dayjs.tz.guess())
+                .format(RESULT_DATE_FORMAT),
+            "",
+            response.download,
+            response.upload,
+            response.ping,
+            "",
+            "",
+            response.openTestUuid ?? "",
+            false,
+            [],
+            [],
+            [],
+            ClassificationService.I.classify(
+                response.download,
+                THRESHOLD_DOWNLOAD,
+                "biggerBetter"
+            ),
+            ClassificationService.I.classify(
+                response.upload,
+                THRESHOLD_UPLOAD,
+                "biggerBetter"
+            ),
+            ClassificationService.I.classify(
+                response.ping * 1e6,
+                THRESHOLD_PING,
+                "smallerBetter"
+            )
+        )
+    }
+
     static fromRTRHistoryResult(response: any) {
         const downKbit = response.speed_download
             ? parseFloat(response.speed_download.replace(",", "")) * 1e3

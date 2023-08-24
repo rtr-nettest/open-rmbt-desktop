@@ -181,10 +181,11 @@ export class ControlServer {
             )
         ).data as IUserSetingsResponse
         if (response?.settings?.length) {
-            Logger.I.info("Using settings: %o", response.settings[0])
-            Store.set(CLIENT_UUID, response.settings[0].uuid)
-            Store.set(SETTINGS, response.settings[0])
-            return response.settings[0]
+            const settings = { ...response.settings[0], uuid: request.uuid }
+            Logger.I.info("Using settings: %o")
+            Store.set(CLIENT_UUID, settings.uuid)
+            Store.set(SETTINGS, settings)
+            return settings
         }
         if (response?.error?.length) {
             throw new Error(response.error.join(" "))
@@ -270,6 +271,48 @@ export class ControlServer {
             return []
         }
         let retVal: ISimpleHistoryResult[] | undefined
+        try {
+            if (process.env.HISTORY_RESULT_PATH_METHOD === "GET") {
+                // as used by ONT
+                retVal = await this.getONTHistory(offset, limit)
+            } else if (process.env.HISTORY_RESULT_PATH_METHOD === "POST") {
+                // as used by RTR
+                retVal = await this.getRTRHistory(offset, limit)
+            }
+        } catch (e) {
+            retVal = await DBService.I.getAllMeasurements()
+            if (!retVal) {
+                this.handleError(e)
+            }
+        }
+        Logger.I.info("The history is: %o", retVal)
+        return retVal
+    }
+
+    async getONTHistory(offset = 0, limit?: number) {
+        let params = `sort=measurementDate,desc&uuid=${
+            Store.get(CLIENT_UUID) as string
+        }`
+        if (limit) {
+            let page = 1
+            if (offset >= limit) {
+                page = offset / limit + 1
+            }
+            params += `&page=${page}&size=${limit}`
+        }
+        const url = `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_PATH}?${params}`
+        Logger.I.info(ELoggerMessage.GET_REQUEST, url)
+        const resp = (await axios.get(url, { headers: this.headers })).data
+        Logger.I.warn("Response is %o", resp)
+        if (resp?.content.length) {
+            return resp.content.map((hi: any) =>
+                SimpleHistoryResult.fromONTHistoryResult(hi)
+            )
+        }
+        throw new Error("Something unexpected happened.")
+    }
+
+    async getRTRHistory(offset = 0, limit?: number) {
         const body: { [key: string]: any } = {
             language: I18nService.I.getActiveLanguage(),
             timezone: dayjs.tz.guess(),
@@ -284,31 +327,23 @@ export class ControlServer {
             process.env.HISTORY_PATH,
             body
         )
-        try {
-            const resp = (
-                await axios.post(
-                    `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_PATH}`,
-                    body,
-                    { headers: this.headers }
-                )
-            ).data
-            Logger.I.warn("Response is %o", resp)
-            if (resp?.error.length) {
-                throw new Error(resp.error)
-            }
-            if (resp?.history.length) {
-                retVal = resp.history.map((hi: any) =>
-                    SimpleHistoryResult.fromRTRHistoryResult(hi)
-                )
-            }
-        } catch (e) {
-            retVal = await DBService.I.getAllMeasurements()
-            if (!retVal) {
-                this.handleError(e)
-            }
+        const resp = (
+            await axios.post(
+                `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_PATH}`,
+                body,
+                { headers: this.headers }
+            )
+        ).data
+        Logger.I.warn("Response is %o", resp)
+        if (resp?.error.length) {
+            throw new Error(resp.error)
         }
-        Logger.I.info("The history is: %o", retVal)
-        return retVal
+        if (resp?.history.length) {
+            return resp.history.map((hi: any) =>
+                SimpleHistoryResult.fromRTRHistoryResult(hi)
+            )
+        }
+        throw new Error("Something unexpected happened.")
     }
 
     async getMeasurementResult(

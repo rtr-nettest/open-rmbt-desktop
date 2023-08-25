@@ -305,9 +305,15 @@ export class ControlServer {
         const resp = (await axios.get(url, { headers: this.headers })).data
         Logger.I.warn("Response is %o", resp)
         if (resp?.content.length) {
-            return resp.content.map((hi: any) =>
-                SimpleHistoryResult.fromONTHistoryResult(hi)
-            )
+            return resp.content.map((hi: any) => {
+                const result: ISimpleHistoryResult =
+                    SimpleHistoryResult.fromONTHistoryResult(hi)
+                result.paginator = {
+                    totalElements: resp.totalElements,
+                    totalPages: resp.totalPages,
+                }
+                return result
+            })
         }
         throw new Error("Something unexpected happened.")
     }

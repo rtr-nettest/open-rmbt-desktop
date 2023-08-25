@@ -17,6 +17,7 @@ import { MessageService } from "src/app/services/message.service"
 import { ClientSelectComponent } from "src/app/widgets/client-select/client-select.component"
 import { TestServersComponent } from "src/app/widgets/test-servers/test-servers.component"
 import { CMSService } from "src/app/services/cms.service"
+import { IEnv } from "../../../../../electron/interfaces/env.interface"
 
 export interface ISettingsRow {
     title: string
@@ -48,6 +49,7 @@ export class SettingsScreenComponent extends BaseScreen implements OnInit {
         this.cms.getProject(),
     ]).pipe(
         map(([env, t, settings, project]) => {
+            this.env = env ?? undefined
             const content: ISettingsRow[] = [
                 {
                     title: t["Client UUID"],
@@ -104,6 +106,9 @@ export class SettingsScreenComponent extends BaseScreen implements OnInit {
                     },
                 })
             }
+            if (env?.FLAVOR === "ont") {
+                this.tableClassNames.push("app-table--ont")
+            }
             return {
                 content,
                 totalElements: content.length,
@@ -115,7 +120,7 @@ export class SettingsScreenComponent extends BaseScreen implements OnInit {
         direction: "",
     }
     tableClassNames = ["app-table--wide"]
-    env$ = this.mainStore.env$
+    env?: IEnv
 
     constructor(
         mainStore: MainStore,

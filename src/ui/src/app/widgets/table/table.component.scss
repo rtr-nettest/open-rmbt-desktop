@@ -15,7 +15,7 @@ $color-border: rgba(0, 0, 0, 0.1);
 
     mat-header-row {
         min-height: rem(50);
-        z-index: 9 !important;
+        z-index: 1 !important;
     }
 
     &__cell--ellipsis {
@@ -92,6 +92,8 @@ $color-border: rgba(0, 0, 0, 0.1);
     }
 
     &--ont {
+        margin-left: rem(-60);
+        margin-right: rem(-80);
         mat-header-row {
             min-height: rem(48);
         }

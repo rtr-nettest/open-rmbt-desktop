@@ -1,9 +1,9 @@
 <app-header></app-header>
 <app-body>
-    <app-main-menu *ngIf="(env$ | async)?.FLAVOR !== 'ont'"></app-main-menu>
+    <app-main-menu *ngIf="env?.FLAVOR !== 'ont'"></app-main-menu>
     <app-main-content>
         <div class="app-main" *transloco="let t">
-            <h1 class="app-title">
+            <h1 *ngIf="env?.FLAVOR && env?.FLAVOR !== 'ont'" class="app-title">
                 {{ t("Settings") }}
             </h1>
             <div class="app-wrapper">

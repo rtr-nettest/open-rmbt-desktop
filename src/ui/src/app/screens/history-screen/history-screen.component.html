@@ -4,11 +4,14 @@
     <app-main-content *ngIf="result$ | async as result; else noResult">
         <app-export-warning></app-export-warning>
         <div class="app-main" *transloco="let t">
-            <h1 *ngIf="env?.FLAVOR !== 'ont'" class="app-title">
+            <h1 *ngIf="env?.FLAVOR && env?.FLAVOR !== 'ont'" class="app-title">
                 {{ t("History") }}
                 <app-action-buttons
                     [items]="actionButtons"
                 ></app-action-buttons>
+            </h1>
+            <h1 *ngIf="env?.FLAVOR === 'ont'" class="app-title app-title--ont">
+                {{ getHeading(result.totalElements) }}
             </h1>
             <div class="app-wrapper">
                 <app-table
@@ -24,6 +27,9 @@
                     color="primary"
                     (click)="loadMore()"
                     [disabled]="loading"
+                    [ngClass]="
+                        env?.FLAVOR === 'ont' ? 'app-button--expanded' : ''
+                    "
                 >
                     {{ loading ? t("Loading") : t("Load more") }}
                 </button>

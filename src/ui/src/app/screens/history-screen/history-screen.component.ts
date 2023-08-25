@@ -1,5 +1,6 @@
 import {
-    ChangeDetectionStrategy,
+    AfterViewChecked,
+    ChangeDetectorRef,
     Component,
     HostListener,
     OnDestroy,
@@ -51,7 +52,7 @@ export interface IHistoryRowONT {
 })
 export class HistoryScreenComponent
     extends BaseScreen
-    implements OnInit, OnDestroy
+    implements OnInit, OnDestroy, AfterViewChecked
 {
     columns$: Observable<ITableColumn<ISimpleHistoryResult>[]> =
         this.mainStore.env$.pipe(
@@ -164,9 +165,13 @@ export class HistoryScreenComponent
                                   history.length
                               )
                           )
+                const totalElements = history[0].paginator?.totalElements
                 return {
                     content,
-                    totalElements: content.length,
+                    totalElements:
+                        env?.FLAVOR === "ont" && totalElements
+                            ? totalElements
+                            : content.length,
                 }
             })
         )
@@ -201,6 +206,7 @@ export class HistoryScreenComponent
     constructor(
         mainStore: MainStore,
         message: MessageService,
+        private cdr: ChangeDetectorRef,
         private classification: ClassificationService,
         private conversion: ConversionService,
         private store: TestStore,
@@ -208,6 +214,10 @@ export class HistoryScreenComponent
         private datePipe: DatePipe
     ) {
         super(mainStore, message)
+    }
+
+    ngAfterViewChecked(): void {
+        this.cdr.detectChanges()
     }
 
     ngOnInit(): void {
@@ -218,6 +228,13 @@ export class HistoryScreenComponent
     override ngOnDestroy(): void {
         this.store.resetMeasurementHistory()
         super.ngOnDestroy()
+    }
+
+    getHeading(count: number) {
+        const heading = this.transloco.translate(
+            `history.table.heading-${count === 1 ? 1 : 2}`
+        )
+        return `${count || 0} ${heading}`
     }
 
     loadMore() {

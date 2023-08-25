@@ -8,7 +8,6 @@ import {
 } from "@angular/core"
 import { ISort } from "src/app/interfaces/sort.interface"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
-import { TestStore } from "src/app/store/test.store"
 import { ISimpleHistoryResult } from "../../../../../measurement/interfaces/simple-history-result.interface"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { map, withLatestFrom } from "rxjs/operators"
@@ -24,11 +23,12 @@ import { BaseScreen } from "../base-screen/base-screen.component"
 import { MessageService } from "src/app/services/message.service"
 import { DatePipe } from "@angular/common"
 import { IEnv } from "../../../../../electron/interfaces/env.interface"
+import { HistoryStore } from "src/app/store/history.store"
 
 export interface IHistoryRowRTR {
     id: string
     count: number
-    time: string
+    date: string
     download: string
     upload: string
     ping: string
@@ -100,7 +100,7 @@ export class HistoryScreenComponent
                             header: "#",
                         },
                         {
-                            columnDef: "time",
+                            columnDef: "date",
                             header: "Time",
                         },
                         {
@@ -175,10 +175,7 @@ export class HistoryScreenComponent
                 }
             })
         )
-    sort: ISort = {
-        active: "time",
-        direction: "desc",
-    }
+    sort$ = this.store.historySort$
     actionButtons: IMainMenuItem[] = [
         {
             label: "",
@@ -209,7 +206,7 @@ export class HistoryScreenComponent
         private cdr: ChangeDetectorRef,
         private classification: ClassificationService,
         private conversion: ConversionService,
-        private store: TestStore,
+        private store: HistoryStore,
         private transloco: TranslocoService,
         private datePipe: DatePipe
     ) {
@@ -228,6 +225,11 @@ export class HistoryScreenComponent
     override ngOnDestroy(): void {
         this.store.resetMeasurementHistory()
         super.ngOnDestroy()
+    }
+
+    changeSort = (sort: ISort) => {
+        this.allLoaded = false
+        this.store.sortMeasurementHistory(sort, this.loadMore.bind(this))
     }
 
     getHeading(count: number) {
@@ -306,7 +308,7 @@ export class HistoryScreenComponent
             return {
                 id: hi.testUuid!,
                 count: paginator.limit ? index + 1 : historyLength - index,
-                time: this.datePipe.transform(
+                date: this.datePipe.transform(
                     hi.measurementDate,
                     "medium",
                     undefined,

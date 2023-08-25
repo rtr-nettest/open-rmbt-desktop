@@ -1,10 +1,10 @@
 <app-header></app-header>
 <app-body>
-    <app-main-menu *ngIf="(env$ | async)?.FLAVOR !== 'ont'"></app-main-menu>
+    <app-main-menu *ngIf="env?.FLAVOR !== 'ont'"></app-main-menu>
     <app-main-content *ngIf="result$ | async as result; else noResult">
         <app-export-warning></app-export-warning>
         <div class="app-main" *transloco="let t">
-            <h1 class="app-title">
+            <h1 *ngIf="env?.FLAVOR !== 'ont'" class="app-title">
                 {{ t("History") }}
                 <app-action-buttons
                     [items]="actionButtons"
@@ -16,6 +16,7 @@
                     [data]="result"
                     [sort]="sort"
                     [shouldHideHeader]="false"
+                    [tableClassNames]="tableClassNames ?? []"
                 ></app-table>
                 <button
                     *ngIf="!allLoaded"

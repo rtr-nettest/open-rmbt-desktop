@@ -22,6 +22,7 @@ import { ConversionService } from "src/app/services/conversion.service"
 import { BaseScreen } from "../base-screen/base-screen.component"
 import { MessageService } from "src/app/services/message.service"
 import { DatePipe } from "@angular/common"
+import { IEnv } from "../../../../../electron/interfaces/env.interface"
 
 export interface IHistoryRowRTR {
     id: string
@@ -37,7 +38,6 @@ export interface IHistoryRowONT {
     id: string
     date: string
     time: string
-    os: string
     providerName: string
     download: string
     upload: string
@@ -56,7 +56,6 @@ export class HistoryScreenComponent
     columns$: Observable<ITableColumn<ISimpleHistoryResult>[]> =
         this.mainStore.env$.pipe(
             map((env) => {
-                const locale = this.transloco.getActiveLang()
                 if (env?.FLAVOR === "ont") {
                     return [
                         {
@@ -71,12 +70,8 @@ export class HistoryScreenComponent
                             header: "history.table.time",
                         },
                         {
-                            columnDef: "os",
-                            header: "OS",
-                        },
-                        {
                             columnDef: "providerName",
-                            header: "history.table.operator",
+                            header: "test.provider",
                         },
                         {
                             columnDef: "download",
@@ -146,6 +141,10 @@ export class HistoryScreenComponent
                 this.mainStore.env$
             ),
             map(([history, t, paginator, env]) => {
+                this.env = env ?? undefined
+                if (this.env?.FLAVOR === "ont") {
+                    this.tableClassNames = ["app-table--ont"]
+                }
                 if (!history.length) {
                     return { content: [], totalElements: 0 }
                 }
@@ -196,7 +195,8 @@ export class HistoryScreenComponent
                 this.store.exportAs("xlsx", this.store.history$.value),
         },
     ]
-    env$ = this.mainStore.env$
+    env?: IEnv
+    tableClassNames?: string[]
 
     constructor(
         mainStore: MainStore,
@@ -275,7 +275,6 @@ export class HistoryScreenComponent
                 upload: this.conversion
                     .getSignificantDigits(hi.uploadKbit / 1e3)
                     .toLocaleString(locale),
-                os: "-",
                 ping: this.conversion
                     .getSignificantDigits(hi.ping)
                     .toLocaleString(locale),

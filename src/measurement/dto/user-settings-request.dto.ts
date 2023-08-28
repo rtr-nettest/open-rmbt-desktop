@@ -33,6 +33,10 @@ export class UserSettingsRequest implements IUserSettingsRequest {
             this.terms_and_conditions_accepted = true
             this.terms_and_conditions_accepted_version = 5
         }
-        this.uuid = (Store.get(CLIENT_UUID) as string) ?? v4()
+        if (process.env.FLAVOR === "ont") {
+            this.uuid = (Store.get(CLIENT_UUID) as string) ?? v4()
+        } else {
+            this.uuid = Store.get(CLIENT_UUID) as string
+        }
     }
 }

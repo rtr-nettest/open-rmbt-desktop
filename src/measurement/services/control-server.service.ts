@@ -183,7 +183,10 @@ export class ControlServer {
             )
         ).data as IUserSetingsResponse
         if (response?.settings?.length) {
-            const settings = { ...response.settings[0], uuid: request.uuid }
+            const settings =
+                process.env.FLAVOR === "ont"
+                    ? { ...response.settings[0], uuid: request.uuid }
+                    : response.settings[0]
             Logger.I.info("Using settings: %o")
             Store.set(CLIENT_UUID, settings.uuid)
             Store.set(SETTINGS, settings)

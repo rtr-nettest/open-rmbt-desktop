@@ -1,5 +1,13 @@
 import { Injectable } from "@angular/core"
-import { BehaviorSubject, catchError, of, switchMap, take, tap } from "rxjs"
+import {
+    BehaviorSubject,
+    catchError,
+    of,
+    switchMap,
+    take,
+    tap,
+    withLatestFrom,
+} from "rxjs"
 import { ISimpleHistoryResult } from "../../../../measurement/interfaces/simple-history-result.interface"
 import { MainStore } from "./main.store"
 import { IPaginator } from "../interfaces/paginator.interface"
@@ -21,7 +29,7 @@ export class HistoryStore {
         offset: 0,
     })
     historySort$ = new BehaviorSubject<ISort>({
-        active: "date",
+        active: "measurementDate",
         direction: "desc",
     })
 
@@ -39,19 +47,26 @@ export class HistoryStore {
         const env = this.mainStore.env$.value
         return this.historyPaginator$.pipe(
             take(1),
-            switchMap((paginator) => {
+            withLatestFrom(this.historySort$),
+            switchMap(([paginator, sort]) => {
                 if (env?.HISTORY_RESULTS_LIMIT) {
                     this.historyPaginator$.next({
                         offset: paginator.offset + env.HISTORY_RESULTS_LIMIT,
                         limit: env.HISTORY_RESULTS_LIMIT,
                     })
                     return window.electronAPI.getMeasurementHistory(
-                        paginator.offset,
-                        env.HISTORY_RESULTS_LIMIT
+                        {
+                            offset: paginator.offset,
+                            limit: env.HISTORY_RESULTS_LIMIT,
+                        },
+                        sort
                     )
                 } else {
                     return window.electronAPI.getMeasurementHistory(
-                        paginator.offset
+                        {
+                            offset: paginator.offset,
+                        },
+                        sort
                     )
                 }
             }),

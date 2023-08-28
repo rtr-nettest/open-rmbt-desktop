@@ -34,6 +34,8 @@ import { Agent } from "https"
 import { NetworkInfoService } from "./network-info.service"
 import { UserSettingsRequest } from "../dto/user-settings-request.dto"
 import * as dns from "dns"
+import { IPaginator } from "../../ui/src/app/interfaces/paginator.interface"
+import { ISort } from "../../ui/src/app/interfaces/sort.interface"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -266,7 +268,7 @@ export class ControlServer {
         }
     }
 
-    async getMeasurementHistory(offset = 0, limit?: number) {
+    async getMeasurementHistory(paginator?: IPaginator, sort?: ISort) {
         if (!process.env.HISTORY_PATH) {
             return []
         }
@@ -274,10 +276,10 @@ export class ControlServer {
         try {
             if (process.env.HISTORY_RESULT_PATH_METHOD === "GET") {
                 // as used by ONT
-                retVal = await this.getONTHistory(offset, limit)
+                retVal = await this.getONTHistory(paginator, sort)
             } else if (process.env.HISTORY_RESULT_PATH_METHOD === "POST") {
                 // as used by RTR
-                retVal = await this.getRTRHistory(offset, limit)
+                retVal = await this.getRTRHistory(paginator)
             }
         } catch (e) {
             retVal = await DBService.I.getAllMeasurements()
@@ -289,16 +291,23 @@ export class ControlServer {
         return retVal
     }
 
-    async getONTHistory(offset = 0, limit?: number) {
-        let params = `sort=measurementDate,desc&uuid=${
-            Store.get(CLIENT_UUID) as string
-        }`
-        if (limit) {
-            let page = 1
-            if (offset >= limit) {
-                page = offset / limit + 1
+    async getONTHistory(paginator?: IPaginator, sort?: ISort) {
+        let params = `uuid=${Store.get(CLIENT_UUID) as string}`
+        if (paginator) {
+            const { offset, limit } = paginator
+            if (limit) {
+                let page = 1
+                if (offset >= limit) {
+                    page = offset / limit + 1
+                }
+                params += `&page=${page}&size=${limit}`
             }
-            params += `&page=${page}&size=${limit}`
+        }
+        if (sort) {
+            const { active, direction } = sort
+            params += `&sort=${active},${direction}`
+        } else {
+            params += `&sort=measurementDate,desc`
         }
         const url = `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_PATH}?${params}`
         Logger.I.info(ELoggerMessage.GET_REQUEST, url)
@@ -318,15 +327,15 @@ export class ControlServer {
         throw new Error("Something unexpected happened.")
     }
 
-    async getRTRHistory(offset = 0, limit?: number) {
+    async getRTRHistory(paginator?: IPaginator) {
         const body: { [key: string]: any } = {
             language: I18nService.I.getActiveLanguage(),
             timezone: dayjs.tz.guess(),
             uuid: Store.get(CLIENT_UUID) as string,
-            result_offset: offset,
+            result_offset: paginator?.offset,
         }
-        if (limit) {
-            body.result_limit = limit
+        if (paginator?.limit) {
+            body.result_limit = paginator.limit
         }
         Logger.I.info(
             ELoggerMessage.POST_REQUEST,

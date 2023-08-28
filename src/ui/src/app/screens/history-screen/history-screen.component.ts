@@ -28,7 +28,7 @@ import { HistoryStore } from "src/app/store/history.store"
 export interface IHistoryRowRTR {
     id: string
     count: number
-    date: string
+    measurementDate: string
     download: string
     upload: string
     ping: string
@@ -37,7 +37,7 @@ export interface IHistoryRowRTR {
 
 export interface IHistoryRowONT {
     id: string
-    date: string
+    measurementDate: string
     time: string
     providerName: string
     download: string
@@ -60,8 +60,9 @@ export class HistoryScreenComponent
                 if (env?.FLAVOR === "ont") {
                     return [
                         {
-                            columnDef: "date",
+                            columnDef: "measurementDate",
                             header: "history.table.date",
+                            isSortable: true,
                             link: (id) =>
                                 "/" +
                                 ERoutes.TEST_RESULT.replace(":testUuid", id),
@@ -100,7 +101,7 @@ export class HistoryScreenComponent
                             header: "#",
                         },
                         {
-                            columnDef: "date",
+                            columnDef: "measurementDate",
                             header: "Time",
                         },
                         {
@@ -276,7 +277,7 @@ export class HistoryScreenComponent
             const locale = this.transloco.getActiveLang()
             return {
                 id: hi.testUuid!,
-                date: this.datePipe.transform(
+                measurementDate: this.datePipe.transform(
                     hi.measurementDate,
                     "mediumDate",
                     undefined,
@@ -308,7 +309,7 @@ export class HistoryScreenComponent
             return {
                 id: hi.testUuid!,
                 count: paginator.limit ? index + 1 : historyLength - index,
-                date: this.datePipe.transform(
+                measurementDate: this.datePipe.transform(
                     hi.measurementDate,
                     "medium",
                     undefined,

@@ -4,13 +4,18 @@ import { TestStore } from "src/app/store/test.store"
 import { IMeasurementServerResponse } from "../../../../../measurement/interfaces/measurement-server-response.interface"
 import { map } from "rxjs"
 import { CMSService } from "src/app/services/cms.service"
+import {
+    IDynamicComponent,
+    IDynamicComponentParameters,
+} from "src/app/interfaces/dynamic-component.interface"
 
 @Component({
     selector: "app-test-servers",
     templateUrl: "./test-servers.component.html",
     styleUrls: ["./test-servers.component.scss"],
 })
-export class TestServersComponent implements OnInit {
+export class TestServersComponent implements OnInit, IDynamicComponent {
+    parameters?: IDynamicComponentParameters | undefined
     project$ = this.cms.getProject()
     servers$ = this.store.servers$.pipe(
         map((servers) => {

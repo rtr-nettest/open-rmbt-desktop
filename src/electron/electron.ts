@@ -196,14 +196,17 @@ ipcMain.handle(Events.GET_MEASUREMENT_RESULT, async (event, testUuid) => {
     }
 })
 
-ipcMain.handle(Events.GET_MEASUREMENT_HISTORY, async (event, offset, limit) => {
-    const webContents = event.sender
-    try {
-        return await ControlServer.I.getMeasurementHistory(offset, limit)
-    } catch (e) {
-        webContents.send(Events.ERROR, e)
+ipcMain.handle(
+    Events.GET_MEASUREMENT_HISTORY,
+    async (event, paginator, sort) => {
+        const webContents = event.sender
+        try {
+            return await ControlServer.I.getMeasurementHistory(paginator, sort)
+        } catch (e) {
+            webContents.send(Events.ERROR, e)
+        }
     }
-})
+)
 
 ipcMain.handle(Events.GET_SERVERS, async (event) => {
     const webContents = event.sender

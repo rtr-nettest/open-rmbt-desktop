@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core"
 import { PageEvent } from "@angular/material/paginator"
-import { MatSort, Sort } from "@angular/material/sort"
+import { Sort } from "@angular/material/sort"
 
 @Injectable({
     providedIn: "root",
@@ -8,11 +8,11 @@ import { MatSort, Sort } from "@angular/material/sort"
 export class TableSortService {
     constructor() {}
 
-    changeSort(newSort: Sort, action?: (...args: []) => any) {
-        // TODO
+    changeSort(newSort: Sort, action?: (...args: any) => any) {
+        action?.(newSort)
     }
 
-    changePage(page: PageEvent, action?: (...args: []) => any) {
+    changePage(page: PageEvent, action?: (...args: any) => any) {
         // TODO
     }
 }

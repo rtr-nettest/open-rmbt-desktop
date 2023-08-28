@@ -2,6 +2,8 @@ import { contextBridge, ipcRenderer } from "electron"
 import { Events } from "./enums/events.enum"
 import { EIPVersion } from "../measurement/enums/ip-version.enum"
 import { IMeasurementServerResponse } from "../measurement/interfaces/measurement-server-response.interface"
+import { IPaginator } from "../ui/src/app/interfaces/paginator.interface"
+import { ISort } from "../ui/src/app/interfaces/sort.interface"
 
 contextBridge.exposeInMainWorld("electronAPI", {
     quit: () => ipcRenderer.send(Events.QUIT),
@@ -29,8 +31,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getMeasurementState: () => ipcRenderer.invoke(Events.GET_MEASUREMENT_STATE),
     getMeasurementResult: (testUuid: string) =>
         ipcRenderer.invoke(Events.GET_MEASUREMENT_RESULT, testUuid),
-    getMeasurementHistory: (offset?: number, limit?: number) =>
-        ipcRenderer.invoke(Events.GET_MEASUREMENT_HISTORY, offset, limit),
+    getMeasurementHistory: (paginator?: IPaginator, sort?: ISort) =>
+        ipcRenderer.invoke(Events.GET_MEASUREMENT_HISTORY, paginator, sort),
     onError: (callback: (error: Error) => any) => {
         ipcRenderer.removeAllListeners(Events.ERROR)
         ipcRenderer.on(Events.ERROR, (event, error) => callback(error))

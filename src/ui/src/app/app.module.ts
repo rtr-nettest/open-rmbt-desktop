@@ -95,9 +95,11 @@ import { DatePipe, registerLocaleData } from "@angular/common"
 import { HeaderMenuComponent } from "./widgets/header-menu/header-menu.component"
 import { IMeasurementServerResponse } from "../../../measurement/interfaces/measurement-server-response.interface"
 import { TestServersComponent } from "./widgets/test-servers/test-servers.component"
-import { DistancePipe } from "./pipes/distance.pipe";
-import { ClientScreenComponent } from './screens/client-screen/client-screen.component';
-import { ClientSelectComponent } from './widgets/client-select/client-select.component'
+import { DistancePipe } from "./pipes/distance.pipe"
+import { ClientScreenComponent } from "./screens/client-screen/client-screen.component"
+import { ClientSelectComponent } from "./widgets/client-select/client-select.component"
+import { IPaginator } from "./interfaces/paginator.interface"
+import { ISort } from "./interfaces/sort.interface"
 
 Chart.register(
     BarElement,
@@ -138,8 +140,8 @@ declare global {
                 testUuid: string
             ) => Promise<ISimpleHistoryResult>
             getMeasurementHistory: (
-                offset?: number,
-                limit?: number
+                paginator?: IPaginator,
+                sort?: ISort
             ) => Promise<ISimpleHistoryResult[]>
             onError: (callback: (error: Error) => any) => Promise<any>
             onOpenSettings: (callback: () => any) => Promise<any>

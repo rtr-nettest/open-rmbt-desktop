@@ -20,7 +20,7 @@ export class UserSettingsRequest implements IUserSettingsRequest {
     timezone = dayjs.tz.guess()
     terms_and_conditions_accepted = false
     terms_and_conditions_accepted_version?: number
-    uuid = (Store.get(CLIENT_UUID) as string) ?? v4()
+    uuid = ""
     operating_system = `${os.type}, ${os.release}`
 
     // RTR BE compatibility
@@ -32,6 +32,11 @@ export class UserSettingsRequest implements IUserSettingsRequest {
         if (termsAccepted) {
             this.terms_and_conditions_accepted = true
             this.terms_and_conditions_accepted_version = 5
+        }
+        if (process.env.FLAVOR === "ont") {
+            this.uuid = (Store.get(CLIENT_UUID) as string) ?? v4()
+        } else {
+            this.uuid = Store.get(CLIENT_UUID) as string
         }
     }
 }

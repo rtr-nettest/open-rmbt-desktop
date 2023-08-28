@@ -24,6 +24,13 @@ $container-width: 100%;
 .app-title {
     display: flex;
     margin-bottom: 1em;
+
+    &--ont {
+        font-size: rem(18);
+        font-weight: normal;
+        margin-left: rem(-30);
+        margin-right: rem(-30);
+    }
 }
 
 .app-wrapper {
@@ -42,4 +49,12 @@ app-main-content {
     align-items: initial;
     flex-direction: column;
     overflow: auto;
+}
+
+.app-button {
+    &--expanded {
+        margin-left: rem(-60);
+        margin-right: rem(-80);
+        width: auto;
+    }
 }

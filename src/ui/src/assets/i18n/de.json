@@ -9,7 +9,7 @@
     "Help": "Hilfe",
     "Options": "Optionen",
     "The current action will be interrupted": "Die aktuelle Aktion wird unterbrochen. Möchten Sie fortfahren?",
-    "\"An error occurred. Please try again later\"": "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
+    "An error occurred. Please try again later": "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
     "An error occurred while sending the results": "Beim Senden der Ergebnisse ist ein Fehler aufgetreten.\nDie App wird die Ergebnisse speichern und es später erneut versuchen.",
     "The registration couldn't be completed": "Die Registrierung konnte nicht durchgeführt werden. Bitte versuchen Sie es später erneut.",
     "Did not receive any settings": "Konfiguration konnte nicht geladen werden.",

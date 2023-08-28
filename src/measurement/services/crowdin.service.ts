@@ -71,9 +71,16 @@ export class CrowdinService {
     toTranslationFormat(json: { [key: string]: any }) {
         const obj: { [key: string]: any } = json.resources["/en.json"]
         return Object.values(obj).reduce((acc, value) => {
+            let key: string = value.additionalAttributes.resname.trim()
+            if (key.indexOf('"') === 0) {
+                key = key.slice(1)
+            }
+            if (key.indexOf('"') === key.length - 1) {
+                key = key.slice(0, -1)
+            }
             return {
                 ...acc,
-                [value.additionalAttributes.resname]: value.target,
+                [key]: value.target,
             }
         }, {})
     }

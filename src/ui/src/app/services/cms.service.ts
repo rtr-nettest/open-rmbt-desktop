@@ -1,7 +1,14 @@
 import { HttpClient, HttpParams } from "@angular/common/http"
 import { Injectable } from "@angular/core"
 import { Observable, of } from "rxjs"
-import { catchError, first, map, switchMap, tap } from "rxjs/operators"
+import {
+    catchError,
+    first,
+    map,
+    switchMap,
+    tap,
+    withLatestFrom,
+} from "rxjs/operators"
 import { IMainAsset } from "../interfaces/main-asset.interface"
 import { IMainProject } from "../interfaces/main-project.interface"
 import { MainStore } from "../store/main.store"
@@ -46,11 +53,14 @@ export class CMSService {
             )
     }
 
-    getProject(): Observable<IMainProject> {
+    getProject(): Observable<IMainProject | null> {
         return this.mainStore.project$.pipe(
             first(),
-            switchMap((project) =>
-                project
+            withLatestFrom(this.mainStore.env$),
+            switchMap(([project, env]) =>
+                env?.FLAVOR !== "ont"
+                    ? of(null)
+                    : project
                     ? of(project)
                     : this.http
                           .get<IMainProject[]>(`${this.apiUrl}/projects`, {
@@ -63,7 +73,8 @@ export class CMSService {
                               headers: this.headers,
                           })
                           .pipe(map((projects) => projects?.[0]))
-            )
+            ),
+            catchError(() => of(null))
         )
     }
 

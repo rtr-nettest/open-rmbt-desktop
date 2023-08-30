@@ -34,6 +34,10 @@ export class TestBarChart extends TestChart {
             barThickness: 6 * (10 / allData.length),
         }
         this.resetDatasets()
+        const padder = { ...allData[allData.length - 1] }
+        padder.x += 10
+        padder.y = 0
+        allData.push(padder)
         this.data.datasets[0].data = allData
         this.update()
     }

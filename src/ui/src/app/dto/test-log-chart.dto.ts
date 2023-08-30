@@ -27,7 +27,7 @@ export class TestLogChart extends TestChart {
     override setData(data: ITestPhaseState) {
         this.resetDatasets()
         super.data.datasets[0].data = this.getAllData(data)
-        const lastIndex = Math.round(
+        const lastIndex = Math.ceil(
             (
                 super.data.datasets[0].data[
                     super.data.datasets[0].data.length - 1

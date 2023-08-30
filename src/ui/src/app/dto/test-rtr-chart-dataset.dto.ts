@@ -19,7 +19,7 @@ export class TestRTRChartDataset {
     constructor(
         phase: ChartPhase,
         barOptions: BarOptions = {
-            barPercentage: 1,
+            barPercentage: 0.3,
             barThickness: "flex",
         }
     ) {

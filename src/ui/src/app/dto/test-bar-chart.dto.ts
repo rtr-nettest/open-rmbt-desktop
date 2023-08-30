@@ -31,7 +31,7 @@ export class TestBarChart extends TestChart {
     override setData(data: ITestPhaseState) {
         const allData = this.getAllData(data)
         this.barOptions = {
-            barPercentage: 4 / allData.length,
+            barPercentage: Math.min(10 / allData.length, 0.3),
             barThickness: "flex",
         }
         this.resetDatasets()

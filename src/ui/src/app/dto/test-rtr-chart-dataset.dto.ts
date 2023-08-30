@@ -1,8 +1,7 @@
 export type ChartPhase = "download" | "upload" | "ping"
 export type BarOptions = {
-    barPercentage: number
-    barThickness: number
-    maxBarThickness: number
+    barPercentage?: number
+    barThickness: number | string
 }
 
 export class TestRTRChartDataset {
@@ -20,9 +19,8 @@ export class TestRTRChartDataset {
     constructor(
         phase: ChartPhase,
         barOptions: BarOptions = {
-            barPercentage: 0.5,
-            barThickness: 6,
-            maxBarThickness: 8,
+            barPercentage: 1,
+            barThickness: "flex",
         }
     ) {
         if (phase === "download") {

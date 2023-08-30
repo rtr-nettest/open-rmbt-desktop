@@ -5,8 +5,8 @@ import { IOverallResult } from "../../../../measurement/interfaces/overall-resul
 import { ETestStatuses } from "../enums/test-statuses.enum"
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
 import { STATE_UPDATE_TIMEOUT } from "../store/test.store"
-import { inject } from "@angular/core"
 import { ConversionService } from "../services/conversion.service"
+import * as dayjs from "dayjs"
 
 export class TestPhaseState implements ITestPhaseState {
     counter: number = -1
@@ -67,8 +67,12 @@ export class TestPhaseState implements ITestPhaseState {
     }
 
     setChartFromPings(pings: IPing[]): void {
+        const oTime = dayjs().startOf("day")
         this.chart = pings.map((p, i) => ({
-            x: i,
+            x: oTime
+                .add(p.time_ns / 1e6, "milliseconds")
+                .toDate()
+                .getTime(),
             y: p.value_server / 1e6,
         }))
     }

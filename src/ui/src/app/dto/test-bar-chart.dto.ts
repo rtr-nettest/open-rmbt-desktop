@@ -30,16 +30,11 @@ export class TestBarChart extends TestChart {
 
     override setData(data: ITestPhaseState) {
         const allData = this.getAllData(data)
-        if (allData.length > 100) {
-            this.barOptions = {
-                barPercentage: 0.1,
-                barThickness: 0.5,
-                maxBarThickness: 1,
-            }
+        this.barOptions = {
+            barThickness: 6 * (10 / allData.length),
         }
         this.resetDatasets()
         this.data.datasets[0].data = allData
-        this.data.labels = this.data.datasets[0].data.map(() => "")
         this.update()
     }
 

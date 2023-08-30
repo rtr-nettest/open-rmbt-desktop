@@ -1,7 +1,9 @@
 import { TranslocoService } from "@ngneat/transloco"
+import * as dayjs from "dayjs"
 import { EColors } from "src/app/enums/colors.enum"
 
 export class TestBarChartOptions {
+    private startTime = dayjs().startOf("day").toDate().getTime()
     animation = {
         duration: 0,
     }
@@ -16,6 +18,8 @@ export class TestBarChartOptions {
     parsing = false as const
     scales = {
         x: {
+            min: this.startTime,
+            type: "time",
             grid: {
                 display: false,
             },
@@ -24,6 +28,25 @@ export class TestBarChartOptions {
                 color: EColors.SECONDARY_50,
                 font: {
                     size: 12,
+                },
+            },
+            time: {
+                unit: "millisecond",
+            },
+            offset: false,
+            bounds: "ticks",
+            ticks: {
+                color: EColors.SECONDARY_50,
+                font: {
+                    size: 12,
+                },
+                stepSize: 500,
+                callback: (value: any) => {
+                    const duration = (value - this.startTime) / 1000
+                    if (duration % 0.5 === 0) {
+                        return `${duration} ${this.t.translate("s")}`
+                    }
+                    return ""
                 },
             },
         },

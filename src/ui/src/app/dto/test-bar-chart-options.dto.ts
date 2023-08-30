@@ -34,7 +34,6 @@ export class TestBarChartOptions {
                 unit: "millisecond",
             },
             offset: false,
-            bounds: "ticks",
             ticks: {
                 color: EColors.SECONDARY_50,
                 font: {

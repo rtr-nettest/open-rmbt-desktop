@@ -24,9 +24,9 @@ async function main() {
                 "src",
                 "assets",
                 "i18n",
-                `${lang}.json`
+                `${lang}.json`,
             ),
-            JSON.stringify(translations)
+            JSON.stringify(translations, null, 2),
         )
     }
 }

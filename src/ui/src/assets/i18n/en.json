@@ -62,5 +62,21 @@
     "Download and install": "Download and install",
     "Later": "Later",
     "Install": "Install",
-    "The new version is ready for installation.": "The new version is ready for installation."
+    "The new version is ready for installation.": "The new version is ready for installation.",
+    "Hide": "Hide",
+    "Hide others": "Hide others",
+    "Unhide": "Unhide",
+    "Quit": "Quit",
+    "File": "File",
+    "Close": "Close",
+    "Undo": "Undo",
+    "Redo": "Redo",
+    "Cut": "Cut",
+    "Paste": "Paste",
+    "Paste and match style": "Paste and match style",
+    "Delete": "Delete",
+    "Select all": "Select all",
+    "Window": "Window",
+    "Minimize": "Minimize",
+    "Edit": "Edit"
 }

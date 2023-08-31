@@ -1,4 +1,4 @@
-import { I18nService } from "../measurement/services/i18n.service"
+import { I18nService, t } from "../measurement/services/i18n.service"
 import { Events } from "./enums/events.enum"
 
 const { app, Menu } = require("electron")
@@ -12,21 +12,21 @@ const template = [
               {
                   label: app.name,
                   submenu: [
-                      { role: "hide" },
-                      { role: "hideOthers" },
-                      { role: "unhide" },
+                      { role: "hide", label: t("Hide") },
+                      { role: "hideOthers", label: t("Hide others") },
+                      { role: "unhide", label: t("Unhide") },
                       { type: "separator" },
-                      { role: "quit" },
+                      { role: "quit", label: t("Quit") },
                   ],
               },
           ]
         : []),
     // { role: 'fileMenu' }
     {
-        label: "File",
+        label: t("File"),
         submenu: [
             {
-                label: "Settings",
+                label: t("Settings"),
                 click: async (
                     e: Electron.KeyboardEvent,
                     $: Electron.BrowserWindow
@@ -34,24 +34,30 @@ const template = [
                     $.webContents.send(Events.OPEN_SETTINGS)
                 },
             },
-            { role: isMac ? "close" : "quit" },
+            {
+                role: isMac ? "close" : "quit",
+                label: isMac ? t("Close") : t("Quit"),
+            },
         ],
     },
     // { role: 'editMenu' }
     {
-        label: "Edit",
+        label: t("Edit"),
         submenu: [
-            { role: "undo" },
-            { role: "redo" },
+            { role: "undo", label: t("Undo") },
+            { role: "redo", label: t("Redo") },
             { type: "separator" },
-            { role: "cut" },
-            { role: "copy" },
-            { role: "paste" },
+            { role: "cut", label: t("Cut") },
+            { role: "copy", label: t("Copy") },
+            { role: "paste", label: t("Paste") },
             ...(isMac
                 ? [
-                      { role: "pasteAndMatchStyle" },
-                      { role: "delete" },
-                      { role: "selectAll" },
+                      {
+                          role: "pasteAndMatchStyle",
+                          label: t("Paste and match style"),
+                      },
+                      { role: "delete", label: t("Delete") },
+                      { role: "selectAll", label: t("Select all") },
                       { type: "separator" },
                       //   {
                       //       label: "Speech",
@@ -62,22 +68,23 @@ const template = [
                       //   },
                   ]
                 : [
-                      { role: "delete" },
+                      { role: "delete", label: t("Delete") },
                       { type: "separator" },
-                      { role: "selectAll" },
+                      { role: "selectAll", label: t("Select all") },
                   ]),
         ],
     },
     // { role: 'windowMenu' }
     {
-        label: "Window",
-        submenu: [{ role: "minimize" }],
+        label: t("Window"),
+        submenu: [{ role: "minimize", label: t("Minimize") }],
     },
     {
         role: "help",
+        label: t("Help"),
         submenu: [
             {
-                label: "Help",
+                label: t("Help"),
                 click: async () => {
                     const { shell } = require("electron")
                     await shell.openExternal(
@@ -89,4 +96,4 @@ const template = [
     },
 ]
 
-export const menu = Menu.buildFromTemplate(template as any)
+export const buildMenu = () => Menu.buildFromTemplate(template as any)

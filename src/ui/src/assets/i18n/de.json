@@ -62,5 +62,21 @@
     "Download and install": "Herunterladen und installieren",
     "Later": "Später",
     "Install": "Installieren",
-    "The new version is ready for installation.": "Eine neue Version ist für die Installation bereit."
+    "The new version is ready for installation.": "Eine neue Version ist für die Installation bereit.",
+    "Hide": "DE-Hide",
+    "Hide others": "DE-Hide others",
+    "Unhide": "DE-Unhide",
+    "Quit": "DE-Quit",
+    "File": "DE-File",
+    "Close": "DE-Close",
+    "Undo": "DE-Undo",
+    "Redo": "DE-Redo",
+    "Cut": "DE-Cut",
+    "Paste": "DE-Paste",
+    "Paste and match style": "DE-Paste and match style",
+    "Delete": "DE-Delete",
+    "Select all": "DE-Select all",
+    "Window": "DE-Window",
+    "Minimize": "DE-Minimize",
+    "Edit": "DE-Edit"
 }

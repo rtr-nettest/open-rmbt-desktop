@@ -18,7 +18,7 @@ import { CrowdinService } from "../measurement/services/crowdin.service"
 import { ControlServer } from "../measurement/services/control-server.service"
 import pack from "../../package.json"
 import { EIPVersion } from "../measurement/enums/ip-version.enum"
-import { menu } from "./menu"
+import { buildMenu } from "./menu"
 import { UserSettingsRequest } from "../measurement/dto/user-settings-request.dto"
 import { IMeasurementServerResponse } from "../measurement/interfaces/measurement-server-response.interface"
 
@@ -53,7 +53,7 @@ const createWindow = () => {
         return { action: "deny" }
     })
 
-    Menu.setApplicationMenu(menu)
+    Menu.setApplicationMenu(buildMenu())
 
     if (process.env.DEV === "true") {
         win.loadURL("http://localhost:4200/")

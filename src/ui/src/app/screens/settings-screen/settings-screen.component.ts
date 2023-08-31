@@ -1,4 +1,10 @@
-import { Component, OnInit, Type } from "@angular/core"
+import {
+    AfterViewChecked,
+    ChangeDetectorRef,
+    Component,
+    OnInit,
+    Type,
+} from "@angular/core"
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
 import { IDynamicComponentParameters } from "src/app/interfaces/dynamic-component.interface"
 import { ISort } from "src/app/interfaces/sort.interface"
@@ -30,7 +36,10 @@ export interface ISettingsRow {
     templateUrl: "./settings-screen.component.html",
     styleUrls: ["./settings-screen.component.scss"],
 })
-export class SettingsScreenComponent extends BaseScreen implements OnInit {
+export class SettingsScreenComponent
+    extends BaseScreen
+    implements OnInit, AfterViewChecked
+{
     columns: ITableColumn[] = [
         {
             columnDef: "title",
@@ -126,9 +135,14 @@ export class SettingsScreenComponent extends BaseScreen implements OnInit {
         mainStore: MainStore,
         message: MessageService,
         private transloco: TranslocoService,
-        private cms: CMSService
+        private cms: CMSService,
+        private cdr: ChangeDetectorRef
     ) {
         super(mainStore, message)
+    }
+
+    ngAfterViewChecked(): void {
+        this.cdr.detectChanges()
     }
 
     ngOnInit(): void {

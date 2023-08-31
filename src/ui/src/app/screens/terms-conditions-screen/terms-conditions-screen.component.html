@@ -1,5 +1,6 @@
 <div class="app-wrapper" *transloco="let t">
     <div class="app-article" [innerHTML]="t('Terms and conditions text')"></div>
+    <app-scroll-bottom [isVisible]="!isRead"></app-scroll-bottom>
     <footer class="app-footer">
         <button mat-button color="primary" (click)="cancel()">
             {{ t("Cancel") }}

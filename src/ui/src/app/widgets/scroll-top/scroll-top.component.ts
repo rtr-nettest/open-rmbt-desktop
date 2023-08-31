@@ -16,12 +16,12 @@ export class ScrollTopComponent {
 
     @HostListener("body:scroll")
     onScroll() {
-        const body = document.querySelector("app-main-content")
-        if (!body) {
+        const content = document.querySelector("app-main-content")
+        if (!content) {
             return
         }
-        const bodyTop = Math.abs(body.getBoundingClientRect().top)
-        if (bodyTop >= window.innerHeight / 3) {
+        const contentTop = content.getBoundingClientRect().top
+        if (contentTop < 0 && Math.abs(contentTop) >= window.innerHeight / 3) {
             this.isVisible = true
         } else {
             this.isVisible = false

@@ -99,7 +99,8 @@ import { DistancePipe } from "./pipes/distance.pipe"
 import { ClientScreenComponent } from "./screens/client-screen/client-screen.component"
 import { ClientSelectComponent } from "./widgets/client-select/client-select.component"
 import { IPaginator } from "./interfaces/paginator.interface"
-import { ISort } from "./interfaces/sort.interface"
+import { ISort } from "./interfaces/sort.interface";
+import { ScrollBottomComponent } from './widgets/scroll-bottom/scroll-bottom.component'
 
 Chart.register(
     BarElement,
@@ -193,6 +194,7 @@ declare global {
         TestServersComponent,
         ClientScreenComponent,
         ClientSelectComponent,
+        ScrollBottomComponent,
     ],
     imports: [
         AppRoutingModule,

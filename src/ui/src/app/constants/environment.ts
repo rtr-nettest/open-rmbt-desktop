@@ -16,6 +16,7 @@ export const environment: {
             icon: "loop",
             route: ERoutes.LOOP_MODE,
             translations: [],
+            hidden: true,
         },
         {
             label: "Certified",
@@ -29,6 +30,7 @@ export const environment: {
             icon: "map",
             route: ERoutes.MAP,
             translations: [],
+            hidden: true,
         },
         {
             label: "History",
@@ -41,6 +43,7 @@ export const environment: {
             icon: "statistics",
             route: ERoutes.STATISTICS,
             translations: [],
+            hidden: true,
         },
         {
             label: "Help",

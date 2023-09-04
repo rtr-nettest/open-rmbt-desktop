@@ -20,11 +20,14 @@ export interface IMeasurementRegistrationRequest {
     }
     measurement_server_id?: number
     measurement_type_flag: string
+    model?: string
     ndt?: boolean
     networkType?: number
     num_threads?: number
+    os_version?: string
     operating_system?: string
     platform?: string
+    plattform?: string
     prefer_server?: number
     previousTestStatus?: string
     protocol_version?: string

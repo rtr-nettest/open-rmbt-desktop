@@ -25,7 +25,7 @@ export class UserSettingsRequest implements IUserSettingsRequest {
 
     // RTR BE compatibility
     capabilities = { RMBThttp: true }
-    device?: string | undefined
+    model?: string | undefined
     os_version?: string | undefined
     type = "DESKTOP"
     plattform?: string | undefined
@@ -40,10 +40,11 @@ export class UserSettingsRequest implements IUserSettingsRequest {
             this.uuid = (Store.get(CLIENT_UUID) as string) ?? v4()
         } else {
             this.uuid = Store.get(CLIENT_UUID) as string
-            this.plattform = platform
-            const [device, os_version] = this.operating_system.split(", ")
+            const [platform, os_version] = this.operating_system.split(", ")
             this.os_version = os_version
-            this.device = device
+            this.platform = platform
+            this.plattform = platform
+            this.model = os.machine()
         }
     }
 }

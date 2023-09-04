@@ -103,6 +103,10 @@ $ npm run make:rpm
 
 Both `deb` and `rpm` packages will be placed in the `out/make` folder at the root of the project. `RPM`s built on macOS are not valid and can be discarded.
 
+## Updating
+
+To enable auto-updates from Github releases, put the `GITHUB_API_URL` and `GITHUB_TOKEN` in the `.env` file.
+
 ## Configuration
 
 The project contains a `.env.example` file. You can use it as an example to configure the variables needed to successfully run a measurement. The path to your custom `.env` file can be passed through an environment variable `RMBT_DESKTOP_DOTENV_CONFIG_PATH`. Otherwise the client will read the variables from a `.env` file in the root of the project, if such exists.
@@ -153,3 +157,5 @@ The project contains a `.env.example` file. You can use it as an example to conf
 | `APPLE_PASSWORD`                   | App-specific password. See https://support.apple.com/en-us/HT204397 for details.                                                                                                                                                                   |
 | `APPLE_TEAM_ID`                    | The Apple Team ID you want to notarize under. You can find Team IDs for team you belong to by going to https://developer.apple.com/account/#/membership.                                                                                           |
 | `WINDOWS_CERT_PATH`                | Full path to your certificate.pfx                                                                                                                                                                                                                  |
+| `GITHUB_API_URL`                   | https://api.github.com/repos/<account>/<repo>, is used to check for new releases.                                                                                                                                                                  |
+| `GITHUB_TOKEN`                     | Github API token.                                                                                                                                                                                                                                  |

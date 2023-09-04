@@ -7,7 +7,7 @@ export const TranslocoConfigExt: { [key: string]: any } = {
         { iso: "sk", name: "Slovenčina" },
         { iso: "sr", name: "Српски" },
         { iso: "sr-Latn", name: "Srpski" },
-        { ison: "sr-Latn-ME", name: "Crnogorski" },
+        { iso: "sr-Latn-ME", name: "Crnogorski" },
     ],
     defaultLang: "en",
 }

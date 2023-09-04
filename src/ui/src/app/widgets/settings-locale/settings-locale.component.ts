@@ -18,7 +18,6 @@ export class SettingsLocaleComponent {
     constructor(private transloco: TranslocoService) {}
 
     change(event: MatSelectChange) {
-        console.log(event.value.iso)
         this.transloco.setActiveLang(event.value.iso)
         window.electronAPI.setActiveLanguage(event.value.iso)
     }

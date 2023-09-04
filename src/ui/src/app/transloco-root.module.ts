@@ -37,8 +37,9 @@ export class TranslocoHttpLoader implements TranslocoLoader {
     }
 
     private getFromCms(env: IEnv, lang: string) {
+        const cmsLang = lang === "sr-Latn-ME" ? "sr_ME-Latn" : lang
         return this.http.get<IUITranslation[]>(
-            `${env?.CMS_URL}/ui-translations?locale.iso=${lang}&_limit=1000`,
+            `${env?.CMS_URL}/ui-translations?locale.iso=${cmsLang}&_limit=1000`,
             {
                 headers: {
                     "Content-Type": "application/json",

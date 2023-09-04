@@ -91,6 +91,12 @@ import { HistoryScreenComponent } from "./screens/history-screen/history-screen.
 import { ActionButtonsComponent } from "./widgets/action-buttons/action-buttons.component"
 import { ScrollTopComponent } from "./widgets/scroll-top/scroll-top.component"
 import localeDe from "@angular/common/locales/de"
+import localeNb from "@angular/common/locales/nb"
+import localeSq from "@angular/common/locales/sq"
+import localeSk from "@angular/common/locales/sk"
+import localeSr from "@angular/common/locales/sr"
+import localeSrLatn from "@angular/common/locales/sr-Latn"
+import localeSrMeLatn from "@angular/common/locales/sr-Latn-ME"
 import { DatePipe, registerLocaleData } from "@angular/common"
 import { HeaderMenuComponent } from "./widgets/header-menu/header-menu.component"
 import { IMeasurementServerResponse } from "../../../measurement/interfaces/measurement-server-response.interface"
@@ -99,8 +105,8 @@ import { DistancePipe } from "./pipes/distance.pipe"
 import { ClientScreenComponent } from "./screens/client-screen/client-screen.component"
 import { ClientSelectComponent } from "./widgets/client-select/client-select.component"
 import { IPaginator } from "./interfaces/paginator.interface"
-import { ISort } from "./interfaces/sort.interface";
-import { ScrollBottomComponent } from './widgets/scroll-bottom/scroll-bottom.component'
+import { ISort } from "./interfaces/sort.interface"
+import { ScrollBottomComponent } from "./widgets/scroll-bottom/scroll-bottom.component"
 
 Chart.register(
     BarElement,
@@ -231,6 +237,12 @@ declare global {
 })
 export class AppModule {
     constructor() {
+        registerLocaleData(localeNb)
+        registerLocaleData(localeSq)
+        registerLocaleData(localeSk)
+        registerLocaleData(localeSr)
+        registerLocaleData(localeSrLatn)
         registerLocaleData(localeDe)
+        registerLocaleData(localeSrMeLatn)
     }
 }

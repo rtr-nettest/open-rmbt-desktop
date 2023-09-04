@@ -21,11 +21,14 @@ export class UserSettingsRequest implements IUserSettingsRequest {
     terms_and_conditions_accepted = false
     terms_and_conditions_accepted_version?: number
     uuid = ""
-    operating_system = `${os.type}, ${os.release}`
+    operating_system = `${os.type()}, ${os.release()}`
 
     // RTR BE compatibility
     capabilities = { RMBThttp: true }
     type = "DESKTOP"
+    os_version = os.release()
+    device = os.type()
+    plattform?: string | undefined
 
     constructor(public platform = "DESKTOP") {
         const termsAccepted = Store.get(TERMS_ACCEPTED)
@@ -37,6 +40,7 @@ export class UserSettingsRequest implements IUserSettingsRequest {
             this.uuid = (Store.get(CLIENT_UUID) as string) ?? v4()
         } else {
             this.uuid = Store.get(CLIENT_UUID) as string
+            this.plattform = platform
         }
     }
 }

@@ -31,7 +31,7 @@
   "Server name": "Server-Name",
   "IP Address": "IP-Adresse",
   "Provider": "Anbieter",
-  "Developed by Specure": "",
+  "Developed by Specure": " ",
   "Start Test": "Test starten",
   "Start RTR-NetTest": "RTR-Netztest starten",
   "Client UUID": "Client-UUID",

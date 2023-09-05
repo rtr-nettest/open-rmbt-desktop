@@ -21,7 +21,7 @@ export class TestBarChartOptions {
             min: this.startTime,
             type: "time",
             grid: {
-                display: false,
+                offset: false,
             },
             title: {
                 display: true,

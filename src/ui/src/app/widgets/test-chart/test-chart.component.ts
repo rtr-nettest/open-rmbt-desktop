@@ -39,6 +39,8 @@ export class TestChartComponent {
             })
         )
     flavor?: string
+    downIsComplete = false
+    pingIsComplete = false
 
     get canvas() {
         return document.getElementById(this.id) as HTMLCanvasElement
@@ -69,10 +71,11 @@ export class TestChartComponent {
                         this.chart?.updateData(
                             visualization.phases[EMeasurementStatus.DOWN]
                         )
-                    } else if (this.phase === "ping") {
+                    } else if (this.phase === "ping" && !this.pingIsComplete) {
                         this.chart?.setData(
                             visualization.phases[EMeasurementStatus.PING]
                         )
+                        this.pingIsComplete = true
                     }
                     break
                 case EMeasurementStatus.UP:
@@ -80,6 +83,14 @@ export class TestChartComponent {
                         this.chart?.updateData(
                             visualization.phases[EMeasurementStatus.UP]
                         )
+                    } else if (
+                        this.phase === "download" &&
+                        !this.downIsComplete
+                    ) {
+                        this.chart?.setData(
+                            visualization.phases[EMeasurementStatus.DOWN]
+                        )
+                        this.downIsComplete = true
                     }
                     break
                 case EMeasurementStatus.SHOWING_RESULTS:

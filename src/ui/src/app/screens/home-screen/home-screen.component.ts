@@ -77,6 +77,16 @@ export class HomeScreenComponent extends BaseScreen {
         )
         .subscribe()
     showProgress = true
+    methodologyLink$ = this.cmsService.getProject().pipe(
+        map(() => {
+            const path = "methodology"
+            let lang = this.transloco.getActiveLang()
+            if (!["en", "de"].includes(lang)) {
+                lang = "en"
+            }
+            return `${this.env$.value?.WEBSITE_HOST}/${lang}/${path}`
+        })
+    )
 
     constructor(
         mainStore: MainStore,
@@ -98,11 +108,5 @@ export class HomeScreenComponent extends BaseScreen {
         } else {
             return '<i class="app-icon--class app-icon--class-green"></i>'
         }
-    }
-
-    getMethodologyLink(path: string) {
-        return `${
-            this.env$.value?.WEBSITE_HOST
-        }/${this.transloco.getActiveLang()}/${path}`
     }
 }

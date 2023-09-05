@@ -82,6 +82,7 @@ export class MainStore {
         window.electronAPI.setActiveClient(client)
         const newEnv = { ...this.env$.value, X_NETTEST_CLIENT: client } as IEnv
         this.env$.next(newEnv)
+        this.project$.next(null)
         const loader$ = this.transLoader.getTranslation(
             this.transloco.getActiveLang()
         ) as Observable<Translation>

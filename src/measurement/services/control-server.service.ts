@@ -187,7 +187,7 @@ export class ControlServer {
                 process.env.FLAVOR === "ont"
                     ? { ...response.settings[0], uuid: request.uuid }
                     : response.settings[0]
-            Logger.I.info("Using settings: %o")
+            Logger.I.info("Using settings: %o", settings)
             Store.set(CLIENT_UUID, settings.uuid)
             Store.set(SETTINGS, settings)
             return settings

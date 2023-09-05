@@ -35,10 +35,7 @@
 <ng-template #ont>
     <div class="app-link-wrapper" *transloco="let t">
         <app-test-servers></app-test-servers>
-        <a
-            class="app-link"
-            [href]="getMethodologyLink(t('test.learn_about_route'))"
-            target="_blank"
+        <a class="app-link" [href]="methodologyLink$ | async" target="_blank"
             ><mat-icon>info</mat-icon
             ><span>{{ t("test.learn_about_methodology") }}</span></a
         >

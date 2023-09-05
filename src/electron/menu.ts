@@ -1,3 +1,4 @@
+import { Store } from "../measurement/services/store.service"
 import { I18nService, t } from "../measurement/services/i18n.service"
 import { Events } from "./enums/events.enum"
 
@@ -37,6 +38,12 @@ const template = [
             {
                 role: isMac ? "close" : "quit",
                 label: isMac ? t("Close") : t("Quit"),
+            },
+            {
+                label: t("Delete local data"),
+                click: async () => {
+                    await Store.wipeDataAndQuit()
+                },
             },
         ],
     },

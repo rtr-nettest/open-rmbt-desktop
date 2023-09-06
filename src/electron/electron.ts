@@ -152,6 +152,10 @@ ipcMain.on(Events.ABORT_MEASUREMENT, () => {
     MeasurementRunner.I.abortMeasurement()
 })
 
+ipcMain.on(Events.DELETE_LOCAL_DATA, () => {
+    Store.wipeDataAndQuit()
+})
+
 ipcMain.handle(Events.GET_ENV, (): IEnv => {
     return {
         ACTIVE_LANGUAGE: Store.get(ACTIVE_LANGUAGE) as string,

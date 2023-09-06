@@ -41,4 +41,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.removeAllListeners(Events.OPEN_SETTINGS)
         ipcRenderer.on(Events.OPEN_SETTINGS, callback)
     },
+    deleteLocalData: () => {
+        ipcRenderer.send(Events.DELETE_LOCAL_DATA)
+    },
 })

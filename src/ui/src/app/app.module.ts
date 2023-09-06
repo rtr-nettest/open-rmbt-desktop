@@ -106,7 +106,8 @@ import { ClientScreenComponent } from "./screens/client-screen/client-screen.com
 import { ClientSelectComponent } from "./widgets/client-select/client-select.component"
 import { IPaginator } from "./interfaces/paginator.interface"
 import { ISort } from "./interfaces/sort.interface"
-import { ScrollBottomComponent } from "./widgets/scroll-bottom/scroll-bottom.component"
+import { ScrollBottomComponent } from "./widgets/scroll-bottom/scroll-bottom.component";
+import { SettingsLocalDataComponent } from './widgets/settings-local-data/settings-local-data.component'
 
 Chart.register(
     BarElement,
@@ -152,6 +153,7 @@ declare global {
             ) => Promise<ISimpleHistoryResult[]>
             onError: (callback: (error: Error) => any) => Promise<any>
             onOpenSettings: (callback: () => any) => Promise<any>
+            deleteLocalData: () => Promise<void>
         }
     }
 }
@@ -201,6 +203,7 @@ declare global {
         ClientScreenComponent,
         ClientSelectComponent,
         ScrollBottomComponent,
+        SettingsLocalDataComponent,
     ],
     imports: [
         AppRoutingModule,

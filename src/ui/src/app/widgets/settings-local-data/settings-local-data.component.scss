@@ -1,0 +1,14 @@
+:host {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.app-button {
+    background: none;
+    border: none;
+    min-width: auto;
+    padding: 0.75rem 1.125rem;
+    white-space: nowrap;
+}

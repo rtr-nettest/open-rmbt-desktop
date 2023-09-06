@@ -24,6 +24,7 @@ import { ClientSelectComponent } from "src/app/widgets/client-select/client-sele
 import { TestServersComponent } from "src/app/widgets/test-servers/test-servers.component"
 import { CMSService } from "src/app/services/cms.service"
 import { IEnv } from "../../../../../electron/interfaces/env.interface"
+import { SettingsLocalDataComponent } from "src/app/widgets/settings-local-data/settings-local-data.component"
 
 export interface ISettingsRow {
     title: string
@@ -115,6 +116,10 @@ export class SettingsScreenComponent
                     },
                 })
             }
+            content.push({
+                title: t["Local data"],
+                component: SettingsLocalDataComponent,
+            })
             if (env?.FLAVOR === "ont") {
                 this.tableClassNames.push("app-table--ont")
             }

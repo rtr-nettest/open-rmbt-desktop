@@ -3,8 +3,6 @@ import { Logger } from "./logger.service"
 import { t } from "./i18n.service"
 import { app, dialog } from "electron"
 import fsp from "fs/promises"
-import fs from "fs"
-import path from "path"
 import cp from "child_process"
 
 export const CLIENT_UUID = "clienUuid"
@@ -45,13 +43,20 @@ export class Store {
         const response = await dialog.showMessageBox(dialogOpts)
         if (response.response === 0) {
             const userData = app.getPath("userData")
-            const cmd = `timeout /t 1 /nobreak && rd /s /q "${userData}"`
-            const process = cp.spawn(cmd, {
-                shell: true,
-                stdio: "ignore",
-                detached: true,
-            })
-            process.unref()
+            if (process.platform === "win32") {
+                const cmd = `timeout /t 1 /nobreak && rd /s /q "${userData}"`
+                const p = cp.spawn(cmd, {
+                    shell: true,
+                    stdio: "ignore",
+                    detached: true,
+                })
+                p.unref()
+            } else {
+                await fsp.rm(app.getPath("userData"), {
+                    recursive: true,
+                    force: true,
+                })
+            }
             app.exit()
         }
     }

@@ -80,5 +80,5 @@
     "Minimize": "Minimieren",
     "Edit": "Bearbeiten",
     "Delete local data": "DE-Delete local data",
-    "Delete local data description": "DE-This will remove your local data, such as language settings and measurement history, then close the application. Do you want to proceed?"
+    "Delete local data description": "DE-This will remove your local data, such as language settings and measurement history. The application will be closed. Do you want to proceed?"
 }

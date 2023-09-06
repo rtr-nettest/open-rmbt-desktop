@@ -3,6 +3,9 @@ import { Logger } from "./logger.service"
 import { t } from "./i18n.service"
 import { app, dialog } from "electron"
 import fsp from "fs/promises"
+import fs from "fs"
+import path from "path"
+import cp from "child_process"
 
 export const CLIENT_UUID = "clienUuid"
 export const TERMS_ACCEPTED = "termsAccepted"
@@ -41,10 +44,20 @@ export class Store {
         }
         const response = await dialog.showMessageBox(dialogOpts)
         if (response.response === 0) {
-            await fsp.rm(app.getPath("userData"), {
-                recursive: true,
-                force: true,
-            })
+            const userData = app.getPath("userData")
+            for (const file of fs.readdirSync(userData)) {
+                try {
+                    await fsp.rm(path.resolve(userData, file), {
+                        recursive: true,
+                        force: true,
+                    })
+                } catch (_) {}
+                if (process.platform === "win32") {
+                    cp.exec(`rmdir ${userData} /s /q`)
+                } else {
+                    cp.execFile("rm", ["-rf", userData])
+                }
+            }
             app.exit()
         }
     }

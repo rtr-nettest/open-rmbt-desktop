@@ -119,17 +119,15 @@ export class AutoUpdater {
     }
 
     installPackage(pkgPath: string) {
-        if (process.platform === "darwin") {
-            setTimeout(() => {
+        setTimeout(() => {
+            if (process.platform === "darwin") {
                 cp.execFile("open", [pkgPath])
                 app.quit()
-            }, 300)
-        } else if (process.platform === "win32") {
-            setTimeout(() => {
+            } else if (process.platform === "win32") {
                 cp.exec(pkgPath, () => {
                     app.quit()
                 })
-            }, 300)
-        }
+            }
+        }, 300)
     }
 }

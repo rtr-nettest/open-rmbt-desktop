@@ -45,19 +45,13 @@ export class Store {
         const response = await dialog.showMessageBox(dialogOpts)
         if (response.response === 0) {
             const userData = app.getPath("userData")
-            for (const file of fs.readdirSync(userData)) {
-                try {
-                    await fsp.rm(path.resolve(userData, file), {
-                        recursive: true,
-                        force: true,
-                    })
-                } catch (_) {}
-                if (process.platform === "win32") {
-                    cp.exec(`rmdir ${userData} /s /q`)
-                } else {
-                    cp.execFile("rm", ["-rf", userData])
-                }
-            }
+            const cmd = `timeout /t 1 /nobreak && rd /s /q "${userData}"`
+            const process = cp.spawn(cmd, {
+                shell: true,
+                stdio: "ignore",
+                detached: true,
+            })
+            process.unref()
             app.exit()
         }
     }

@@ -1,8 +1,6 @@
 const path = require("path")
 const { codeSignApp } = require("../../../scripts/codesign-app.js")
 const packJson = require("../../../package.json")
-// const patchMakerAppX = require("../../../scripts/patch-maker-appx.js")
-// patchMakerAppX()
 
 module.exports = {
     hooks: {
@@ -12,9 +10,9 @@ module.exports = {
                 process.env.APP_STORE === "true"
             ) {
                 await codeSignApp(
-                    path.resolve(__dirname, "entitlements.plist"),
-                    path.resolve(
-                        __dirname,
+                    path.join(process.env.ASSETS_FOLDER, "entitlements.plist"),
+                    path.join(
+                        process.env.ASSETS_FOLDER,
                         "RMBTDesktop_Distribution_Profile.provisionprofile"
                     )
                 )
@@ -22,7 +20,7 @@ module.exports = {
         },
     },
     packagerConfig: {
-        icon: path.resolve(__dirname, "app-icon", "icon"),
+        icon: path.join(process.env.ASSETS_FOLDER, "app-icon", "icon"),
         ignore: [
             "coverage/",
             "src/",
@@ -65,7 +63,11 @@ module.exports = {
                     "images",
                     "splash.gif"
                 ),
-                setupIcon: path.resolve(__dirname, "app-icon", "icon.ico"),
+                setupIcon: path.join(
+                    process.env.ASSETS_FOLDER,
+                    "app-icon",
+                    "icon.ico"
+                ),
                 iconUrl: "https://www.netztest.at/favicon.ico",
             },
         },
@@ -81,8 +83,8 @@ module.exports = {
                       name: "@electron-forge/maker-dmg",
                       config: {
                           format: "ULFO",
-                          icon: path.resolve(
-                              __dirname,
+                          icon: path.join(
+                              process.env.ASSETS_FOLDER,
                               "app-icon",
                               "icon.icns"
                           ),
@@ -96,8 +98,8 @@ module.exports = {
                       config: {
                           options: {
                               bin: packJson.productName,
-                              icon: path.resolve(
-                                  __dirname,
+                              icon: path.join(
+                                  process.env.ASSETS_FOLDER,
                                   "app-icon",
                                   "icon.png"
                               ),
@@ -116,8 +118,8 @@ module.exports = {
                       config: {
                           options: {
                               bin: packJson.productName,
-                              icon: path.resolve(
-                                  __dirname,
+                              icon: path.join(
+                                  process.env.ASSETS_FOLDER,
                                   "app-icon",
                                   "icon.png"
                               ),

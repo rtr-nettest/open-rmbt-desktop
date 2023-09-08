@@ -107,7 +107,8 @@ import { ClientSelectComponent } from "./widgets/client-select/client-select.com
 import { IPaginator } from "./interfaces/paginator.interface"
 import { ISort } from "./interfaces/sort.interface"
 import { ScrollBottomComponent } from "./widgets/scroll-bottom/scroll-bottom.component";
-import { SettingsLocalDataComponent } from './widgets/settings-local-data/settings-local-data.component'
+import { SettingsLocalDataComponent } from './widgets/settings-local-data/settings-local-data.component';
+import { StatisticsScreenComponent } from './screens/statistics-screen/statistics-screen.component'
 
 Chart.register(
     BarElement,
@@ -204,6 +205,7 @@ declare global {
         ClientSelectComponent,
         ScrollBottomComponent,
         SettingsLocalDataComponent,
+        StatisticsScreenComponent,
     ],
     imports: [
         AppRoutingModule,

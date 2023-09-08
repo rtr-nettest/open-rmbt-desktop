@@ -167,6 +167,8 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         FLAVOR: process.env.FLAVOR || "rtr",
         WEBSITE_HOST: new URL(process.env.FULL_HISTORY_RESULT_URL ?? "").origin,
         FULL_HISTORY_RESULT_URL: process.env.FULL_HISTORY_RESULT_URL,
+        FULL_STATISTICS_URL: process.env.FULL_STATISTICS_URL,
+        FULL_MAP_URL: process.env.FULL_MAP_URL,
         HISTORY_EXPORT_URL: process.env.HISTORY_EXPORT_URL,
         HISTORY_RESULTS_LIMIT: process.env.HISTORY_RESULTS_LIMIT
             ? parseInt(process.env.HISTORY_RESULTS_LIMIT)

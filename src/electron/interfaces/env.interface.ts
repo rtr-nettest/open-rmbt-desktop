@@ -7,6 +7,8 @@ export interface IEnv {
     ENABLE_LOOP_MODE: string
     FLAVOR: string
     FULL_HISTORY_RESULT_URL: string | undefined
+    FULL_STATISTICS_URL: string | undefined
+    FULL_MAP_URL: string | undefined
     HISTORY_EXPORT_URL: string | undefined
     HISTORY_RESULTS_LIMIT: number | undefined
     HISTORY_SEARCH_URL: string | undefined

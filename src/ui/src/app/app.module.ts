@@ -108,7 +108,8 @@ import { IPaginator } from "./interfaces/paginator.interface"
 import { ISort } from "./interfaces/sort.interface"
 import { ScrollBottomComponent } from "./widgets/scroll-bottom/scroll-bottom.component";
 import { SettingsLocalDataComponent } from './widgets/settings-local-data/settings-local-data.component';
-import { StatisticsScreenComponent } from './screens/statistics-screen/statistics-screen.component'
+import { StatisticsScreenComponent } from './screens/statistics-screen/statistics-screen.component';
+import { MapScreenComponent } from './screens/map-screen/map-screen.component'
 
 Chart.register(
     BarElement,
@@ -206,6 +207,7 @@ declare global {
         ScrollBottomComponent,
         SettingsLocalDataComponent,
         StatisticsScreenComponent,
+        MapScreenComponent,
     ],
     imports: [
         AppRoutingModule,

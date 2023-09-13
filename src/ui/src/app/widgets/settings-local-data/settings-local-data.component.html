@@ -1,0 +1,11 @@
+<ng-container *transloco="let t">
+    <div>{{ t("Local data settings description") }}</div>
+    <button
+        mat-button
+        color="warn"
+        class="app-button"
+        (click)="deleteLocalData()"
+    >
+        {{ t("Delete local data") }}
+    </button>
+</ng-container>

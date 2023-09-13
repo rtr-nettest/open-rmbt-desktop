@@ -1,4 +1,10 @@
-import { Component, OnInit, Type } from "@angular/core"
+import {
+    AfterViewChecked,
+    ChangeDetectorRef,
+    Component,
+    OnInit,
+    Type,
+} from "@angular/core"
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
 import { IDynamicComponentParameters } from "src/app/interfaces/dynamic-component.interface"
 import { ISort } from "src/app/interfaces/sort.interface"
@@ -14,6 +20,11 @@ import { Observable, combineLatest, map } from "rxjs"
 import { TranslocoService } from "@ngneat/transloco"
 import { BaseScreen } from "../base-screen/base-screen.component"
 import { MessageService } from "src/app/services/message.service"
+import { ClientSelectComponent } from "src/app/widgets/client-select/client-select.component"
+import { TestServersComponent } from "src/app/widgets/test-servers/test-servers.component"
+import { CMSService } from "src/app/services/cms.service"
+import { IEnv } from "../../../../../electron/interfaces/env.interface"
+import { SettingsLocalDataComponent } from "src/app/widgets/settings-local-data/settings-local-data.component"
 
 export interface ISettingsRow {
     title: string
@@ -26,7 +37,10 @@ export interface ISettingsRow {
     templateUrl: "./settings-screen.component.html",
     styleUrls: ["./settings-screen.component.scss"],
 })
-export class SettingsScreenComponent extends BaseScreen implements OnInit {
+export class SettingsScreenComponent
+    extends BaseScreen
+    implements OnInit, AfterViewChecked
+{
     columns: ITableColumn[] = [
         {
             columnDef: "title",
@@ -42,8 +56,10 @@ export class SettingsScreenComponent extends BaseScreen implements OnInit {
         this.mainStore.env$,
         this.transloco.selectTranslation(),
         this.mainStore.settings$,
+        this.cms.getProject(),
     ]).pipe(
-        map(([env, t, settings]) => {
+        map(([env, t, settings, project]) => {
+            this.env = env ?? undefined
             const content: ISettingsRow[] = [
                 {
                     title: t["Client UUID"],
@@ -82,6 +98,31 @@ export class SettingsScreenComponent extends BaseScreen implements OnInit {
                     component: SettingsLocaleComponent,
                 })
             }
+            if (env?.FLAVOR === "ont") {
+                content.push({
+                    title: t["Region"],
+                    component: ClientSelectComponent,
+                    parameters: {
+                        className: "app-client-select--settings",
+                    },
+                })
+            }
+            if (env?.FLAVOR === "ont" && project?.can_choose_server) {
+                content.push({
+                    title: t["Server"],
+                    component: TestServersComponent,
+                    parameters: {
+                        hideTitle: true,
+                    },
+                })
+            }
+            content.push({
+                title: t["Local data"],
+                component: SettingsLocalDataComponent,
+            })
+            if (env?.FLAVOR === "ont") {
+                this.tableClassNames.push("app-table--ont")
+            }
             return {
                 content,
                 totalElements: content.length,
@@ -93,13 +134,20 @@ export class SettingsScreenComponent extends BaseScreen implements OnInit {
         direction: "",
     }
     tableClassNames = ["app-table--wide"]
+    env?: IEnv
 
     constructor(
         mainStore: MainStore,
         message: MessageService,
-        private transloco: TranslocoService
+        private transloco: TranslocoService,
+        private cms: CMSService,
+        private cdr: ChangeDetectorRef
     ) {
         super(mainStore, message)
+    }
+
+    ngAfterViewChecked(): void {
+        this.cdr.detectChanges()
     }
 
     ngOnInit(): void {

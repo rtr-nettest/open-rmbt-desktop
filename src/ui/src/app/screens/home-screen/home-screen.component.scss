@@ -7,12 +7,12 @@
 }
 
 .app-title {
-    margin-bottom: rem(40);
+    font-size: rem(48);
+    font-weight: bold;
+    text-align: center;
 }
 
 .app-link-wrapper {
-    margin-top: rem(40);
-
     &--metrics {
         display: flex;
         margin-top: rem(70);
@@ -25,6 +25,7 @@
 
 .app-link {
     display: flex;
+    margin-top: rem(16);
     .mat-icon {
         flex: 0 0 rem(24);
         margin-right: rem(9);
@@ -43,5 +44,14 @@
 
     @include screen-xs {
         display: none;
+    }
+}
+
+.app-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    &--ont {
+        align-items: center;
     }
 }

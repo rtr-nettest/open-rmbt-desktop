@@ -1,7 +1,10 @@
 @import "../../../assets/styles/core.scss";
 
+$color-border: rgba(0, 0, 0, 0.1);
+
 .app-table {
     mat-row {
+        min-height: rem(40);
         &:nth-child(odd) {
             background-color: #ecf3e5;
         }
@@ -10,12 +13,9 @@
         }
     }
 
-    mat-row {
-        min-height: rem(40);
-    }
-
     mat-header-row {
         min-height: rem(50);
+        z-index: 1 !important;
     }
 
     &__cell--ellipsis {
@@ -88,6 +88,26 @@
     &--wide {
         mat-row {
             min-height: rem(60);
+        }
+    }
+
+    &--ont {
+        margin-left: rem(-60);
+        margin-right: rem(-80);
+        mat-header-row {
+            min-height: rem(48);
+        }
+        mat-header-cell {
+            background-color: white;
+            color: rgba(0, 0, 0, 0.5);
+            font-size: rem(12);
+        }
+        mat-cell {
+            background-color: white;
+        }
+        .mdc-data-table__table {
+            border-top: 1px solid $color-border;
+            border-bottom: 1px solid $color-border;
         }
     }
 }

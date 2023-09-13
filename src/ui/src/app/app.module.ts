@@ -91,7 +91,23 @@ import { HistoryScreenComponent } from "./screens/history-screen/history-screen.
 import { ActionButtonsComponent } from "./widgets/action-buttons/action-buttons.component"
 import { ScrollTopComponent } from "./widgets/scroll-top/scroll-top.component"
 import localeDe from "@angular/common/locales/de"
+import localeNb from "@angular/common/locales/nb"
+import localeSq from "@angular/common/locales/sq"
+import localeSk from "@angular/common/locales/sk"
+import localeSr from "@angular/common/locales/sr"
+import localeSrLatn from "@angular/common/locales/sr-Latn"
+import localeSrMeLatn from "@angular/common/locales/sr-Latn-ME"
 import { DatePipe, registerLocaleData } from "@angular/common"
+import { HeaderMenuComponent } from "./widgets/header-menu/header-menu.component"
+import { IMeasurementServerResponse } from "../../../measurement/interfaces/measurement-server-response.interface"
+import { TestServersComponent } from "./widgets/test-servers/test-servers.component"
+import { DistancePipe } from "./pipes/distance.pipe"
+import { ClientScreenComponent } from "./screens/client-screen/client-screen.component"
+import { ClientSelectComponent } from "./widgets/client-select/client-select.component"
+import { IPaginator } from "./interfaces/paginator.interface"
+import { ISort } from "./interfaces/sort.interface"
+import { ScrollBottomComponent } from "./widgets/scroll-bottom/scroll-bottom.component";
+import { SettingsLocalDataComponent } from './widgets/settings-local-data/settings-local-data.component'
 
 Chart.register(
     BarElement,
@@ -114,9 +130,15 @@ declare global {
             acceptTerms: (terms: string) => Promise<void>
             registerClient: () => Promise<IUserSettings>
             setIpVersion: (ipv: EIPVersion | null) => Promise<void>
-            setLanguage: (language: string) => Promise<void>
+            setActiveClient: (client: string) => Promise<void>
+            setActiveLanguage: (language: string) => Promise<void>
+            setActiveServer: (
+                server: IMeasurementServerResponse
+            ) => Promise<void>
+            setDefaultLanguage: (language: string) => Promise<void>
             runMeasurement: () => Promise<void>
             abortMeasurement: () => Promise<void>
+            getServers: () => Promise<IMeasurementServerResponse[]>
             getEnv: () => Promise<IEnv>
             getCPUUsage: () => Promise<ICPU>
             getMeasurementState: () => Promise<
@@ -126,10 +148,12 @@ declare global {
                 testUuid: string
             ) => Promise<ISimpleHistoryResult>
             getMeasurementHistory: (
-                offset?: number,
-                limit?: number
+                paginator?: IPaginator,
+                sort?: ISort
             ) => Promise<ISimpleHistoryResult[]>
             onError: (callback: (error: Error) => any) => Promise<any>
+            onOpenSettings: (callback: () => any) => Promise<any>
+            deleteLocalData: () => Promise<void>
         }
     }
 }
@@ -138,6 +162,7 @@ declare global {
     declarations: [
         AppComponent,
         BodyComponent,
+        DistancePipe,
         DlComponent,
         ExportWarningComponent,
         FooterComponent,
@@ -173,6 +198,12 @@ declare global {
         HistoryScreenComponent,
         ActionButtonsComponent,
         ScrollTopComponent,
+        HeaderMenuComponent,
+        TestServersComponent,
+        ClientScreenComponent,
+        ClientSelectComponent,
+        ScrollBottomComponent,
+        SettingsLocalDataComponent,
     ],
     imports: [
         AppRoutingModule,
@@ -209,6 +240,12 @@ declare global {
 })
 export class AppModule {
     constructor() {
+        registerLocaleData(localeNb)
+        registerLocaleData(localeSq)
+        registerLocaleData(localeSk)
+        registerLocaleData(localeSr)
+        registerLocaleData(localeSrLatn)
         registerLocaleData(localeDe)
+        registerLocaleData(localeSrMeLatn)
     }
 }

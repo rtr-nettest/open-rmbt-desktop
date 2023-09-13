@@ -1,6 +1,5 @@
 import { Component } from "@angular/core"
-import { map } from "rxjs"
-import { IDynamicComponent } from "src/app/interfaces/dynamic-component.interface"
+import { map, withLatestFrom } from "rxjs"
 import { MessageService } from "src/app/services/message.service"
 import { MainStore } from "src/app/store/main.store"
 
@@ -10,7 +9,15 @@ import { MainStore } from "src/app/store/main.store"
     styleUrls: ["./settings-uuid.component.scss"],
 })
 export class SettingsUuidComponent {
-    uuid$ = this.store.settings$.pipe(map((s) => s?.uuid))
+    uuid$ = this.store.settings$.pipe(
+        withLatestFrom(this.store.env$),
+        map(([settings, env]) => {
+            if (env?.FLAVOR === "ont") {
+                return settings?.uuid
+            }
+            return "U" + settings?.uuid
+        })
+    )
 
     constructor(private store: MainStore, private message: MessageService) {}
 

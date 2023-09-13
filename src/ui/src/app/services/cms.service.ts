@@ -1,12 +1,20 @@
 import { HttpClient, HttpParams } from "@angular/common/http"
 import { Injectable } from "@angular/core"
 import { Observable, of } from "rxjs"
-import { catchError, first, map, switchMap, tap } from "rxjs/operators"
+import {
+    catchError,
+    first,
+    map,
+    switchMap,
+    tap,
+    withLatestFrom,
+} from "rxjs/operators"
 import { IMainAsset } from "../interfaces/main-asset.interface"
 import { IMainProject } from "../interfaces/main-project.interface"
 import { MainStore } from "../store/main.store"
 import { IMainMenuItem } from "../interfaces/main-menu-item.interface"
 import { environment } from "../constants/environment"
+import { CLIENTS } from "../constants/clients"
 
 @Injectable({
     providedIn: "root",
@@ -33,11 +41,26 @@ export class CMSService {
         return of(environment.menu)
     }
 
-    getProject(): Observable<IMainProject> {
+    getProjects(): Observable<IMainProject[]> {
+        return this.http
+            .get<IMainProject[]>(`${this.apiUrl}/projects`, {
+                headers: this.headers,
+            })
+            .pipe(
+                map((projects) =>
+                    projects.filter((p) => CLIENTS.includes(p.slug))
+                )
+            )
+    }
+
+    getProject(): Observable<IMainProject | null> {
         return this.mainStore.project$.pipe(
             first(),
-            switchMap((project) =>
-                project
+            withLatestFrom(this.mainStore.env$),
+            switchMap(([project, env]) =>
+                env?.FLAVOR !== "ont"
+                    ? of(null)
+                    : project
                     ? of(project)
                     : this.http
                           .get<IMainProject[]>(`${this.apiUrl}/projects`, {
@@ -50,7 +73,8 @@ export class CMSService {
                               headers: this.headers,
                           })
                           .pipe(map((projects) => projects?.[0]))
-            )
+            ),
+            catchError(() => of(null))
         )
     }
 
@@ -73,7 +97,16 @@ export class CMSService {
                                         } as IMainAsset)
                                       : null
                               ),
-                              catchError(() => of(null))
+                              catchError(() => of(null)),
+                              tap((asset) => {
+                                  if (asset?.name) {
+                                      const newAssets = {
+                                          ...this.mainStore.assets$.value,
+                                          [asset.name]: asset,
+                                      }
+                                      this.mainStore.assets$.next(newAssets)
+                                  }
+                              })
                           )
             )
         )

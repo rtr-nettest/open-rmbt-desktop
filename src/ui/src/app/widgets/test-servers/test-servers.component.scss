@@ -1,0 +1,70 @@
+@import "src/assets/styles/core";
+
+.app-server-select {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: rem(52);
+    p {
+        white-space: nowrap;
+    }
+    mat-select {
+        mat-select-trigger {
+            p {
+                color: $color-link;
+            }
+        }
+    }
+}
+
+$dot_diameter: 6px;
+
+.app-loading-servers {
+    position: relative;
+    width: $dot_diameter;
+    height: $dot_diameter;
+    border-radius: calc($dot_diameter/2);
+    background-color: $color-primary;
+    color: $color-primary;
+    animation: loading-servers 500ms infinite linear alternate;
+    animation-delay: 0s;
+
+    &::before {
+        left: calc($dot_diameter/2 + $dot_diameter);
+        width: $dot_diameter;
+        height: $dot_diameter;
+        border-radius: calc($dot_diameter/2);
+        background-color: $color-primary;
+        color: $color-primary;
+        animation: loading-servers 500ms infinite alternate;
+        animation-delay: 250ms;
+    }
+
+    &::after {
+        left: calc(($dot_diameter/2 + $dot_diameter) * 2);
+        width: $dot_diameter;
+        height: $dot_diameter;
+        border-radius: calc($dot_diameter/2);
+        background-color: $color-primary;
+        color: $color-primary;
+        animation: loading-servers 500ms infinite alternate;
+        animation-delay: 500ms;
+    }
+}
+.app-loading-servers::before,
+.app-loading-servers::after {
+    content: "";
+    display: inline-block;
+    position: absolute;
+    top: 0;
+}
+
+@keyframes loading-servers {
+    0% {
+        background-color: $color-primary;
+    }
+    50%,
+    100% {
+        background-color: fade-out($color-primary, 0.7);
+    }
+}

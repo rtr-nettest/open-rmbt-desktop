@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, protocol, shell } from "electron"
+import { app, BrowserWindow, ipcMain, Menu, protocol, shell } from "electron"
 if (require("electron-squirrel-startup")) app.quit()
 import path from "path"
 import { MeasurementRunner } from "../measurement"
@@ -6,7 +6,10 @@ import { Events } from "./enums/events.enum"
 import { IEnv } from "./interfaces/env.interface"
 import Protocol from "./protocol"
 import {
-    LANGUAGE,
+    ACTIVE_CLIENT,
+    ACTIVE_LANGUAGE,
+    ACTIVE_SERVER,
+    DEFAULT_LANGUAGE,
     IP_VERSION,
     Store,
     TERMS_ACCEPTED,
@@ -15,6 +18,9 @@ import { CrowdinService } from "../measurement/services/crowdin.service"
 import { ControlServer } from "../measurement/services/control-server.service"
 import pack from "../../package.json"
 import { EIPVersion } from "../measurement/enums/ip-version.enum"
+import { buildMenu } from "./menu"
+import { UserSettingsRequest } from "../measurement/dto/user-settings-request.dto"
+import { IMeasurementServerResponse } from "../measurement/interfaces/measurement-server-response.interface"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -39,6 +45,7 @@ const createWindow = () => {
             preload: path.join(__dirname, "preload.js"),
             nodeIntegration: true,
         },
+        icon: path.join(__dirname, "assets", "images", "icon-linux.png"),
     })
 
     win.webContents.setWindowOpenHandler(({ url }) => {
@@ -46,9 +53,13 @@ const createWindow = () => {
         return { action: "deny" }
     })
 
+    Menu.setApplicationMenu(buildMenu())
+
     if (process.env.DEV === "true") {
-        win.webContents.openDevTools()
         win.loadURL("http://localhost:4200/")
+        setTimeout(() => {
+            win.webContents.openDevTools()
+        }, 300)
     } else {
         win.loadURL(`${Protocol.scheme}://index.html`)
     }
@@ -93,7 +104,7 @@ ipcMain.handle(Events.GET_NEWS, async () => {
 })
 
 ipcMain.on(Events.ACCEPT_TERMS, (event, terms: string) => {
-    Store.I.set(TERMS_ACCEPTED, terms)
+    Store.set(TERMS_ACCEPTED, terms)
 })
 
 ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
@@ -106,12 +117,27 @@ ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
 })
 
 ipcMain.on(Events.SET_IP_VERSION, (event, ipv: EIPVersion | null) => {
-    Store.I.set(IP_VERSION, ipv)
+    Store.set(IP_VERSION, ipv)
 })
 
-ipcMain.on(Events.SET_LANGUAGE, (event, language: string) => {
-    Store.I.set(LANGUAGE, language)
+ipcMain.on(Events.SET_ACTIVE_CLIENT, (event, client: string) => {
+    Store.set(ACTIVE_CLIENT, client)
 })
+
+ipcMain.on(Events.SET_ACTIVE_LANGUAGE, (event, language: string) => {
+    Store.set(ACTIVE_LANGUAGE, language)
+})
+
+ipcMain.on(Events.SET_DEFAULT_LANGUAGE, (event, language: string) => {
+    Store.set(DEFAULT_LANGUAGE, language)
+})
+
+ipcMain.on(
+    Events.SET_ACTIVE_SERVER,
+    (event, server: IMeasurementServerResponse) => {
+        Store.set(ACTIVE_SERVER, server)
+    }
+)
 
 ipcMain.on(Events.RUN_MEASUREMENT, async (event) => {
     const webContents = event.sender
@@ -126,26 +152,34 @@ ipcMain.on(Events.ABORT_MEASUREMENT, () => {
     MeasurementRunner.I.abortMeasurement()
 })
 
+ipcMain.on(Events.DELETE_LOCAL_DATA, () => {
+    Store.wipeDataAndQuit()
+})
+
 ipcMain.handle(Events.GET_ENV, (): IEnv => {
     return {
-        CMS_URL: process.env.CMS_URL || "",
-        FLAVOR: process.env.FLAVOR || "rtr",
-        X_NETTEST_CLIENT: process.env.X_NETTEST_CLIENT || "",
-        ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",
-        CROWDIN_UPDATE_AT_RUNTIME: process.env.CROWDIN_UPDATE_AT_RUNTIME || "",
+        ACTIVE_LANGUAGE: Store.get(ACTIVE_LANGUAGE) as string,
         APP_VERSION: pack.version,
-        REPO_URL: pack.repository,
+        CMS_URL: process.env.CMS_URL || "",
+        CROWDIN_UPDATE_AT_RUNTIME: process.env.CROWDIN_UPDATE_AT_RUNTIME || "",
         ENABLE_LANGUAGE_SWITCH: process.env.ENABLE_LANGUAGE_SWITCH || "",
-        IP_VERSION: (Store.I.get(IP_VERSION) as string) || "",
-        TERMS_ACCEPTED: (Store.I.get(TERMS_ACCEPTED) as boolean) || false,
-        LANGUAGE: Store.I.get(LANGUAGE) as string,
-        OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
+        ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",
+        FLAVOR: process.env.FLAVOR || "rtr",
+        WEBSITE_HOST: new URL(process.env.FULL_HISTORY_RESULT_URL ?? "").origin,
+        FULL_HISTORY_RESULT_URL: process.env.FULL_HISTORY_RESULT_URL,
+        HISTORY_EXPORT_URL: process.env.HISTORY_EXPORT_URL,
         HISTORY_RESULTS_LIMIT: process.env.HISTORY_RESULTS_LIMIT
             ? parseInt(process.env.HISTORY_RESULTS_LIMIT)
             : undefined,
         HISTORY_SEARCH_URL: process.env.HISTORY_SEARCH_URL,
-        HISTORY_EXPORT_URL: process.env.HISTORY_EXPORT_URL,
-        FULL_HISTORY_RESULT_URL: process.env.FULL_HISTORY_RESULT_URL,
+        IP_VERSION: (Store.get(IP_VERSION) as string) || "",
+        OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
+        REPO_URL: pack.repository,
+        TERMS_ACCEPTED: (Store.get(TERMS_ACCEPTED) as boolean) || false,
+        X_NETTEST_CLIENT: (Store.get(ACTIVE_CLIENT) as string) || "",
+        USER_DATA: app.getPath("temp"),
+        MEASUREMENT_SERVERS_PATH: process.env.MEASUREMENT_SERVERS_PATH || "",
+        CONTROL_SERVER_URL: process.env.CONTROL_SERVER_URL || "",
     }
 })
 
@@ -166,10 +200,24 @@ ipcMain.handle(Events.GET_MEASUREMENT_RESULT, async (event, testUuid) => {
     }
 })
 
-ipcMain.handle(Events.GET_MEASUREMENT_HISTORY, async (event, offset, limit) => {
+ipcMain.handle(
+    Events.GET_MEASUREMENT_HISTORY,
+    async (event, paginator, sort) => {
+        const webContents = event.sender
+        try {
+            return await ControlServer.I.getMeasurementHistory(paginator, sort)
+        } catch (e) {
+            webContents.send(Events.ERROR, e)
+        }
+    }
+)
+
+ipcMain.handle(Events.GET_SERVERS, async (event) => {
     const webContents = event.sender
     try {
-        return await ControlServer.I.getMeasurementHistory(offset, limit)
+        return await ControlServer.I.getMeasurementServersFromApi(
+            new UserSettingsRequest()
+        )
     } catch (e) {
         webContents.send(Events.ERROR, e)
     }

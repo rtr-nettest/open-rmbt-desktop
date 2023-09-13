@@ -11,11 +11,10 @@ import { IUITranslation } from "./interfaces/ui-translation.interface"
 import { from, of, switchMap } from "rxjs"
 import { TranslocoConfigExt } from "src/transloco.config"
 import { IEnv } from "../../../electron/interfaces/env.interface"
-import { MainStore } from "./store/main.store"
 
 @Injectable({ providedIn: "root" })
 export class TranslocoHttpLoader implements TranslocoLoader {
-    constructor(private http: HttpClient, private store: MainStore) {}
+    constructor(private http: HttpClient) {}
 
     getTranslation(lang: string) {
         return from(window.electronAPI.getEnv()).pipe(
@@ -25,25 +24,26 @@ export class TranslocoHttpLoader implements TranslocoLoader {
                 } else if (env.CROWDIN_UPDATE_AT_RUNTIME === "true") {
                     return from(window.electronAPI.getTranslations(lang))
                 } else {
-                    return of([])
+                    return of(null)
                 }
             }),
             switchMap((remote) => {
-                if (!remote || !remote.length) {
-                    return this.http.get(`/assets/i18n/${lang}.json`)
+                if (remote) {
+                    return of(remote!)
                 }
-                return of(remote)
+                return this.http.get(`/assets/i18n/${lang}.json`)
             })
         )
     }
 
     private getFromCms(env: IEnv, lang: string) {
+        const cmsLang = lang === "sr-Latn-ME" ? "sr_ME-Latn" : lang
         return this.http.get<IUITranslation[]>(
-            `${env?.CMS_URL}/ui-translations?locale.iso=${lang}&_limit=1000`,
+            `${env?.CMS_URL}/ui-translations?locale.iso=${cmsLang}&_limit=1000`,
             {
                 headers: {
                     "Content-Type": "application/json",
-                    "X-Nettest-Client": env?.X_NETTEST_CLIENT ?? "",
+                    "X-Nettest-Client": env?.X_NETTEST_CLIENT || "nt",
                 },
             }
         )
@@ -58,16 +58,17 @@ export class TranslocoHttpLoader implements TranslocoLoader {
             useValue: translocoConfig({
                 availableLangs: TranslocoConfigExt["availableLangs"],
                 defaultLang: (() => {
-                    const systemLang =
+                    let systemLang =
                         Intl.DateTimeFormat().resolvedOptions().locale
                     if (
-                        TranslocoConfigExt["availableLangs"].includes(
+                        !TranslocoConfigExt["availableLangs"].includes(
                             systemLang
                         )
                     ) {
-                        return systemLang
+                        systemLang = TranslocoConfigExt["defaultLang"]
                     }
-                    return TranslocoConfigExt["defaultLang"]
+                    window.electronAPI.setDefaultLanguage(systemLang)
+                    return systemLang
                 })(),
                 reRenderOnLangChange: true,
                 prodMode: !isDevMode(),

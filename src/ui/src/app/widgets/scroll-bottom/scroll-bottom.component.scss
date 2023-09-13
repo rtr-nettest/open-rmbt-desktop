@@ -1,0 +1,9 @@
+@import "../../../assets/styles/core.scss";
+
+:host {
+    position: fixed;
+    bottom: rem(40);
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: rem(120);
+}

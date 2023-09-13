@@ -3,7 +3,7 @@
     <footer class="app-footer">
         <ng-container *ngIf="canCancel; else simpleOk">
             <button mat-button color="primary" (click)="close()">
-                {{ t("Cancel") }}
+                {{ t(cancelButtonText) }}
             </button>
             <button
                 mat-flat-button
@@ -11,7 +11,7 @@
                 color="primary"
                 (click)="close(true)"
             >
-                {{ t("Proceed") }}
+                {{ t(proceedButtonText) }}
             </button>
         </ng-container>
     </footer>
@@ -19,6 +19,6 @@
 
 <ng-template #simpleOk>
     <button *transloco="let t" mat-button color="primary" (click)="close(true)">
-        {{ t("Ok") }}
+        {{ t(okButtonText) }}
     </button>
 </ng-template>

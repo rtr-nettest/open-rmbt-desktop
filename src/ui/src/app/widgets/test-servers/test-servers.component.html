@@ -1,0 +1,33 @@
+<ng-container *transloco="let t">
+    <div
+        *ngIf="(project$ | async)?.can_choose_server"
+        class="app-server-select"
+    >
+        <p
+            *ngIf="!parameters?.['hideTitle']"
+            style="align-items: center; display: flex; height: 2rem"
+        >
+            {{ t("test.measurement_server") }}&nbsp;&nbsp;
+        </p>
+        <mat-form-field
+            *ngIf="servers$ | async as servers; else loadingServers"
+        >
+            <mat-select
+                (selectionChange)="changeServer($event)"
+                [value]="activeServer"
+                [compareWith]="compareIds"
+            >
+                <mat-select-trigger>
+                    <p>{{ activeServer?.name }}</p>
+                </mat-select-trigger>
+                <mat-option *ngFor="let server of servers" [value]="server">
+                    {{ server.distance | distance }}{{ server.name }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+</ng-container>
+
+<ng-template #loadingServers>
+    <div class="app-loading-servers"></div>
+</ng-template>

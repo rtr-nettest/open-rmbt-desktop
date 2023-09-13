@@ -67,7 +67,7 @@ export class HomeScreenComponent extends BaseScreen {
         .pipe(
             takeUntil(this.destroyed$),
             tap(([terms, env]) => {
-                if (terms !== env.TERMS_ACCEPTED) {
+                if (terms !== env.TERMS_ACCEPTED && env.FLAVOR !== "ont") {
                     this.router.navigate(["/", ERoutes.TERMS_CONDITIONS])
                 } else {
                     this.mainStore.registerClient()
@@ -77,6 +77,16 @@ export class HomeScreenComponent extends BaseScreen {
         )
         .subscribe()
     showProgress = true
+    methodologyLink$ = this.cmsService.getProject().pipe(
+        map(() => {
+            const path = "methodology"
+            let lang = this.transloco.getActiveLang()
+            if (!["en", "de"].includes(lang)) {
+                lang = "en"
+            }
+            return `${this.env$.value?.WEBSITE_HOST}/${lang}/${path}`
+        })
+    )
 
     constructor(
         mainStore: MainStore,

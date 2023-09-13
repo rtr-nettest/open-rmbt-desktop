@@ -1,0 +1,11 @@
+<ng-container *ngIf="isVisible">
+    <button
+        color="primary"
+        mat-icon-button
+        *transloco="let t"
+        (click)="handleClick($event)"
+        style="box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3); background: white"
+    >
+        <img src="/assets/images/btn-scroll-down.png" />
+    </button>
+</ng-container>

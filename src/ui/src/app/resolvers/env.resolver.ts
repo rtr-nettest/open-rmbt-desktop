@@ -16,21 +16,33 @@ export class EnvResolver {
         return from(window.electronAPI.getEnv()).pipe(
             map((env) => {
                 this.resolveLang(env)
-                return this.resolveTerms(env)
+                const termsAccepted = this.resolveTerms(env)
+                if (termsAccepted) {
+                    return this.resolveClient(env)
+                }
+                return termsAccepted
             })
         )
     }
 
     private resolveLang(env: IEnv) {
-        const storedLanguage = env?.LANGUAGE
+        const storedLanguage = env?.ACTIVE_LANGUAGE
         if (TranslocoConfigExt["availableLangs"].includes(storedLanguage)) {
             this.transloco.setActiveLang(storedLanguage!)
         }
     }
 
     private resolveTerms(env: IEnv) {
-        if (!env?.TERMS_ACCEPTED) {
+        if (!env?.TERMS_ACCEPTED && env?.FLAVOR !== "ont") {
             this.router.navigate(["/", ERoutes.TERMS_CONDITIONS])
+            return false
+        }
+        return true
+    }
+
+    private resolveClient(env: IEnv) {
+        if (!env?.X_NETTEST_CLIENT && env?.FLAVOR === "ont") {
+            this.router.navigate(["/", ERoutes.CLIENT])
             return false
         }
         return true

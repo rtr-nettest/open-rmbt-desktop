@@ -1,63 +1,43 @@
 <app-header></app-header>
 <app-body>
-    <app-main-menu></app-main-menu>
-    <app-main-content>
+    <app-main-menu *ngIf="(env$ | async)?.FLAVOR !== 'ont'"></app-main-menu>
+    <app-main-content *ngIf="env$ | async as env">
         <div *ngIf="showProgress" style="width: 100%">
             <mat-spinner style="margin: auto"></mat-spinner>
         </div>
         <ng-container *ngIf="!showProgress">
-            <div style="width: 100%" *transloco="let t">
-                <h1 class="app-title" *ngIf="(env$ | async)?.FLAVOR === 'ont'">
+            <div
+                class="app-wrapper app-wrapper--{{ env?.FLAVOR }}"
+                *transloco="let t"
+            >
+                <h1 class="app-title" *ngIf="env?.FLAVOR === 'ont'">
                     {{ t("test.title") }}
                 </h1>
                 <app-start-test-button></app-start-test-button>
-                <div
-                    class="app-link-wrapper app-link-wrapper--metrics"
-                    *ngIf="(env$ | async)?.FLAVOR === 'rtr'"
-                >
-                    <app-home-metrics
-                        [list]="ipInfo$ | async"
-                        title="Your IP address"
-                    ></app-home-metrics>
-                </div>
-                <div
-                    class="app-link-wrapper"
-                    *ngIf="(env$ | async)?.FLAVOR === 'ont'"
-                >
-                    <!-- TODO: take the href and the text from the CMS -->
-                    <a
-                        class="app-link"
-                        href="https://nettest.com/en/methodology"
-                        target="_blank"
-                        ><mat-icon>info</mat-icon
-                        ><span
-                            >Learn more about the methodology of the
-                            measurement</span
-                        ></a
-                    >
-                </div>
+                <ng-container
+                    *ngTemplateOutlet="env?.FLAVOR === 'ont' ? ont : rtr"
+                ></ng-container>
             </div>
-            <aside class="app-aside" *ngIf="(env$ | async)?.FLAVOR === 'ont'">
-                <img
-                    *ngIf="testInviteImg$ | async as testInviteImg"
-                    [src]="testInviteImg.url"
-                    [alt]="
-                        testInviteImg.alternativeText ||
-                        testInviteImg.caption ||
-                        testInviteImg.name ||
-                        ''
-                    "
-                    [title]="
-                        testInviteImg.alternativeText ||
-                        testInviteImg.caption ||
-                        testInviteImg.name ||
-                        ''
-                    "
-                    width="280"
-                    height="280"
-                />
-            </aside>
         </ng-container>
     </app-main-content>
     <app-footer></app-footer>
 </app-body>
+
+<ng-template #rtr>
+    <div class="app-link-wrapper app-link-wrapper--metrics">
+        <app-home-metrics
+            [list]="ipInfo$ | async"
+            title="Your IP address"
+        ></app-home-metrics>
+    </div>
+</ng-template>
+
+<ng-template #ont>
+    <div class="app-link-wrapper" *transloco="let t">
+        <app-test-servers></app-test-servers>
+        <a class="app-link" [href]="methodologyLink$ | async" target="_blank"
+            ><mat-icon>info</mat-icon
+            ><span>{{ t("test.learn_about_methodology") }}</span></a
+        >
+    </div>
+</ng-template>

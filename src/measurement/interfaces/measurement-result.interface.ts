@@ -12,9 +12,12 @@ export interface IMeasurementResult {
     num_threads_ul?: number
     network_type?: number
     operating_system?: string
+    os_version?: string
     pings: IPing[]
     platform?: string
+    plattform?: string
     speed_detail: ISpeedItem[]
+    signals: string[]
     test_bytes_download: number
     test_bytes_upload: number
     test_nsec_download: number

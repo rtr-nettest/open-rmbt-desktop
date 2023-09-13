@@ -1,5 +1,6 @@
 export enum ERoutes {
     CERTIFIED = "certified",
+    CLIENT = "client",
     HELP = "help",
     HISTORY = "history",
     LOOP_MODE = "loop",

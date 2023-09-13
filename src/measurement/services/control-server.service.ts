@@ -15,9 +15,10 @@ import utc from "dayjs/plugin/utc"
 import tz from "dayjs/plugin/timezone"
 import { ELoggerMessage } from "../enums/logger-message.enum"
 import {
+    ACTIVE_CLIENT,
+    ACTIVE_SERVER,
     CLIENT_UUID,
     IP_VERSION,
-    LANGUAGE,
     LAST_NEWS_UID,
     SETTINGS,
     Store,
@@ -33,6 +34,8 @@ import { Agent } from "https"
 import { NetworkInfoService } from "./network-info.service"
 import { UserSettingsRequest } from "../dto/user-settings-request.dto"
 import * as dns from "dns"
+import { IPaginator } from "../../ui/src/app/interfaces/paginator.interface"
+import { ISort } from "../../ui/src/app/interfaces/sort.interface"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -47,8 +50,8 @@ export class ControlServer {
     private constructor() {}
 
     private async getHost() {
-        const ipv = Store.I.get(IP_VERSION) as EIPVersion
-        const settings = Store.I.get(SETTINGS) as IUserSettings
+        const ipv = Store.get(IP_VERSION) as EIPVersion
+        const settings = Store.get(SETTINGS) as IUserSettings
         const settingsRequest = new UserSettingsRequest()
         const ipv6Host = settings.urls.control_ipv6_only
         const ipv4Host = settings.urls.control_ipv4_only
@@ -73,6 +76,7 @@ export class ControlServer {
         } else {
             dns.setDefaultResultOrder("verbatim")
         }
+        retVal = new URL(retVal).href.replace(/\/$/, "")
         Logger.I.info(`The current control server is: ${retVal}`)
         return retVal
     }
@@ -81,8 +85,9 @@ export class ControlServer {
         const headers: { [key: string]: string } = {
             "Content-Type": "application/json",
         }
-        if (process.env.X_NETTEST_CLIENT) {
-            headers["X-Nettest-Client"] = process.env.X_NETTEST_CLIENT
+        const activeClient = Store.I.get(ACTIVE_CLIENT) as string
+        if (activeClient) {
+            headers["X-Nettest-Client"] = activeClient
         }
         return headers
     }
@@ -91,13 +96,13 @@ export class ControlServer {
         if (!process.env.NEWS_PATH) {
             return null
         }
-        const lastNewsUid = Store.I.get(LAST_NEWS_UID) as number
+        const lastNewsUid = Store.get(LAST_NEWS_UID) as number
         const newsRequest: INewsRequest = {
             language: I18nService.I.getActiveLanguage(),
             plattform: "Desktop",
             softwareVersionCode: pack.version.replaceAll(".", ""),
             lastNewsUid,
-            uuid: Store.I.get(CLIENT_UUID) as string,
+            uuid: Store.get(CLIENT_UUID) as string,
         }
         Logger.I.info(
             ELoggerMessage.POST_REQUEST,
@@ -115,7 +120,7 @@ export class ControlServer {
                 throw response.error
             }
             if (response.news?.[0]?.uid) {
-                Store.I.set(LAST_NEWS_UID, response.news[0].uid)
+                Store.set(LAST_NEWS_UID, response.news[0].uid)
             }
             Logger.I.info("News are %o", response.news)
             return response.news ?? null
@@ -125,11 +130,11 @@ export class ControlServer {
         }
     }
 
-    async getMeasurementServerFromApi(
+    async getMeasurementServersFromApi(
         request: IUserSettingsRequest
-    ): Promise<IMeasurementServerResponse | undefined> {
+    ): Promise<IMeasurementServerResponse[]> {
         if (!process.env.MEASUREMENT_SERVERS_PATH) {
-            return undefined
+            return []
         }
         Logger.I.info(
             ELoggerMessage.GET_REQUEST,
@@ -141,21 +146,27 @@ export class ControlServer {
                 { headers: this.headers }
             )
         ).data as IMeasurementServerResponse[]
+        const activeServer = Store.I.get(
+            ACTIVE_SERVER
+        ) as IMeasurementServerResponse
+        let filteredServers: IMeasurementServerResponse[] = []
         if (servers?.length) {
-            const filteredServer = servers.find((s) =>
+            filteredServers = servers.filter((s) =>
                 s.serverTypeDetails.some(
                     (std) => std.serverType === request.name
                 )
             )
-            if (filteredServer) {
+            for (const filteredServer of filteredServers) {
                 filteredServer.serverTypeDetails =
                     filteredServer.serverTypeDetails.filter(
                         (std) => std.serverType === request.name
                     )
+                if (activeServer?.webAddress === filteredServer.webAddress) {
+                    filteredServer.active = true
+                }
             }
-            Logger.I.info("Using server: %o", filteredServer)
-            return filteredServer
         }
+        return filteredServers.sort((a, b) => a.distance - b.distance)
     }
 
     async getUserSettings(request: IUserSettingsRequest) {
@@ -172,10 +183,14 @@ export class ControlServer {
             )
         ).data as IUserSetingsResponse
         if (response?.settings?.length) {
-            Logger.I.info("Using settings: %o", response.settings[0])
-            Store.I.set(CLIENT_UUID, response.settings[0].uuid)
-            Store.I.set(SETTINGS, response.settings[0])
-            return response.settings[0]
+            const settings =
+                process.env.FLAVOR === "ont"
+                    ? { ...response.settings[0], uuid: request.uuid }
+                    : response.settings[0]
+            Logger.I.info("Using settings: %o", settings)
+            Store.set(CLIENT_UUID, settings.uuid)
+            Store.set(SETTINGS, settings)
+            return settings
         }
         if (response?.error?.length) {
             throw new Error(response.error.join(" "))
@@ -189,7 +204,7 @@ export class ControlServer {
             process.env.MESUREMENT_REGISTRATION_PATH,
             request
         )
-        const hostName = new URL(await this.getHost())
+        const hostName = await this.getHost()
         const response = (
             await axios.post(
                 `${hostName}${process.env.MESUREMENT_REGISTRATION_PATH}`,
@@ -256,41 +271,18 @@ export class ControlServer {
         }
     }
 
-    async getMeasurementHistory(offset = 0, limit?: number) {
+    async getMeasurementHistory(paginator?: IPaginator, sort?: ISort) {
         if (!process.env.HISTORY_PATH) {
             return []
         }
         let retVal: ISimpleHistoryResult[] | undefined
-        const body: { [key: string]: any } = {
-            language: I18nService.I.getActiveLanguage(),
-            timezone: dayjs.tz.guess(),
-            uuid: Store.I.get(CLIENT_UUID) as string,
-            result_offset: offset,
-        }
-        if (limit) {
-            body.result_limit = limit
-        }
-        Logger.I.info(
-            ELoggerMessage.POST_REQUEST,
-            process.env.HISTORY_PATH,
-            body
-        )
         try {
-            const resp = (
-                await axios.post(
-                    `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_PATH}`,
-                    body,
-                    { headers: this.headers }
-                )
-            ).data
-            Logger.I.warn("Response is %o", resp)
-            if (resp?.error.length) {
-                throw new Error(resp.error)
-            }
-            if (resp?.history.length) {
-                retVal = resp.history.map((hi: any) =>
-                    SimpleHistoryResult.fromRTRHistoryResult(hi)
-                )
+            if (process.env.HISTORY_RESULT_PATH_METHOD === "GET") {
+                // as used by ONT
+                retVal = await this.getONTHistory(paginator, sort)
+            } else if (process.env.HISTORY_RESULT_PATH_METHOD === "POST") {
+                // as used by RTR
+                retVal = await this.getRTRHistory(paginator)
             }
         } catch (e) {
             retVal = await DBService.I.getAllMeasurements()
@@ -300,6 +292,76 @@ export class ControlServer {
         }
         Logger.I.info("The history is: %o", retVal)
         return retVal
+    }
+
+    async getONTHistory(paginator?: IPaginator, sort?: ISort) {
+        let params = `uuid=${Store.get(CLIENT_UUID) as string}`
+        if (paginator) {
+            const { offset, limit } = paginator
+            if (limit) {
+                let page = 1
+                if (offset >= limit) {
+                    page = offset / limit + 1
+                }
+                params += `&page=${page}&size=${limit}`
+            }
+        }
+        if (sort) {
+            const { active, direction } = sort
+            params += `&sort=${active},${direction}`
+        } else {
+            params += `&sort=measurementDate,desc`
+        }
+        const url = `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_PATH}?${params}`
+        Logger.I.info(ELoggerMessage.GET_REQUEST, url)
+        const resp = (await axios.get(url, { headers: this.headers })).data
+        Logger.I.warn("Response is %o", resp)
+        if (resp?.content.length) {
+            return resp.content.map((hi: any) => {
+                const result: ISimpleHistoryResult =
+                    SimpleHistoryResult.fromONTHistoryResult(hi)
+                result.paginator = {
+                    totalElements: resp.totalElements,
+                    totalPages: resp.totalPages,
+                }
+                return result
+            })
+        }
+        throw new Error("Something unexpected happened.")
+    }
+
+    async getRTRHistory(paginator?: IPaginator) {
+        const body: { [key: string]: any } = {
+            language: I18nService.I.getActiveLanguage(),
+            timezone: dayjs.tz.guess(),
+            uuid: Store.get(CLIENT_UUID) as string,
+            result_offset: paginator?.offset,
+        }
+        if (paginator?.limit) {
+            body.result_limit = paginator.limit
+        }
+        Logger.I.info(
+            ELoggerMessage.POST_REQUEST,
+            process.env.HISTORY_PATH,
+            body
+        )
+        const resp = (
+            await axios.post(
+                `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_PATH}`,
+                body,
+                { headers: this.headers }
+            )
+        ).data
+        Logger.I.warn("Response is %o", resp)
+        if (resp?.error.length) {
+            throw new Error(resp.error)
+        }
+        if (resp?.history.length) {
+            return resp.history.map((hi: any) =>
+                SimpleHistoryResult.fromRTRHistoryResult(hi)
+            )
+        }
+        throw new Error("Something unexpected happened.")
     }
 
     async getMeasurementResult(
@@ -359,7 +421,7 @@ export class ControlServer {
                         `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_DETAILS_PATH}`,
                         {
                             ...body,
-                            language: Store.I.get(LANGUAGE) as string,
+                            language: I18nService.I.getActiveLanguage(),
                         },
                         { headers: this.headers }
                     )
@@ -410,7 +472,9 @@ export class ControlServer {
     private handleError(e: any) {
         if (e.response) {
             Logger.I.error(e.response)
-            if (e.response.data?.error?.length) {
+            if (typeof e.response.data?.error === "string") {
+                throw new Error(e.response.data.error)
+            } else if (e.response.data?.error?.length) {
                 throw new Error(e.response.data.error.join(". "))
             } else {
                 throw e.response.data

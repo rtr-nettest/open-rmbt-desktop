@@ -1,11 +1,11 @@
-import { CrowdinService } from "./src/measurement/services/crowdin.service"
-import { TranslocoConfigExt } from "./src/ui/src/transloco.config"
+import { CrowdinService } from "../src/measurement/services/crowdin.service"
+import { TranslocoConfigExt } from "../src/ui/src/transloco.config"
 import * as fsp from "fs/promises"
 import * as path from "path"
 import * as dotenv from "dotenv"
 
 async function main() {
-    const projectRoot = path.join(__dirname)
+    const projectRoot = process.cwd()
     const dotenvConfig = path.join(projectRoot, ".env")
     console.log(`Loading .env file from ${dotenvConfig}`)
     dotenv.config({ path: dotenvConfig })
@@ -24,9 +24,9 @@ async function main() {
                 "src",
                 "assets",
                 "i18n",
-                `${lang}.json`
+                `${lang}.json`,
             ),
-            JSON.stringify(translations)
+            JSON.stringify(translations, null, 2),
         )
     }
 }

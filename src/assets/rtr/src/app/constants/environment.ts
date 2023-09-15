@@ -16,7 +16,6 @@ export const environment: {
             icon: "loop",
             route: ERoutes.LOOP_MODE,
             translations: [],
-            hidden: true,
         },
         {
             label: "Certified",

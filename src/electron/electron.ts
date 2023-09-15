@@ -173,6 +173,15 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
             : undefined,
         HISTORY_SEARCH_URL: process.env.HISTORY_SEARCH_URL,
         IP_VERSION: (Store.get(IP_VERSION) as string) || "",
+        LOOP_MODE_MIN_INT: process.env.LOOP_MODE_MIN_INT
+            ? parseInt(process.env.LOOP_MODE_MIN_INT)
+            : 5,
+        LOOP_MODE_MAX_INT: process.env.LOOP_MODE_MAX_INT
+            ? parseInt(process.env.LOOP_MODE_MAX_INT)
+            : 120,
+        LOOP_MODE_DEFAULT_INT: process.env.LOOP_MODE_DEFAULT_INT
+            ? parseInt(process.env.LOOP_MODE_DEFAULT_INT)
+            : 10,
         OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
         REPO_URL: pack.repository,
         TERMS_ACCEPTED: (Store.get(TERMS_ACCEPTED) as boolean) || false,

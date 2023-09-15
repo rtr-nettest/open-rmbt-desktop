@@ -12,6 +12,7 @@ import { EnvResolver } from "./resolvers/env.resolver"
 import { HistoryScreenComponent } from "./screens/history-screen/history-screen.component"
 import { ReferrerResolver } from "./resolvers/referrer.resolver"
 import { ClientScreenComponent } from "./screens/client-screen/client-screen.component"
+import { LoopStartScreenComponent } from "./screens/loop-start-screen/loop-start-screen.component"
 
 const routes: Routes = [
     {
@@ -44,6 +45,10 @@ const routes: Routes = [
     {
         path: ERoutes.CLIENT,
         component: ClientScreenComponent,
+    },
+    {
+        path: ERoutes.LOOP_MODE,
+        component: LoopStartScreenComponent,
     },
     {
         path: "**",

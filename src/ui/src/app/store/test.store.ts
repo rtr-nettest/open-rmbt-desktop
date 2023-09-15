@@ -27,6 +27,7 @@ export class TestStore {
         null
     )
     servers$ = new BehaviorSubject<IMeasurementServerResponse[]>([])
+    testIntervalMinutes$ = new BehaviorSubject<number>(10)
 
     constructor(private mainStore: MainStore, private router: Router) {}
 
@@ -80,7 +81,7 @@ export class TestStore {
                     ) {
                         setTimeout(
                             () => this.router.navigateByUrl("/test"),
-                            1000
+                            this.testIntervalMinutes$.value * 60 * 1000
                         )
                     }
                 })

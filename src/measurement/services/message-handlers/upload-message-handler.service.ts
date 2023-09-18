@@ -16,12 +16,12 @@ export class UploadMessageHandler implements IMessageHandler {
     static clientTimeOffsetNs = 1e9
     private _uploadEndTimeNs = 0
     private _result = new MeasurementThreadResultList(0)
-    private _activityInterval?: NodeJS.Timer
+    private _activityInterval?: NodeJS.Timeout
     private _inactivityTimeoutMs = 1000
     private _finalTimeout?: NodeJS.Timeout
     private _buffers: Buffer[] = []
     private _bytesWritten = 0
-    private _interimHandlerInterval?: NodeJS.Timer
+    private _interimHandlerInterval?: NodeJS.Timeout
     private _isRunning = true
 
     get waterMark() {

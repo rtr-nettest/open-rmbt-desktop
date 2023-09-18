@@ -65,7 +65,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
 
     private generateBuffers(_chunkSize: number) {
         let maxStoredResults = 3
-        const buffers = []
+        const buffers: Buffer[] = []
         while (maxStoredResults > 0) {
             buffers.push(randomBytes(_chunkSize))
             maxStoredResults--

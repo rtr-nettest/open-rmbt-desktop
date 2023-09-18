@@ -111,6 +111,7 @@ import { ScrollBottomComponent } from "./widgets/scroll-bottom/scroll-bottom.com
 import { SettingsLocalDataComponent } from "./widgets/settings-local-data/settings-local-data.component"
 import { LoopStartScreenComponent } from "./screens/loop-start-screen/loop-start-screen.component"
 import { SprintfPipe } from "./pipes/sprintf.pipe"
+import { AlertComponent } from "./widgets/alert/alert.component"
 
 Chart.register(
     BarElement,
@@ -209,6 +210,7 @@ declare global {
         SettingsLocalDataComponent,
         LoopStartScreenComponent,
         SprintfPipe,
+        AlertComponent,
     ],
     imports: [
         AppRoutingModule,

@@ -39,5 +39,10 @@ export class LoopStartScreenComponent {
         private fb: FormBuilder
     ) {}
 
-    onSubmit() {}
+    onSubmit() {
+        const interval = this.form?.get("interval")?.value
+        if (interval) {
+            this.testStore.launchLoopTest(interval)
+        }
+    }
 }

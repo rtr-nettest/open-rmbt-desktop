@@ -1,7 +1,8 @@
 @import "../../../assets/styles/core.scss";
 
 app-main-content {
-    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
 mat-form-field {
@@ -13,7 +14,7 @@ mat-error {
     position: absolute;
 }
 
-.app-warning {
+app-alert {
     margin-bottom: rem(60);
 }
 

@@ -2,30 +2,23 @@
 <app-body>
     <app-main-menu *ngIf="(env$ | async)?.FLAVOR !== 'ont'"></app-main-menu>
     <app-main-content *ngIf="env$ | async as env">
+        <app-alert
+            text="Tests are conducted repeatedly until they are stopped manually"
+        ></app-alert>
         <div
             class="app-wrapper app-wrapper--{{ env?.FLAVOR }}"
             *transloco="let t"
         >
-            <div class="app-warning">
-                <i class="app-icon app-icon--info"></i>
-                <div>
-                    {{
-                        t(
-                            "Tests are conducted repeatedly until they are are stopped manually"
-                        )
-                    }}
-                </div>
-            </div>
             <form *ngIf="form" [formGroup]="form" (ngSubmit)="onSubmit()">
                 <div>
                     <span>{{ t("Interval between tests") }}</span>
-                    <mat-form-field>
+                    <mat-form-field style="width: 88px">
                         <input
                             type="number"
                             formControlName="interval"
                             name="interval"
                             matInput
-                            placeholder="Interval"
+                            placeholder=""
                             required
                         />
                     </mat-form-field>
@@ -38,7 +31,12 @@
                     }}
                 </mat-error>
                 <div class="app-btn-container">
-                    <button type="submit" mat-flat-button color="primary">
+                    <button
+                        type="submit"
+                        mat-flat-button
+                        color="primary"
+                        [disabled]="form.controls.interval.invalid"
+                    >
                         {{ t("Start loop test") }}
                     </button>
                 </div>

@@ -10,6 +10,7 @@ import { EMeasurementStatus } from "../../../../measurement/enums/measurement-st
 import { Router } from "@angular/router"
 import { MainStore } from "./main.store"
 import { IMeasurementServerResponse } from "../../../../measurement/interfaces/measurement-server-response.interface"
+import { ERoutes } from "../enums/routes.enum"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
@@ -28,6 +29,7 @@ export class TestStore {
     )
     servers$ = new BehaviorSubject<IMeasurementServerResponse[]>([])
     testIntervalMinutes$ = new BehaviorSubject<number>(10)
+    enableLoopMode$ = new BehaviorSubject<boolean>(false)
 
     constructor(private mainStore: MainStore, private router: Router) {}
 
@@ -47,6 +49,16 @@ export class TestStore {
                 return newState
             })
         )
+    }
+
+    launchLoopTest(interval: number) {
+        this.enableLoopMode$.next(true)
+        this.testIntervalMinutes$.next(interval)
+        this.router.navigate(["/", ERoutes.TEST])
+    }
+
+    disableLoopMode() {
+        this.enableLoopMode$.next(false)
     }
 
     getMeasurementResult(testUuid: string | null) {
@@ -74,17 +86,15 @@ export class TestStore {
                     ipAddress: result.ipAddress,
                     providerName: result.providerName,
                 })
-                window.electronAPI.getEnv().then((env) => {
-                    if (
-                        env.ENABLE_LOOP_MODE === "true" &&
-                        !this.mainStore.error$.value
-                    ) {
-                        setTimeout(
-                            () => this.router.navigateByUrl("/test"),
-                            this.testIntervalMinutes$.value * 60 * 1000
-                        )
-                    }
-                })
+                if (
+                    this.enableLoopMode$.value === true &&
+                    !this.mainStore.error$.value
+                ) {
+                    setTimeout(
+                        () => this.router.navigate(["/", ERoutes.TEST]),
+                        this.testIntervalMinutes$.value * 60 * 1000
+                    )
+                }
                 return result
             })
         )

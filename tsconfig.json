@@ -5,9 +5,10 @@
         "emitDecoratorMetadata": true,
         "outDir": "dist",
         "allowJs": true,
-        "noImplicitAny": true,
+        "noImplicitAny": false,
         "sourceMap": true,
         "baseUrl": ".",
+        "moduleResolution": "Node16",
         "resolveJsonModule": true,
         "paths": {
             "*": ["node_modules/*"]

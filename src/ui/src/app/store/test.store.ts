@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core"
+import { Injectable, NgZone } from "@angular/core"
 import { BehaviorSubject, concatMap, from, interval, map, of } from "rxjs"
 import { TestVisualizationState } from "../dto/test-visualization-state.dto"
 import { ITestVisualizationState } from "../interfaces/test-visualization-state.interface"
@@ -10,6 +10,7 @@ import { EMeasurementStatus } from "../../../../measurement/enums/measurement-st
 import { Router } from "@angular/router"
 import { MainStore } from "./main.store"
 import { IMeasurementServerResponse } from "../../../../measurement/interfaces/measurement-server-response.interface"
+import { ERoutes } from "../enums/routes.enum"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
@@ -27,8 +28,20 @@ export class TestStore {
         null
     )
     servers$ = new BehaviorSubject<IMeasurementServerResponse[]>([])
+    testIntervalMinutes$ = new BehaviorSubject<number>(10)
+    enableLoopMode$ = new BehaviorSubject<boolean>(false)
 
-    constructor(private mainStore: MainStore, private router: Router) {}
+    constructor(
+        private mainStore: MainStore,
+        private ngZone: NgZone,
+        private router: Router
+    ) {
+        window.electronAPI.onRestartMeasurement(() => {
+            this.ngZone.run(() => {
+                this.router.navigate(["/", ERoutes.TEST])
+            })
+        })
+    }
 
     launchTest() {
         this.resetState()
@@ -48,11 +61,27 @@ export class TestStore {
         )
     }
 
+    launchLoopTest(interval: number) {
+        this.enableLoopMode$.next(true)
+        this.testIntervalMinutes$.next(interval)
+        this.router.navigate(["/", ERoutes.TEST])
+    }
+
+    disableLoopMode() {
+        this.enableLoopMode$.next(false)
+    }
+
     getMeasurementResult(testUuid: string | null) {
         if (!testUuid || this.mainStore.error$.value) {
             return of(null)
         }
-        return from(window.electronAPI.getMeasurementResult(testUuid)).pipe(
+        const interval =
+            this.enableLoopMode$.value === true
+                ? this.testIntervalMinutes$.value * 60 * 1000
+                : undefined
+        return from(
+            window.electronAPI.getMeasurementResult(testUuid, interval)
+        ).pipe(
             map((result) => {
                 this.simpleHistoryResult$.next(result)
                 const newPhase = new TestPhaseState({
@@ -72,17 +101,6 @@ export class TestStore {
                     serverName: result.measurementServerName,
                     ipAddress: result.ipAddress,
                     providerName: result.providerName,
-                })
-                window.electronAPI.getEnv().then((env) => {
-                    if (
-                        env.ENABLE_LOOP_MODE === "true" &&
-                        !this.mainStore.error$.value
-                    ) {
-                        setTimeout(
-                            () => this.router.navigateByUrl("/test"),
-                            1000
-                        )
-                    }
                 })
                 return result
             })

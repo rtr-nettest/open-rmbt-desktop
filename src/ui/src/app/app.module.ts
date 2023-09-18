@@ -71,6 +71,7 @@ import { ICrowdinJson } from "../../../measurement/interfaces/crowdin.interface"
 import { INewsItem } from "../../../measurement/interfaces/news.interface"
 import { SettingsScreenComponent } from "./screens/settings-screen/settings-screen.component"
 import { NewsScreenComponent } from "./screens/news-screen/news-screen.component"
+import { MatInputModule } from "@angular/material/input"
 import { MatTableModule } from "@angular/material/table"
 import { MatSortModule } from "@angular/material/sort"
 import { MatPaginatorModule } from "@angular/material/paginator"
@@ -84,7 +85,7 @@ import { SettingsVersionComponent } from "./widgets/settings-version/settings-ve
 import { SettingsRepoLinkComponent } from "./widgets/settings-repo-link/settings-repo-link.component"
 import { SettingsIpComponent } from "./widgets/settings-ip/settings-ip.component"
 import { SettingsLocaleComponent } from "./widgets/settings-locale/settings-locale.component"
-import { FormsModule } from "@angular/forms"
+import { FormsModule, ReactiveFormsModule } from "@angular/forms"
 import { EIPVersion } from "../../../measurement/enums/ip-version.enum"
 import { MainStore } from "./store/main.store"
 import { HistoryScreenComponent } from "./screens/history-screen/history-screen.component"
@@ -106,10 +107,13 @@ import { ClientScreenComponent } from "./screens/client-screen/client-screen.com
 import { ClientSelectComponent } from "./widgets/client-select/client-select.component"
 import { IPaginator } from "./interfaces/paginator.interface"
 import { ISort } from "./interfaces/sort.interface"
-import { ScrollBottomComponent } from "./widgets/scroll-bottom/scroll-bottom.component";
-import { SettingsLocalDataComponent } from './widgets/settings-local-data/settings-local-data.component';
-import { StatisticsScreenComponent } from './screens/statistics-screen/statistics-screen.component';
-import { MapScreenComponent } from './screens/map-screen/map-screen.component'
+import { ScrollBottomComponent } from "./widgets/scroll-bottom/scroll-bottom.component"
+import { SettingsLocalDataComponent } from "./widgets/settings-local-data/settings-local-data.component"
+import { StatisticsScreenComponent } from "./screens/statistics-screen/statistics-screen.component"
+import { MapScreenComponent } from "./screens/map-screen/map-screen.component"
+import { LoopStartScreenComponent } from "./screens/loop-start-screen/loop-start-screen.component"
+import { SprintfPipe } from "./pipes/sprintf.pipe"
+import { AlertComponent } from "./widgets/alert/alert.component"
 
 Chart.register(
     BarElement,
@@ -147,7 +151,8 @@ declare global {
                 IMeasurementPhaseState & IBasicNetworkInfo
             >
             getMeasurementResult: (
-                testUuid: string
+                testUuid: string,
+                loopInterval?: number
             ) => Promise<ISimpleHistoryResult>
             getMeasurementHistory: (
                 paginator?: IPaginator,
@@ -155,6 +160,7 @@ declare global {
             ) => Promise<ISimpleHistoryResult[]>
             onError: (callback: (error: Error) => any) => Promise<any>
             onOpenSettings: (callback: () => any) => Promise<any>
+            onRestartMeasurement: (callback: () => any) => Promise<any>
             deleteLocalData: () => Promise<void>
         }
     }
@@ -208,16 +214,21 @@ declare global {
         SettingsLocalDataComponent,
         StatisticsScreenComponent,
         MapScreenComponent,
+        LoopStartScreenComponent,
+        SprintfPipe,
+        AlertComponent,
     ],
     imports: [
         AppRoutingModule,
         BrowserAnimationsModule,
         BrowserModule,
         FormsModule,
+        ReactiveFormsModule,
         HttpClientModule,
         MatButtonModule,
         MatDialogModule,
         MatIconModule,
+        MatInputModule,
         MatPaginatorModule,
         MatProgressBarModule,
         MatProgressSpinnerModule,

@@ -14,6 +14,7 @@ import { ReferrerResolver } from "./resolvers/referrer.resolver"
 import { ClientScreenComponent } from "./screens/client-screen/client-screen.component"
 import { StatisticsScreenComponent } from "./screens/statistics-screen/statistics-screen.component"
 import { MapScreenComponent } from "./screens/map-screen/map-screen.component"
+import { LoopStartScreenComponent } from "./screens/loop-start-screen/loop-start-screen.component"
 
 const routes: Routes = [
     {
@@ -54,6 +55,10 @@ const routes: Routes = [
     {
         path: ERoutes.MAP,
         component: MapScreenComponent,
+    },
+    {
+        path: ERoutes.LOOP_MODE,
+        component: LoopStartScreenComponent,
     },
     {
         path: "**",

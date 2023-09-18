@@ -1,0 +1,6 @@
+<div *ngIf="text" class="app-alert app-alert--{{ kind }}">
+    <i *ngIf="kind === 'info'" class="app-icon app-icon--info"></i>
+    <span *transloco="let t">
+        {{ t(text) }}
+    </span>
+</div>

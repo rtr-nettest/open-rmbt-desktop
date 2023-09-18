@@ -220,7 +220,7 @@ export class RMBTClient {
     pingMedian = -1
     measurementStart: number = 0
     isRunning = false
-    activityInterval?: NodeJS.Timer
+    activityInterval?: NodeJS.Timeout
     aborter = new AbortController()
     pings: IPing[] = []
     private bytesPerSecPreDownload: number[] = []

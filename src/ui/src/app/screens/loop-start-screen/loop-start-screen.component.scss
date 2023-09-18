@@ -1,0 +1,24 @@
+@import "../../../assets/styles/core.scss";
+
+app-main-content {
+    align-items: center;
+    flex-direction: column;
+}
+
+mat-form-field {
+    margin: 0 rem(12);
+}
+
+mat-error {
+    font-size: 0.8em;
+    position: absolute;
+}
+
+app-alert {
+    margin-bottom: rem(60);
+}
+
+.app-btn-container {
+    margin-top: rem(60);
+    text-align: center;
+}

@@ -8,6 +8,7 @@ import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 import { CMSService } from "src/app/services/cms.service"
 import { MessageService } from "src/app/services/message.service"
 import { MainStore } from "src/app/store/main.store"
+import { TestStore } from "src/app/store/test.store"
 
 @Component({
     selector: "app-main-menu",
@@ -55,6 +56,7 @@ export class MainMenuComponent {
         private mainStore: MainStore,
         private message: MessageService,
         private router: Router,
+        private testStore: TestStore,
         private transloco: TranslocoService
     ) {}
 
@@ -70,6 +72,8 @@ export class MainMenuComponent {
                     },
                     { canCancel: true }
                 )
+        } else if (item.route.includes(ERoutes.TEST)) {
+            this.testStore.disableLoopMode()
         }
     }
 

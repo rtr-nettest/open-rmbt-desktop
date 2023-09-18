@@ -21,6 +21,9 @@ import { EIPVersion } from "../measurement/enums/ip-version.enum"
 import { buildMenu } from "./menu"
 import { UserSettingsRequest } from "../measurement/dto/user-settings-request.dto"
 import { IMeasurementServerResponse } from "../measurement/interfaces/measurement-server-response.interface"
+import { Logger } from "../measurement/services/logger.service"
+
+let loopTimeout: NodeJS.Timeout
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -83,6 +86,7 @@ app.on("window-all-closed", () => {
     if (process.platform !== "darwin") {
         app.quit()
     } else {
+        clearTimeout(loopTimeout)
         MeasurementRunner.I.abortMeasurement()
     }
 })
@@ -147,8 +151,8 @@ ipcMain.on(Events.RUN_MEASUREMENT, async (event) => {
         webContents.send(Events.ERROR, e)
     }
 })
-
 ipcMain.on(Events.ABORT_MEASUREMENT, () => {
+    clearTimeout(loopTimeout)
     MeasurementRunner.I.abortMeasurement()
 })
 
@@ -175,6 +179,15 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
             : undefined,
         HISTORY_SEARCH_URL: process.env.HISTORY_SEARCH_URL,
         IP_VERSION: (Store.get(IP_VERSION) as string) || "",
+        LOOP_MODE_MIN_INT: process.env.LOOP_MODE_MIN_INT
+            ? parseInt(process.env.LOOP_MODE_MIN_INT)
+            : 5,
+        LOOP_MODE_MAX_INT: process.env.LOOP_MODE_MAX_INT
+            ? parseInt(process.env.LOOP_MODE_MAX_INT)
+            : 120,
+        LOOP_MODE_DEFAULT_INT: process.env.LOOP_MODE_DEFAULT_INT
+            ? parseInt(process.env.LOOP_MODE_DEFAULT_INT)
+            : 10,
         OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
         REPO_URL: pack.repository,
         TERMS_ACCEPTED: (Store.get(TERMS_ACCEPTED) as boolean) || false,
@@ -193,14 +206,25 @@ ipcMain.handle(Events.GET_MEASUREMENT_STATE, () => {
     return MeasurementRunner.I.getCurrentPhaseState()
 })
 
-ipcMain.handle(Events.GET_MEASUREMENT_RESULT, async (event, testUuid) => {
-    const webContents = event.sender
-    try {
-        return await ControlServer.I.getMeasurementResult(testUuid)
-    } catch (e) {
-        webContents.send(Events.ERROR, e)
+ipcMain.handle(
+    Events.GET_MEASUREMENT_RESULT,
+    async (event, testUuid, loopInterval) => {
+        const webContents = event.sender
+        try {
+            const result = await ControlServer.I.getMeasurementResult(testUuid)
+            if (loopInterval) {
+                Logger.I.info("Scheduling restart in %d ms", loopInterval)
+                loopTimeout = setTimeout(() => {
+                    Logger.I.info("Restarting test")
+                    webContents.send(Events.RESTART_MEASUREMENT)
+                }, loopInterval)
+            }
+            return result
+        } catch (e) {
+            webContents.send(Events.ERROR, e)
+        }
     }
-})
+)
 
 ipcMain.handle(
     Events.GET_MEASUREMENT_HISTORY,

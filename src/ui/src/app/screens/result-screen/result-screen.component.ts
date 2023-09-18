@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from "@angular/core"
+import { ChangeDetectionStrategy, Component, OnDestroy } from "@angular/core"
 import { ActivatedRoute, Router } from "@angular/router"
 import { TranslocoService } from "@ngneat/transloco"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
@@ -21,7 +21,7 @@ import { HistoryStore } from "src/app/store/history.store"
     styleUrls: ["./result-screen.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ResultScreenComponent {
+export class ResultScreenComponent implements OnDestroy {
     columns: ITableColumn[] = [
         {
             columnDef: "title",
@@ -75,6 +75,10 @@ export class ResultScreenComponent {
         private router: Router,
         private transloco: TranslocoService
     ) {}
+
+    ngOnDestroy(): void {
+        window.electronAPI.abortMeasurement()
+    }
 
     getSpeedInMbps(speed: number) {
         const locale = this.transloco.getActiveLang()

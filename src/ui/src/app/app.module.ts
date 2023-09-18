@@ -149,7 +149,8 @@ declare global {
                 IMeasurementPhaseState & IBasicNetworkInfo
             >
             getMeasurementResult: (
-                testUuid: string
+                testUuid: string,
+                loopInterval?: number
             ) => Promise<ISimpleHistoryResult>
             getMeasurementHistory: (
                 paginator?: IPaginator,
@@ -157,6 +158,7 @@ declare global {
             ) => Promise<ISimpleHistoryResult[]>
             onError: (callback: (error: Error) => any) => Promise<any>
             onOpenSettings: (callback: () => any) => Promise<any>
+            onRestartMeasurement: (callback: () => any) => Promise<any>
             deleteLocalData: () => Promise<void>
         }
     }

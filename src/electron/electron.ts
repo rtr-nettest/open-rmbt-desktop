@@ -21,6 +21,9 @@ import { EIPVersion } from "../measurement/enums/ip-version.enum"
 import { buildMenu } from "./menu"
 import { UserSettingsRequest } from "../measurement/dto/user-settings-request.dto"
 import { IMeasurementServerResponse } from "../measurement/interfaces/measurement-server-response.interface"
+import { Logger } from "../measurement/services/logger.service"
+
+let loopTimeout: NodeJS.Timeout
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -83,6 +86,7 @@ app.on("window-all-closed", () => {
     if (process.platform !== "darwin") {
         app.quit()
     } else {
+        clearTimeout(loopTimeout)
         MeasurementRunner.I.abortMeasurement()
     }
 })
@@ -147,8 +151,8 @@ ipcMain.on(Events.RUN_MEASUREMENT, async (event) => {
         webContents.send(Events.ERROR, e)
     }
 })
-
 ipcMain.on(Events.ABORT_MEASUREMENT, () => {
+    clearTimeout(loopTimeout)
     MeasurementRunner.I.abortMeasurement()
 })
 
@@ -200,14 +204,25 @@ ipcMain.handle(Events.GET_MEASUREMENT_STATE, () => {
     return MeasurementRunner.I.getCurrentPhaseState()
 })
 
-ipcMain.handle(Events.GET_MEASUREMENT_RESULT, async (event, testUuid) => {
-    const webContents = event.sender
-    try {
-        return await ControlServer.I.getMeasurementResult(testUuid)
-    } catch (e) {
-        webContents.send(Events.ERROR, e)
+ipcMain.handle(
+    Events.GET_MEASUREMENT_RESULT,
+    async (event, testUuid, loopInterval) => {
+        const webContents = event.sender
+        try {
+            const result = await ControlServer.I.getMeasurementResult(testUuid)
+            if (loopInterval) {
+                Logger.I.info("Scheduling restart in %d ms", loopInterval)
+                loopTimeout = setTimeout(() => {
+                    Logger.I.info("Restarting test")
+                    webContents.send(Events.RESTART_MEASUREMENT)
+                }, loopInterval)
+            }
+            return result
+        } catch (e) {
+            webContents.send(Events.ERROR, e)
+        }
     }
-})
+)
 
 ipcMain.handle(
     Events.GET_MEASUREMENT_HISTORY,

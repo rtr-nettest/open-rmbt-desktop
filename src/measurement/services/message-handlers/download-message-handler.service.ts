@@ -102,7 +102,8 @@ export class DownloadMessageHandler implements IMessageHandler {
 
     checkActivity = () => {
         Logger.I.info(ELoggerMessage.T_CHECKING_ACTIVITY, this.ctx.index)
-        if (Time.nowNs() >= this._downloadEndTime) {
+        this._result.addResult(this._downloadBytesRead, this._nsec)
+        if (Time.nowNs() >= this._downloadEndTime + 1e9) {
             Logger.I.info(ELoggerMessage.T_TIMEOUT, this.ctx.index)
             this.requestFinish()
         }
@@ -138,10 +139,6 @@ export class DownloadMessageHandler implements IMessageHandler {
             this._nsec = Time.nowNs() - this._downloadStartTime
             lastByte = data[data.length - 1]
             isFullChunk = this._downloadBytesRead % this.ctx.chunkSize === 0
-        }
-        if (isFullChunk && (lastByte === 0x00 || lastByte === 0xff)) {
-            this._result.addResult(this._downloadBytesRead, this._nsec)
-            this._nsec = Infinity
         }
         if (isFullChunk && lastByte === 0xff) {
             this.requestFinish()

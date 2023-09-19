@@ -15,7 +15,7 @@ export class DownloadMessageHandler implements IMessageHandler {
     private _downloadEndTime = Time.nowNs()
     private _downloadBytesRead = 0
     private _activityInterval?: NodeJS.Timeout
-    private _inactivityTimeout = 1000
+    private _inactivityTimeout = 200
     private _result = new MeasurementThreadResultList(0)
     private _nsec = Infinity
     private _isFinishRequested = false
@@ -102,7 +102,8 @@ export class DownloadMessageHandler implements IMessageHandler {
 
     checkActivity = () => {
         Logger.I.info(ELoggerMessage.T_CHECKING_ACTIVITY, this.ctx.index)
-        this._result.addResult(this._downloadBytesRead, this._nsec)
+        if (!this._isFinishRequested)
+            this._result.addResult(this._downloadBytesRead, this._nsec)
         if (Time.nowNs() >= this._downloadEndTime + 1e9) {
             Logger.I.info(ELoggerMessage.T_TIMEOUT, this.ctx.index)
             this.requestFinish()

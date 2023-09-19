@@ -41,7 +41,7 @@ export class NetInterfaceInfoWindowsService implements NetInterfaceInfo {
 
     async convertToJson(info: string) {
         const lines = info.split("\n")
-        const blocks = []
+        const blocks: any[] = []
         for (const line of lines) {
             let key = ""
             let lineLowered = line.toLowerCase().replace("-", "")

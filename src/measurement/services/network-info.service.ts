@@ -40,7 +40,7 @@ export class NetworkInfoService {
                 .data.ip
         } catch (e) {}
 
-        const interfaces = []
+        const interfaces: any[] = []
         for (const iface of Object.values(os.networkInterfaces())) {
             if (!iface) {
                 break

@@ -124,7 +124,7 @@ export class DownloadMessageHandler implements IMessageHandler {
 
     readData(data: Buffer): void {
         if (
-            data.includes(ESocketMessage.ACCEPT_GETCHUNKS) &&
+            data.indexOf(ESocketMessage.ACCEPT_GETCHUNKS) === 0 &&
             this._isFinishRequested
         ) {
             this.stopMessaging()

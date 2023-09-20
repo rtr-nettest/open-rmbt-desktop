@@ -130,9 +130,6 @@ export class DownloadMessageHandler implements IMessageHandler {
             this.stopMessaging()
             return
         }
-        if (data.indexOf(ESocketMessage.TIME) === 0) {
-            return
-        }
         let lastByte = 0
         let isFullChunk = false
         if (data.length > 0) {

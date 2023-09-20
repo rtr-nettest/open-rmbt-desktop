@@ -45,4 +45,8 @@ export class LoopStartScreenComponent {
             this.testStore.launchLoopTest(interval)
         }
     }
+
+    onFocus(event: any) {
+        event.target.select()
+    }
 }

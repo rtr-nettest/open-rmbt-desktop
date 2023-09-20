@@ -30,14 +30,16 @@ export class TestStore {
     servers$ = new BehaviorSubject<IMeasurementServerResponse[]>([])
     testIntervalMinutes$ = new BehaviorSubject<number>(10)
     enableLoopMode$ = new BehaviorSubject<boolean>(false)
+    loopCounter$ = new BehaviorSubject<number>(1)
 
     constructor(
         private mainStore: MainStore,
         private ngZone: NgZone,
         private router: Router
     ) {
-        window.electronAPI.onRestartMeasurement(() => {
+        window.electronAPI.onRestartMeasurement((loopCounter) => {
             this.ngZone.run(() => {
+                this.loopCounter$.next(loopCounter + 1)
                 this.router.navigate(["/", ERoutes.TEST])
             })
         })
@@ -62,6 +64,7 @@ export class TestStore {
     }
 
     launchLoopTest(interval: number) {
+        this.loopCounter$.next(1)
         this.enableLoopMode$.next(true)
         this.testIntervalMinutes$.next(interval)
         this.router.navigate(["/", ERoutes.TEST])

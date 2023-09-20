@@ -38,8 +38,19 @@
     }
 }
 
+app-main-content {
+    flex-direction: column;
+    align-items: start;
+}
+
+.app-title {
+    margin-bottom: 1em;
+    margin-left: 1em;
+}
+
 app-alert {
-    position: absolute;
+    margin-bottom: 2em;
+    position: relative;
     left: 50%;
     top: 0;
     transform: translateX(-50%);

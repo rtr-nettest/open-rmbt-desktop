@@ -45,8 +45,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.removeAllListeners(Events.OPEN_SETTINGS)
         ipcRenderer.on(Events.OPEN_SETTINGS, callback)
     },
-    onRestartMeasurement: (callback: () => any) => {
-        ipcRenderer.on(Events.RESTART_MEASUREMENT, callback)
+    onRestartMeasurement: (callback: (loopCounter: number) => any) => {
+        ipcRenderer.removeAllListeners(Events.RESTART_MEASUREMENT)
+        ipcRenderer.on(Events.RESTART_MEASUREMENT, (_, loopCounter) =>
+            callback(loopCounter)
+        )
     },
     deleteLocalData: () => {
         ipcRenderer.send(Events.DELETE_LOCAL_DATA)

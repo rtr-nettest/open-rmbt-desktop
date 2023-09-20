@@ -21,9 +21,7 @@ import { EIPVersion } from "../measurement/enums/ip-version.enum"
 import { buildMenu } from "./menu"
 import { UserSettingsRequest } from "../measurement/dto/user-settings-request.dto"
 import { IMeasurementServerResponse } from "../measurement/interfaces/measurement-server-response.interface"
-import { Logger } from "../measurement/services/logger.service"
-
-let loopTimeout: NodeJS.Timeout
+import { LoopService } from "../measurement/services/loop.service"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -86,7 +84,7 @@ app.on("window-all-closed", () => {
     if (process.platform !== "darwin") {
         app.quit()
     } else {
-        clearTimeout(loopTimeout)
+        LoopService.I.resetCounter()
         MeasurementRunner.I.abortMeasurement()
     }
 })
@@ -152,7 +150,7 @@ ipcMain.on(Events.RUN_MEASUREMENT, async (event) => {
     }
 })
 ipcMain.on(Events.ABORT_MEASUREMENT, () => {
-    clearTimeout(loopTimeout)
+    LoopService.I.resetCounter()
     MeasurementRunner.I.abortMeasurement()
 })
 
@@ -213,11 +211,9 @@ ipcMain.handle(
         try {
             const result = await ControlServer.I.getMeasurementResult(testUuid)
             if (loopInterval) {
-                Logger.I.info("Scheduling restart in %d ms", loopInterval)
-                loopTimeout = setTimeout(() => {
-                    Logger.I.info("Restarting test")
-                    webContents.send(Events.RESTART_MEASUREMENT)
-                }, loopInterval)
+                LoopService.I.scheduleLoop(loopInterval, (counter) =>
+                    webContents.send(Events.RESTART_MEASUREMENT, counter)
+                )
             }
             return result
         } catch (e) {

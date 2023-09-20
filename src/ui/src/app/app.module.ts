@@ -113,8 +113,8 @@ import { StatisticsScreenComponent } from "./screens/statistics-screen/statistic
 import { MapScreenComponent } from "./screens/map-screen/map-screen.component"
 import { LoopStartScreenComponent } from "./screens/loop-start-screen/loop-start-screen.component"
 import { SprintfPipe } from "./pipes/sprintf.pipe"
-import { AlertComponent } from "./widgets/alert/alert.component";
-import { StopLoopButtonComponent } from './widgets/stop-loop-button/stop-loop-button.component'
+import { AlertComponent } from "./widgets/alert/alert.component"
+import { StopLoopButtonComponent } from "./widgets/stop-loop-button/stop-loop-button.component"
 
 Chart.register(
     BarElement,
@@ -161,7 +161,9 @@ declare global {
             ) => Promise<ISimpleHistoryResult[]>
             onError: (callback: (error: Error) => any) => Promise<any>
             onOpenSettings: (callback: () => any) => Promise<any>
-            onRestartMeasurement: (callback: () => any) => Promise<any>
+            onRestartMeasurement: (
+                callback: (loopCounter: number) => any
+            ) => Promise<any>
             deleteLocalData: () => Promise<void>
         }
     }

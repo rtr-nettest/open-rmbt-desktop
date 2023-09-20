@@ -7,7 +7,7 @@
     z-index: 10;
 
     @include screen-lg {
-        flex: 0 0 rem(70);
+        flex: 0 0 calc(rem($font-size-xxl * 2.5) + 1.5rem);
     }
 }
 

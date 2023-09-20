@@ -25,6 +25,7 @@ import { ITestVisualizationState } from "src/app/interfaces/test-visualization-s
 })
 export class TestScreenComponent implements OnDestroy {
     enableLoopMode$ = this.store.enableLoopMode$
+    loopCount$ = this.store.loopCounter$
     env$ = this.mainStore.env$
     stopped$: Subject<void> = new Subject()
     visualization$ = this.store.launchTest().pipe(

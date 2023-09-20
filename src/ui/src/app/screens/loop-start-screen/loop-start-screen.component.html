@@ -4,7 +4,8 @@
     <app-main-content *ngIf="env$ | async as env">
         <app-alert
             text="Tests are conducted repeatedly until they are stopped manually"
-        ></app-alert>
+        >
+        </app-alert>
         <div
             class="app-wrapper app-wrapper--{{ env?.FLAVOR }}"
             *transloco="let t"

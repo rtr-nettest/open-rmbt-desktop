@@ -1,10 +1,5 @@
 @import "src/assets/styles/core";
 
-:host {
-    align-items: center;
-    display: flex;
-}
-
 .app-alert {
     border: 1px solid $color-pale;
     border-radius: 8px;
@@ -12,9 +7,7 @@
     display: flex;
     justify-content: center;
     font-size: rem(14);
-    margin: 0 auto rem(24);
-    padding: rem(12) rem(16);
-    width: 100%;
+    padding: rem(12) rem(21);
 
     &--warning {
         background-color: rgba(255, 204, 0, 0.2);
@@ -22,16 +15,20 @@
     }
 }
 
+.app-wrapper {
+    align-items: center;
+    display: flex;
+    width: rem(500);
+}
+
 .app-icon {
     flex: 0 0 rem(36);
     height: rem(36);
-    margin-left: rem(21);
+    margin-right: rem(21);
 
     & + * {
         align-items: center;
         display: flex;
-        padding-left: rem(21);
-        padding-right: rem(21);
-        white-space: pre;
+        flex: 1 1 calc(100% - 36px);
     }
 }

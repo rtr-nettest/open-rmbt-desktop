@@ -15,6 +15,12 @@
     <app-body>
         <app-main-menu [disabled]="true"></app-main-menu>
         <app-main-content *ngIf="visualization$ | async">
+            <app-alert
+                *ngIf="(enableLoopMode$ | async) === true"
+                text="Tests are conducted repeatedly until they are stopped manually"
+            >
+                <app-stop-loop-button></app-stop-loop-button>
+            </app-alert>
             <div class="app-main">
                 <app-gauge></app-gauge>
                 <app-spacer></app-spacer>

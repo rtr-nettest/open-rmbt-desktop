@@ -99,12 +99,11 @@ export class UploadMessageHandler implements IMessageHandler {
             if (dataArr.length === 4) {
                 const nanos = +dataArr[1]
                 const bytes = +dataArr[3]
-                if (nanos <= Number(this.ctx.params.test_duration) * 1e9) {
-                    this._result.addResult(bytes, nanos)
-                    this.ctx.threadResult!.up = this._result
-                    this.ctx.threadResult!.currentTime.up = nanos
-                    this.ctx.threadResult!.currentTransfer.up = bytes
-                } else {
+                this._result.addResult(bytes, nanos)
+                this.ctx.threadResult!.up = this._result
+                this.ctx.threadResult!.currentTime.up = nanos
+                this.ctx.threadResult!.currentTransfer.up = bytes
+                if (nanos > Number(this.ctx.params.test_duration) * 1e9) {
                     this.stopMessaging()
                 }
             }

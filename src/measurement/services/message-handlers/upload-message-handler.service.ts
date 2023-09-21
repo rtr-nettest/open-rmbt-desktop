@@ -102,15 +102,10 @@ export class UploadMessageHandler implements IMessageHandler {
             if (dataArr.length === 4) {
                 const nanos = +dataArr[1]
                 const bytes = +dataArr[3]
-                const nowNs = Time.nowNs()
-                if (nowNs < this._uploadEndTimeNs) {
-                    this._result.addResult(bytes, nanos)
-                    this.ctx.threadResult!.up = this._result
-                    this.ctx.threadResult!.currentTime.up = nanos
-                    this.ctx.threadResult!.currentTransfer.up = bytes
-                } else {
-                    this.stopMessaging()
-                }
+                this._result.addResult(bytes, nanos)
+                this.ctx.threadResult!.up = this._result
+                this.ctx.threadResult!.currentTime.up = nanos
+                this.ctx.threadResult!.currentTransfer.up = bytes
             }
             return
         }
@@ -154,7 +149,7 @@ export class UploadMessageHandler implements IMessageHandler {
 
     activityCheck = () => {
         Logger.I.info(ELoggerMessage.T_CHECKING_ACTIVITY, this.ctx.index)
-        if (Time.nowNs() > this._uploadEndTimeNs) {
+        if (Time.nowNs() > this._uploadEndTimeNs + 1e9) {
             Logger.I.info(ELoggerMessage.T_TIMEOUT, this.ctx.index)
             this.stopMessaging()
         }

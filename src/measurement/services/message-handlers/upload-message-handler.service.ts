@@ -103,7 +103,7 @@ export class UploadMessageHandler implements IMessageHandler {
                 const nanos = +dataArr[1]
                 const bytes = +dataArr[3]
                 const nowNs = Time.nowNs()
-                if (bytes > 0 && nanos > 0 && nowNs < this._uploadEndTimeNs) {
+                if (nowNs < this._uploadEndTimeNs) {
                     this._result.addResult(bytes, nanos)
                     this.ctx.threadResult!.up = this._result
                     this.ctx.threadResult!.currentTime.up = nanos

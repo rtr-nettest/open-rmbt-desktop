@@ -17,9 +17,9 @@ export class LoopStartScreenComponent {
     env$ = this.mainStore.env$.pipe(
         withLatestFrom(this.testStore.testIntervalMinutes$),
         map(([env, savedInterval]) => {
-            const def: number = env?.LOOP_MODE_DEFAULT_INT || 10
-            this.min = env?.LOOP_MODE_MIN_INT || 5
-            this.max = env?.LOOP_MODE_MAX_INT || 120
+            const def: number = env!.LOOP_MODE_DEFAULT_INT
+            this.min = env!.LOOP_MODE_MIN_INT
+            this.max = env!.LOOP_MODE_MAX_INT
             this.form = this.fb.group({
                 interval: new FormControl(savedInterval || def, [
                     Validators.min(this.min),

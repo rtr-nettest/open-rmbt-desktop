@@ -29,12 +29,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getEnv: () => ipcRenderer.invoke(Events.GET_ENV),
     getCPUUsage: () => ipcRenderer.invoke(Events.GET_CPU_USAGE),
     getMeasurementState: () => ipcRenderer.invoke(Events.GET_MEASUREMENT_STATE),
-    getMeasurementResult: (testUuid: string, loopInterval?: number) =>
-        ipcRenderer.invoke(
-            Events.GET_MEASUREMENT_RESULT,
-            testUuid,
-            loopInterval
-        ),
+    getMeasurementResult: (testUuid: string) =>
+        ipcRenderer.invoke(Events.GET_MEASUREMENT_RESULT, testUuid),
     getMeasurementHistory: (paginator?: IPaginator, sort?: ISort) =>
         ipcRenderer.invoke(Events.GET_MEASUREMENT_HISTORY, paginator, sort),
     onError: (callback: (error: Error) => any) => {
@@ -53,5 +49,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     },
     deleteLocalData: () => {
         ipcRenderer.send(Events.DELETE_LOCAL_DATA)
+    },
+    scheduleLoop: (loopInterval: number) => {
+        ipcRenderer.send(Events.SCHEDULE_LOOP, loopInterval)
     },
 })

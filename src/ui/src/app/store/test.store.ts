@@ -1,5 +1,13 @@
 import { Injectable, NgZone } from "@angular/core"
-import { BehaviorSubject, concatMap, from, interval, map, of } from "rxjs"
+import {
+    BehaviorSubject,
+    concatMap,
+    from,
+    interval,
+    map,
+    of,
+    takeWhile,
+} from "rxjs"
 import { TestVisualizationState } from "../dto/test-visualization-state.dto"
 import { ITestVisualizationState } from "../interfaces/test-visualization-state.interface"
 import { IBasicNetworkInfo } from "../../../../measurement/interfaces/basic-network-info.interface"
@@ -28,7 +36,7 @@ export class TestStore {
         null
     )
     servers$ = new BehaviorSubject<IMeasurementServerResponse[]>([])
-    testIntervalMinutes$ = new BehaviorSubject<number>(10)
+    testIntervalMinutes$ = new BehaviorSubject<number | null>(null)
     enableLoopMode$ = new BehaviorSubject<boolean>(false)
     loopCounter$ = new BehaviorSubject<number>(1)
 
@@ -40,7 +48,13 @@ export class TestStore {
         window.electronAPI.onRestartMeasurement((loopCounter) => {
             this.ngZone.run(() => {
                 this.loopCounter$.next(loopCounter + 1)
-                this.router.navigate(["/", ERoutes.TEST])
+                this.router
+                    .navigate(["/", ERoutes.SETTINGS], {
+                        skipLocationChange: true,
+                    })
+                    .then(() => {
+                        this.router.navigate(["/", ERoutes.TEST])
+                    })
             })
         })
     }
@@ -70,6 +84,21 @@ export class TestStore {
         this.router.navigate(["/", ERoutes.TEST])
     }
 
+    scheduleLoop() {
+        const testIntervalMs = this.testIntervalMinutes$.value! * 60 * 1000
+        window.electronAPI.scheduleLoop(testIntervalMs)
+        return interval(200).pipe(
+            map((ms: number) => ms * 200),
+            takeWhile((ms) => ms <= testIntervalMs),
+            map((ms) => {
+                return {
+                    ms: testIntervalMs - ms,
+                    percent: (ms / testIntervalMs) * 100,
+                }
+            })
+        )
+    }
+
     disableLoopMode() {
         this.enableLoopMode$.next(false)
     }
@@ -78,13 +107,7 @@ export class TestStore {
         if (!testUuid || this.mainStore.error$.value) {
             return of(null)
         }
-        const interval =
-            this.enableLoopMode$.value === true
-                ? this.testIntervalMinutes$.value * 60 * 1000
-                : undefined
-        return from(
-            window.electronAPI.getMeasurementResult(testUuid, interval)
-        ).pipe(
+        return from(window.electronAPI.getMeasurementResult(testUuid)).pipe(
             map((result) => {
                 this.simpleHistoryResult$.next(result)
                 const newPhase = new TestPhaseState({

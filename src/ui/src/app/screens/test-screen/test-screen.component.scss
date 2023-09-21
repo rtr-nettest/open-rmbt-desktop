@@ -55,3 +55,18 @@ app-alert {
     top: 0;
     transform: translateX(-50%);
 }
+
+.app-progress-bar-wrapper {
+    align-items: center;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+
+    .app-title {
+        margin-left: 0;
+    }
+
+    app-gauge {
+        width: 100%;
+    }
+}

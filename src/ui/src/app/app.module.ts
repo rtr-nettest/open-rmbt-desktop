@@ -152,8 +152,7 @@ declare global {
                 IMeasurementPhaseState & IBasicNetworkInfo
             >
             getMeasurementResult: (
-                testUuid: string,
-                loopInterval?: number
+                testUuid: string
             ) => Promise<ISimpleHistoryResult>
             getMeasurementHistory: (
                 paginator?: IPaginator,
@@ -165,6 +164,7 @@ declare global {
                 callback: (loopCounter: number) => any
             ) => Promise<any>
             deleteLocalData: () => Promise<void>
+            scheduleLoop: (loopInterval: number) => Promise<void>
         }
     }
 }

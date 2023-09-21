@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from "@angular/core"
 import { Router } from "@angular/router"
 import {
+    Observable,
     Subject,
     distinctUntilChanged,
     takeUntil,
@@ -55,6 +56,7 @@ export class TestScreenComponent implements OnDestroy {
             }
         })
     )
+    loopWaitProgress$?: Observable<{ ms: number; percent: number }>
 
     constructor(
         private store: TestStore,
@@ -67,9 +69,14 @@ export class TestScreenComponent implements OnDestroy {
         this.stopped$.complete()
     }
 
-    private goToResult = (state: ITestVisualizationState) =>
-        this.router.navigate([
-            "result",
-            state.phases[state.currentPhaseName].testUuid,
-        ])
+    private goToResult = (state: ITestVisualizationState) => {
+        if (this.enableLoopMode$.value !== true) {
+            this.router.navigate([
+                "result",
+                state.phases[state.currentPhaseName].testUuid,
+            ])
+        } else {
+            this.loopWaitProgress$ = this.store.scheduleLoop()
+        }
+    }
 }

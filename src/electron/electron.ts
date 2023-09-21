@@ -149,9 +149,17 @@ ipcMain.on(Events.RUN_MEASUREMENT, async (event) => {
         webContents.send(Events.ERROR, e)
     }
 })
+
 ipcMain.on(Events.ABORT_MEASUREMENT, () => {
     LoopService.I.resetCounter()
     MeasurementRunner.I.abortMeasurement()
+})
+
+ipcMain.on(Events.SCHEDULE_LOOP, (event, loopInterval) => {
+    const webContents = event.sender
+    LoopService.I.scheduleLoop(loopInterval, (counter) =>
+        webContents.send(Events.RESTART_MEASUREMENT, counter)
+    )
 })
 
 ipcMain.on(Events.DELETE_LOCAL_DATA, () => {
@@ -204,23 +212,15 @@ ipcMain.handle(Events.GET_MEASUREMENT_STATE, () => {
     return MeasurementRunner.I.getCurrentPhaseState()
 })
 
-ipcMain.handle(
-    Events.GET_MEASUREMENT_RESULT,
-    async (event, testUuid, loopInterval) => {
-        const webContents = event.sender
-        try {
-            const result = await ControlServer.I.getMeasurementResult(testUuid)
-            if (loopInterval) {
-                LoopService.I.scheduleLoop(loopInterval, (counter) =>
-                    webContents.send(Events.RESTART_MEASUREMENT, counter)
-                )
-            }
-            return result
-        } catch (e) {
-            webContents.send(Events.ERROR, e)
-        }
+ipcMain.handle(Events.GET_MEASUREMENT_RESULT, async (event, testUuid) => {
+    const webContents = event.sender
+    try {
+        const result = await ControlServer.I.getMeasurementResult(testUuid)
+        return result
+    } catch (e) {
+        webContents.send(Events.ERROR, e)
     }
-)
+})
 
 ipcMain.handle(
     Events.GET_MEASUREMENT_HISTORY,

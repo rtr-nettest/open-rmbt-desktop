@@ -31,11 +31,33 @@
                 </ng-container>
             </ng-container>
             <div class="app-main">
-                <app-gauge></app-gauge>
+                <div class="app-progress-bar-wrapper">
+                    <app-gauge
+                        *ngIf="!loopWaitProgress$; else loopWaitProgressBar"
+                    ></app-gauge>
+                </div>
                 <app-spacer></app-spacer>
                 <app-interim-results></app-interim-results>
             </div>
         </app-main-content>
         <app-footer></app-footer>
     </app-body>
+</ng-template>
+
+<ng-template #loopWaitProgressBar>
+    <div
+        style="width: 100%; padding: 0.5em"
+        *ngIf="loopWaitProgress$ | async as progress"
+    >
+        <h2 *transloco="let t" class="app-title">
+            {{
+                t("Next measurement in") + " " + (progress.ms | date : "mm:ss")
+            }}
+        </h2>
+        <mat-progress-bar
+            class="app-progress-bar--loop"
+            mode="determinate"
+            [value]="progress.percent"
+        ></mat-progress-bar>
+    </div>
 </ng-template>

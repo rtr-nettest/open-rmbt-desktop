@@ -21,7 +21,7 @@ import { HistoryStore } from "src/app/store/history.store"
     styleUrls: ["./result-screen.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ResultScreenComponent implements OnDestroy {
+export class ResultScreenComponent {
     columns: ITableColumn[] = [
         {
             columnDef: "title",
@@ -75,10 +75,6 @@ export class ResultScreenComponent implements OnDestroy {
         private router: Router,
         private transloco: TranslocoService
     ) {}
-
-    ngOnDestroy(): void {
-        window.electronAPI.abortMeasurement()
-    }
 
     getSpeedInMbps(speed: number) {
         const locale = this.transloco.getActiveLang()

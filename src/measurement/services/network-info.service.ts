@@ -1,4 +1,3 @@
-import axios from "axios/index.cjs"
 import { IUserSettings } from "../interfaces/user-settings-response.interface"
 import { IUserSettingsRequest } from "../interfaces/user-settings-request.interface"
 import os from "os"
@@ -6,6 +5,8 @@ import { Logger } from "./logger.service"
 import { ELoggerMessage } from "../enums/logger-message.enum"
 import { NetInterfaceInfoUnixService } from "./net-interface-info-unix.service"
 import { NetInterfaceInfoWindowsService } from "./net-interface-info-windows.service"
+
+const axios = require("axios")
 
 export class NetworkInfoService {
     private static instance = new NetworkInfoService()

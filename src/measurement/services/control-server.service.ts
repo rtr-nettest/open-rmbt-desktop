@@ -1,4 +1,3 @@
-import axios from "axios/index.cjs"
 import { IMeasurementRegistrationRequest } from "../interfaces/measurement-registration-request.interface"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import { IMeasurementResult } from "../interfaces/measurement-result.interface"
@@ -36,6 +35,8 @@ import { UserSettingsRequest } from "../dto/user-settings-request.dto"
 import * as dns from "dns"
 import { IPaginator } from "../../ui/src/app/interfaces/paginator.interface"
 import { ISort } from "../../ui/src/app/interfaces/sort.interface"
+
+const axios = require("axios")
 
 dayjs.extend(utc)
 dayjs.extend(tz)

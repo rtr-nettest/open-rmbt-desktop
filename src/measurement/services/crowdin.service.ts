@@ -1,9 +1,9 @@
-import axios from "axios/index.cjs"
 import { Logger } from "./logger.service"
 import { ICrowdinDownload, ICrowdinJson } from "../interfaces/crowdin.interface"
 import { Store, TERMS_ACCEPTED } from "./store.service"
 import { TERMS_AND_CONDITIONS } from "../../ui/src/app/constants/strings"
 
+const axios = require("axios")
 const xliff = require("xliff/cjs/xliff12ToJs")
 
 export class CrowdinService {

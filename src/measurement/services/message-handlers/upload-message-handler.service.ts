@@ -16,8 +16,6 @@ export class UploadMessageHandler implements IMessageHandler {
     static clientTimeOffsetNs = 1e9
     private _uploadEndTimeNs = 0
     private _result = new MeasurementThreadResultList(0)
-    private _activityInterval?: NodeJS.Timeout
-    private _inactivityTimeoutMs = 1000
     private _finalTimeout?: NodeJS.Timeout
     private _buffers: Buffer[] = []
     private _bytesWritten = 0
@@ -68,7 +66,6 @@ export class UploadMessageHandler implements IMessageHandler {
         this._isRunning = false
         this.ctx.client.off("drain", this.putChunks)
         clearInterval(this._interimHandlerInterval)
-        clearInterval(this._activityInterval)
         this.ctx.threadResult!.up = this._result
         this.onFinish?.(this.ctx.threadResult!)
     }
@@ -106,6 +103,9 @@ export class UploadMessageHandler implements IMessageHandler {
                 this.ctx.threadResult!.up = this._result
                 this.ctx.threadResult!.currentTime.up = nanos
                 this.ctx.threadResult!.currentTransfer.up = bytes
+                if (nanos > Number(this.ctx.params.test_duration) * 1e9) {
+                    this.stopMessaging()
+                }
             }
             return
         }
@@ -147,21 +147,8 @@ export class UploadMessageHandler implements IMessageHandler {
         }
     }
 
-    activityCheck = () => {
-        Logger.I.info(ELoggerMessage.T_CHECKING_ACTIVITY, this.ctx.index)
-        if (Time.nowNs() > this._uploadEndTimeNs + 1e9) {
-            Logger.I.info(ELoggerMessage.T_TIMEOUT, this.ctx.index)
-            this.stopMessaging()
-        }
-    }
-
     private setActivityInterval() {
-        clearInterval(this._activityInterval)
         const uploadDuration = Number(this.ctx.params.test_duration) * 1e9
         this._uploadEndTimeNs = Time.nowNs() + uploadDuration
-        this._activityInterval = setInterval(
-            this.activityCheck,
-            this._inactivityTimeoutMs
-        )
     }
 }

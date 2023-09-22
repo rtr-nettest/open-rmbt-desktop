@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core"
 import {
     BehaviorSubject,
     catchError,
+    map,
     of,
     switchMap,
     take,
@@ -13,10 +14,17 @@ import { MainStore } from "./main.store"
 import { IPaginator } from "../interfaces/paginator.interface"
 import { HttpClient, HttpParams } from "@angular/common/http"
 import { saveAs } from "file-saver"
-import { TranslocoService } from "@ngneat/transloco"
+import { Translation, TranslocoService } from "@ngneat/transloco"
 import { MessageService } from "../services/message.service"
 import { ERROR_OCCURED } from "../constants/strings"
 import { ISort } from "../interfaces/sort.interface"
+import { ClassificationService } from "../services/classification.service"
+import { ConversionService } from "../services/conversion.service"
+import { DatePipe } from "@angular/common"
+import {
+    IHistoryRowONT,
+    IHistoryRowRTR,
+} from "../interfaces/history-row.interface"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
@@ -32,8 +40,39 @@ export class HistoryStore {
         active: "measurementDate",
         direction: "desc",
     })
+    formattedHistory$ = this.history$.pipe(
+        withLatestFrom(
+            this.transloco.selectTranslation(),
+            this.historyPaginator$,
+            this.mainStore.env$
+        ),
+        map(([history, t, paginator, env]) => {
+            if (!history.length) {
+                return { content: [], totalElements: 0 }
+            }
+            const content =
+                env?.FLAVOR === "ont"
+                    ? history.map(
+                          this.historyItemToRowONT(t, paginator, history.length)
+                      )
+                    : history.map(
+                          this.historyItemToRowRTR(t, paginator, history.length)
+                      )
+            const totalElements = history[0].paginator?.totalElements
+            return {
+                content,
+                totalElements:
+                    env?.FLAVOR === "ont" && totalElements
+                        ? totalElements
+                        : content.length,
+            }
+        })
+    )
 
     constructor(
+        private classification: ClassificationService,
+        private conversion: ConversionService,
+        private datePipe: DatePipe,
         private mainStore: MainStore,
         private http: HttpClient,
         private transloco: TranslocoService,
@@ -168,4 +207,71 @@ export class HistoryStore {
             },
         })
     }
+
+    private historyItemToRowONT =
+        (t: Translation, paginator: IPaginator, historyLength: number) =>
+        (hi: ISimpleHistoryResult, index: number): IHistoryRowONT => {
+            const locale = this.transloco.getActiveLang()
+            return {
+                id: hi.testUuid!,
+                measurementDate: this.datePipe.transform(
+                    hi.measurementDate,
+                    "mediumDate",
+                    undefined,
+                    locale
+                )!,
+                time: this.datePipe.transform(
+                    hi.measurementDate,
+                    "mediumTime",
+                    undefined,
+                    locale
+                )!,
+                download: this.conversion
+                    .getSignificantDigits(hi.downloadKbit / 1e3)
+                    .toLocaleString(locale),
+                upload: this.conversion
+                    .getSignificantDigits(hi.uploadKbit / 1e3)
+                    .toLocaleString(locale),
+                ping: this.conversion
+                    .getSignificantDigits(hi.ping)
+                    .toLocaleString(locale),
+                providerName: hi.providerName,
+            }
+        }
+
+    private historyItemToRowRTR =
+        (t: Translation, paginator: IPaginator, historyLength: number) =>
+        (hi: ISimpleHistoryResult, index: number): IHistoryRowRTR => {
+            const locale = this.transloco.getActiveLang()
+            return {
+                id: hi.testUuid!,
+                count: paginator.limit ? index + 1 : historyLength - index,
+                measurementDate: this.datePipe.transform(
+                    hi.measurementDate,
+                    "medium",
+                    undefined,
+                    locale
+                )!,
+                download:
+                    this.classification.getIconByClass(hi.downloadClass) +
+                    this.conversion
+                        .getSignificantDigits(hi.downloadKbit / 1e3)
+                        .toLocaleString(locale) +
+                    " " +
+                    t["Mbps"],
+                upload:
+                    this.classification.getIconByClass(hi.uploadClass) +
+                    this.conversion
+                        .getSignificantDigits(hi.uploadKbit / 1e3)
+                        .toLocaleString(locale) +
+                    " " +
+                    t["Mbps"],
+                ping:
+                    this.classification.getIconByClass(hi.pingClass) +
+                    hi.ping.toLocaleString(locale) +
+                    " " +
+                    t["ms"],
+                details: t["Details"] + "...",
+            }
+        }
 }

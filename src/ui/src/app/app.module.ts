@@ -115,6 +115,7 @@ import { LoopStartScreenComponent } from "./screens/loop-start-screen/loop-start
 import { SprintfPipe } from "./pipes/sprintf.pipe"
 import { AlertComponent } from "./widgets/alert/alert.component"
 import { StopLoopButtonComponent } from "./widgets/stop-loop-button/stop-loop-button.component"
+import { ILoopModeInfo } from "../../../measurement/interfaces/measurement-registration-request.interface"
 
 Chart.register(
     BarElement,
@@ -143,7 +144,7 @@ declare global {
                 server: IMeasurementServerResponse
             ) => Promise<void>
             setDefaultLanguage: (language: string) => Promise<void>
-            runMeasurement: () => Promise<void>
+            runMeasurement: (loopModeInfo?: ILoopModeInfo) => Promise<void>
             abortMeasurement: () => Promise<void>
             getServers: () => Promise<IMeasurementServerResponse[]>
             getEnv: () => Promise<IEnv>

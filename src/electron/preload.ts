@@ -4,6 +4,7 @@ import { EIPVersion } from "../measurement/enums/ip-version.enum"
 import { IMeasurementServerResponse } from "../measurement/interfaces/measurement-server-response.interface"
 import { IPaginator } from "../ui/src/app/interfaces/paginator.interface"
 import { ISort } from "../ui/src/app/interfaces/sort.interface"
+import { ILoopModeInfo } from "../measurement/interfaces/measurement-registration-request.interface"
 
 contextBridge.exposeInMainWorld("electronAPI", {
     quit: () => ipcRenderer.send(Events.QUIT),
@@ -23,7 +24,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.send(Events.SET_ACTIVE_SERVER, server),
     setDefaultLanguage: (language: string) =>
         ipcRenderer.send(Events.SET_DEFAULT_LANGUAGE, language),
-    runMeasurement: () => ipcRenderer.send(Events.RUN_MEASUREMENT),
+    runMeasurement: (loopModeInfo?: ILoopModeInfo) =>
+        ipcRenderer.send(Events.RUN_MEASUREMENT, loopModeInfo),
     abortMeasurement: () => ipcRenderer.send(Events.ABORT_MEASUREMENT),
     getServers: () => ipcRenderer.invoke(Events.GET_SERVERS),
     getEnv: () => ipcRenderer.invoke(Events.GET_ENV),

@@ -19,6 +19,8 @@ import { Router } from "@angular/router"
 import { MainStore } from "./main.store"
 import { IMeasurementServerResponse } from "../../../../measurement/interfaces/measurement-server-response.interface"
 import { ERoutes } from "../enums/routes.enum"
+import { ILoopModeInfo } from "../../../../measurement/interfaces/measurement-registration-request.interface"
+import { v4 } from "uuid"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
@@ -39,6 +41,7 @@ export class TestStore {
     testIntervalMinutes$ = new BehaviorSubject<number | null>(null)
     enableLoopMode$ = new BehaviorSubject<boolean>(false)
     loopCounter$ = new BehaviorSubject<number>(1)
+    loopUuid$ = new BehaviorSubject<string | null>(null)
 
     constructor(
         private mainStore: MainStore,
@@ -61,7 +64,15 @@ export class TestStore {
 
     launchTest() {
         this.resetState()
-        window.electronAPI.runMeasurement()
+        const loopModeInfo: ILoopModeInfo | undefined =
+            this.enableLoopMode$.value === true
+                ? {
+                      max_delay: this.testIntervalMinutes$.value ?? 0,
+                      test_counter: this.loopCounter$.value,
+                      loop_uuid: this.loopUuid$.value ?? "",
+                  }
+                : undefined
+        window.electronAPI.runMeasurement(loopModeInfo)
         return interval(STATE_UPDATE_TIMEOUT).pipe(
             concatMap(() => from(window.electronAPI.getMeasurementState())),
             map((phaseState) => {
@@ -78,10 +89,15 @@ export class TestStore {
     }
 
     launchLoopTest(interval: number) {
+        this.loopUuid$.next(v4())
         this.loopCounter$.next(1)
         this.enableLoopMode$.next(true)
         this.testIntervalMinutes$.next(interval)
         this.router.navigate(["/", ERoutes.TEST])
+    }
+
+    disableLoopMode() {
+        this.enableLoopMode$.next(false)
     }
 
     scheduleLoop() {
@@ -97,10 +113,6 @@ export class TestStore {
                 }
             })
         )
-    }
-
-    disableLoopMode() {
-        this.enableLoopMode$.next(false)
     }
 
     getMeasurementResult(testUuid: string | null) {

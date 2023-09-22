@@ -22,6 +22,7 @@ import { buildMenu } from "./menu"
 import { UserSettingsRequest } from "../measurement/dto/user-settings-request.dto"
 import { IMeasurementServerResponse } from "../measurement/interfaces/measurement-server-response.interface"
 import { LoopService } from "../measurement/services/loop.service"
+import { ILoopModeInfo } from "../measurement/interfaces/measurement-registration-request.interface"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -141,14 +142,17 @@ ipcMain.on(
     }
 )
 
-ipcMain.on(Events.RUN_MEASUREMENT, async (event) => {
-    const webContents = event.sender
-    try {
-        await MeasurementRunner.I.runMeasurement()
-    } catch (e) {
-        webContents.send(Events.ERROR, e)
+ipcMain.on(
+    Events.RUN_MEASUREMENT,
+    async (event, loopModeInfo?: ILoopModeInfo) => {
+        const webContents = event.sender
+        try {
+            await MeasurementRunner.I.runMeasurement({ loopModeInfo })
+        } catch (e) {
+            webContents.send(Events.ERROR, e)
+        }
     }
-})
+)
 
 ipcMain.on(Events.ABORT_MEASUREMENT, () => {
     LoopService.I.resetCounter()

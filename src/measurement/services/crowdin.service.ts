@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios from "axios/index.cjs"
 import { Logger } from "./logger.service"
 import { ICrowdinDownload, ICrowdinJson } from "../interfaces/crowdin.interface"
 import { Store, TERMS_ACCEPTED } from "./store.service"

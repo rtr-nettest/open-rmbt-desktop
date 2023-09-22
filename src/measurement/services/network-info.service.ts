@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios from "axios/index.cjs"
 import { IUserSettings } from "../interfaces/user-settings-response.interface"
 import { IUserSettingsRequest } from "../interfaces/user-settings-request.interface"
 import os from "os"

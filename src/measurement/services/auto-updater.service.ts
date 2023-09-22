@@ -1,7 +1,7 @@
 import * as path from "path"
 import * as cp from "child_process"
 import { app, dialog, BrowserWindow } from "electron"
-import axios from "axios"
+import axios from "axios/index.cjs"
 import { Logger } from "./logger.service"
 import semverGt from "semver/functions/gt"
 import * as pack from "../../../package.json"

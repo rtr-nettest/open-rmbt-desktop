@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios from "axios/index.cjs"
 import { IMeasurementRegistrationRequest } from "../interfaces/measurement-registration-request.interface"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import { IMeasurementResult } from "../interfaces/measurement-result.interface"

@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core"
 import {
     BehaviorSubject,
     catchError,
+    from,
     map,
     of,
     switchMap,
@@ -115,6 +116,23 @@ export class HistoryStore {
                 } else if (!env?.HISTORY_RESULTS_LIMIT && history) {
                     this.history$.next(history)
                 }
+            })
+        )
+    }
+
+    getRecentMeasurementHistory(paginator: IPaginator, sort?: ISort) {
+        if (this.mainStore.error$.value || !paginator.limit) {
+            return of([])
+        }
+        return from(
+            window.electronAPI.getMeasurementHistory(
+                paginator,
+                sort ?? this.historySort$.value
+            )
+        ).pipe(
+            take(1),
+            tap((history) => {
+                this.history$.next(history)
             })
         )
     }

@@ -1,10 +1,10 @@
-import { Component, EventEmitter, Output } from "@angular/core"
-import { Observable, map, tap, withLatestFrom } from "rxjs"
+import { Component, EventEmitter, Input, Output } from "@angular/core"
+import { Observable, map, withLatestFrom } from "rxjs"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
 import { ISimpleHistoryResult } from "../../../../../measurement/interfaces/simple-history-result.interface"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { MainStore } from "src/app/store/main.store"
-import { Translation, TranslocoService } from "@ngneat/transloco"
+import { TranslocoService } from "@ngneat/transloco"
 import { ISort } from "src/app/interfaces/sort.interface"
 import { HistoryStore } from "src/app/store/history.store"
 import {
@@ -12,10 +12,6 @@ import {
     IHistoryRowRTR,
 } from "src/app/interfaces/history-row.interface"
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
-import { IPaginator } from "src/app/interfaces/paginator.interface"
-import { ClassificationService } from "src/app/services/classification.service"
-import { ConversionService } from "src/app/services/conversion.service"
-import { DatePipe } from "@angular/common"
 import { IEnv } from "../../../../../electron/interfaces/env.interface"
 
 @Component({
@@ -24,6 +20,7 @@ import { IEnv } from "../../../../../electron/interfaces/env.interface"
     styleUrls: ["./recent-history.component.scss"],
 })
 export class RecentHistoryComponent {
+    @Input() title?: string
     @Output() sortChange: EventEmitter<ISort> = new EventEmitter()
     columns$: Observable<ITableColumn<ISimpleHistoryResult>[]> =
         this.mainStore.env$.pipe(

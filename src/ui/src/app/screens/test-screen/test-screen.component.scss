@@ -44,8 +44,7 @@ app-main-content {
 }
 
 .app-title {
-    margin-bottom: 1em;
-    margin-left: 1em;
+    margin: rem(36);
 }
 
 app-alert {
@@ -64,9 +63,15 @@ app-alert {
 
     .app-title {
         margin-left: 0;
+        margin-top: 0;
     }
 
     app-gauge {
         width: 100%;
     }
+}
+
+app-recent-history {
+    margin-top: rem(40);
+    width: 100%;
 }

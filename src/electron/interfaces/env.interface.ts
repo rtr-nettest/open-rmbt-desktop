@@ -13,9 +13,9 @@ export interface IEnv {
     HISTORY_RESULTS_LIMIT: number | undefined
     HISTORY_SEARCH_URL: string | undefined
     IP_VERSION: string | null
-    LOOP_MODE_MIN_INT: number
-    LOOP_MODE_MAX_INT: number
-    LOOP_MODE_DEFAULT_INT: number
+    LOOP_MODE_MIN_INTERVAL: number
+    LOOP_MODE_MAX_INTERVAL: number
+    LOOP_MODE_DEFAULT_INTERVAL: number
     OPEN_HISTORY_RESUlT_URL: string
     REPO_URL: string
     TERMS_ACCEPTED: boolean

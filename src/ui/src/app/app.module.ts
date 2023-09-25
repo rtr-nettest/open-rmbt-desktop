@@ -115,8 +115,8 @@ import { LoopStartScreenComponent } from "./screens/loop-start-screen/loop-start
 import { SprintfPipe } from "./pipes/sprintf.pipe"
 import { AlertComponent } from "./widgets/alert/alert.component"
 import { StopLoopButtonComponent } from "./widgets/stop-loop-button/stop-loop-button.component"
-import { ILoopModeInfo } from "../../../measurement/interfaces/measurement-registration-request.interface";
-import { RecentHistoryComponent } from './widgets/recent-history/recent-history.component'
+import { ILoopModeInfo } from "../../../measurement/interfaces/measurement-registration-request.interface"
+import { RecentHistoryComponent } from "./widgets/recent-history/recent-history.component"
 
 Chart.register(
     BarElement,
@@ -165,6 +165,7 @@ declare global {
             onRestartMeasurement: (
                 callback: (loopCounter: number) => any
             ) => Promise<any>
+            onLoopModeExpired: (callback: () => any) => Promise<any>
             deleteLocalData: () => Promise<void>
             scheduleLoop: (loopInterval: number) => Promise<void>
         }

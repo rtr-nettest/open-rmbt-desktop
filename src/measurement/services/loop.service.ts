@@ -9,6 +9,7 @@ export class LoopService {
 
     loopCounter = 0
     loopTimeout?: NodeJS.Timeout
+    expireTimeout?: NodeJS.Timeout
 
     private constructor() {}
 
@@ -17,16 +18,29 @@ export class LoopService {
         clearTimeout(this.loopTimeout)
     }
 
-    scheduleLoop(interval: number, callback: (counter: number) => void) {
+    scheduleLoop(options: {
+        interval: number
+        onTime: (counter: number) => void
+        onExpire?: () => void
+    }) {
         this.loopCounter += 1
         Logger.I.info(
             "Scheduling restart %d in %d ms",
             this.loopCounter,
-            interval
+            options.interval
         )
         this.loopTimeout = setTimeout(() => {
             Logger.I.info("Restarting test")
-            callback(this.loopCounter)
-        }, interval)
+            options.onTime(this.loopCounter)
+        }, options.interval)
+        const expireTimeout = process.env.LOOP_MODE_MAX_DURATION
+            ? parseInt(process.env.LOOP_MODE_MAX_DURATION)
+            : 0
+        if (!this.expireTimeout && options.onExpire && expireTimeout > 0) {
+            this.expireTimeout = setTimeout(() => {
+                Logger.I.info("Loop mode expired")
+                options.onExpire?.()
+            }, expireTimeout * 60 * 1000)
+        }
     }
 }

@@ -21,6 +21,7 @@ import { IMeasurementServerResponse } from "../../../../measurement/interfaces/m
 import { ERoutes } from "../enums/routes.enum"
 import { ILoopModeInfo } from "../../../../measurement/interfaces/measurement-registration-request.interface"
 import { v4 } from "uuid"
+import { MessageService } from "../services/message.service"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
@@ -44,6 +45,7 @@ export class TestStore {
     loopUuid$ = new BehaviorSubject<string | null>(null)
 
     constructor(
+        private message: MessageService,
         private mainStore: MainStore,
         private ngZone: NgZone,
         private router: Router
@@ -58,6 +60,16 @@ export class TestStore {
                     .then(() => {
                         this.router.navigate(["/", ERoutes.TEST])
                     })
+            })
+        })
+        window.electronAPI.onLoopModeExpired(() => {
+            this.ngZone.run(() => {
+                this.message.openConfirmDialog(
+                    "The loop measurement has expired",
+                    () => {
+                        this.router.navigate(["/", ERoutes.HISTORY])
+                    }
+                )
             })
         })
     }

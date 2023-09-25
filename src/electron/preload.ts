@@ -49,6 +49,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
             callback(loopCounter)
         )
     },
+    onLoopModeExpired: (callback: () => any) => {
+        ipcRenderer.removeAllListeners(Events.LOOP_MODE_EXPIRED)
+        ipcRenderer.on(Events.LOOP_MODE_EXPIRED, callback)
+    },
     deleteLocalData: () => {
         ipcRenderer.send(Events.DELETE_LOCAL_DATA)
     },

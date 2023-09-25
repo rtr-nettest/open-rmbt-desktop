@@ -161,9 +161,17 @@ ipcMain.on(Events.ABORT_MEASUREMENT, () => {
 
 ipcMain.on(Events.SCHEDULE_LOOP, (event, loopInterval) => {
     const webContents = event.sender
-    LoopService.I.scheduleLoop(loopInterval, (counter) =>
-        webContents.send(Events.RESTART_MEASUREMENT, counter)
-    )
+    LoopService.I.scheduleLoop({
+        interval: loopInterval,
+        onTime: (counter) => {
+            webContents.send(Events.RESTART_MEASUREMENT, counter)
+        },
+        onExpire: () => {
+            LoopService.I.resetCounter()
+            MeasurementRunner.I.abortMeasurement()
+            webContents.send(Events.LOOP_MODE_EXPIRED)
+        },
+    })
 })
 
 ipcMain.on(Events.DELETE_LOCAL_DATA, () => {
@@ -189,14 +197,14 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
             : undefined,
         HISTORY_SEARCH_URL: process.env.HISTORY_SEARCH_URL,
         IP_VERSION: (Store.get(IP_VERSION) as string) || "",
-        LOOP_MODE_MIN_INT: process.env.LOOP_MODE_MIN_INT
-            ? parseInt(process.env.LOOP_MODE_MIN_INT)
+        LOOP_MODE_MIN_INTERVAL: process.env.LOOP_MODE_MIN_INTERVAL
+            ? parseInt(process.env.LOOP_MODE_MIN_INTERVAL)
             : 5,
-        LOOP_MODE_MAX_INT: process.env.LOOP_MODE_MAX_INT
-            ? parseInt(process.env.LOOP_MODE_MAX_INT)
+        LOOP_MODE_MAX_INTERVAL: process.env.LOOP_MODE_MAX_INTERVAL
+            ? parseInt(process.env.LOOP_MODE_MAX_INTERVAL)
             : 120,
-        LOOP_MODE_DEFAULT_INT: process.env.LOOP_MODE_DEFAULT_INT
-            ? parseInt(process.env.LOOP_MODE_DEFAULT_INT)
+        LOOP_MODE_DEFAULT_INTERVAL: process.env.LOOP_MODE_DEFAULT_INTERVAL
+            ? parseInt(process.env.LOOP_MODE_DEFAULT_INTERVAL)
             : 10,
         OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
         REPO_URL: pack.repository,

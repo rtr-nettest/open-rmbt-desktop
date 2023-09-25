@@ -21,12 +21,14 @@ import { IEnv } from "../../../../../electron/interfaces/env.interface"
 })
 export class RecentHistoryComponent {
     @Input() title?: string
+    @Input() excludeColumns?: string[]
     @Output() sortChange: EventEmitter<ISort> = new EventEmitter()
     columns$: Observable<ITableColumn<ISimpleHistoryResult>[]> =
         this.mainStore.env$.pipe(
             map((env) => {
+                let cols: ITableColumn<ISimpleHistoryResult>[] = []
                 if (env?.FLAVOR === "ont") {
-                    return [
+                    cols = [
                         {
                             columnDef: "measurementDate",
                             header: "history.table.date",
@@ -63,7 +65,7 @@ export class RecentHistoryComponent {
                         },
                     ]
                 } else {
-                    return [
+                    cols = [
                         {
                             columnDef: "count",
                             header: "#",
@@ -98,6 +100,9 @@ export class RecentHistoryComponent {
                         },
                     ]
                 }
+                return cols.filter(
+                    (c) => !this.excludeColumns?.includes(c.columnDef)
+                )
             })
         )
     env?: IEnv

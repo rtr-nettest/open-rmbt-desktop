@@ -38,6 +38,7 @@
                 <app-interim-results></app-interim-results>
             </div>
             <app-recent-history
+                [excludeColumns]="['details']"
                 title="Recent measurements"
             ></app-recent-history>
         </app-main-content>

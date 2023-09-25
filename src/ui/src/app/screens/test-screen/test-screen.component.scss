@@ -44,7 +44,7 @@ app-main-content {
 }
 
 .app-title {
-    margin: rem(36);
+    margin: rem(32);
 }
 
 app-alert {
@@ -72,6 +72,7 @@ app-alert {
 }
 
 app-recent-history {
+    margin-left: rem(32);
     margin-top: rem(40);
     width: 100%;
 }

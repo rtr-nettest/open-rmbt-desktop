@@ -16,6 +16,7 @@ export class LoopService {
     resetCounter() {
         this.loopCounter = 0
         clearTimeout(this.loopTimeout)
+        this.loopTimeout = undefined
     }
 
     scheduleLoop(options: {

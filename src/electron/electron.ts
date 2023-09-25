@@ -1,6 +1,15 @@
-import { app, BrowserWindow, ipcMain, Menu, protocol, shell } from "electron"
+import {
+    app,
+    BrowserWindow,
+    dialog,
+    ipcMain,
+    Menu,
+    protocol,
+    shell,
+} from "electron"
 if (require("electron-squirrel-startup")) app.quit()
 import path from "path"
+import { t } from "../measurement/services/i18n.service"
 import { MeasurementRunner } from "../measurement"
 import { Events } from "./enums/events.enum"
 import { IEnv } from "./interfaces/env.interface"
@@ -23,6 +32,7 @@ import { UserSettingsRequest } from "../measurement/dto/user-settings-request.dt
 import { IMeasurementServerResponse } from "../measurement/interfaces/measurement-server-response.interface"
 import { LoopService } from "../measurement/services/loop.service"
 import { ILoopModeInfo } from "../measurement/interfaces/measurement-registration-request.interface"
+import { EMeasurementStatus } from "../measurement/enums/measurement-status.enum"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -65,6 +75,29 @@ const createWindow = () => {
     } else {
         win.loadURL(`${Protocol.scheme}://index.html`)
     }
+
+    win.on("close", async (event) => {
+        if (
+            [
+                EMeasurementStatus.END,
+                EMeasurementStatus.ABORTED,
+                EMeasurementStatus.NOT_STARTED,
+            ].includes(MeasurementRunner.I.getCurrentPhaseState().phase) &&
+            !LoopService.I.loopTimeout
+        ) {
+            return
+        }
+        const dialogOpts = {
+            type: "warning" as const,
+            buttons: [t("Ok"), t("Cancel")],
+            title: t("Close app"),
+            message: t("The currently running measurement will be aborted"),
+        }
+        const response = await dialog.showMessageBox(dialogOpts)
+        if (response.response !== 0) {
+            event.preventDefault()
+        }
+    })
 }
 
 // Needs to be called before app is ready;

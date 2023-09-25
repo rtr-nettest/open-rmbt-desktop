@@ -117,6 +117,7 @@ import { AlertComponent } from "./widgets/alert/alert.component"
 import { StopLoopButtonComponent } from "./widgets/stop-loop-button/stop-loop-button.component"
 import { ILoopModeInfo } from "../../../measurement/interfaces/measurement-registration-request.interface"
 import { RecentHistoryComponent } from "./widgets/recent-history/recent-history.component"
+import { ERoutes } from "./enums/routes.enum"
 
 Chart.register(
     BarElement,
@@ -161,7 +162,7 @@ declare global {
                 sort?: ISort
             ) => Promise<ISimpleHistoryResult[]>
             onError: (callback: (error: Error) => any) => Promise<any>
-            onOpenSettings: (callback: () => any) => Promise<any>
+            onOpenScreen: (callback: (route: ERoutes) => any) => Promise<any>
             onRestartMeasurement: (
                 callback: (loopCounter: number) => any
             ) => Promise<any>

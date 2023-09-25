@@ -4,6 +4,7 @@ import {
     dialog,
     ipcMain,
     Menu,
+    powerMonitor,
     protocol,
     shell,
 } from "electron"
@@ -33,6 +34,7 @@ import { IMeasurementServerResponse } from "../measurement/interfaces/measuremen
 import { LoopService } from "../measurement/services/loop.service"
 import { ILoopModeInfo } from "../measurement/interfaces/measurement-registration-request.interface"
 import { EMeasurementStatus } from "../measurement/enums/measurement-status.enum"
+import { ERoutes } from "../ui/src/app/enums/routes.enum"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -96,6 +98,33 @@ const createWindow = () => {
         const response = await dialog.showMessageBox(dialogOpts)
         if (response.response !== 0) {
             event.preventDefault()
+        }
+    })
+
+    powerMonitor.on("suspend", async (event) => {
+        if (
+            [
+                EMeasurementStatus.END,
+                EMeasurementStatus.ABORTED,
+                EMeasurementStatus.NOT_STARTED,
+            ].includes(MeasurementRunner.I.getCurrentPhaseState().phase) &&
+            !LoopService.I.loopTimeout
+        ) {
+            return
+        }
+        const dialogOpts = {
+            type: "warning" as const,
+            buttons: [t("Ok")],
+            title: t("App was suspended"),
+            message: t(
+                "The app was suspended. The last running measurement was aborted"
+            ),
+        }
+        const response = await dialog.showMessageBox(dialogOpts)
+        if (response.response === 0) {
+            LoopService.I.resetCounter()
+            MeasurementRunner.I.abortMeasurement()
+            win.webContents.send(Events.OPEN_SCREEN, ERoutes.HISTORY)
         }
     })
 }

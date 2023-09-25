@@ -5,6 +5,7 @@ import { IMeasurementServerResponse } from "../measurement/interfaces/measuremen
 import { IPaginator } from "../ui/src/app/interfaces/paginator.interface"
 import { ISort } from "../ui/src/app/interfaces/sort.interface"
 import { ILoopModeInfo } from "../measurement/interfaces/measurement-registration-request.interface"
+import { ERoutes } from "../ui/src/app/enums/routes.enum"
 
 contextBridge.exposeInMainWorld("electronAPI", {
     quit: () => ipcRenderer.send(Events.QUIT),
@@ -39,9 +40,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.removeAllListeners(Events.ERROR)
         ipcRenderer.on(Events.ERROR, (event, error) => callback(error))
     },
-    onOpenSettings: (callback: () => any) => {
-        ipcRenderer.removeAllListeners(Events.OPEN_SETTINGS)
-        ipcRenderer.on(Events.OPEN_SETTINGS, callback)
+    onOpenScreen: (callback: (route: ERoutes) => any) => {
+        ipcRenderer.removeAllListeners(Events.OPEN_SCREEN)
+        ipcRenderer.on(Events.OPEN_SCREEN, (event, route) => callback(route))
     },
     onRestartMeasurement: (callback: (loopCounter: number) => any) => {
         ipcRenderer.removeAllListeners(Events.RESTART_MEASUREMENT)

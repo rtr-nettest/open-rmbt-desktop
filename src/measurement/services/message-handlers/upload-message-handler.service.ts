@@ -126,7 +126,7 @@ export class UploadMessageHandler implements IMessageHandler {
                 this._isRunning = false
                 if (!this._finalTimeout) {
                     this._finalTimeout = setTimeout(
-                        () => this.stopMessaging.bind(this),
+                        this.stopMessaging.bind(this),
                         UploadMessageHandler.waitForAllChunksTimeMs
                     )
                 }

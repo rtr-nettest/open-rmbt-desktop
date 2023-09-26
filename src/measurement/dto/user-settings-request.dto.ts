@@ -44,7 +44,7 @@ export class UserSettingsRequest implements IUserSettingsRequest {
             this.os_version = os_version
             this.platform = platform
             this.plattform = platform
-            this.model = os.machine()
+            this.model = "Desktop_" + os.machine()
         }
     }
 }

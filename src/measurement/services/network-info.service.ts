@@ -89,6 +89,8 @@ export class NetworkInfoService {
         switch (type) {
             case "wifi":
                 return 99
+            case "mobile":
+                return 105
             case "ethernet":
                 return 106
             default:

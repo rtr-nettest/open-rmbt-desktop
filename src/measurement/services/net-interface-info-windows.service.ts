@@ -53,6 +53,9 @@ export class NetInterfaceInfoWindowsService implements NetInterfaceInfo {
                 case lineLowered.includes("ethernet"):
                     key = "ethernet"
                     break
+                case lineLowered.includes("mobil"):
+                    key = "mobile"
+                    break
             }
             if (key) {
                 blocks.push({ key, value: "" })

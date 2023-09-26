@@ -98,12 +98,14 @@ export class ControlServer {
             return null
         }
         const lastNewsUid = Store.get(LAST_NEWS_UID) as number
+        const settings = new UserSettingsRequest()
         const newsRequest: INewsRequest = {
             language: I18nService.I.getActiveLanguage(),
-            plattform: "Desktop",
+            plattform: settings.plattform ?? "",
+            platform: settings.platform ?? "",
             softwareVersionCode: pack.version.replaceAll(".", ""),
             lastNewsUid,
-            uuid: Store.get(CLIENT_UUID) as string,
+            uuid: settings.uuid,
         }
         Logger.I.info(
             ELoggerMessage.POST_REQUEST,

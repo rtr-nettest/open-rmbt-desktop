@@ -12,7 +12,7 @@ import { randomBytes } from "crypto"
 import { ELoggerMessage } from "../../enums/logger-message.enum"
 
 export class UploadMessageHandler implements IMessageHandler {
-    static waitForAllChunksTimeMs = 3000
+    static waitForAllChunksTimeMs = 1000
     static clientTimeOffsetNs = 1e9
     private _uploadEndTimeNs = 0
     private _result = new MeasurementThreadResultList(0)
@@ -71,7 +71,6 @@ export class UploadMessageHandler implements IMessageHandler {
     }
 
     writeData(): void {
-        this.setActivityInterval()
         const msg = `${ESocketMessage.PUT}${
             this.ctx.chunkSize === this.ctx.defaultChunkSize
                 ? "\n"
@@ -103,9 +102,6 @@ export class UploadMessageHandler implements IMessageHandler {
                 this.ctx.threadResult!.up = this._result
                 this.ctx.threadResult!.currentTime.up = nanos
                 this.ctx.threadResult!.currentTransfer.up = bytes
-                if (nanos > Number(this.ctx.params.test_duration) * 1e9) {
-                    this.stopMessaging()
-                }
             }
             return
         }
@@ -124,10 +120,10 @@ export class UploadMessageHandler implements IMessageHandler {
             } else {
                 bufferIndex++
             }
-            const nowNs = Time.nowNs()
-            if (nowNs >= this._uploadEndTimeNs) {
+            if (Time.nowNs() >= this._uploadEndTimeNs) {
                 buffer[buffer.length - 1] = 0xff
                 this.ctx.client.write(buffer)
+                this._isRunning = false
                 if (!this._finalTimeout) {
                     this._finalTimeout = setTimeout(
                         () => this.stopMessaging.bind(this),

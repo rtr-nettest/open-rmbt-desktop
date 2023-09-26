@@ -15,7 +15,7 @@ export class DownloadMessageHandler implements IMessageHandler {
     private _downloadEndTime = Time.nowNs()
     private _downloadBytesRead = 0
     private _activityInterval?: NodeJS.Timeout
-    private _inactivityTimeout = 200
+    private _inactivityTimeout = 100
     private _result = new MeasurementThreadResultList(0)
     private _nsec = Infinity
     private _isFinishRequested = false

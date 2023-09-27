@@ -87,5 +87,14 @@
     "Interval between tests": "Interval between tests",
     "minutes": "minutes",
     "Start loop test": "Start loop test",
-    "Tests are conducted repeatedly until they are stopped manually": "Tests are conducted repeatedly until they are stopped manually"
+    "Tests are conducted repeatedly until they are stopped manually": "Tests are conducted repeatedly until they are stopped manually",
+    "Measurement": "Measurement",
+    "End tests": "End tests",
+    "Next measurement in": "Next measurement in",
+    "Recent measurements": "Recent measurements",
+    "The loop measurement has expired": "The loop measurement has expired",
+    "Close app": "Close app",
+    "The currently running measurement will be aborted": "The currently running measurement will be aborted",
+    "App was suspended": "App was suspended",
+    "The app was suspended. The last running measurement was aborted": "The app was suspended. The last running measurement was aborted"
 }

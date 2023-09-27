@@ -1,0 +1,11 @@
+@import "../../../assets/styles/core.scss";
+
+:host.app-padding {
+    .app-title {
+        margin: rem(64) rem(32) rem(32);
+    }
+    app-table {
+        display: block;
+        margin: rem(32);
+    }
+}

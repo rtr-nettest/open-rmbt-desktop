@@ -1,5 +1,6 @@
 import { Component } from "@angular/core"
 import { Router } from "@angular/router"
+import { ERoutes } from "src/app/enums/routes.enum"
 import { TestStore } from "src/app/store/test.store"
 
 @Component({
@@ -13,6 +14,6 @@ export class StopLoopButtonComponent {
     abortTest() {
         window.electronAPI.abortMeasurement()
         this.testStore.disableLoopMode()
-        this.router.navigate(["/"])
+        this.router.navigate(["/", ERoutes.HISTORY])
     }
 }

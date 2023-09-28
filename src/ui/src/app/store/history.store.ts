@@ -29,11 +29,18 @@ import {
 
 export const STATE_UPDATE_TIMEOUT = 200
 
+export interface IHistoryGroupItem {
+    groupHeader?: boolean
+    hidden?: boolean
+}
+
 @Injectable({
     providedIn: "root",
 })
 export class HistoryStore {
-    history$ = new BehaviorSubject<ISimpleHistoryResult[]>([])
+    history$ = new BehaviorSubject<
+        Array<ISimpleHistoryResult & IHistoryGroupItem>
+    >([])
     historyPaginator$ = new BehaviorSubject<IPaginator>({
         offset: 0,
     })
@@ -112,12 +119,37 @@ export class HistoryStore {
             }),
             tap((history) => {
                 if (env?.HISTORY_RESULTS_LIMIT && history) {
-                    this.history$.next([...this.history$.value, ...history])
+                    this.history$.next(
+                        this.groupResults([...this.history$.value, ...history])
+                    )
                 } else if (!env?.HISTORY_RESULTS_LIMIT && history) {
-                    this.history$.next(history)
+                    this.history$.next(this.groupResults(history))
                 }
             })
         )
+    }
+
+    private groupResults(history: ISimpleHistoryResult[]) {
+        const retVal: Array<ISimpleHistoryResult & IHistoryGroupItem> = []
+        const grouped: Set<string> = new Set()
+        for (let i = 0; i < history.length; i++) {
+            if (history[i].loopUuid) {
+                if (!grouped.has(history[i].loopUuid!)) {
+                    grouped.add(history[i].loopUuid!)
+                    retVal.push({
+                        ...history[i],
+                        groupHeader: true,
+                    })
+                }
+                retVal.push({
+                    ...history[i],
+                    hidden: true,
+                })
+            } else {
+                retVal.push(history[i])
+            }
+        }
+        return retVal
     }
 
     getRecentMeasurementHistory(paginator: IPaginator, sort?: ISort) {

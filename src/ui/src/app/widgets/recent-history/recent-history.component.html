@@ -1,4 +1,4 @@
-<ng-container *ngIf="getResult() | async as result">
+<ng-container *ngIf="result$ | async as result">
     <ng-container *ngIf="result.totalElements > 0">
         <ng-container *transloco="let t">
             <h3 *ngIf="title" class="app-title" style="margin-bottom: 1em">
@@ -11,6 +11,7 @@
                 [sort]="(sort$ | async)!"
                 [shouldHideHeader]="false"
                 [tableClassNames]="tableClassNames ?? []"
+                (toggleExpandableRow)="toggleLoopResults($event.toString())"
             ></app-table>
         </ng-container>
     </ng-container>

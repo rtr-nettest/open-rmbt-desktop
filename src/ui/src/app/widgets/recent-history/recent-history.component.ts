@@ -1,7 +1,6 @@
-import { Component, EventEmitter, Input, Output } from "@angular/core"
-import { Observable, map, withLatestFrom } from "rxjs"
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core"
+import { Observable, map, of, withLatestFrom } from "rxjs"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
-import { ISimpleHistoryResult } from "../../../../../measurement/interfaces/simple-history-result.interface"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { MainStore } from "src/app/store/main.store"
 import { TranslocoService } from "@ngneat/transloco"
@@ -11,7 +10,6 @@ import {
     IHistoryRowONT,
     IHistoryRowRTR,
 } from "src/app/interfaces/history-row.interface"
-import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
 import { IEnv } from "../../../../../electron/interfaces/env.interface"
 
 @Component({
@@ -19,7 +17,7 @@ import { IEnv } from "../../../../../electron/interfaces/env.interface"
     templateUrl: "./recent-history.component.html",
     styleUrls: ["./recent-history.component.scss"],
 })
-export class RecentHistoryComponent {
+export class RecentHistoryComponent implements OnInit {
     @Input() grouped?: boolean
     @Input() title?: string
     @Input() excludeColumns?: string[]
@@ -113,6 +111,11 @@ export class RecentHistoryComponent {
         )
     env?: IEnv
 
+    result$: Observable<{
+        content: IHistoryRowONT[] | IHistoryRowRTR[]
+        totalElements: number
+    }> = of({ content: [], totalElements: 0 })
+
     sort$ = this.store.historySort$
     tableClassNames?: string[]
 
@@ -122,8 +125,8 @@ export class RecentHistoryComponent {
         private transloco: TranslocoService
     ) {}
 
-    getResult() {
-        return this.store.getFormattedHistory(this.grouped).pipe(
+    ngOnInit(): void {
+        this.result$ = this.store.getFormattedHistory(this.grouped).pipe(
             withLatestFrom(this.mainStore.env$),
             map(([history, env]) => {
                 this.env = env ?? undefined
@@ -137,5 +140,16 @@ export class RecentHistoryComponent {
 
     changeSort = (sort: ISort) => {
         this.sortChange.emit(sort)
+    }
+
+    toggleLoopResults(loopUuid: string) {
+        const openLoops = this.store.openLoops$.value
+        const index = openLoops.indexOf(loopUuid)
+        if (index >= 0) {
+            openLoops.splice(index, 1)
+            this.store.openLoops$.next(openLoops)
+        } else {
+            this.store.openLoops$.next([...openLoops, loopUuid])
+        }
     }
 }

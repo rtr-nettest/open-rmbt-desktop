@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core"
 import {
     BehaviorSubject,
     catchError,
+    combineLatest,
     from,
     map,
     of,
@@ -42,6 +43,7 @@ export class HistoryStore {
         active: "measurementDate",
         direction: "desc",
     })
+    openLoops$ = new BehaviorSubject<string[]>([])
 
     constructor(
         private classification: ClassificationService,
@@ -54,20 +56,22 @@ export class HistoryStore {
     ) {}
 
     getFormattedHistory(grouped?: boolean) {
-        return this.history$.pipe(
-            withLatestFrom(
-                this.transloco.selectTranslation(),
-                this.historyPaginator$,
-                this.mainStore.env$
-            ),
-            map(([history, t, paginator, env]) => {
+        return combineLatest([
+            this.history$,
+            this.openLoops$,
+            this.transloco.selectTranslation(),
+            this.historyPaginator$,
+            this.mainStore.env$,
+        ]).pipe(
+            map(([history, openLoops, t, paginator, env]) => {
                 if (!history.length) {
                     return { content: [], totalElements: 0 }
                 }
                 const h =
                     grouped && env?.FLAVOR !== "ont"
                         ? this.groupResults(
-                              this.countResults(history, paginator)
+                              this.countResults(history, paginator),
+                              openLoops
                           )
                         : history
                 const content =
@@ -127,7 +131,7 @@ export class HistoryStore {
         )
     }
 
-    private groupResults(history: ISimpleHistoryResult[]) {
+    private groupResults(history: ISimpleHistoryResult[], openLoops: string[]) {
         const retVal: Array<ISimpleHistoryResult & IHistoryGroupItem> = []
         const grouped: Set<string> = new Set()
         for (let i = 0; i < history.length; i++) {
@@ -141,7 +145,7 @@ export class HistoryStore {
                 }
                 retVal.push({
                     ...history[i],
-                    hidden: true,
+                    hidden: !openLoops.includes(history[i].loopUuid!),
                 })
             } else {
                 retVal.push(history[i])

@@ -4,7 +4,7 @@ $color-border: rgba(0, 0, 0, 0.1);
 
 .app-table {
     mat-row {
-        min-height: rem(40);
+        min-height: rem(50);
         &:nth-child(odd) {
             background-color: #ecf3e5;
         }
@@ -120,4 +120,22 @@ mat-paginator {
     position: relative;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+.mat-row {
+    &--hidden {
+        height: 0 !important;
+        min-height: 0 !important;
+        transition: all 300ms ease;
+    }
+
+    &--visible {
+        height: rem(50) !important;
+        min-height: rem(50) !important;
+        transition: all 300ms ease;
+    }
+
+    &--group-header {
+        cursor: pointer;
+    }
 }

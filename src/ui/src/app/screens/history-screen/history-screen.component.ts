@@ -55,7 +55,7 @@ export class HistoryScreenComponent
         },
     ]
     result$: Observable<IBasicResponse<IHistoryRowRTR | IHistoryRowONT>> =
-        this.store.formattedHistory$
+        this.store.getFormattedHistory(true)
 
     constructor(
         mainStore: MainStore,

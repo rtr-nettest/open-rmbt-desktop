@@ -20,13 +20,14 @@ import { IEnv } from "../../../../../electron/interfaces/env.interface"
     styleUrls: ["./recent-history.component.scss"],
 })
 export class RecentHistoryComponent {
+    @Input() grouped?: boolean
     @Input() title?: string
     @Input() excludeColumns?: string[]
     @Output() sortChange: EventEmitter<ISort> = new EventEmitter()
-    columns$: Observable<ITableColumn<ISimpleHistoryResult>[]> =
+    columns$: Observable<ITableColumn<IHistoryRowRTR | IHistoryRowONT>[]> =
         this.mainStore.env$.pipe(
             map((env) => {
-                let cols: ITableColumn<ISimpleHistoryResult>[] = []
+                let cols: ITableColumn<IHistoryRowRTR | IHistoryRowONT>[] = []
                 if (env?.FLAVOR === "ont") {
                     cols = [
                         {
@@ -69,6 +70,9 @@ export class RecentHistoryComponent {
                         {
                             columnDef: "count",
                             header: "#",
+                            transformValue(value) {
+                                return value.groupHeader ? "" : value.count
+                            },
                         },
                         {
                             columnDef: "measurementDate",
@@ -95,8 +99,10 @@ export class RecentHistoryComponent {
                             link: (id) =>
                                 "/" +
                                 ERoutes.TEST_RESULT.replace(":testUuid", id),
-                            transformValue: () =>
-                                this.transloco.translate("Details..."),
+                            transformValue: (value) =>
+                                value.groupHeader
+                                    ? ""
+                                    : this.transloco.translate("Details..."),
                         },
                     ]
                 }
@@ -107,8 +113,17 @@ export class RecentHistoryComponent {
         )
     env?: IEnv
 
-    result$: Observable<IBasicResponse<IHistoryRowRTR | IHistoryRowONT>> =
-        this.store.formattedHistory$.pipe(
+    sort$ = this.store.historySort$
+    tableClassNames?: string[]
+
+    constructor(
+        private mainStore: MainStore,
+        private store: HistoryStore,
+        private transloco: TranslocoService
+    ) {}
+
+    getResult() {
+        return this.store.getFormattedHistory(this.grouped).pipe(
             withLatestFrom(this.mainStore.env$),
             map(([history, env]) => {
                 this.env = env ?? undefined
@@ -118,14 +133,7 @@ export class RecentHistoryComponent {
                 return history
             })
         )
-    sort$ = this.store.historySort$
-    tableClassNames?: string[]
-
-    constructor(
-        private mainStore: MainStore,
-        private store: HistoryStore,
-        private transloco: TranslocoService
-    ) {}
+    }
 
     changeSort = (sort: ISort) => {
         this.sortChange.emit(sort)

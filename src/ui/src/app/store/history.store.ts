@@ -23,24 +23,18 @@ import { ClassificationService } from "../services/classification.service"
 import { ConversionService } from "../services/conversion.service"
 import { DatePipe } from "@angular/common"
 import {
+    IHistoryGroupItem,
     IHistoryRowONT,
     IHistoryRowRTR,
 } from "../interfaces/history-row.interface"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
-export interface IHistoryGroupItem {
-    groupHeader?: boolean
-    hidden?: boolean
-}
-
 @Injectable({
     providedIn: "root",
 })
 export class HistoryStore {
-    history$ = new BehaviorSubject<
-        Array<ISimpleHistoryResult & IHistoryGroupItem>
-    >([])
+    history$ = new BehaviorSubject<Array<ISimpleHistoryResult>>([])
     historyPaginator$ = new BehaviorSubject<IPaginator>({
         offset: 0,
     })
@@ -48,34 +42,6 @@ export class HistoryStore {
         active: "measurementDate",
         direction: "desc",
     })
-    formattedHistory$ = this.history$.pipe(
-        withLatestFrom(
-            this.transloco.selectTranslation(),
-            this.historyPaginator$,
-            this.mainStore.env$
-        ),
-        map(([history, t, paginator, env]) => {
-            if (!history.length) {
-                return { content: [], totalElements: 0 }
-            }
-            const content =
-                env?.FLAVOR === "ont"
-                    ? history.map(
-                          this.historyItemToRowONT(t, paginator, history.length)
-                      )
-                    : history.map(
-                          this.historyItemToRowRTR(t, paginator, history.length)
-                      )
-            const totalElements = history[0].paginator?.totalElements
-            return {
-                content,
-                totalElements:
-                    env?.FLAVOR === "ont" && totalElements
-                        ? totalElements
-                        : content.length,
-            }
-        })
-    )
 
     constructor(
         private classification: ClassificationService,
@@ -86,6 +52,39 @@ export class HistoryStore {
         private transloco: TranslocoService,
         private message: MessageService
     ) {}
+
+    getFormattedHistory(grouped?: boolean) {
+        return this.history$.pipe(
+            withLatestFrom(
+                this.transloco.selectTranslation(),
+                this.historyPaginator$,
+                this.mainStore.env$
+            ),
+            map(([history, t, paginator, env]) => {
+                if (!history.length) {
+                    return { content: [], totalElements: 0 }
+                }
+                const h =
+                    grouped && env?.FLAVOR !== "ont"
+                        ? this.groupResults(
+                              this.countResults(history, paginator)
+                          )
+                        : history
+                const content =
+                    env?.FLAVOR === "ont"
+                        ? h.map(this.historyItemToRowONT(t))
+                        : h.map(this.historyItemToRowRTR(t))
+                const totalElements = history[0].paginator?.totalElements
+                return {
+                    content,
+                    totalElements:
+                        env?.FLAVOR === "ont" && totalElements
+                            ? totalElements
+                            : content.length,
+                }
+            })
+        )
+    }
 
     getMeasurementHistory() {
         if (this.mainStore.error$.value) {
@@ -118,12 +117,11 @@ export class HistoryStore {
                 }
             }),
             tap((history) => {
-                if (env?.HISTORY_RESULTS_LIMIT && history) {
-                    this.history$.next(
-                        this.groupResults([...this.history$.value, ...history])
-                    )
-                } else if (!env?.HISTORY_RESULTS_LIMIT && history) {
-                    this.history$.next(this.groupResults(history))
+                if (history) {
+                    const h = env?.HISTORY_RESULTS_LIMIT
+                        ? [...this.history$.value, ...history]
+                        : history
+                    this.history$.next(h)
                 }
             })
         )
@@ -258,9 +256,19 @@ export class HistoryStore {
         })
     }
 
+    private countResults(
+        history: ISimpleHistoryResult[],
+        paginator: IPaginator
+    ) {
+        return history.map((hi, index) => ({
+            ...hi,
+            count: paginator.limit ? index + 1 : history.length - index,
+        }))
+    }
+
     private historyItemToRowONT =
-        (t: Translation, paginator: IPaginator, historyLength: number) =>
-        (hi: ISimpleHistoryResult, index: number): IHistoryRowONT => {
+        (t: Translation) =>
+        (hi: ISimpleHistoryResult): IHistoryRowONT => {
             const locale = this.transloco.getActiveLang()
             return {
                 id: hi.testUuid!,
@@ -290,18 +298,26 @@ export class HistoryStore {
         }
 
     private historyItemToRowRTR =
-        (t: Translation, paginator: IPaginator, historyLength: number) =>
-        (hi: ISimpleHistoryResult, index: number): IHistoryRowRTR => {
+        (t: Translation) =>
+        (hi: ISimpleHistoryResult & IHistoryGroupItem): IHistoryRowRTR => {
             const locale = this.transloco.getActiveLang()
+            const measurementDate = this.datePipe.transform(
+                hi.measurementDate,
+                "medium",
+                undefined,
+                locale
+            )!
+            if (hi.groupHeader) {
+                return {
+                    id: hi.loopUuid!,
+                    measurementDate,
+                    groupHeader: hi.groupHeader,
+                }
+            }
             return {
                 id: hi.testUuid!,
-                count: paginator.limit ? index + 1 : historyLength - index,
-                measurementDate: this.datePipe.transform(
-                    hi.measurementDate,
-                    "medium",
-                    undefined,
-                    locale
-                )!,
+                count: hi.count,
+                measurementDate,
                 download:
                     this.classification.getIconByClass(hi.downloadClass) +
                     this.conversion
@@ -322,6 +338,8 @@ export class HistoryStore {
                     " " +
                     t["ms"],
                 details: t["Details"] + "...",
+                loopUuid: hi.loopUuid,
+                hidden: hi.hidden,
             }
         }
 }

@@ -4,16 +4,20 @@ $color-border: rgba(0, 0, 0, 0.1);
 
 .app-table {
     mat-row {
-        min-height: rem(40);
+        min-height: rem(50);
         &:nth-child(odd) {
-            background-color: #ecf3e5;
+            background-color: #f9fbf7;
         }
         &:nth-child(even) {
-            background-color: #f9fbf7;
+            background-color: white;
+        }
+        &.mat-row--group-header {
+            background-color: #ecf3e5;
         }
     }
 
     mat-header-row {
+        background-color: #dceace;
         min-height: rem(50);
         z-index: 1 !important;
     }
@@ -59,7 +63,6 @@ $color-border: rgba(0, 0, 0, 0.1);
     }
 
     mat-header-cell {
-        background-color: #ecf3e5;
         font-weight: 700 !important;
 
         :not(:only-child) {
@@ -118,6 +121,25 @@ mat-paginator {
 
 .mat-table-wrap {
     position: relative;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
+}
+
+.mat-row {
+    &--hidden {
+        height: 0 !important;
+        min-height: 0 !important;
+        transition: all 300ms ease;
+        padding-left: rem(24);
+    }
+
+    &--visible {
+        height: rem(50) !important;
+        min-height: rem(50) !important;
+        transition: all 300ms ease;
+        padding-left: rem(24);
+    }
+
+    &--group-header {
+        cursor: pointer;
+    }
 }

@@ -15,6 +15,7 @@
             </h1>
             <div class="app-wrapper">
                 <app-recent-history
+                    [grouped]="true"
                     (sortChange)="changeSort($event)"
                 ></app-recent-history>
                 <button

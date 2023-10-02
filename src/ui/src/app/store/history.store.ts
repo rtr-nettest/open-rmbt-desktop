@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core"
 import {
     BehaviorSubject,
     catchError,
+    combineLatest,
     from,
     map,
     of,
@@ -23,9 +24,13 @@ import { ClassificationService } from "../services/classification.service"
 import { ConversionService } from "../services/conversion.service"
 import { DatePipe } from "@angular/common"
 import {
+    IHistoryGroupItem,
     IHistoryRowONT,
     IHistoryRowRTR,
 } from "../interfaces/history-row.interface"
+import { ExpandArrowComponent } from "../widgets/expand-arrow/expand-arrow.component"
+import { ERoutes } from "../enums/routes.enum"
+import { RouterLinkComponent } from "../widgets/router-link/router-link.component"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
@@ -33,7 +38,7 @@ export const STATE_UPDATE_TIMEOUT = 200
     providedIn: "root",
 })
 export class HistoryStore {
-    history$ = new BehaviorSubject<ISimpleHistoryResult[]>([])
+    history$ = new BehaviorSubject<Array<ISimpleHistoryResult>>([])
     historyPaginator$ = new BehaviorSubject<IPaginator>({
         offset: 0,
     })
@@ -41,34 +46,7 @@ export class HistoryStore {
         active: "measurementDate",
         direction: "desc",
     })
-    formattedHistory$ = this.history$.pipe(
-        withLatestFrom(
-            this.transloco.selectTranslation(),
-            this.historyPaginator$,
-            this.mainStore.env$
-        ),
-        map(([history, t, paginator, env]) => {
-            if (!history.length) {
-                return { content: [], totalElements: 0 }
-            }
-            const content =
-                env?.FLAVOR === "ont"
-                    ? history.map(
-                          this.historyItemToRowONT(t, paginator, history.length)
-                      )
-                    : history.map(
-                          this.historyItemToRowRTR(t, paginator, history.length)
-                      )
-            const totalElements = history[0].paginator?.totalElements
-            return {
-                content,
-                totalElements:
-                    env?.FLAVOR === "ont" && totalElements
-                        ? totalElements
-                        : content.length,
-            }
-        })
-    )
+    openLoops$ = new BehaviorSubject<string[]>([])
 
     constructor(
         private classification: ClassificationService,
@@ -79,6 +57,41 @@ export class HistoryStore {
         private transloco: TranslocoService,
         private message: MessageService
     ) {}
+
+    getFormattedHistory(grouped?: boolean) {
+        return combineLatest([
+            this.history$,
+            this.transloco.selectTranslation(),
+            this.historyPaginator$,
+            this.mainStore.env$,
+            this.openLoops$,
+        ]).pipe(
+            map(([history, t, paginator, env, openLoops]) => {
+                if (!history.length) {
+                    return { content: [], totalElements: 0 }
+                }
+                const h =
+                    grouped && env?.FLAVOR !== "ont"
+                        ? this.groupResults(
+                              this.countResults(history, paginator),
+                              openLoops
+                          )
+                        : history
+                const content =
+                    env?.FLAVOR === "ont"
+                        ? h.map(this.historyItemToRowONT(t))
+                        : h.map(this.historyItemToRowRTR(t, openLoops))
+                const totalElements = history[0].paginator?.totalElements
+                return {
+                    content,
+                    totalElements:
+                        env?.FLAVOR === "ont" && totalElements
+                            ? totalElements
+                            : content.length,
+                }
+            })
+        )
+    }
 
     getMeasurementHistory() {
         if (this.mainStore.error$.value) {
@@ -111,13 +124,37 @@ export class HistoryStore {
                 }
             }),
             tap((history) => {
-                if (env?.HISTORY_RESULTS_LIMIT && history) {
-                    this.history$.next([...this.history$.value, ...history])
-                } else if (!env?.HISTORY_RESULTS_LIMIT && history) {
-                    this.history$.next(history)
+                if (history) {
+                    const h = env?.HISTORY_RESULTS_LIMIT
+                        ? [...this.history$.value, ...history]
+                        : history
+                    this.history$.next(h)
                 }
             })
         )
+    }
+
+    private groupResults(history: ISimpleHistoryResult[], openLoops: string[]) {
+        const retVal: Array<ISimpleHistoryResult & IHistoryGroupItem> = []
+        const grouped: Set<string> = new Set()
+        for (let i = 0; i < history.length; i++) {
+            if (history[i].loopUuid) {
+                if (!grouped.has(history[i].loopUuid!)) {
+                    grouped.add(history[i].loopUuid!)
+                    retVal.push({
+                        ...history[i],
+                        groupHeader: true,
+                    })
+                }
+                retVal.push({
+                    ...history[i],
+                    hidden: !openLoops.includes(history[i].loopUuid!),
+                })
+            } else {
+                retVal.push(history[i])
+            }
+        }
+        return retVal
     }
 
     getRecentMeasurementHistory(paginator: IPaginator, sort?: ISort) {
@@ -226,9 +263,19 @@ export class HistoryStore {
         })
     }
 
+    private countResults(
+        history: ISimpleHistoryResult[],
+        paginator: IPaginator
+    ) {
+        return history.map((hi, index) => ({
+            ...hi,
+            count: paginator.limit ? index + 1 : history.length - index,
+        }))
+    }
+
     private historyItemToRowONT =
-        (t: Translation, paginator: IPaginator, historyLength: number) =>
-        (hi: ISimpleHistoryResult, index: number): IHistoryRowONT => {
+        (t: Translation) =>
+        (hi: ISimpleHistoryResult): IHistoryRowONT => {
             const locale = this.transloco.getActiveLang()
             return {
                 id: hi.testUuid!,
@@ -258,18 +305,31 @@ export class HistoryStore {
         }
 
     private historyItemToRowRTR =
-        (t: Translation, paginator: IPaginator, historyLength: number) =>
-        (hi: ISimpleHistoryResult, index: number): IHistoryRowRTR => {
+        (t: Translation, openLoops: string[]) =>
+        (hi: ISimpleHistoryResult & IHistoryGroupItem): IHistoryRowRTR => {
             const locale = this.transloco.getActiveLang()
+            const measurementDate = this.datePipe.transform(
+                hi.measurementDate,
+                "medium",
+                undefined,
+                locale
+            )!
+            if (hi.groupHeader) {
+                return {
+                    id: hi.loopUuid!,
+                    measurementDate,
+                    groupHeader: hi.groupHeader,
+                    details: ExpandArrowComponent,
+                    componentField: "details",
+                    parameters: {
+                        expanded: openLoops.includes(hi.loopUuid!),
+                    },
+                }
+            }
             return {
                 id: hi.testUuid!,
-                count: paginator.limit ? index + 1 : historyLength - index,
-                measurementDate: this.datePipe.transform(
-                    hi.measurementDate,
-                    "medium",
-                    undefined,
-                    locale
-                )!,
+                count: hi.count,
+                measurementDate,
                 download:
                     this.classification.getIconByClass(hi.downloadClass) +
                     this.conversion
@@ -289,7 +349,19 @@ export class HistoryStore {
                     hi.ping.toLocaleString(locale) +
                     " " +
                     t["ms"],
-                details: t["Details"] + "...",
+                componentField: "details",
+                details: RouterLinkComponent,
+                parameters: {
+                    label: "Details...",
+                    route:
+                        "/" +
+                        ERoutes.TEST_RESULT.replace(
+                            ":testUuid",
+                            hi.testUuid ?? ""
+                        ),
+                },
+                loopUuid: hi.loopUuid,
+                hidden: hi.hidden,
             }
         }
 }

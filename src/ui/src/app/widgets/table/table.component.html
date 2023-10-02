@@ -43,8 +43,13 @@
                     [style]="justify(column)"
                 >
                     <ng-template
-                        [dynamicComponent]="element.component"
-                        [parameters]="element.parameters"
+                        [dynamicComponent]="
+                            element[element.componentField] || element.component
+                        "
+                        [parameters]="
+                            element[element.parametersField] ||
+                            element.parameters
+                        "
                     ></ng-template>
                 </mat-cell>
             </ng-container>

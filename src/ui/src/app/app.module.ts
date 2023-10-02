@@ -117,7 +117,9 @@ import { AlertComponent } from "./widgets/alert/alert.component"
 import { StopLoopButtonComponent } from "./widgets/stop-loop-button/stop-loop-button.component"
 import { ILoopModeInfo } from "../../../measurement/interfaces/measurement-registration-request.interface"
 import { RecentHistoryComponent } from "./widgets/recent-history/recent-history.component"
-import { ERoutes } from "./enums/routes.enum"
+import { ERoutes } from "./enums/routes.enum";
+import { ExpandArrowComponent } from './widgets/expand-arrow/expand-arrow.component';
+import { RouterLinkComponent } from './widgets/router-link/router-link.component'
 
 Chart.register(
     BarElement,
@@ -226,6 +228,8 @@ declare global {
         AlertComponent,
         StopLoopButtonComponent,
         RecentHistoryComponent,
+        ExpandArrowComponent,
+        RouterLinkComponent,
     ],
     imports: [
         AppRoutingModule,

@@ -2,8 +2,10 @@ export interface IHistoryRowRTR extends IHistoryGroupItem {
     download?: string
     upload?: string
     ping?: string
-    details?: string
+    details?: any
     loopUuid?: string
+    componentField?: string
+    parameters?: { [key: string]: any }
 }
 
 export interface IHistoryRowONT extends IHistoryGroupItem {

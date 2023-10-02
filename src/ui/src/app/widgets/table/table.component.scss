@@ -11,6 +11,9 @@ $color-border: rgba(0, 0, 0, 0.1);
         &:nth-child(even) {
             background-color: #f9fbf7;
         }
+        &.mat-row--group-header {
+            background-color: #e1f2cd;
+        }
     }
 
     mat-header-row {
@@ -118,8 +121,7 @@ mat-paginator {
 
 .mat-table-wrap {
     position: relative;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 .mat-row {

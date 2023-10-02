@@ -28,6 +28,9 @@ import {
     IHistoryRowONT,
     IHistoryRowRTR,
 } from "../interfaces/history-row.interface"
+import { ExpandArrowComponent } from "../widgets/expand-arrow/expand-arrow.component"
+import { ERoutes } from "../enums/routes.enum"
+import { RouterLinkComponent } from "../widgets/router-link/router-link.component"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
@@ -58,12 +61,12 @@ export class HistoryStore {
     getFormattedHistory(grouped?: boolean) {
         return combineLatest([
             this.history$,
-            this.openLoops$,
             this.transloco.selectTranslation(),
             this.historyPaginator$,
             this.mainStore.env$,
+            this.openLoops$,
         ]).pipe(
-            map(([history, openLoops, t, paginator, env]) => {
+            map(([history, t, paginator, env, openLoops]) => {
                 if (!history.length) {
                     return { content: [], totalElements: 0 }
                 }
@@ -77,7 +80,7 @@ export class HistoryStore {
                 const content =
                     env?.FLAVOR === "ont"
                         ? h.map(this.historyItemToRowONT(t))
-                        : h.map(this.historyItemToRowRTR(t))
+                        : h.map(this.historyItemToRowRTR(t, openLoops))
                 const totalElements = history[0].paginator?.totalElements
                 return {
                     content,
@@ -302,7 +305,7 @@ export class HistoryStore {
         }
 
     private historyItemToRowRTR =
-        (t: Translation) =>
+        (t: Translation, openLoops: string[]) =>
         (hi: ISimpleHistoryResult & IHistoryGroupItem): IHistoryRowRTR => {
             const locale = this.transloco.getActiveLang()
             const measurementDate = this.datePipe.transform(
@@ -316,6 +319,11 @@ export class HistoryStore {
                     id: hi.loopUuid!,
                     measurementDate,
                     groupHeader: hi.groupHeader,
+                    details: ExpandArrowComponent,
+                    componentField: "details",
+                    parameters: {
+                        expanded: openLoops.includes(hi.loopUuid!),
+                    },
                 }
             }
             return {
@@ -341,7 +349,17 @@ export class HistoryStore {
                     hi.ping.toLocaleString(locale) +
                     " " +
                     t["ms"],
-                details: t["Details"] + "...",
+                componentField: "details",
+                details: RouterLinkComponent,
+                parameters: {
+                    label: "Details...",
+                    route:
+                        "/" +
+                        ERoutes.TEST_RESULT.replace(
+                            ":testUuid",
+                            hi.testUuid ?? ""
+                        ),
+                },
                 loopUuid: hi.loopUuid,
                 hidden: hi.hidden,
             }

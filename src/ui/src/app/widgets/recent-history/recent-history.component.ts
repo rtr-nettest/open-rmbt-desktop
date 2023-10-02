@@ -94,13 +94,7 @@ export class RecentHistoryComponent implements OnInit {
                         {
                             columnDef: "details",
                             header: "",
-                            link: (id) =>
-                                "/" +
-                                ERoutes.TEST_RESULT.replace(":testUuid", id),
-                            transformValue: (value) =>
-                                value.groupHeader
-                                    ? ""
-                                    : this.transloco.translate("Details..."),
+                            isComponent: true,
                         },
                     ]
                 }
@@ -119,11 +113,7 @@ export class RecentHistoryComponent implements OnInit {
     sort$ = this.store.historySort$
     tableClassNames?: string[]
 
-    constructor(
-        private mainStore: MainStore,
-        private store: HistoryStore,
-        private transloco: TranslocoService
-    ) {}
+    constructor(private mainStore: MainStore, private store: HistoryStore) {}
 
     ngOnInit(): void {
         this.result$ = this.store.getFormattedHistory(this.grouped).pipe(

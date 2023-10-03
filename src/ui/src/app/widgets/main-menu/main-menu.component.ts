@@ -72,8 +72,6 @@ export class MainMenuComponent {
                     },
                     { canCancel: true }
                 )
-        } else if (item.route.includes(ERoutes.TEST)) {
-            this.testStore.disableLoopMode()
         }
     }
 
@@ -95,7 +93,6 @@ export class MainMenuComponent {
                     : "",
             ].join(" "),
             action: () => {
-                window.electronAPI.abortMeasurement()
                 if (item.url) {
                     window.open(item.url, "_blank")
                 } else if (item.route) {

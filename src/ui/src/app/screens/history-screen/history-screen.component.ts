@@ -30,6 +30,7 @@ export class HistoryScreenComponent
     implements OnInit, OnDestroy, AfterViewChecked
 {
     env$ = this.mainStore.env$
+    shouldGroupHistory = true
     loading = false
     allLoaded = false
     isLodaMoreButtonVisible = !!this.mainStore.env$.value?.HISTORY_RESULTS_LIMIT
@@ -54,14 +55,15 @@ export class HistoryScreenComponent
                 this.store.exportAs("xlsx", this.store.history$.value),
         },
     ]
+    pageTitle = "History"
     result$: Observable<IBasicResponse<IHistoryRowRTR | IHistoryRowONT>> =
-        this.store.getFormattedHistory(true)
+        this.store.getFormattedHistory({ grouped: this.shouldGroupHistory })
 
     constructor(
         mainStore: MainStore,
         message: MessageService,
+        protected store: HistoryStore,
         private cdr: ChangeDetectorRef,
-        private store: HistoryStore,
         private transloco: TranslocoService
     ) {
         super(mainStore, message)

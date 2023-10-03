@@ -58,7 +58,7 @@ export class HistoryStore {
         private message: MessageService
     ) {}
 
-    getFormattedHistory(grouped?: boolean) {
+    getFormattedHistory(options?: { grouped?: boolean; loopUuid?: string }) {
         return combineLatest([
             this.history$,
             this.transloco.selectTranslation(),
@@ -71,9 +71,15 @@ export class HistoryStore {
                     return { content: [], totalElements: 0 }
                 }
                 const h =
-                    grouped && env?.FLAVOR !== "ont"
+                    options?.grouped && env?.FLAVOR !== "ont"
                         ? this.groupResults(
-                              this.countResults(history, paginator),
+                              this.countResults(
+                                  this.getLoopResults(
+                                      history,
+                                      options?.loopUuid
+                                  ),
+                                  paginator
+                              ),
                               openLoops
                           )
                         : history
@@ -261,6 +267,13 @@ export class HistoryStore {
                 max_results: 1000,
             },
         })
+    }
+
+    private getLoopResults(history: ISimpleHistoryResult[], loopUuid?: string) {
+        if (!loopUuid) {
+            return history
+        }
+        return history.filter((hi) => hi.loopUuid === loopUuid)
     }
 
     private countResults(

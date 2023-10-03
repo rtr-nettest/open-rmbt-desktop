@@ -119,7 +119,9 @@ import { ILoopModeInfo } from "../../../measurement/interfaces/measurement-regis
 import { RecentHistoryComponent } from "./widgets/recent-history/recent-history.component"
 import { ERoutes } from "./enums/routes.enum";
 import { ExpandArrowComponent } from './widgets/expand-arrow/expand-arrow.component';
-import { RouterLinkComponent } from './widgets/router-link/router-link.component'
+import { RouterLinkComponent } from './widgets/router-link/router-link.component';
+import { LoopResultScreenComponent } from './screens/loop-result-screen/loop-result-screen.component';
+import { LoopTestScreenComponent } from './screens/loop-test-screen/loop-test-screen.component'
 
 Chart.register(
     BarElement,
@@ -230,6 +232,8 @@ declare global {
         RecentHistoryComponent,
         ExpandArrowComponent,
         RouterLinkComponent,
+        LoopResultScreenComponent,
+        LoopTestScreenComponent,
     ],
     imports: [
         AppRoutingModule,

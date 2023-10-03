@@ -63,6 +63,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
         })
     )
     loopWaitProgress$?: Observable<{ ms: number; percent: number }>
+    result$ = this.historyStore.getFormattedHistory({ grouped: false })
 
     constructor(
         private historyStore: HistoryStore,

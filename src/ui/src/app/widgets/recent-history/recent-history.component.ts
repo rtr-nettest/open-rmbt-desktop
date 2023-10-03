@@ -3,7 +3,6 @@ import { Observable, map, of, withLatestFrom } from "rxjs"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { MainStore } from "src/app/store/main.store"
-import { TranslocoService } from "@ngneat/transloco"
 import { ISort } from "src/app/interfaces/sort.interface"
 import { HistoryStore } from "src/app/store/history.store"
 import {
@@ -17,7 +16,11 @@ import { IEnv } from "../../../../../electron/interfaces/env.interface"
     templateUrl: "./recent-history.component.html",
     styleUrls: ["./recent-history.component.scss"],
 })
-export class RecentHistoryComponent implements OnInit {
+export class RecentHistoryComponent {
+    @Input({ required: true }) result!: {
+        content: IHistoryRowONT[] | IHistoryRowRTR[]
+        totalElements: number
+    }
     @Input() grouped?: boolean
     @Input() title?: string
     @Input() excludeColumns?: string[]
@@ -103,30 +106,19 @@ export class RecentHistoryComponent implements OnInit {
                 )
             })
         )
-    env?: IEnv
-
-    result$: Observable<{
-        content: IHistoryRowONT[] | IHistoryRowRTR[]
-        totalElements: number
-    }> = of({ content: [], totalElements: 0 })
+    env$ = this.mainStore.env$.pipe(
+        map((env) => {
+            if (env?.FLAVOR === "ont") {
+                this.tableClassNames = ["app-table--ont"]
+            }
+            return env
+        })
+    )
 
     sort$ = this.store.historySort$
     tableClassNames?: string[]
 
     constructor(private mainStore: MainStore, private store: HistoryStore) {}
-
-    ngOnInit(): void {
-        this.result$ = this.store.getFormattedHistory(this.grouped).pipe(
-            withLatestFrom(this.mainStore.env$),
-            map(([history, env]) => {
-                this.env = env ?? undefined
-                if (this.env?.FLAVOR === "ont") {
-                    this.tableClassNames = ["app-table--ont"]
-                }
-                return history
-            })
-        )
-    }
 
     changeSort = (sort: ISort) => {
         this.sortChange.emit(sort)

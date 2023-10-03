@@ -63,7 +63,6 @@ export class HeaderComponent {
             this.message.openConfirmDialog(
                 THIS_INTERRUPTS_ACTION,
                 () => {
-                    window.electronAPI.abortMeasurement()
                     this.router.navigate(["/"])
                 },
                 { canCancel: true }

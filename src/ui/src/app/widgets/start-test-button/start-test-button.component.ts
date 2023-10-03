@@ -20,8 +20,6 @@ export class StartTestButtonComponent {
     async preventNavigation(e: Event) {
         if ((await lastValueFrom(this.disabled$)) === true) {
             e.preventDefault()
-        } else {
-            this.testStore.disableLoopMode()
         }
     }
 }

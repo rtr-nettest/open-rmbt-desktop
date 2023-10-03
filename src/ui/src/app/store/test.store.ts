@@ -67,7 +67,11 @@ export class TestStore {
                 this.message.openConfirmDialog(
                     "The loop measurement has expired",
                     () => {
-                        this.router.navigate(["/", ERoutes.HISTORY])
+                        this.router.navigate([
+                            "/",
+                            ERoutes.LOOP_RESULT.split("/")[0],
+                            this.loopUuid$.value,
+                        ])
                     }
                 )
             })

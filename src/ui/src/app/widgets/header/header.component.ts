@@ -20,7 +20,10 @@ export class HeaderComponent {
     private noGo = "javascript:;"
     link$ = this.activeRoute.url.pipe(
         map((segments) => {
-            if (segments.join("/") === ERoutes.TEST) {
+            if (
+                segments.join("/") === ERoutes.TEST ||
+                segments.join("/") === ERoutes.LOOP_TEST
+            ) {
                 return this.noGo
             }
             return "/"

@@ -10,7 +10,7 @@ import { MainStore } from "src/app/store/main.store"
 import { MessageService } from "src/app/services/message.service"
 import { HistoryStore } from "src/app/store/history.store"
 import { TranslocoService } from "@ngneat/transloco"
-import { ActivatedRouteSnapshot } from "@angular/router"
+import { ActivatedRoute } from "@angular/router"
 
 @Component({
     selector: "app-loop-result-screen",
@@ -24,7 +24,7 @@ export class LoopResultScreenComponent extends HistoryScreenComponent {
         IBasicResponse<IHistoryRowRTR | IHistoryRowONT>
     > = this.store.getFormattedHistory({
         grouped: this.shouldGroupHistory,
-        loopUuid: this.activatedRoute.params["loopUuid"],
+        loopUuid: this.activatedRoute.snapshot.params["loopUuid"],
     })
 
     constructor(
@@ -33,7 +33,7 @@ export class LoopResultScreenComponent extends HistoryScreenComponent {
         cdr: ChangeDetectorRef,
         store: HistoryStore,
         transloco: TranslocoService,
-        private activatedRoute: ActivatedRouteSnapshot
+        private activatedRoute: ActivatedRoute
     ) {
         super(mainStore, message, store, cdr, transloco)
     }

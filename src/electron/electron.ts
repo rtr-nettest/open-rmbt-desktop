@@ -209,7 +209,12 @@ ipcMain.on(
     async (event, loopModeInfo?: ILoopModeInfo) => {
         const webContents = event.sender
         try {
-            await MeasurementRunner.I.runMeasurement({ loopModeInfo })
+            const status = await MeasurementRunner.I.runMeasurement({
+                loopModeInfo,
+            })
+            if (status === EMeasurementStatus.ABORTED) {
+                webContents.send(Events.MEASUREMENT_ABORTED)
+            }
         } catch (e) {
             webContents.send(Events.ERROR, e)
         }

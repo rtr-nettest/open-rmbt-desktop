@@ -53,10 +53,10 @@ export class MainMenuComponent {
     constructor(
         private activeRoute: ActivatedRoute,
         private cmsService: CMSService,
+        private testStore: TestStore,
         private mainStore: MainStore,
         private message: MessageService,
         private router: Router,
-        private testStore: TestStore,
         private transloco: TranslocoService
     ) {}
 
@@ -96,7 +96,15 @@ export class MainMenuComponent {
                 if (item.url) {
                     window.open(item.url, "_blank")
                 } else if (item.route) {
-                    this.router.navigate([item.route])
+                    if (this.testStore.enableLoopMode$.value === true) {
+                        window.electronAPI.abortMeasurement()
+                        window.electronAPI.onMeasurementAborted(() => {
+                            window.electronAPI.offMeasurementAborted()
+                            this.router.navigate([item.route])
+                        })
+                    } else {
+                        this.router.navigate([item.route])
+                    }
                 }
             },
         }

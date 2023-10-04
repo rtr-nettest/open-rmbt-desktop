@@ -70,19 +70,15 @@ export class HistoryStore {
                 if (!history.length) {
                     return { content: [], totalElements: 0 }
                 }
+                const loopHistory = this.getLoopResults(
+                    history,
+                    options?.loopUuid
+                )
+                const countedHistory = this.countResults(loopHistory, paginator)
                 const h =
                     options?.grouped && env?.FLAVOR !== "ont"
-                        ? this.groupResults(
-                              this.countResults(
-                                  this.getLoopResults(
-                                      history,
-                                      options?.loopUuid
-                                  ),
-                                  paginator
-                              ),
-                              openLoops
-                          )
-                        : history
+                        ? this.groupResults(countedHistory, openLoops)
+                        : countedHistory
                 const content =
                     env?.FLAVOR === "ont"
                         ? h.map(this.historyItemToRowONT(t))
@@ -269,11 +265,11 @@ export class HistoryStore {
         })
     }
 
-    private getLoopResults(history: ISimpleHistoryResult[], loopUuid?: string) {
+    getLoopResults(history: ISimpleHistoryResult[], loopUuid?: string) {
         if (!loopUuid) {
             return history
         }
-        return history.filter((hi) => hi.loopUuid === loopUuid)
+        return history.filter((hi) => hi.loopUuid === "L" + loopUuid)
     }
 
     private countResults(

@@ -192,10 +192,13 @@ export class ResultScreenComponent {
                 ERoutes.LOOP_RESULT.split("/")[0]
             )
         ) {
-            this.router.navigate([
-                "/",
-                this.mainStore.referrer$.value.split("/"),
-            ])
+            const parts = this.mainStore.referrer$.value.split("/")
+            this.router.navigateByUrl(
+                ERoutes.LOOP_RESULT.replace(
+                    ":loopUuid",
+                    parts[parts.length - 1]
+                )
+            )
         } else {
             this.router.navigate(["/"])
         }

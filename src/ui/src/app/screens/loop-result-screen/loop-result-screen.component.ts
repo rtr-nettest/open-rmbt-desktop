@@ -11,6 +11,7 @@ import { MessageService } from "src/app/services/message.service"
 import { HistoryStore } from "src/app/store/history.store"
 import { TranslocoService } from "@ngneat/transloco"
 import { ActivatedRoute } from "@angular/router"
+import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 
 @Component({
     selector: "app-loop-result-screen",
@@ -26,6 +27,33 @@ export class LoopResultScreenComponent extends HistoryScreenComponent {
         grouped: this.shouldGroupHistory,
         loopUuid: this.activatedRoute.snapshot.params["loopUuid"],
     })
+    override actionButtons: IMainMenuItem[] = [
+        {
+            label: "",
+            translations: [],
+            icon: "filetype-csv",
+            action: () => this.store.exportAs("csv", this.loopResults),
+        },
+        {
+            label: "",
+            translations: [],
+            icon: "filetype-pdf",
+            action: () => this.store.exportAsPdf(this.loopResults),
+        },
+        {
+            label: "",
+            translations: [],
+            icon: "filetype-xlsx",
+            action: () => this.store.exportAs("xlsx", this.loopResults),
+        },
+    ]
+
+    private get loopResults() {
+        return this.store.getLoopResults(
+            this.store.history$.value,
+            this.activatedRoute.snapshot.params["loopUuid"]
+        )
+    }
 
     constructor(
         mainStore: MainStore,

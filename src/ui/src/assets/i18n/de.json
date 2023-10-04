@@ -96,5 +96,6 @@
     "Close app": "DE-Close app",
     "The currently running measurement will be aborted": "DE-The currently running measurement will be aborted",
     "App was suspended": "DE-App was suspended",
-    "The app was suspended. The last running measurement was aborted": "DE-The app was suspended. The last running measurement was aborted"
+    "The app was suspended. The last running measurement was aborted": "DE-The app was suspended. The last running measurement was aborted",
+    "Loop measurement results": "DE-Loop measurement results"
 }

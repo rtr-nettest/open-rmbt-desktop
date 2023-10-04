@@ -126,6 +126,7 @@ export class MeasurementRunner {
                     this.rounded(this.cpuInfo.load_avg * 100)
                 )
             }
+            return this.rmbtClient!.measurementStatus
         }
     }
 

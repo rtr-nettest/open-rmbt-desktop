@@ -5,7 +5,7 @@
         <app-export-warning></app-export-warning>
         <div class="app-main" *transloco="let t">
             <h1 *ngIf="env?.FLAVOR && env?.FLAVOR !== 'ont'" class="app-title">
-                {{ t("History") }}
+                {{ t(pageTitle) }}
                 <app-action-buttons
                     [items]="actionButtons"
                 ></app-action-buttons>
@@ -15,7 +15,8 @@
             </h1>
             <div class="app-wrapper">
                 <app-recent-history
-                    [grouped]="true"
+                    [result]="result"
+                    [grouped]="shouldGroupHistory"
                     (sortChange)="changeSort($event)"
                 ></app-recent-history>
                 <button

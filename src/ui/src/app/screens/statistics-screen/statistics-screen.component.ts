@@ -1,7 +1,7 @@
-import { Component, Sanitizer } from "@angular/core"
+import { Component } from "@angular/core"
 import { DomSanitizer } from "@angular/platform-browser"
 import { TranslocoService } from "@ngneat/transloco"
-import { map, tap } from "rxjs"
+import { map } from "rxjs"
 import { MainStore } from "src/app/store/main.store"
 
 @Component({
@@ -20,8 +20,7 @@ export class StatisticsScreenComponent {
                       ) ?? ""
                   )
                 : null
-        ),
-        tap(console.log)
+        )
     )
 
     constructor(

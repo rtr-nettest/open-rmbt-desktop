@@ -40,6 +40,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.removeAllListeners(Events.ERROR)
         ipcRenderer.on(Events.ERROR, (event, error) => callback(error))
     },
+    onMeasurementAborted: (callback: () => any) => {
+        ipcRenderer.removeAllListeners(Events.MEASUREMENT_ABORTED)
+        ipcRenderer.on(Events.MEASUREMENT_ABORTED, (event) => callback())
+    },
+    offMeasurementAborted: () => {
+        ipcRenderer.removeAllListeners(Events.MEASUREMENT_ABORTED)
+    },
     onOpenScreen: (callback: (route: ERoutes) => any) => {
         ipcRenderer.removeAllListeners(Events.OPEN_SCREEN)
         ipcRenderer.on(Events.OPEN_SCREEN, (event, route) => callback(route))

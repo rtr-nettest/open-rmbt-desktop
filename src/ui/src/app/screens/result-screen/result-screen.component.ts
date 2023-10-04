@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from "@angular/core"
+import { ChangeDetectionStrategy, Component } from "@angular/core"
 import { ActivatedRoute, Router } from "@angular/router"
 import { TranslocoService } from "@ngneat/transloco"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
@@ -187,6 +187,18 @@ export class ResultScreenComponent {
     weHaveToGoBack() {
         if (this.mainStore.referrer$.value?.includes(ERoutes.HISTORY)) {
             this.router.navigate(["/", ERoutes.HISTORY])
+        } else if (
+            this.mainStore.referrer$.value?.includes(
+                ERoutes.LOOP_RESULT.split("/")[0]
+            )
+        ) {
+            const parts = this.mainStore.referrer$.value.split("/")
+            this.router.navigateByUrl(
+                ERoutes.LOOP_RESULT.replace(
+                    ":loopUuid",
+                    parts[parts.length - 1]
+                )
+            )
         } else {
             this.router.navigate(["/"])
         }

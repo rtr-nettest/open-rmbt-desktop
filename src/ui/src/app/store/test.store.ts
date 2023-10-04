@@ -54,11 +54,11 @@ export class TestStore {
             this.ngZone.run(() => {
                 this.loopCounter$.next(loopCounter + 1)
                 this.router
-                    .navigate(["/", ERoutes.SETTINGS], {
+                    .navigate(["/", ERoutes.NEWS], {
                         skipLocationChange: true,
                     })
                     .then(() => {
-                        this.router.navigate(["/", ERoutes.TEST])
+                        this.router.navigate(["/", ERoutes.LOOP_TEST])
                     })
             })
         })
@@ -67,7 +67,11 @@ export class TestStore {
                 this.message.openConfirmDialog(
                     "The loop measurement has expired",
                     () => {
-                        this.router.navigate(["/", ERoutes.HISTORY])
+                        this.router.navigate([
+                            "/",
+                            ERoutes.LOOP_RESULT.split("/")[0],
+                            this.loopUuid$.value,
+                        ])
                     }
                 )
             })
@@ -105,7 +109,7 @@ export class TestStore {
         this.loopCounter$.next(1)
         this.enableLoopMode$.next(true)
         this.testIntervalMinutes$.next(interval)
-        this.router.navigate(["/", ERoutes.TEST])
+        this.router.navigate(["/", ERoutes.LOOP_TEST])
     }
 
     disableLoopMode() {

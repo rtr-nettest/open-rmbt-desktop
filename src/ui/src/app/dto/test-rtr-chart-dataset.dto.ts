@@ -9,7 +9,7 @@ export class TestRTRChartDataset {
     backgroundColor!: string
     borderColor!: string
     borderCapStyle: "round" = "round"
-    lineTension = 0
+    cubicInterpolationMode = "monotone"
     pointBackgroundColor = "transparent"
     pointBorderColor = "transparent"
     pointHoverBackgroundColor = "transparent"

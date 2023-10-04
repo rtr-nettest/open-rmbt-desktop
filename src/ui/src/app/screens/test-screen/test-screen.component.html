@@ -38,7 +38,9 @@
                 <app-interim-results></app-interim-results>
             </div>
             <app-recent-history
+                *ngIf="result$ | async as result"
                 class="app-padding"
+                [result]="result"
                 [excludeColumns]="['details']"
                 title="Recent measurements"
             ></app-recent-history>

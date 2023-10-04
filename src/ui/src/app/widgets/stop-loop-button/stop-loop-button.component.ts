@@ -12,8 +12,10 @@ export class StopLoopButtonComponent {
     constructor(private testStore: TestStore, private router: Router) {}
 
     abortTest() {
-        window.electronAPI.abortMeasurement()
-        this.testStore.disableLoopMode()
-        this.router.navigate(["/", ERoutes.HISTORY])
+        this.router.navigate([
+            "/",
+            ERoutes.LOOP_RESULT.split("/")[0],
+            this.testStore.loopUuid$.value,
+        ])
     }
 }

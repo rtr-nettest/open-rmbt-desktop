@@ -1,10 +1,11 @@
 const path = require("path")
 const { codeSignApp } = require("../../../scripts/codesign-app.js")
 const packJson = require("../../../package.json")
+const fs = require("fs")
 
 module.exports = {
     hooks: {
-        postPackage: async () => {
+        postPackage: async (_, options) => {
             if (
                 process.platform === "darwin" &&
                 process.env.APP_STORE === "true"
@@ -17,6 +18,26 @@ module.exports = {
                     )
                 )
             }
+            if (!(options.outputPaths instanceof Array)) {
+                return
+            }
+            const packageJson =
+                process.platform === "darwin"
+                    ? path.join(
+                          options.outputPaths[0],
+                          `${packJson.productName}.app`,
+                          "Contents",
+                          "Resources",
+                          "app",
+                          "package.json"
+                      )
+                    : path.join(
+                          options.outputPaths[0],
+                          "resources",
+                          "app",
+                          "package.json"
+                      )
+            fs.unlinkSync(packageJson)
         },
     },
     packagerConfig: {

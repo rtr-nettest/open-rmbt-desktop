@@ -131,7 +131,11 @@ export class MeasurementRunner {
     }
 
     abortMeasurement() {
-        this.rmbtClient?.abortMeasurement()
+        if (this.rmbtClient) {
+            this.rmbtClient.abortMeasurement()
+            return !this.rmbtClient.isRunning
+        }
+        return true
     }
 
     getCurrentPhaseState(): IMeasurementPhaseState & IBasicNetworkInfo {

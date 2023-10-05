@@ -221,9 +221,13 @@ ipcMain.on(
     }
 )
 
-ipcMain.on(Events.ABORT_MEASUREMENT, () => {
+ipcMain.on(Events.ABORT_MEASUREMENT, (event) => {
+    const webContents = event.sender
     LoopService.I.resetCounter()
-    MeasurementRunner.I.abortMeasurement()
+    let aborted = MeasurementRunner.I.abortMeasurement()
+    if (aborted) {
+        webContents.send(Events.MEASUREMENT_ABORTED)
+    }
 })
 
 ipcMain.on(Events.SCHEDULE_LOOP, (event, loopInterval) => {

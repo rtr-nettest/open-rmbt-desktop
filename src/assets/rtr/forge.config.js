@@ -20,7 +20,8 @@ module.exports = {
             }
             if (
                 options.outputPaths instanceof Array &&
-                process.platform === "darwin"
+                (process.env.APP_STORE === "true" ||
+                    process.env.MACOS === "true")
             ) {
                 fs.unlinkSync(
                     path.join(

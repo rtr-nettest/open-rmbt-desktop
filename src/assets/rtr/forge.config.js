@@ -18,26 +18,21 @@ module.exports = {
                     )
                 )
             }
-            if (!(options.outputPaths instanceof Array)) {
-                return
-            }
-            const packageJson =
+            if (
+                options.outputPaths instanceof Array &&
                 process.platform === "darwin"
-                    ? path.join(
-                          options.outputPaths[0],
-                          `${packJson.productName}.app`,
-                          "Contents",
-                          "Resources",
-                          "app",
-                          "package.json"
-                      )
-                    : path.join(
-                          options.outputPaths[0],
-                          "resources",
-                          "app",
-                          "package.json"
-                      )
-            fs.unlinkSync(packageJson)
+            ) {
+                fs.unlinkSync(
+                    path.join(
+                        options.outputPaths[0],
+                        `${packJson.productName}.app`,
+                        "Contents",
+                        "Resources",
+                        "app",
+                        "package.json"
+                    )
+                )
+            }
         },
     },
     packagerConfig: {

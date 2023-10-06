@@ -15,6 +15,8 @@ jobs:
       with:
         node-version: 18.x
     - name: Get .env
+      env:
+        REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
       run: |
         curl -H "Authorization: token ${REPO_TOKEN}" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.c01
         dir

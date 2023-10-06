@@ -18,22 +18,6 @@ module.exports = {
                     )
                 )
             }
-            if (
-                options.outputPaths instanceof Array &&
-                (process.env.APP_STORE === "true" ||
-                    process.env.MACOS === "true")
-            ) {
-                fs.unlinkSync(
-                    path.join(
-                        options.outputPaths[0],
-                        `${packJson.productName}.app`,
-                        "Contents",
-                        "Resources",
-                        "app",
-                        "package.json"
-                    )
-                )
-            }
         },
     },
     packagerConfig: {

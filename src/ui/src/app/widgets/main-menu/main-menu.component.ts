@@ -8,6 +8,7 @@ import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 import { CMSService } from "src/app/services/cms.service"
 import { MessageService } from "src/app/services/message.service"
 import { MainStore } from "src/app/store/main.store"
+import { TestStore } from "src/app/store/test.store"
 
 @Component({
     selector: "app-main-menu",
@@ -52,6 +53,7 @@ export class MainMenuComponent {
     constructor(
         private activeRoute: ActivatedRoute,
         private cmsService: CMSService,
+        private testStore: TestStore,
         private mainStore: MainStore,
         private message: MessageService,
         private router: Router,
@@ -91,11 +93,18 @@ export class MainMenuComponent {
                     : "",
             ].join(" "),
             action: () => {
-                window.electronAPI.abortMeasurement()
                 if (item.url) {
                     window.open(item.url, "_blank")
                 } else if (item.route) {
-                    this.router.navigate([item.route])
+                    if (this.testStore.enableLoopMode$.value === true) {
+                        window.electronAPI.abortMeasurement()
+                        window.electronAPI.onMeasurementAborted(() => {
+                            window.electronAPI.offMeasurementAborted()
+                            this.router.navigate([item.route])
+                        })
+                    } else {
+                        this.router.navigate([item.route])
+                    }
                 }
             },
         }

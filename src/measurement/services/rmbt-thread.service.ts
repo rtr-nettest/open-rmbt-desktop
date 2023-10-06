@@ -8,7 +8,10 @@ import { DownloadMessageHandler } from "./message-handlers/download-message-hand
 import { Logger } from "./logger.service"
 import { PingMessageHandler } from "./message-handlers/ping-message-handler.service"
 import { PreDownloadMessageHandler } from "./message-handlers/pre-download-message-handler.service"
-import { PreUploadMessageHandler } from "./message-handlers/pre-upload-message-handler.service"
+import {
+    PreUploadMessageHandler,
+    IPreUploadResult,
+} from "./message-handlers/pre-upload-message-handler.service"
 import { InitMessageHandler } from "./message-handlers/init-message-handler.service"
 import { UploadMessageHandler } from "./message-handlers/upload-message-handler.service"
 import { IMessageHandlerContext } from "../interfaces/message-handler.interface"
@@ -277,20 +280,20 @@ export class RMBTThread implements IMessageHandlerContext {
         })
     }
 
-    async managePreUpload(): Promise<number> {
+    async managePreUpload(): Promise<IPreUploadResult> {
         return new Promise((resolve) => {
             this.phase = "preupload"
             this.dropHandlers()
             this.preUploadMessageHandler = new PreUploadMessageHandler(
                 this,
-                (chunkSize: number) => {
+                (result) => {
                     Logger.I.info(
                         ELoggerMessage.T_RESOLVING_PHASE,
                         this.index,
                         this.phase
                     )
                     this.dropHandlers()
-                    resolve(chunkSize)
+                    resolve(result)
                 }
             )
             this.preUploadMessageHandler.writeData()

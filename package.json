@@ -1,7 +1,7 @@
 {
   "name": "open-rmbt-desktop",
   "productName": "RTR-Netztest",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "RTR Desktop App",
   "main": "dist/main.js",
   "engines": {
@@ -20,7 +20,7 @@
     "package": "npm run build:all && electron-forge package",
     "make": "npm run build:all && electron-forge make",
     "make:windows": "npm run build:all && electron-forge make --platform=win32 --arch=x64",
-    "make:macos": "npm run build:all && electron-forge make --platform=darwin --arch=x64",
+    "make:macos": "npm run build:all && cross-env MACOS=true electron-forge make --platform=darwin --arch=x64",
     "make:app-store": "npm run build:all && cross-env APP_STORE=true electron-forge make --platform=mas --arch=x64",
     "make:deb": "npm run build:all && cross-env DEB=true electron-forge make --platform=linux --arch=x64",
     "make:rpm": "npm run build:all && cross-env RPM=true electron-forge make --platform=linux --arch=x64"

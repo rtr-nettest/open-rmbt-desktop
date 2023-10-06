@@ -1,0 +1,10 @@
+@import "../../../assets/styles/core.scss";
+
+.app-iframe {
+    height: calc(100vh - 168px);
+    width: 100%;
+
+    @include screen-sm {
+        height: calc(100vh - 95px);
+    }
+}

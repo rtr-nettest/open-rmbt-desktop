@@ -1,11 +1,11 @@
 <app-header></app-header>
-<app-body>
+<app-body *ngIf="env$ | async as env">
     <app-main-menu *ngIf="env?.FLAVOR !== 'ont'"></app-main-menu>
     <app-main-content *ngIf="result$ | async as result; else noResult">
         <app-export-warning></app-export-warning>
         <div class="app-main" *transloco="let t">
             <h1 *ngIf="env?.FLAVOR && env?.FLAVOR !== 'ont'" class="app-title">
-                {{ t("History") }}
+                {{ t(pageTitle) }}
                 <app-action-buttons
                     [items]="actionButtons"
                 ></app-action-buttons>
@@ -14,14 +14,11 @@
                 {{ getHeading(result.totalElements) }}
             </h1>
             <div class="app-wrapper">
-                <app-table
-                    [action]="changeSort"
-                    [columns]="(columns$ | async)!"
-                    [data]="result"
-                    [sort]="(sort$ | async)!"
-                    [shouldHideHeader]="false"
-                    [tableClassNames]="tableClassNames ?? []"
-                ></app-table>
+                <app-recent-history
+                    [result]="result"
+                    [grouped]="shouldGroupHistory"
+                    (sortChange)="changeSort($event)"
+                ></app-recent-history>
                 <button
                     *ngIf="!allLoaded"
                     mat-flat-button

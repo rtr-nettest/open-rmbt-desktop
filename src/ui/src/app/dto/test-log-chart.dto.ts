@@ -34,8 +34,12 @@ export class TestLogChart extends TestChart {
                 ] as Point
             ).x
         )
-        if (super.data.labels && super.data.labels.length <= lastIndex)
-            super.data.labels.push(lastIndex)
+        const { labels } = super.data
+        if (labels && labels.length <= lastIndex) {
+            while (labels!.length <= lastIndex) {
+                labels.push(lastIndex)
+            }
+        }
         this.update()
     }
 

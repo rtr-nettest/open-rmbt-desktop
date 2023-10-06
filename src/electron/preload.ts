@@ -4,13 +4,15 @@ import { EIPVersion } from "../measurement/enums/ip-version.enum"
 import { IMeasurementServerResponse } from "../measurement/interfaces/measurement-server-response.interface"
 import { IPaginator } from "../ui/src/app/interfaces/paginator.interface"
 import { ISort } from "../ui/src/app/interfaces/sort.interface"
+import { ILoopModeInfo } from "../measurement/interfaces/measurement-registration-request.interface"
+import { ERoutes } from "../ui/src/app/enums/routes.enum"
 
 contextBridge.exposeInMainWorld("electronAPI", {
     quit: () => ipcRenderer.send(Events.QUIT),
     getTranslations: (lang: string) =>
         ipcRenderer.invoke(Events.GET_TRANSLATIONS, lang),
     getNews: () => ipcRenderer.invoke(Events.GET_NEWS),
-    acceptTerms: (terms: string) =>
+    acceptTerms: (terms: number) =>
         ipcRenderer.send(Events.ACCEPT_TERMS, terms),
     registerClient: () => ipcRenderer.invoke(Events.REGISTER_CLIENT),
     setIpVersion: (ipv: EIPVersion | null) =>
@@ -23,7 +25,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.send(Events.SET_ACTIVE_SERVER, server),
     setDefaultLanguage: (language: string) =>
         ipcRenderer.send(Events.SET_DEFAULT_LANGUAGE, language),
-    runMeasurement: () => ipcRenderer.send(Events.RUN_MEASUREMENT),
+    runMeasurement: (loopModeInfo?: ILoopModeInfo) =>
+        ipcRenderer.send(Events.RUN_MEASUREMENT, loopModeInfo),
     abortMeasurement: () => ipcRenderer.send(Events.ABORT_MEASUREMENT),
     getServers: () => ipcRenderer.invoke(Events.GET_SERVERS),
     getEnv: () => ipcRenderer.invoke(Events.GET_ENV),
@@ -37,11 +40,31 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.removeAllListeners(Events.ERROR)
         ipcRenderer.on(Events.ERROR, (event, error) => callback(error))
     },
-    onOpenSettings: (callback: () => any) => {
-        ipcRenderer.removeAllListeners(Events.OPEN_SETTINGS)
-        ipcRenderer.on(Events.OPEN_SETTINGS, callback)
+    onMeasurementAborted: (callback: () => any) => {
+        ipcRenderer.removeAllListeners(Events.MEASUREMENT_ABORTED)
+        ipcRenderer.on(Events.MEASUREMENT_ABORTED, (event) => callback())
+    },
+    offMeasurementAborted: () => {
+        ipcRenderer.removeAllListeners(Events.MEASUREMENT_ABORTED)
+    },
+    onOpenScreen: (callback: (route: ERoutes) => any) => {
+        ipcRenderer.removeAllListeners(Events.OPEN_SCREEN)
+        ipcRenderer.on(Events.OPEN_SCREEN, (event, route) => callback(route))
+    },
+    onRestartMeasurement: (callback: (loopCounter: number) => any) => {
+        ipcRenderer.removeAllListeners(Events.RESTART_MEASUREMENT)
+        ipcRenderer.on(Events.RESTART_MEASUREMENT, (_, loopCounter) =>
+            callback(loopCounter)
+        )
+    },
+    onLoopModeExpired: (callback: () => any) => {
+        ipcRenderer.removeAllListeners(Events.LOOP_MODE_EXPIRED)
+        ipcRenderer.on(Events.LOOP_MODE_EXPIRED, callback)
     },
     deleteLocalData: () => {
         ipcRenderer.send(Events.DELETE_LOCAL_DATA)
+    },
+    scheduleLoop: (loopInterval: number) => {
+        ipcRenderer.send(Events.SCHEDULE_LOOP, loopInterval)
     },
 })

@@ -1,4 +1,3 @@
-import axios from "axios"
 import { IMeasurementRegistrationRequest } from "../interfaces/measurement-registration-request.interface"
 import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
 import { IMeasurementResult } from "../interfaces/measurement-result.interface"
@@ -22,6 +21,7 @@ import {
     LAST_NEWS_UID,
     SETTINGS,
     Store,
+    TERMS_ACCEPTED_VERSION,
 } from "./store.service"
 import { DBService } from "./db.service"
 import { SimpleHistoryResult } from "../dto/simple-history-result.dto"
@@ -36,6 +36,9 @@ import { UserSettingsRequest } from "../dto/user-settings-request.dto"
 import * as dns from "dns"
 import { IPaginator } from "../../ui/src/app/interfaces/paginator.interface"
 import { ISort } from "../../ui/src/app/interfaces/sort.interface"
+import { BrowserWindow } from "electron"
+
+const axios = require("axios")
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -97,12 +100,14 @@ export class ControlServer {
             return null
         }
         const lastNewsUid = Store.get(LAST_NEWS_UID) as number
+        const settings = new UserSettingsRequest()
         const newsRequest: INewsRequest = {
             language: I18nService.I.getActiveLanguage(),
-            plattform: "Desktop",
+            plattform: settings.plattform ?? "",
+            platform: settings.platform ?? "",
             softwareVersionCode: pack.version.replaceAll(".", ""),
             lastNewsUid,
-            uuid: Store.get(CLIENT_UUID) as string,
+            uuid: settings.uuid,
         }
         Logger.I.info(
             ELoggerMessage.POST_REQUEST,
@@ -190,6 +195,12 @@ export class ControlServer {
             Logger.I.info("Using settings: %o", settings)
             Store.set(CLIENT_UUID, settings.uuid)
             Store.set(SETTINGS, settings)
+            if (
+                Store.I.get(TERMS_ACCEPTED_VERSION) !==
+                settings.terms_and_conditions.version
+            ) {
+                return { ...settings, shouldAcceptTerms: true }
+            }
             return settings
         }
         if (response?.error?.length) {

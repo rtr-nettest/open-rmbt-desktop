@@ -83,5 +83,19 @@
     "Delete local data description": "This will remove your local data, such as language settings and measurement history. The application will be closed. Do you want to proceed?",
     "Local data": "Local data",
     "Local data settings description": "Local data includes settings, user ID, measurement history",
-    "Abort measurement": "Abort measurement"
+    "Abort measurement": "Abort measurement",
+    "Interval between tests": "Interval between tests",
+    "minutes": "minutes",
+    "Start loop test": "Start loop test",
+    "Tests are conducted repeatedly until they are stopped manually": "Tests are conducted repeatedly until they are stopped manually",
+    "Measurement": "Measurement",
+    "End tests": "End tests",
+    "Next measurement in": "Next measurement in",
+    "Recent measurements": "Recent measurements",
+    "The loop measurement has expired": "The loop measurement has expired after %0 minutes",
+    "Close app": "Close app",
+    "The currently running measurement will be aborted": "The currently running measurement will be aborted",
+    "App was suspended": "App was suspended",
+    "The app was suspended. The last running measurement was aborted": "The app was suspended. The last running measurement was aborted",
+    "Loop measurement results": "Loop measurement results"
 }

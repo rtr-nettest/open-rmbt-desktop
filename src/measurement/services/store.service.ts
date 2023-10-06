@@ -6,7 +6,7 @@ import fsp from "fs/promises"
 import cp from "child_process"
 
 export const CLIENT_UUID = "clienUuid"
-export const TERMS_ACCEPTED = "termsAccepted"
+export const TERMS_ACCEPTED_VERSION = "termsAcceptedVersion"
 export const LAST_NEWS_UID = "lastNewsUid"
 export const IP_VERSION = "ipVersion"
 export const ACTIVE_LANGUAGE = "activeLanguage"

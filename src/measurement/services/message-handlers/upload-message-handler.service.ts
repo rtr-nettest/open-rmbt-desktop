@@ -12,16 +12,14 @@ import { randomBytes } from "crypto"
 import { ELoggerMessage } from "../../enums/logger-message.enum"
 
 export class UploadMessageHandler implements IMessageHandler {
-    static waitForAllChunksTimeMs = 3000
+    static waitForAllChunksTimeMs = 1000
     static clientTimeOffsetNs = 1e9
     private _uploadEndTimeNs = 0
     private _result = new MeasurementThreadResultList(0)
-    private _activityInterval?: NodeJS.Timer
-    private _inactivityTimeoutMs = 1000
     private _finalTimeout?: NodeJS.Timeout
     private _buffers: Buffer[] = []
     private _bytesWritten = 0
-    private _interimHandlerInterval?: NodeJS.Timer
+    private _interimHandlerInterval?: NodeJS.Timeout
     private _isRunning = true
 
     get waterMark() {
@@ -68,13 +66,11 @@ export class UploadMessageHandler implements IMessageHandler {
         this._isRunning = false
         this.ctx.client.off("drain", this.putChunks)
         clearInterval(this._interimHandlerInterval)
-        clearInterval(this._activityInterval)
         this.ctx.threadResult!.up = this._result
         this.onFinish?.(this.ctx.threadResult!)
     }
 
     writeData(): void {
-        this.setActivityInterval()
         const msg = `${ESocketMessage.PUT}${
             this.ctx.chunkSize === this.ctx.defaultChunkSize
                 ? "\n"
@@ -102,15 +98,10 @@ export class UploadMessageHandler implements IMessageHandler {
             if (dataArr.length === 4) {
                 const nanos = +dataArr[1]
                 const bytes = +dataArr[3]
-                const nowNs = Time.nowNs()
-                if (bytes > 0 && nanos > 0 && nowNs < this._uploadEndTimeNs) {
-                    this._result.addResult(bytes, nanos)
-                    this.ctx.threadResult!.up = this._result
-                    this.ctx.threadResult!.currentTime.up = nanos
-                    this.ctx.threadResult!.currentTransfer.up = bytes
-                } else {
-                    this.stopMessaging()
-                }
+                this._result.addResult(bytes, nanos)
+                this.ctx.threadResult!.up = this._result
+                this.ctx.threadResult!.currentTime.up = nanos
+                this.ctx.threadResult!.currentTransfer.up = bytes
             }
             return
         }
@@ -129,13 +120,13 @@ export class UploadMessageHandler implements IMessageHandler {
             } else {
                 bufferIndex++
             }
-            const nowNs = Time.nowNs()
-            if (nowNs >= this._uploadEndTimeNs) {
+            if (Time.nowNs() >= this._uploadEndTimeNs) {
                 buffer[buffer.length - 1] = 0xff
                 this.ctx.client.write(buffer)
+                this._isRunning = false
                 if (!this._finalTimeout) {
                     this._finalTimeout = setTimeout(
-                        () => this.stopMessaging.bind(this),
+                        this.stopMessaging.bind(this),
                         UploadMessageHandler.waitForAllChunksTimeMs
                     )
                 }
@@ -152,21 +143,8 @@ export class UploadMessageHandler implements IMessageHandler {
         }
     }
 
-    activityCheck = () => {
-        Logger.I.info(ELoggerMessage.T_CHECKING_ACTIVITY, this.ctx.index)
-        if (Time.nowNs() > this._uploadEndTimeNs) {
-            Logger.I.info(ELoggerMessage.T_TIMEOUT, this.ctx.index)
-            this.stopMessaging()
-        }
-    }
-
     private setActivityInterval() {
-        clearInterval(this._activityInterval)
         const uploadDuration = Number(this.ctx.params.test_duration) * 1e9
         this._uploadEndTimeNs = Time.nowNs() + uploadDuration
-        this._activityInterval = setInterval(
-            this.activityCheck,
-            this._inactivityTimeoutMs
-        )
     }
 }

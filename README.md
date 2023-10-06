@@ -50,8 +50,9 @@ The app will be placed in the `out` folder at the root of the project.
 
 Requires macOS Ventura or later, XCode 12.2.0 or later.
 
+
 1. Newly create and download Distribution, Mac Installer Distribution, and Developer ID certificates from https://developer.apple.com/account/resources/certificates/list (more info at https://developer.apple.com/help/account/create-certificates/create-developer-id-certificates/), then install them in your Mac's default keychain. You may have to restart the system to apply the changes.
-2. Put the name of the installed certificates into the `.env` file as `APPLE_CODESIGN_IDENTITY` and `APPLE_INSTALLER_IDENTITY` respectively.
+2. Put the name of the installed certificates into the `.env` file as `APPLE_CODESIGN_IDENTITY`, `APPLE_INSTALLER_IDENTITY`, `APPLE_STANDALONE_CODESIGN_IDENTITY` respectively. See `.env.example` for details.
 3. Create and donwload a distribution provisioning profile from https://developer.apple.com/account/resources/profiles/list and put it into the `src/assets/<FLAVOR>` folder as `RMBTDesktop_Distribution_Profile.provisionprofile`.
 4. Set up the `.env` file with your `APPLE_ID`, `APPLE_PASSWORD`, and `APPLE_TEAM_ID`. See https://www.electronforge.io/guides/code-signing/code-signing-macos#option-1-using-an-app-specific-password for details.
 5. Make sure that all files have `644` or `744` permissions set.
@@ -128,6 +129,8 @@ The project contains a `.env.example` file. You can use it as an example to conf
 | `HISTORY_EXPORT_URL`           | A URL used to export history as a PDF file. Once the file is downloaded, a dialog will be shown for the user to pick the folder where to save it.                                                      |
 | `HISTORY_SEARCH_URL`           | A URL used to export history as a CSV or XSLX file. Once the file is downloaded, a dialog will be shown for the user to pick the folder where to save it.                                              |
 | `FULL_HISTORY_RESULT_URL`      | A full URL, without ` test_uuid`, of a webpage, which contains a detailed measurement result.                                                                                                          |
+| `FULL_STATISTICS_URL`          | A full URL of a webpage to be shown in an iframe on the Statistics screen.                                                                                                                             |
+| `FULL_MAP_URL`                 | A full URL of a webpage to be shown in an iframe on the Map screen.                                                                                                                                    |
 | `OPEN_HISTORY_RESUlT_URL`      | A full URL, without ` open_test_uuid`, of a webpage, which contains an open measurement result for sharing.                                                                                            |
 | `FLAVOR`                       | `rtr` or `ont`, determines the type of UI used for the Electron app. Defaults to ` rtr` if not set.                                                                                                    |
 | `ASSETS_FOLDER`                | A path to a folder that contains flavor specific files, such as icons and styles.                                                                                                                      |
@@ -160,3 +163,8 @@ The project contains a `.env.example` file. You can use it as an example to conf
 | `WINDOWS_CERT_PATH`                | Full path to your certificate.pfx                                                                                                                                                                                                                  |
 | `GITHUB_API_URL`                   | https://api.github.com/repos/<account>/<repo>, is used to check for new releases.                                                                                                                                                                  |
 | `GITHUB_TOKEN`                     | Github API token.                                                                                                                                                                                                                                  |
+| `LOOP_MODE_MIN_INTERVAL`           | Minimal allowed interval between tests in the loop mode, in minutes.                                                                                                                                                                               |
+| `LOOP_MODE_MAX_INTERVAL`           | Maximal allowed interval between tests in the loop mode, in minutes.                                                                                                                                                                               |
+| `LOOP_MODE_DEFAULT_INTERVAL`       | Interval between tests in the loop mode, in minutes, suggested by default.                                                                                                                                                                         |
+
+| `LOOP_MODE_MAX_DURATION` | Maximal allowed duration of the loop mode tests, in minutes. |

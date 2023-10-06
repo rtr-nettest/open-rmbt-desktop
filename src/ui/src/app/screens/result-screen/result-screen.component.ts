@@ -14,6 +14,7 @@ import { ERoutes } from "src/app/enums/routes.enum"
 import { ClassificationService } from "src/app/services/classification.service"
 import { ConversionService } from "src/app/services/conversion.service"
 import { HistoryStore } from "src/app/store/history.store"
+import { UNKNOWN } from "src/app/constants/strings"
 
 @Component({
     selector: "app-result-screen",
@@ -162,12 +163,22 @@ export class ResultScreenComponent {
                         this.openResultURL = `${this.openResultBaseURL}${item.value}`
                         this.addOpenResultButton()
                     }
-                    return this.openResultURL && isOpenResultId
-                        ? {
-                              title: item.title,
-                              value: `<a href="${this.openResultURL}" target="_blank">${item.value}</a>`,
-                          }
-                        : item
+                    if (this.openResultURL && isOpenResultId) {
+                        return {
+                            title: item.title,
+                            value: `<a href="${this.openResultURL}" target="_blank">${item.value}</a>`,
+                        }
+                    }
+                    if (
+                        item.title.toLowerCase().includes("net") &&
+                        item.value === UNKNOWN
+                    ) {
+                        return {
+                            title: item.title,
+                            value: "LAN",
+                        }
+                    }
+                    return item
                 }) ?? [],
             totalElements: result.detailedHistoryResult?.length ?? 0,
         }
@@ -176,6 +187,18 @@ export class ResultScreenComponent {
     weHaveToGoBack() {
         if (this.mainStore.referrer$.value?.includes(ERoutes.HISTORY)) {
             this.router.navigate(["/", ERoutes.HISTORY])
+        } else if (
+            this.mainStore.referrer$.value?.includes(
+                ERoutes.LOOP_RESULT.split("/")[0]
+            )
+        ) {
+            const parts = this.mainStore.referrer$.value.split("/")
+            this.router.navigateByUrl(
+                ERoutes.LOOP_RESULT.replace(
+                    ":loopUuid",
+                    parts[parts.length - 1]
+                )
+            )
         } else {
             this.router.navigate(["/"])
         }

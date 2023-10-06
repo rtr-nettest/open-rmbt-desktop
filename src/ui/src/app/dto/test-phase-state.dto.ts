@@ -44,7 +44,7 @@ export class TestPhaseState implements ITestPhaseState {
     }
 
     setRTRChartFromOverallSpeed(overallResults: IOverallResult[]) {
-        let skippedMs = 1
+        let skippedMs = 0
         let shift = 0
         this.chart = overallResults.reduce((acc, r, i) => {
             const msec = r.nsec / 1e6

@@ -1,6 +1,16 @@
-import { app, BrowserWindow, ipcMain, Menu, protocol, shell } from "electron"
+import {
+    app,
+    BrowserWindow,
+    dialog,
+    ipcMain,
+    Menu,
+    powerMonitor,
+    protocol,
+    shell,
+} from "electron"
 if (require("electron-squirrel-startup")) app.quit()
 import path from "path"
+import { t } from "../measurement/services/i18n.service"
 import { MeasurementRunner } from "../measurement"
 import { Events } from "./enums/events.enum"
 import { IEnv } from "./interfaces/env.interface"
@@ -12,7 +22,7 @@ import {
     DEFAULT_LANGUAGE,
     IP_VERSION,
     Store,
-    TERMS_ACCEPTED,
+    TERMS_ACCEPTED_VERSION,
 } from "../measurement/services/store.service"
 import { CrowdinService } from "../measurement/services/crowdin.service"
 import { ControlServer } from "../measurement/services/control-server.service"
@@ -21,6 +31,10 @@ import { EIPVersion } from "../measurement/enums/ip-version.enum"
 import { buildMenu } from "./menu"
 import { UserSettingsRequest } from "../measurement/dto/user-settings-request.dto"
 import { IMeasurementServerResponse } from "../measurement/interfaces/measurement-server-response.interface"
+import { LoopService } from "../measurement/services/loop.service"
+import { ILoopModeInfo } from "../measurement/interfaces/measurement-registration-request.interface"
+import { EMeasurementStatus } from "../measurement/enums/measurement-status.enum"
+import { ERoutes } from "../ui/src/app/enums/routes.enum"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -63,6 +77,56 @@ const createWindow = () => {
     } else {
         win.loadURL(`${Protocol.scheme}://index.html`)
     }
+
+    win.on("close", async (event) => {
+        if (
+            [
+                EMeasurementStatus.END,
+                EMeasurementStatus.ABORTED,
+                EMeasurementStatus.NOT_STARTED,
+            ].includes(MeasurementRunner.I.getCurrentPhaseState().phase) &&
+            !LoopService.I.loopTimeout
+        ) {
+            return
+        }
+        const dialogOpts = {
+            type: "warning" as const,
+            buttons: [t("Ok"), t("Cancel")],
+            title: t("Close app"),
+            message: t("The currently running measurement will be aborted"),
+        }
+        const response = await dialog.showMessageBox(dialogOpts)
+        if (response.response !== 0) {
+            event.preventDefault()
+        }
+    })
+
+    powerMonitor.on("suspend", async (event) => {
+        if (
+            [
+                EMeasurementStatus.END,
+                EMeasurementStatus.ABORTED,
+                EMeasurementStatus.NOT_STARTED,
+            ].includes(MeasurementRunner.I.getCurrentPhaseState().phase) &&
+            !LoopService.I.loopTimeout
+        ) {
+            return
+        }
+        const dialogOpts = {
+            type: "warning" as const,
+            buttons: [t("Ok")],
+            title: t("App was suspended"),
+            message: t(
+                "The app was suspended. The last running measurement was aborted"
+            ),
+        }
+        const response = await dialog.showMessageBox(dialogOpts)
+        if (response.response === 0) {
+            LoopService.I.resetCounter()
+            MeasurementRunner.I.abortMeasurement()
+            win.webContents.send(Events.OPEN_SCREEN, ERoutes.HISTORY)
+        }
+    })
 }
 
 // Needs to be called before app is ready;
@@ -83,6 +147,7 @@ app.on("window-all-closed", () => {
     if (process.platform !== "darwin") {
         app.quit()
     } else {
+        LoopService.I.resetCounter()
         MeasurementRunner.I.abortMeasurement()
     }
 })
@@ -103,14 +168,18 @@ ipcMain.handle(Events.GET_NEWS, async () => {
     return await ControlServer.I.getNews()
 })
 
-ipcMain.on(Events.ACCEPT_TERMS, (event, terms: string) => {
-    Store.set(TERMS_ACCEPTED, terms)
+ipcMain.on(Events.ACCEPT_TERMS, (event, terms: number) => {
+    Store.set(TERMS_ACCEPTED_VERSION, terms)
 })
 
 ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
     const webContents = event.sender
     try {
-        return await MeasurementRunner.I.registerClient()
+        const settings = await MeasurementRunner.I.registerClient()
+        if (settings.shouldAcceptTerms) {
+            webContents.send(Events.OPEN_SCREEN, ERoutes.TERMS_CONDITIONS)
+        }
+        return settings
     } catch (e) {
         webContents.send(Events.ERROR, e)
     }
@@ -139,17 +208,43 @@ ipcMain.on(
     }
 )
 
-ipcMain.on(Events.RUN_MEASUREMENT, async (event) => {
+ipcMain.on(
+    Events.RUN_MEASUREMENT,
+    async (event, loopModeInfo?: ILoopModeInfo) => {
+        const webContents = event.sender
+        try {
+            const status = await MeasurementRunner.I.runMeasurement({
+                loopModeInfo,
+            })
+            if (status === EMeasurementStatus.ABORTED) {
+                webContents.send(Events.MEASUREMENT_ABORTED)
+            }
+        } catch (e) {
+            webContents.send(Events.ERROR, e)
+        }
+    }
+)
+
+ipcMain.on(Events.ABORT_MEASUREMENT, (event) => {
     const webContents = event.sender
-    try {
-        await MeasurementRunner.I.runMeasurement()
-    } catch (e) {
-        webContents.send(Events.ERROR, e)
+    LoopService.I.resetCounter()
+    let aborted = MeasurementRunner.I.abortMeasurement()
+    if (aborted) {
+        webContents.send(Events.MEASUREMENT_ABORTED)
     }
 })
 
-ipcMain.on(Events.ABORT_MEASUREMENT, () => {
-    MeasurementRunner.I.abortMeasurement()
+ipcMain.on(Events.SCHEDULE_LOOP, (event, loopInterval) => {
+    const webContents = event.sender
+    LoopService.I.scheduleLoop({
+        interval: loopInterval,
+        onTime: (counter) => {
+            webContents.send(Events.RESTART_MEASUREMENT, counter)
+        },
+        onExpire: () => {
+            webContents.send(Events.LOOP_MODE_EXPIRED)
+        },
+    })
 })
 
 ipcMain.on(Events.DELETE_LOCAL_DATA, () => {
@@ -167,15 +262,29 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         FLAVOR: process.env.FLAVOR || "rtr",
         WEBSITE_HOST: new URL(process.env.FULL_HISTORY_RESULT_URL ?? "").origin,
         FULL_HISTORY_RESULT_URL: process.env.FULL_HISTORY_RESULT_URL,
+        FULL_STATISTICS_URL: process.env.FULL_STATISTICS_URL,
+        FULL_MAP_URL: process.env.FULL_MAP_URL,
         HISTORY_EXPORT_URL: process.env.HISTORY_EXPORT_URL,
         HISTORY_RESULTS_LIMIT: process.env.HISTORY_RESULTS_LIMIT
             ? parseInt(process.env.HISTORY_RESULTS_LIMIT)
             : undefined,
         HISTORY_SEARCH_URL: process.env.HISTORY_SEARCH_URL,
         IP_VERSION: (Store.get(IP_VERSION) as string) || "",
+        LOOP_MODE_MIN_INTERVAL: process.env.LOOP_MODE_MIN_INTERVAL
+            ? parseInt(process.env.LOOP_MODE_MIN_INTERVAL)
+            : 5,
+        LOOP_MODE_MAX_INTERVAL: process.env.LOOP_MODE_MAX_INTERVAL
+            ? parseInt(process.env.LOOP_MODE_MAX_INTERVAL)
+            : 120,
+        LOOP_MODE_DEFAULT_INTERVAL: process.env.LOOP_MODE_DEFAULT_INTERVAL
+            ? parseInt(process.env.LOOP_MODE_DEFAULT_INTERVAL)
+            : 10,
+        LOOP_MODE_MAX_DURATION: process.env.LOOP_MODE_MAX_DURATION
+            ? parseInt(process.env.LOOP_MODE_MAX_DURATION)
+            : 2880,
         OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
         REPO_URL: pack.repository,
-        TERMS_ACCEPTED: (Store.get(TERMS_ACCEPTED) as boolean) || false,
+        TERMS_ACCEPTED_VERSION: Store.get(TERMS_ACCEPTED_VERSION) as number,
         X_NETTEST_CLIENT: (Store.get(ACTIVE_CLIENT) as string) || "",
         USER_DATA: app.getPath("temp"),
         MEASUREMENT_SERVERS_PATH: process.env.MEASUREMENT_SERVERS_PATH || "",
@@ -194,7 +303,8 @@ ipcMain.handle(Events.GET_MEASUREMENT_STATE, () => {
 ipcMain.handle(Events.GET_MEASUREMENT_RESULT, async (event, testUuid) => {
     const webContents = event.sender
     try {
-        return await ControlServer.I.getMeasurementResult(testUuid)
+        const result = await ControlServer.I.getMeasurementResult(testUuid)
+        return result
     } catch (e) {
         webContents.send(Events.ERROR, e)
     }

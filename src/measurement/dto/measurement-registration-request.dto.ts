@@ -1,5 +1,8 @@
 import { EMeasurementServerType } from "../enums/measurement-server-type.enum"
-import { IMeasurementRegistrationRequest } from "../interfaces/measurement-registration-request.interface"
+import {
+    ILoopModeInfo,
+    IMeasurementRegistrationRequest,
+} from "../interfaces/measurement-registration-request.interface"
 import { I18nService } from "../services/i18n.service"
 import { UserSettingsRequest } from "./user-settings-request.dto"
 const registry = require("../../../package.json")
@@ -18,11 +21,14 @@ export class MeasurementRegistrationRequest
     user_server_selection = false
     app_version = registry.version
     networkType?: number | undefined
+    user_loop_mode?: boolean
+    loopmode_info?: ILoopModeInfo | undefined
 
     constructor(
         public uuid: string,
         measurementServerId?: number,
-        settingsRequest?: UserSettingsRequest
+        settingsRequest?: UserSettingsRequest,
+        loopModeInfo?: ILoopModeInfo
     ) {
         if (typeof measurementServerId === "number") {
             this.prefer_server = measurementServerId
@@ -41,6 +47,10 @@ export class MeasurementRegistrationRequest
                 timezone: settingsRequest.timezone,
                 type: settingsRequest.type,
             })
+        }
+        if (loopModeInfo) {
+            this.user_loop_mode = true
+            this.loopmode_info = loopModeInfo
         }
         this.language = I18nService.I.getActiveLanguage()
     }

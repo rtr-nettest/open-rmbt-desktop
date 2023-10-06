@@ -48,7 +48,7 @@ export class NetInterfaceInfoUnixService implements NetInterfaceInfo {
 
     private async convertToJson(info: string) {
         const lines = info.split("\n")
-        const blocks = []
+        const blocks: any[] = []
         for (const line of lines) {
             const key = /^[a-z0-1]+/.exec(line)?.[0]
             const value = /flags.+/.exec(line)?.[0]

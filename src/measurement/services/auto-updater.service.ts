@@ -1,13 +1,14 @@
 import * as path from "path"
 import * as cp from "child_process"
 import { app, dialog, BrowserWindow } from "electron"
-import axios from "axios"
 import { Logger } from "./logger.service"
 import semverGt from "semver/functions/gt"
 import * as pack from "../../../package.json"
 import { download } from "electron-dl"
 import * as fs from "fs"
 import { t } from "./i18n.service"
+
+const axios = require("axios")
 
 const extensionsMap = {
     win32: "exe",

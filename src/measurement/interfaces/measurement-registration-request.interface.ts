@@ -1,23 +1,21 @@
 import { EMeasurementServerType } from "../enums/measurement-server-type.enum"
 import { IGeolocation } from "./geolocation.interface"
 
+export interface ILoopModeInfo {
+    loop_uuid: string
+    max_delay: number
+    max_movement?: number
+    max_tests?: number
+    test_counter: number
+}
+
 export interface IMeasurementRegistrationRequest {
     app_version?: string
     capabilities?: { [key: string]: any }
     client: EMeasurementServerType
     language: string
     location?: IGeolocation
-    loopmode_info?: {
-        client_uuid: string
-        loop_uuid: string
-        max_delay: number
-        max_movement: number
-        max_tests: number
-        test_counter: number
-        test_uuid: string
-        text_counter: number
-        uid: number
-    }
+    loopmode_info?: ILoopModeInfo
     measurement_server_id?: number
     measurement_type_flag: string
     model?: string

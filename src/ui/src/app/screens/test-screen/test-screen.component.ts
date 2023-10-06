@@ -1,6 +1,12 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from "@angular/core"
+import {
+    ChangeDetectionStrategy,
+    Component,
+    OnDestroy,
+    OnInit,
+} from "@angular/core"
 import { Router } from "@angular/router"
 import {
+    Observable,
     Subject,
     distinctUntilChanged,
     takeUntil,
@@ -16,6 +22,7 @@ import {
     ERROR_OCCURED_SENDING_RESULTS,
 } from "src/app/constants/strings"
 import { ITestVisualizationState } from "src/app/interfaces/test-visualization-state.interface"
+import { HistoryStore } from "src/app/store/history.store"
 
 @Component({
     selector: "app-test-screen",
@@ -23,7 +30,9 @@ import { ITestVisualizationState } from "src/app/interfaces/test-visualization-s
     styleUrls: ["./test-screen.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TestScreenComponent implements OnDestroy {
+export class TestScreenComponent implements OnDestroy, OnInit {
+    enableLoopMode$ = this.store.enableLoopMode$
+    loopCount$ = this.store.loopCounter$
     env$ = this.mainStore.env$
     stopped$: Subject<void> = new Subject()
     visualization$ = this.store.launchTest().pipe(
@@ -53,21 +62,38 @@ export class TestScreenComponent implements OnDestroy {
             }
         })
     )
+    loopWaitProgress$?: Observable<{ ms: number; percent: number }>
+    result$ = this.historyStore.getFormattedHistory({ grouped: false })
 
     constructor(
+        private historyStore: HistoryStore,
         private store: TestStore,
         private mainStore: MainStore,
         private router: Router,
         private message: MessageService
     ) {}
 
+    ngOnInit(): void {
+        this.historyStore
+            .getRecentMeasurementHistory({
+                offset: 0,
+                limit: this.store.loopCounter$.value - 1,
+            })
+            .subscribe()
+    }
+
     ngOnDestroy(): void {
         this.stopped$.complete()
     }
 
-    private goToResult = (state: ITestVisualizationState) =>
-        this.router.navigate([
-            "result",
-            state.phases[state.currentPhaseName].testUuid,
-        ])
+    private goToResult = (state: ITestVisualizationState) => {
+        if (this.enableLoopMode$.value !== true) {
+            this.router.navigate([
+                "result",
+                state.phases[state.currentPhaseName].testUuid,
+            ])
+        } else {
+            this.loopWaitProgress$ = this.store.scheduleLoop()
+        }
+    }
 }

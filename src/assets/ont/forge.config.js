@@ -22,13 +22,18 @@ module.exports = {
     packagerConfig: {
         icon: path.join(process.env.ASSETS_FOLDER, "app-icon", "icon"),
         ignore: [
-            "coverage/",
-            "src/",
-            "log/",
-            "node_modules/",
+            "coverage$",
+            "scripts$",
+            "src$",
+            "log$",
+            "node_modules$",
             ".prettierrc",
             ".config.js",
             ".example",
+            ".env",
+            ".log$",
+            ".gitignore",
+            "README.md",
         ],
         appBundleId: process.env.APP_BUNDLE_ID,
         ...(process.env.APP_STORE !== "true"

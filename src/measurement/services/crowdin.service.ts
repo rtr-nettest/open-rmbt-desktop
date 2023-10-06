@@ -1,9 +1,7 @@
-import axios from "axios"
 import { Logger } from "./logger.service"
 import { ICrowdinDownload, ICrowdinJson } from "../interfaces/crowdin.interface"
-import { Store, TERMS_ACCEPTED } from "./store.service"
-import { TERMS_AND_CONDITIONS } from "../../ui/src/app/constants/strings"
 
+const axios = require("axios")
 const xliff = require("xliff/cjs/xliff12ToJs")
 
 export class CrowdinService {
@@ -56,11 +54,6 @@ export class CrowdinService {
             Logger.I.info(
                 "Translations file is converted to translations format"
             )
-            if (
-                translations[TERMS_AND_CONDITIONS] !== Store.get(TERMS_ACCEPTED)
-            ) {
-                Store.set(TERMS_ACCEPTED, "")
-            }
             return translations
         } catch (e) {
             Logger.I.error(e)

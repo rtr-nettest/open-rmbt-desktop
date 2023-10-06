@@ -4,6 +4,8 @@ export enum ERoutes {
     HELP = "help",
     HISTORY = "history",
     LOOP_MODE = "loop",
+    LOOP_TEST = "loop-test",
+    LOOP_RESULT = "loop-result/:loopUuid",
     MAP = "map",
     NEWS = "new",
     SETTINGS = "settings",

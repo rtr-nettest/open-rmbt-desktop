@@ -1,6 +1,7 @@
 import { Store } from "../measurement/services/store.service"
 import { I18nService, t } from "../measurement/services/i18n.service"
 import { Events } from "./enums/events.enum"
+import { ERoutes } from "../ui/src/app/enums/routes.enum"
 
 const { app, Menu } = require("electron")
 
@@ -32,7 +33,7 @@ const template = [
                     e: Electron.KeyboardEvent,
                     $: Electron.BrowserWindow
                 ) => {
-                    $.webContents.send(Events.OPEN_SETTINGS)
+                    $.webContents.send(Events.OPEN_SCREEN, ERoutes.SETTINGS)
                 },
             },
             {

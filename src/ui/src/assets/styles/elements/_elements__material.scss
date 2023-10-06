@@ -119,3 +119,26 @@ app-settings-locale .mat-mdc-select {
 .mat-mdc-option {
     font-size: 1rem;
 }
+
+$progress-height: 26px !important;
+$progress-color: #0071d7;
+
+.app-progress-bar--loop {
+    height: $progress-height;
+    .mdc-linear-progress__bar {
+        height: $progress-height;
+        background-color: $progress-color;
+
+        &-inner {
+            border-color: $progress-color;
+        }
+    }
+    .mdc-linear-progress__buffer {
+        height: $progress-height;
+
+        &-bar,
+        &-dots {
+            background: #d9d9d9;
+        }
+    }
+}

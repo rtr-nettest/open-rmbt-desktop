@@ -9,8 +9,14 @@ import { RMBTClient } from "../rmbt-client.service"
 import { Time } from "../time.service"
 import { ELoggerMessage } from "../../enums/logger-message.enum"
 
+export interface IPreUploadResult {
+    chunkSize: number
+    chunksCount: number
+}
+
 export class PreUploadMessageHandler implements IMessageHandler {
     private _chunkSize: number = RMBTClient.minChunkSize
+    private _chunksCount: number = 0
     private _maxChunksCount = 16
     private _minChunkSize = 0
     private _preUploadEndTime = Infinity
@@ -30,7 +36,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
 
     constructor(
         private ctx: IMessageHandlerContext,
-        public onFinish: (_chunkSize: number) => void
+        public onFinish: (result: IPreUploadResult) => void
     ) {
         for (let i = this._chunkSize; i <= RMBTClient.maxChunkSize; i *= 2) {
             this._buffersMap[i] = this.generateBuffers(i)
@@ -38,7 +44,10 @@ export class PreUploadMessageHandler implements IMessageHandler {
     }
 
     stopMessaging(): void {
-        this.onFinish?.(this._chunkSize)
+        this.onFinish?.({
+            chunkSize: this._chunkSize,
+            chunksCount: this._chunksCount,
+        })
     }
 
     writeData(): void {
@@ -54,6 +63,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
             if (Time.nowNs() >= this._preUploadEndTime) {
                 this.stopMessaging()
             } else if (this.ctx.preUploadChunks < this._maxChunksCount) {
+                this._chunksCount = this.ctx.preUploadChunks
                 this.putNoResult()
                 this.putChunks()
             } else {
@@ -65,7 +75,7 @@ export class PreUploadMessageHandler implements IMessageHandler {
 
     private generateBuffers(_chunkSize: number) {
         let maxStoredResults = 3
-        const buffers = []
+        const buffers: Buffer[] = []
         while (maxStoredResults > 0) {
             buffers.push(randomBytes(_chunkSize))
             maxStoredResults--

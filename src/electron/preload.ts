@@ -12,7 +12,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getTranslations: (lang: string) =>
         ipcRenderer.invoke(Events.GET_TRANSLATIONS, lang),
     getNews: () => ipcRenderer.invoke(Events.GET_NEWS),
-    acceptTerms: (terms: string) =>
+    acceptTerms: (terms: number) =>
         ipcRenderer.send(Events.ACCEPT_TERMS, terms),
     registerClient: () => ipcRenderer.invoke(Events.REGISTER_CLIENT),
     setIpVersion: (ipv: EIPVersion | null) =>

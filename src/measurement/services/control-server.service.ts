@@ -21,6 +21,7 @@ import {
     LAST_NEWS_UID,
     SETTINGS,
     Store,
+    TERMS_ACCEPTED_VERSION,
 } from "./store.service"
 import { DBService } from "./db.service"
 import { SimpleHistoryResult } from "../dto/simple-history-result.dto"
@@ -35,6 +36,7 @@ import { UserSettingsRequest } from "../dto/user-settings-request.dto"
 import * as dns from "dns"
 import { IPaginator } from "../../ui/src/app/interfaces/paginator.interface"
 import { ISort } from "../../ui/src/app/interfaces/sort.interface"
+import { BrowserWindow } from "electron"
 
 const axios = require("axios")
 
@@ -193,6 +195,12 @@ export class ControlServer {
             Logger.I.info("Using settings: %o", settings)
             Store.set(CLIENT_UUID, settings.uuid)
             Store.set(SETTINGS, settings)
+            if (
+                Store.I.get(TERMS_ACCEPTED_VERSION) !==
+                settings.terms_and_conditions.version
+            ) {
+                return { ...settings, shouldAcceptTerms: true }
+            }
             return settings
         }
         if (response?.error?.length) {

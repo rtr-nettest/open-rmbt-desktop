@@ -19,7 +19,7 @@ export interface IEnv {
     LOOP_MODE_MAX_DURATION: number
     OPEN_HISTORY_RESUlT_URL: string
     REPO_URL: string
-    TERMS_ACCEPTED: boolean
+    TERMS_ACCEPTED_VERSION: number
     X_NETTEST_CLIENT: string
     USER_DATA: string
     CONTROL_SERVER_URL: string

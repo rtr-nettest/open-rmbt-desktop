@@ -22,7 +22,7 @@ import {
     DEFAULT_LANGUAGE,
     IP_VERSION,
     Store,
-    TERMS_ACCEPTED,
+    TERMS_ACCEPTED_VERSION,
 } from "../measurement/services/store.service"
 import { CrowdinService } from "../measurement/services/crowdin.service"
 import { ControlServer } from "../measurement/services/control-server.service"
@@ -168,14 +168,18 @@ ipcMain.handle(Events.GET_NEWS, async () => {
     return await ControlServer.I.getNews()
 })
 
-ipcMain.on(Events.ACCEPT_TERMS, (event, terms: string) => {
-    Store.set(TERMS_ACCEPTED, terms)
+ipcMain.on(Events.ACCEPT_TERMS, (event, terms: number) => {
+    Store.set(TERMS_ACCEPTED_VERSION, terms)
 })
 
 ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
     const webContents = event.sender
     try {
-        return await MeasurementRunner.I.registerClient()
+        const settings = await MeasurementRunner.I.registerClient()
+        if (settings.shouldAcceptTerms) {
+            webContents.send(Events.OPEN_SCREEN, ERoutes.TERMS_CONDITIONS)
+        }
+        return settings
     } catch (e) {
         webContents.send(Events.ERROR, e)
     }
@@ -280,7 +284,7 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
             : 2880,
         OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
         REPO_URL: pack.repository,
-        TERMS_ACCEPTED: (Store.get(TERMS_ACCEPTED) as boolean) || false,
+        TERMS_ACCEPTED_VERSION: Store.get(TERMS_ACCEPTED_VERSION) as number,
         X_NETTEST_CLIENT: (Store.get(ACTIVE_CLIENT) as string) || "",
         USER_DATA: app.getPath("temp"),
         MEASUREMENT_SERVERS_PATH: process.env.MEASUREMENT_SERVERS_PATH || "",

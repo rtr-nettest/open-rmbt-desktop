@@ -23,7 +23,7 @@ import { BaseScreen } from "../base-screen/base-screen.component"
     templateUrl: "./home-screen.component.html",
     styleUrls: ["./home-screen.component.scss"],
 })
-export class HomeScreenComponent extends BaseScreen {
+export class HomeScreenComponent extends BaseScreen implements OnInit {
     env$ = this.mainStore.env$
     ipInfo$ = this.mainStore.settings$.pipe(
         map((settings) => {
@@ -60,22 +60,6 @@ export class HomeScreenComponent extends BaseScreen {
             )
         )
     )
-    terms$ = combineLatest([
-        this.transloco.selectTranslate(TERMS_AND_CONDITIONS),
-        from(window.electronAPI.getEnv()),
-    ])
-        .pipe(
-            takeUntil(this.destroyed$),
-            tap(([terms, env]) => {
-                if (terms !== env.TERMS_ACCEPTED && env.FLAVOR !== "ont") {
-                    this.router.navigate(["/", ERoutes.TERMS_CONDITIONS])
-                } else {
-                    this.mainStore.registerClient()
-                    this.showProgress = false
-                }
-            })
-        )
-        .subscribe()
     showProgress = true
     methodologyLink$ = this.cmsService.getProject().pipe(
         map(() => {
@@ -96,6 +80,11 @@ export class HomeScreenComponent extends BaseScreen {
         private transloco: TranslocoService
     ) {
         super(mainStore, message)
+    }
+
+    ngOnInit(): void {
+        this.mainStore.registerClient()
+        this.showProgress = false
     }
 
     getIPIcon(publicAddress: string, privateAddress: string) {

@@ -59,6 +59,9 @@ export class MeasurementRunner {
             this.settings = await ControlServer.I.getUserSettings(
                 this.settingsRequest
             )
+            if (this.settings.shouldAcceptTerms) {
+                return this.settings
+            }
             const ipInfo = await NetworkInfoService.I.getIPInfo(
                 this.settings,
                 this.settingsRequest

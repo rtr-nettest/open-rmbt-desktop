@@ -270,6 +270,9 @@ declare global {
         {
             provide: DatePipe,
         },
+        {
+            provide: SprintfPipe,
+        },
     ],
 })
 export class AppModule {

@@ -22,6 +22,8 @@ import { ERoutes } from "../enums/routes.enum"
 import { ILoopModeInfo } from "../../../../measurement/interfaces/measurement-registration-request.interface"
 import { v4 } from "uuid"
 import { MessageService } from "../services/message.service"
+import { TranslocoService } from "@ngneat/transloco"
+import { SprintfPipe } from "../pipes/sprintf.pipe"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
@@ -43,12 +45,15 @@ export class TestStore {
     enableLoopMode$ = new BehaviorSubject<boolean>(false)
     loopCounter$ = new BehaviorSubject<number>(1)
     loopUuid$ = new BehaviorSubject<string | null>(null)
+    loopModeExpired$ = new BehaviorSubject<boolean>(false)
 
     constructor(
         private message: MessageService,
         private mainStore: MainStore,
         private ngZone: NgZone,
-        private router: Router
+        private router: Router,
+        private sprintf: SprintfPipe,
+        private transloco: TranslocoService
     ) {
         window.electronAPI.onRestartMeasurement((loopCounter) => {
             this.ngZone.run(() => {
@@ -64,16 +69,7 @@ export class TestStore {
         })
         window.electronAPI.onLoopModeExpired(() => {
             this.ngZone.run(() => {
-                this.message.openConfirmDialog(
-                    "The loop measurement has expired",
-                    () => {
-                        this.router.navigate([
-                            "/",
-                            ERoutes.LOOP_RESULT.split("/")[0],
-                            this.loopUuid$.value,
-                        ])
-                    }
-                )
+                this.loopModeExpired$.next(true)
             })
         })
     }
@@ -117,6 +113,26 @@ export class TestStore {
     }
 
     scheduleLoop() {
+        if (this.loopModeExpired$.value === true) {
+            const message = this.transloco.translate(
+                "The loop measurement has expired"
+            )
+            this.message.openConfirmDialog(
+                this.sprintf.transform(
+                    message,
+                    this.mainStore.env$.value!.LOOP_MODE_MAX_DURATION
+                ),
+                () => {
+                    this.loopModeExpired$.next(false)
+                    this.router.navigate([
+                        "/",
+                        ERoutes.LOOP_RESULT.split("/")[0],
+                        this.loopUuid$.value,
+                    ])
+                }
+            )
+            return
+        }
         const testIntervalMs = this.testIntervalMinutes$.value! * 60 * 1000
         window.electronAPI.scheduleLoop(testIntervalMs)
         return interval(200).pipe(

@@ -92,7 +92,7 @@
     "End tests": "DE-End tests",
     "Next measurement in": "DE-Next measurement in",
     "Recent measurements": "DE-Recent measurements",
-    "The loop measurement has expired": "DE-The loop measurement has expired",
+    "The loop measurement has expired": "DE-The loop measurement has expired after %0 minutes",
     "Close app": "DE-Close app",
     "The currently running measurement will be aborted": "DE-The currently running measurement will be aborted",
     "App was suspended": "DE-App was suspended",

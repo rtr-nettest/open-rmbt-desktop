@@ -238,8 +238,6 @@ ipcMain.on(Events.SCHEDULE_LOOP, (event, loopInterval) => {
             webContents.send(Events.RESTART_MEASUREMENT, counter)
         },
         onExpire: () => {
-            LoopService.I.resetCounter()
-            MeasurementRunner.I.abortMeasurement()
             webContents.send(Events.LOOP_MODE_EXPIRED)
         },
     })
@@ -277,6 +275,9 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         LOOP_MODE_DEFAULT_INTERVAL: process.env.LOOP_MODE_DEFAULT_INTERVAL
             ? parseInt(process.env.LOOP_MODE_DEFAULT_INTERVAL)
             : 10,
+        LOOP_MODE_MAX_DURATION: process.env.LOOP_MODE_MAX_DURATION
+            ? parseInt(process.env.LOOP_MODE_MAX_DURATION)
+            : 2880,
         OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
         REPO_URL: pack.repository,
         TERMS_ACCEPTED: (Store.get(TERMS_ACCEPTED) as boolean) || false,

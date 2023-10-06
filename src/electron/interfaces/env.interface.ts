@@ -16,6 +16,7 @@ export interface IEnv {
     LOOP_MODE_MIN_INTERVAL: number
     LOOP_MODE_MAX_INTERVAL: number
     LOOP_MODE_DEFAULT_INTERVAL: number
+    LOOP_MODE_MAX_DURATION: number
     OPEN_HISTORY_RESUlT_URL: string
     REPO_URL: string
     TERMS_ACCEPTED: boolean

@@ -23,11 +23,11 @@ module.exports = {
     packagerConfig: {
         icon: path.join(process.env.ASSETS_FOLDER, "app-icon", "icon"),
         ignore: [
-            "coverage/",
-            "scripts/",
-            "src/",
-            "log/",
-            "node_modules/",
+            "coverage$",
+            "scripts$",
+            "src$",
+            "log$",
+            "node_modules$",
             ".prettierrc",
             ".config.js",
             ".example",

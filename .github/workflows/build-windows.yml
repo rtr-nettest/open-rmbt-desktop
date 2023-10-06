@@ -17,8 +17,10 @@ jobs:
     - name: Get .env
       run: |
         curl -H "Authorization: token ${REPO_TOKEN}" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.c01
+        dir
     - name: Build
       run: |
+        dir
         npm install
         cd src
         cd ui

@@ -40,8 +40,8 @@ export class LoopStartScreenComponent {
     ) {}
 
     onSubmit() {
-        const interval = this.form?.get("interval")?.value
-        if (interval) {
+        const interval = Number(this.form?.get("interval")?.value)
+        if (interval >= 0) {
             this.testStore.launchLoopTest(interval)
         }
     }

@@ -14,11 +14,12 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 18.x
-
+    - name: Get .env
+      run: |
+        curl -H 'Authorization: token ${REPO_TOKEN}' -H 'Accept: application/vnd.github.v3.raw' -O .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.c01
     - name: Build
       run: |
         npm install
-        mv .env.example .env
         cd src
         cd ui
         npm install
@@ -27,5 +28,9 @@ jobs:
         npm run make:windows
     - uses: actions/upload-artifact@v3
       with:
-        name: my-artifact
-        path: out/**/*.exe
+        name: application-zip
+        path: out/RTR-Netztest-win32-x64/
+    - uses: actions/upload-artifact@v3
+      with:
+        name: application-setup
+        path: out/make/squirrel.windows/x64/*.exe

@@ -9,5 +9,7 @@ export const TranslocoConfigExt: { [key: string]: any } = {
         { iso: "sr-Latn", name: "Srpski" },
         { iso: "sr-Latn-ME", name: "Crnogorski" },
     ],
+    browserLangs: ["en", "de", "nb", "sk", "sr", "sr-Latn", "sr-Latn-ME"], // languages supported by the web portal
     defaultLang: "en",
+    defaultBrowserLang: "en",
 }

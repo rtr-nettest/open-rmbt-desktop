@@ -15,6 +15,7 @@ import { ClassificationService } from "src/app/services/classification.service"
 import { ConversionService } from "src/app/services/conversion.service"
 import { HistoryStore } from "src/app/store/history.store"
 import { UNKNOWN } from "src/app/constants/strings"
+import { I18nService } from "src/app/services/i18n.service"
 
 @Component({
     selector: "app-result-screen",
@@ -39,7 +40,7 @@ export class ResultScreenComponent {
             this.openResultBaseURL =
                 env?.OPEN_HISTORY_RESUlT_URL?.replace(
                     "$lang",
-                    this.transloco.getActiveLang()
+                    this.i18n.getActiveBrowserLang()
                 ) ?? ""
         })
     )
@@ -70,6 +71,7 @@ export class ResultScreenComponent {
         private classification: ClassificationService,
         private conversion: ConversionService,
         private historyStore: HistoryStore,
+        private i18n: I18nService,
         private mainStore: MainStore,
         private store: TestStore,
         private route: ActivatedRoute,

@@ -1,7 +1,7 @@
 import { Component } from "@angular/core"
 import { DomSanitizer } from "@angular/platform-browser"
-import { TranslocoService } from "@ngneat/transloco"
 import { map } from "rxjs"
+import { I18nService } from "src/app/services/i18n.service"
 import { MainStore } from "src/app/store/main.store"
 
 @Component({
@@ -16,7 +16,7 @@ export class StatisticsScreenComponent {
                 ? this.sanitizer.bypassSecurityTrustResourceUrl(
                       env?.FULL_STATISTICS_URL?.replace(
                           "$lang",
-                          this.transloco.getActiveLang()
+                          this.i18n.getActiveBrowserLang()
                       ) ?? ""
                   )
                 : null
@@ -24,8 +24,8 @@ export class StatisticsScreenComponent {
     )
 
     constructor(
+        private i18n: I18nService,
         private mainStore: MainStore,
-        private sanitizer: DomSanitizer,
-        private transloco: TranslocoService
+        private sanitizer: DomSanitizer
     ) {}
 }

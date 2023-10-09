@@ -1,0 +1,39 @@
+name: Build windows app
+
+on:
+  push:
+    
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Get .env
+      shell: cmd
+      env:
+        REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+      run: |
+        curl -H "Authorization: token %REPO_TOKEN%" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.windows-ci
+        dir
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18.x
+    - name: Build
+      run: |
+        npm install
+        cd src
+        cd ui
+        npm install
+        cd ..
+        cd ..
+        npm run make:windows
+    - uses: actions/upload-artifact@v3
+      with:
+        name: application-zip
+        path: out/RTR-Netztest-win32-x64/
+    - uses: actions/upload-artifact@v3
+      with:
+        name: application-setup
+        path: out/make/squirrel.windows/x64/*.exe

@@ -108,10 +108,26 @@ export class MeasurementRunner {
             ) {
                 this.rmbtClient!.measurementStatus = EMeasurementStatus.END
             }
+            return this.rmbtClient!.measurementStatus
         } catch (e: any) {
             if (e) {
                 Logger.I.error(e)
-                throw e.message
+                try {
+                    await ControlServer.I.submitMeasurement(
+                        new MeasurementResult(
+                            this.registrationRequest!,
+                            this.rmbtClient!.params!,
+                            [],
+                            this.rmbtClient!.finalResultDown,
+                            this.rmbtClient!.finalResultUp,
+                            this.cpuInfo,
+                            EMeasurementFinalStatus.ERROR,
+                            e.message
+                        )
+                    )
+                } finally {
+                    throw e.message
+                }
             }
         } finally {
             this.setCPUUsage()
@@ -129,7 +145,6 @@ export class MeasurementRunner {
                     this.rounded(this.cpuInfo.load_avg * 100)
                 )
             }
-            return this.rmbtClient!.measurementStatus
         }
     }
 

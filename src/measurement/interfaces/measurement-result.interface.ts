@@ -38,6 +38,7 @@ export interface IMeasurementResult {
     provider_name?: string
     ip_address?: string
     sent_to_server?: boolean
+    test_error?: string
 }
 
 export interface IMeasurementThreadResult {

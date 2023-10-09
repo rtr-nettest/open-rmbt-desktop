@@ -14,9 +14,9 @@ import { IUserSettings } from "../../../../measurement/interfaces/user-settings-
 import { INewsItem } from "../../../../measurement/interfaces/news.interface"
 import { EIPVersion } from "../../../../measurement/enums/ip-version.enum"
 import { Router } from "@angular/router"
-import { ERoutes } from "../enums/routes.enum"
 import { Translation, TranslocoService } from "@ngneat/transloco"
 import { TranslocoHttpLoader } from "../transloco-root.module"
+import { IMainPage } from "../interfaces/main-page.interface"
 
 @Injectable({
     providedIn: "root",
@@ -34,6 +34,7 @@ export class MainStore {
     error$ = new BehaviorSubject<Error | null>(null)
     news$ = new BehaviorSubject<INewsItem[] | null>(null)
     referrer$ = new BehaviorSubject<string | null>(null)
+    terms$ = new BehaviorSubject<IMainPage | null>(null)
 
     constructor(
         private router: Router,

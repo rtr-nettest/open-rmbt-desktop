@@ -15,6 +15,7 @@ import { MainStore } from "../store/main.store"
 import { IMainMenuItem } from "../interfaces/main-menu-item.interface"
 import { environment } from "../constants/environment"
 import { CLIENTS } from "../constants/clients"
+import { IMainPage } from "../interfaces/main-page.interface"
 
 @Injectable({
     providedIn: "root",
@@ -109,6 +110,41 @@ export class CMSService {
                               })
                           )
             )
+        )
+    }
+
+    getPage(route: string): Observable<IMainPage> {
+        return this.http.get<IMainPage>(`${this.apiUrl}/pages`, {
+            params: new HttpParams({
+                fromObject: {
+                    "menu_item.route": route,
+                    _limit: "1",
+                },
+            }),
+            headers: this.headers,
+        })
+    }
+
+    getTerms(): Observable<IMainPage | null> {
+        return this.mainStore.terms$.pipe(
+            first(),
+            switchMap((page) =>
+                page
+                    ? of(page)
+                    : this.http.get<IMainPage>(`${this.apiUrl}/pages`, {
+                          params: new HttpParams({
+                              fromObject: {
+                                  "menu_item.route": "app-terms",
+                                  _limit: "1",
+                              },
+                          }),
+                          headers: {
+                              "Content-Type": "application/json",
+                              "X-Nettest-Client": "nt",
+                          },
+                      })
+            ),
+            catchError(() => of(null))
         )
     }
 }

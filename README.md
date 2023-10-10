@@ -165,5 +165,4 @@ The project contains a `.env.example` file. You can use it as an example to conf
 | `LOOP_MODE_MIN_INTERVAL`           | Minimal allowed interval between tests in the loop mode, in minutes.                                                                                                                                                                               |
 | `LOOP_MODE_MAX_INTERVAL`           | Maximal allowed interval between tests in the loop mode, in minutes.                                                                                                                                                                               |
 | `LOOP_MODE_DEFAULT_INTERVAL`       | Interval between tests in the loop mode, in minutes, suggested by default.                                                                                                                                                                         |
-
-| `LOOP_MODE_MAX_DURATION` | Maximal allowed duration of the loop mode tests, in minutes. |
+| `LOOP_MODE_MAX_DURATION`           | Maximal allowed duration of the loop mode tests, in minutes.                                                                                                                                                                                       |

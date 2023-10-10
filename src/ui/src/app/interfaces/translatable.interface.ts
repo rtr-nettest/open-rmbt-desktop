@@ -7,4 +7,5 @@ export interface ITranslatable {
         updated_at?: string
         [key: string]: any
     }[]
+    [key: string]: any
 }

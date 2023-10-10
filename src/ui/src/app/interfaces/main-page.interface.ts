@@ -10,4 +10,5 @@ export interface IMainPage extends ITranslatable {
     name: string
     enable_table_of_contents?: boolean
     updated_at?: string
+    version?: number
 }

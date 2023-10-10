@@ -48,9 +48,19 @@ export class CMSService {
                 headers: this.headers,
             })
             .pipe(
-                map((projects) =>
-                    projects.filter((p) => CLIENTS.includes(p.slug))
-                )
+                map((projects) => {
+                    const projectMap: { [key: string]: IMainProject } =
+                        projects.reduce(
+                            (acc, c) => ({ ...acc, [c.slug]: c }),
+                            {}
+                        )
+                    const filteredProjectMap: { [key: string]: IMainProject } =
+                        CLIENTS.reduce(
+                            (acc, c) => ({ ...acc, [c]: projectMap[c] }),
+                            {}
+                        )
+                    return Object.values(filteredProjectMap)
+                })
             )
     }
 
@@ -144,7 +154,26 @@ export class CMSService {
                           },
                       })
             ),
-            catchError(() => of(null))
+            catchError(() => of(null)),
+            tap((page) => {
+                if (!page) {
+                    return
+                }
+                const termsVersion = page?.updated_at
+                    ? new Date(page?.updated_at).getTime()
+                    : 0
+                const translatedTermsVersion = page?.translations.length
+                    ? page.translations
+                          .map((t) =>
+                              t.updated_at
+                                  ? new Date(t.updated_at).getTime()
+                                  : 0
+                          )
+                          .sort((a, b) => b - a)?.[0]
+                    : 0
+                page!.version = Math.max(termsVersion, translatedTermsVersion)
+                this.mainStore.terms$.next(page)
+            })
         )
     }
 }

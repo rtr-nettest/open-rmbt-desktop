@@ -7,6 +7,7 @@ import { IEnv } from "../../../../electron/interfaces/env.interface"
 import { ERoutes } from "../enums/routes.enum"
 import { CMSService } from "../services/cms.service"
 import { IMainPage } from "../interfaces/main-page.interface"
+import { MainStore } from "../store/main.store"
 
 @Injectable({
     providedIn: "root",
@@ -14,6 +15,7 @@ import { IMainPage } from "../interfaces/main-page.interface"
 export class EnvResolver {
     constructor(
         private cms: CMSService,
+        private mainStore: MainStore,
         private transloco: TranslocoService,
         private router: Router
     ) {}
@@ -21,11 +23,11 @@ export class EnvResolver {
     resolve(): Observable<boolean> {
         let env: IEnv
         return from(window.electronAPI.getEnv()).pipe(
-            switchMap((e) =>
-                e.FLAVOR === "ont" ? this.cms.getTerms() : of(null)
-            ),
+            switchMap((e) => {
+                env = e
+                return e.FLAVOR === "ont" ? this.cms.getTerms() : of(null)
+            }),
             map((page) => {
-                console.log("page", page)
                 this.resolveLang(env)
                 const resolved = this.resolveTerms(env, page)
                 if (resolved) {
@@ -47,19 +49,7 @@ export class EnvResolver {
         if (!page) {
             return true
         }
-        let termsVersion = page?.updated_at
-            ? new Date(page?.updated_at).getTime()
-            : 0
-        let translatedTermsVersion = page?.translations.length
-            ? page.translations
-                  .map((t) =>
-                      t.updated_at ? new Date(t.updated_at).getTime() : 0
-                  )
-                  .sort((a, b) => b - a)?.[0]
-            : 0
-        termsVersion = Math.max(termsVersion, translatedTermsVersion)
-        console.log("termsVersion", termsVersion)
-        if (env?.TERMS_ACCEPTED_VERSION !== termsVersion) {
+        if (env?.TERMS_ACCEPTED_VERSION !== page.version) {
             this.router.navigate(["/", ERoutes.TERMS_CONDITIONS])
             return false
         }

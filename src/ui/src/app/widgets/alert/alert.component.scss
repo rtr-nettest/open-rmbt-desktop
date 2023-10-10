@@ -1,0 +1,34 @@
+@import "src/assets/styles/core";
+
+.app-alert {
+    border: 1px solid $color-pale;
+    border-radius: 8px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    font-size: rem(14);
+    padding: rem(12) rem(21);
+
+    &--warning {
+        background-color: rgba(255, 204, 0, 0.2);
+        border: 1px solid #ffcc00;
+    }
+}
+
+.app-wrapper {
+    align-items: center;
+    display: flex;
+    width: rem(500);
+}
+
+.app-icon {
+    flex: 0 0 rem(36);
+    height: rem(36);
+    margin-right: rem(21);
+
+    & + * {
+        align-items: center;
+        display: flex;
+        flex: 1 1 calc(100% - 36px);
+    }
+}

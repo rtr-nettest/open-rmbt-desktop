@@ -6,8 +6,10 @@ import { THIS_INTERRUPTS_ACTION } from "src/app/constants/strings"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 import { CMSService } from "src/app/services/cms.service"
+import { I18nService } from "src/app/services/i18n.service"
 import { MessageService } from "src/app/services/message.service"
 import { MainStore } from "src/app/store/main.store"
+import { TestStore } from "src/app/store/test.store"
 
 @Component({
     selector: "app-main-menu",
@@ -38,7 +40,7 @@ export class MainMenuComponent {
                         ...mi,
                         url: mi.url.replace(
                             "$lang",
-                            this.transloco.getActiveLang()
+                            this.i18n.getActiveBrowserLang()
                         ),
                     }
                 }
@@ -52,6 +54,8 @@ export class MainMenuComponent {
     constructor(
         private activeRoute: ActivatedRoute,
         private cmsService: CMSService,
+        private i18n: I18nService,
+        private testStore: TestStore,
         private mainStore: MainStore,
         private message: MessageService,
         private router: Router,
@@ -91,11 +95,18 @@ export class MainMenuComponent {
                     : "",
             ].join(" "),
             action: () => {
-                window.electronAPI.abortMeasurement()
                 if (item.url) {
                     window.open(item.url, "_blank")
                 } else if (item.route) {
-                    this.router.navigate([item.route])
+                    if (this.testStore.enableLoopMode$.value === true) {
+                        window.electronAPI.abortMeasurement()
+                        window.electronAPI.onMeasurementAborted(() => {
+                            window.electronAPI.offMeasurementAborted()
+                            this.router.navigate([item.route])
+                        })
+                    } else {
+                        this.router.navigate([item.route])
+                    }
                 }
             },
         }

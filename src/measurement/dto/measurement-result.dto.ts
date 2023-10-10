@@ -33,6 +33,7 @@ export class MeasurementResult implements IMeasurementResult {
     speed_detail: ISpeedItem[]
     test_bytes_download: number
     test_bytes_upload: number
+    test_error?: string | undefined
     test_nsec_download: number
     test_nsec_upload: number
     test_num_threads: number
@@ -55,7 +56,8 @@ export class MeasurementResult implements IMeasurementResult {
         overallResultDown?: IOverallResult,
         overallResultUp?: IOverallResult,
         cpu?: ICPU,
-        testStatus?: EMeasurementFinalStatus
+        testStatus?: EMeasurementFinalStatus,
+        testError?: string
     ) {
         this.client_language = registrationRequest.language
         this.client_name = registrationRequest.client
@@ -95,12 +97,18 @@ export class MeasurementResult implements IMeasurementResult {
         this.ip_address = registrationResponse.client_remote_ip
         this.test_status = testStatus
         this.network_type = registrationRequest.networkType ?? 0
+        if (testError) {
+            this.test_error = testError
+        }
     }
 
     static getPings(threadResults: IMeasurementThreadResult[]) {
+        if (!threadResults.length) {
+            return []
+        }
         return (
             threadResults
-                ?.reduce(
+                .reduce(
                     (acc, result) =>
                         result?.pings?.length > 0 ? result.pings : acc,
                     [] as IPing[]
@@ -120,6 +128,9 @@ export class MeasurementResult implements IMeasurementResult {
     }
 
     static getSpeedDetail(threadResults: IMeasurementThreadResult[]) {
+        if (!threadResults.length) {
+            return []
+        }
         const speedItemsDownMap: { [key: number]: ISpeedItem } = {}
         const speedItemsUpMap: { [key: number]: ISpeedItem } = {}
         for (const threadResult of threadResults) {

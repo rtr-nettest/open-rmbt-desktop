@@ -1,0 +1,10 @@
+<app-header></app-header>
+<app-body>
+    <app-main-menu></app-main-menu>
+    <app-main-content>
+        <ng-container *ngIf="statisticsLink$ | async as statisticsLink">
+            <iframe class="app-iframe" [src]="statisticsLink"></iframe>
+        </ng-container>
+    </app-main-content>
+</app-body>
+<app-footer></app-footer>

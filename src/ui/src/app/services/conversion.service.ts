@@ -33,7 +33,7 @@ export class ConversionService {
         if (!speedMbps) {
             return -1
         }
-        let yPercent = (2 + Math.log10(speedMbps / 10)) / 5
+        let yPercent = (1 + Math.log10(speedMbps)) / 5
         yPercent = Math.max(yPercent, 0)
         yPercent = Math.min(1, yPercent)
         return yPercent

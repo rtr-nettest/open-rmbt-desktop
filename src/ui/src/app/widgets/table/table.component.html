@@ -43,8 +43,13 @@
                     [style]="justify(column)"
                 >
                     <ng-template
-                        [dynamicComponent]="element.component"
-                        [parameters]="element.parameters"
+                        [dynamicComponent]="
+                            element[element.componentField] || element.component
+                        "
+                        [parameters]="
+                            element[element.parametersField] ||
+                            element.parameters
+                        "
                     ></ng-template>
                 </mat-cell>
             </ng-container>
@@ -143,7 +148,14 @@
             </mat-header-cell>
         </ng-container>
 
-        <mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+        <mat-row
+            *matRowDef="let row; columns: displayedColumns"
+            [class.mat-row--hidden]="row.hidden === true"
+            [class.mat-row--visible]="row.hidden === false"
+            [class.mat-row--group-header]="row.groupHeader"
+            (click)="toggleExpandableRow.emit(row.id)"
+        >
+        </mat-row>
 
         <ng-container *ngIf="!shouldHideHeader">
             <mat-header-row

@@ -17,6 +17,7 @@ import path from "path"
 import { IOverallResult } from "../interfaces/overall-result.interface"
 import { IPreDownloadResult } from "./rmbt-thread.service"
 import { MeasurementResult } from "../dto/measurement-result.dto"
+import { IPreUploadResult } from "./message-handlers/pre-upload-message-handler.service"
 
 export type TransferDirection = "down" | "up"
 
@@ -220,7 +221,7 @@ export class RMBTClient {
     pingMedian = -1
     measurementStart: number = 0
     isRunning = false
-    activityInterval?: NodeJS.Timer
+    activityInterval?: NodeJS.Timeout
     aborter = new AbortController()
     pings: IPing[] = []
     private bytesPerSecPreDownload: number[] = []
@@ -241,6 +242,7 @@ export class RMBTClient {
         [EMeasurementStatus.UP]: -1,
     }
     private lastMessageReceivedAt = 0
+    private _chunkNumbers: number[] = []
 
     get interimDownMbps() {
         return (
@@ -463,7 +465,6 @@ export class RMBTClient {
                                 this.chunks.length ===
                                 this.measurementTasks.length
                             ) {
-                                this.checkIfShouldUseOneThread(this.chunks)
                                 this.measurementTasks[0].postMessage(
                                     new IncomingMessageWithData("ping")
                                 )
@@ -551,7 +552,10 @@ export class RMBTClient {
                             }
                             break
                         case "preUploadFinished":
-                            this.chunks.push(message.data as number)
+                            const { chunkSize: cs, chunksCount } =
+                                message.data as IPreUploadResult
+                            this.chunks.push(cs)
+                            this._chunkNumbers.push(chunksCount)
                             Logger.I.warn(
                                 "Worker %d finished pre-upload with %o chunk sizes.",
                                 index,
@@ -561,7 +565,9 @@ export class RMBTClient {
                                 this.chunks.length ===
                                 this.measurementTasks.length
                             ) {
-                                this.checkIfShouldUseOneThread(this.chunks)
+                                this.checkIfShouldUseOneThread(
+                                    this._chunkNumbers
+                                )
                                 for (const w of this.measurementTasks) {
                                     w.postMessage(
                                         new IncomingMessageWithData(
@@ -641,7 +647,10 @@ export class RMBTClient {
     }
 
     private checkIfShouldUseOneThread(chunkNumbers: number[]) {
-        Logger.I.info("Checking if should use one thread.")
+        Logger.I.info(
+            "Checking if should use one thread. Chunk numbers are %o",
+            chunkNumbers
+        )
         const threadWithLowestChunkNumber = chunkNumbers.findIndex(
             (c) => c <= 4
         )

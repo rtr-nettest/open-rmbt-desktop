@@ -4,7 +4,11 @@ import tz from "dayjs/plugin/timezone"
 import { IUserSettingsRequest } from "../interfaces/user-settings-request.interface"
 import { EMeasurementServerType } from "../enums/measurement-server-type.enum"
 import os from "os"
-import { CLIENT_UUID, Store, TERMS_ACCEPTED } from "../services/store.service"
+import {
+    CLIENT_UUID,
+    Store,
+    TERMS_ACCEPTED_VERSION,
+} from "../services/store.service"
 import { I18nService } from "../services/i18n.service"
 import { v4 } from "uuid"
 
@@ -31,10 +35,10 @@ export class UserSettingsRequest implements IUserSettingsRequest {
     plattform?: string | undefined
 
     constructor(public platform = "DESKTOP") {
-        const termsAccepted = Store.get(TERMS_ACCEPTED)
+        const termsAccepted = Store.get(TERMS_ACCEPTED_VERSION) as number
         if (termsAccepted) {
             this.terms_and_conditions_accepted = true
-            this.terms_and_conditions_accepted_version = 5
+            this.terms_and_conditions_accepted_version = termsAccepted
         }
         if (process.env.FLAVOR === "ont") {
             this.uuid = (Store.get(CLIENT_UUID) as string) ?? v4()
@@ -44,7 +48,7 @@ export class UserSettingsRequest implements IUserSettingsRequest {
             this.os_version = os_version
             this.platform = platform
             this.plattform = platform
-            this.model = os.machine()
+            this.model = "Desktop_" + os.machine()
         }
     }
 }

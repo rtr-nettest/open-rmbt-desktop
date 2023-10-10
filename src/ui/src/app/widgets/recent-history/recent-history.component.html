@@ -1,0 +1,18 @@
+<ng-container *ngIf="result">
+    <ng-container *ngIf="result.totalElements > 0">
+        <ng-container *transloco="let t">
+            <h3 *ngIf="title" class="app-title" style="margin-bottom: 1em">
+                {{ t(title) }}
+            </h3>
+            <app-table
+                [action]="changeSort"
+                [columns]="(columns$ | async)!"
+                [data]="result"
+                [sort]="(sort$ | async)!"
+                [shouldHideHeader]="false"
+                [tableClassNames]="tableClassNames ?? []"
+                (toggleExpandableRow)="toggleLoopResults($event.toString())"
+            ></app-table>
+        </ng-container>
+    </ng-container>
+</ng-container>

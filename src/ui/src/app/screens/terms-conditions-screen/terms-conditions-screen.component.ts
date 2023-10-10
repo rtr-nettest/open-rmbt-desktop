@@ -1,7 +1,6 @@
 import { Component, OnInit } from "@angular/core"
 import { Router } from "@angular/router"
-import { TranslocoService } from "@ngneat/transloco"
-import { TERMS_AND_CONDITIONS } from "src/app/constants/strings"
+import { MainStore } from "src/app/store/main.store"
 
 @Component({
     selector: "app-terms-conditions-screen",
@@ -12,7 +11,7 @@ export class TermsConditionsScreenComponent implements OnInit {
     isRead = false
     timeSinceLoad = 0
 
-    constructor(private router: Router, private transloco: TranslocoService) {}
+    constructor(private router: Router, private mainStore: MainStore) {}
 
     ngOnInit(): void {
         this.waitForFullLoad().then(this.watchForScroll)
@@ -53,7 +52,7 @@ export class TermsConditionsScreenComponent implements OnInit {
 
     agree() {
         window.electronAPI.acceptTerms(
-            this.transloco.translate(TERMS_AND_CONDITIONS)
+            this.mainStore.settings$.value?.terms_and_conditions.version ?? 0
         )
         this.router.navigateByUrl("/")
     }

@@ -1,10 +1,11 @@
 const path = require("path")
 const { codeSignApp } = require("../../../scripts/codesign-app.js")
 const packJson = require("../../../package.json")
+const fs = require("fs")
 
 module.exports = {
     hooks: {
-        postPackage: async () => {
+        postPackage: async (_, options) => {
             if (
                 process.platform === "darwin" &&
                 process.env.APP_STORE === "true"
@@ -22,13 +23,18 @@ module.exports = {
     packagerConfig: {
         icon: path.join(process.env.ASSETS_FOLDER, "app-icon", "icon"),
         ignore: [
-            "coverage/",
-            "src/",
-            "log/",
-            "node_modules/",
+            "coverage$",
+            "scripts$",
+            "src$",
+            "log$",
+            "node_modules$",
             ".prettierrc",
             ".config.js",
             ".example",
+            ".env",
+            ".log$",
+            ".gitignore",
+            "README.md",
         ],
         appBundleId: process.env.APP_BUNDLE_ID,
         ...(process.env.APP_STORE !== "true"

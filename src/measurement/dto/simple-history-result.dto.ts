@@ -32,6 +32,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             result.provider_name ?? "-",
             result.ip_address ?? "-",
             result.test_uuid ?? "",
+            result.loop_uuid ?? "",
             true,
             [],
             [],
@@ -66,6 +67,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             response.clientProvider,
             "",
             response.openTestUuid ?? "",
+            response.loopUuid ?? "",
             false,
             [],
             [],
@@ -109,6 +111,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             "",
             "",
             response.test_uuid ?? "",
+            response.loop_uuid ?? "",
             false,
             [],
             [],
@@ -146,6 +149,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             openTestsResponse?.public_ip_as_name,
             openTestsResponse?.ip_anonym,
             uuid,
+            response.loop_uuid,
             false,
             RMBTClient.getOverallResultsFromSpeedCurve(
                 openTestsResponse?.speed_curve.download
@@ -186,6 +190,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             response.operator ?? response.client_provider,
             response.ip_address,
             uuid,
+            response.loop_uuid,
             false,
             RMBTClient.getOverallResultsFromSpeedItems(
                 response.speed_detail,
@@ -207,6 +212,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         public providerName: string,
         public ipAddress: string,
         public testUuid?: string,
+        public loopUuid?: string,
         public isLocal?: boolean,
         public downloadOverTime?: IOverallResult[],
         public uploadOverTime?: IOverallResult[],

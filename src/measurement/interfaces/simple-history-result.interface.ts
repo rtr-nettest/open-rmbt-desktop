@@ -22,6 +22,7 @@ export interface ISimpleHistoryResult {
     uploadClass?: number
     pingClass?: number
     testUuid?: string
+    loopUuid?: string
     isLocal?: boolean
     detailedHistoryResult?: IDetailedHistoryResultItem[]
     paginator?: ISimpleHistoryPaginator

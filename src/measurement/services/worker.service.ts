@@ -6,13 +6,13 @@ import {
 } from "../interfaces/rmbt-worker.interface"
 import { RMBTThread } from "./rmbt-thread.service"
 import { Logger } from "./logger.service"
+import { IPreUploadResult } from "./message-handlers/pre-upload-message-handler.service"
 
 let thread: RMBTThread | undefined
 
 parentPort?.on("message", async (message: IncomingMessageWithData) => {
     Logger.init(workerData.index)
     let result: IMeasurementThreadResult | undefined
-    let chunks: number | undefined = 0
     let isConnected = false
     switch (message.message) {
         case "connect":
@@ -60,11 +60,12 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
             break
         case "preUpload":
             isConnected = await connectRetrying()
+            let preUpRes: IPreUploadResult | undefined
             if (isConnected) {
-                chunks = await thread?.managePreUpload()
+                preUpRes = await thread!.managePreUpload()
             }
             parentPort?.postMessage(
-                new OutgoingMessageWithData("preUploadFinished", chunks)
+                new OutgoingMessageWithData("preUploadFinished", preUpRes)
             )
             break
         case "reconnectForUpload":

@@ -8,6 +8,7 @@ export interface INewsRequest {
     language: string
     lastNewsUid?: number
     plattform: string
+    platform: string
     softwareVersionCode: string
     uuid?: string
 }

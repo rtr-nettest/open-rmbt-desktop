@@ -1,4 +1,3 @@
-import axios from "axios"
 import { IUserSettings } from "../interfaces/user-settings-response.interface"
 import { IUserSettingsRequest } from "../interfaces/user-settings-request.interface"
 import os from "os"
@@ -6,6 +5,8 @@ import { Logger } from "./logger.service"
 import { ELoggerMessage } from "../enums/logger-message.enum"
 import { NetInterfaceInfoUnixService } from "./net-interface-info-unix.service"
 import { NetInterfaceInfoWindowsService } from "./net-interface-info-windows.service"
+
+const axios = require("axios")
 
 export class NetworkInfoService {
     private static instance = new NetworkInfoService()
@@ -40,7 +41,7 @@ export class NetworkInfoService {
                 .data.ip
         } catch (e) {}
 
-        const interfaces = []
+        const interfaces: any[] = []
         for (const iface of Object.values(os.networkInterfaces())) {
             if (!iface) {
                 break
@@ -88,6 +89,8 @@ export class NetworkInfoService {
         switch (type) {
             case "wifi":
                 return 99
+            case "mobile":
+                return 105
             case "ethernet":
                 return 106
             default:

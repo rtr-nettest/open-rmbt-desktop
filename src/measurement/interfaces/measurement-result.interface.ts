@@ -29,6 +29,7 @@ export interface IMeasurementResult {
     test_status?: EMeasurementFinalStatus
     test_token: string
     test_uuid: string
+    loop_uuid?: string
     time: number
     timezone: string
     type: string
@@ -37,6 +38,7 @@ export interface IMeasurementResult {
     provider_name?: string
     ip_address?: string
     sent_to_server?: boolean
+    test_error?: string
 }
 
 export interface IMeasurementThreadResult {

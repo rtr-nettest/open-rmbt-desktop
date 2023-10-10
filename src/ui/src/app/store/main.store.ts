@@ -44,8 +44,8 @@ export class MainStore {
             console.error(error)
             this.error$.next(new Error("Server communication error"))
         })
-        window.electronAPI.onOpenSettings(() => {
-            this.router.navigate(["/", ERoutes.SETTINGS])
+        window.electronAPI.onOpenScreen((route) => {
+            this.router.navigate(["/", route])
         })
     }
 

@@ -41,7 +41,7 @@ export class NetInterfaceInfoWindowsService implements NetInterfaceInfo {
 
     async convertToJson(info: string) {
         const lines = info.split("\n")
-        const blocks = []
+        const blocks: any[] = []
         for (const line of lines) {
             let key = ""
             let lineLowered = line.toLowerCase().replace("-", "")
@@ -52,6 +52,9 @@ export class NetInterfaceInfoWindowsService implements NetInterfaceInfo {
                     break
                 case lineLowered.includes("ethernet"):
                     key = "ethernet"
+                    break
+                case lineLowered.includes("mobil"):
+                    key = "mobile"
                     break
             }
             if (key) {

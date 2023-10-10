@@ -1,3 +1,4 @@
+import { IPreUploadResult } from "../services/message-handlers/pre-upload-message-handler.service"
 import { IPreDownloadResult } from "../services/rmbt-thread.service"
 import { IMeasurementThreadResult } from "./measurement-result.interface"
 
@@ -38,6 +39,7 @@ export class OutgoingMessageWithData {
             | boolean
             | IBuffer
             | IPreDownloadResult
+            | IPreUploadResult
             | Error
     ) {}
 }

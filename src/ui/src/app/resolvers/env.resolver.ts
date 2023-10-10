@@ -16,11 +16,7 @@ export class EnvResolver {
         return from(window.electronAPI.getEnv()).pipe(
             map((env) => {
                 this.resolveLang(env)
-                const termsAccepted = this.resolveTerms(env)
-                if (termsAccepted) {
-                    return this.resolveClient(env)
-                }
-                return termsAccepted
+                return this.resolveClient(env)
             })
         )
     }
@@ -30,14 +26,6 @@ export class EnvResolver {
         if (TranslocoConfigExt["availableLangs"].includes(storedLanguage)) {
             this.transloco.setActiveLang(storedLanguage!)
         }
-    }
-
-    private resolveTerms(env: IEnv) {
-        if (!env?.TERMS_ACCEPTED && env?.FLAVOR !== "ont") {
-            this.router.navigate(["/", ERoutes.TERMS_CONDITIONS])
-            return false
-        }
-        return true
     }
 
     private resolveClient(env: IEnv) {

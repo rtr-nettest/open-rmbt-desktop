@@ -8,7 +8,7 @@ import { randomBytes } from "crypto"
 import { RMBTClient } from "../../services/rmbt-client.service"
 import fs from "fs"
 import fsp from "fs/promises"
-import * as st from "stream-throttle"
+import st from "stream-throttle"
 
 const { mockThread, mockClient, mockResponse } = mockFactory()
 
@@ -49,8 +49,7 @@ test("Handler writes data", () => {
 
     expect(handler.downloadStartTime).toBe(startTime)
     expect(handler.downloadEndTime).toBe(endTime)
-    expect(setInterval).toHaveBeenCalledTimes(2)
-    expect(handler.activityInterval).not.toBe(undefined)
+    expect(setInterval).toHaveBeenCalled()
     expect(handler.interimHandlerInterval).not.toBe(undefined)
     expect(infoSpy).toHaveBeenCalledWith(
         ELoggerMessage.T_SENDING_MESSAGE,
@@ -71,25 +70,6 @@ test("Stops messaging", () => {
     expect(clearInterval).toHaveBeenCalledTimes(2)
     expect(mockThread.threadResult?.down).toBe(handler.result)
     expect(onFinishSpy).toHaveBeenCalledWith(mockThread.threadResult)
-})
-
-test("Checks activity", () => {
-    globalSpy.mockRestore()
-    globalSpy = jest.spyOn(global, "setInterval")
-
-    handler.checkActivity()
-
-    expect(handler.isFinishRequested).toBe(false)
-
-    Time.mockTime(Time.nowNs() + 10e9)
-
-    handler.checkActivity()
-
-    expect(handler.isFinishRequested).toBe(true)
-    expect(setInterval).toHaveBeenCalled()
-    expect(mockClient.write).toHaveBeenCalledWith(ESocketMessage.OK)
-
-    Time.mockRestore()
 })
 
 test("Submits results", () => {

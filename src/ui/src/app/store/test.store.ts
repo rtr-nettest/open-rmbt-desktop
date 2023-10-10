@@ -1,5 +1,13 @@
-import { Injectable } from "@angular/core"
-import { BehaviorSubject, concatMap, from, interval, map, of } from "rxjs"
+import { Injectable, NgZone } from "@angular/core"
+import {
+    BehaviorSubject,
+    concatMap,
+    from,
+    interval,
+    map,
+    of,
+    takeWhile,
+} from "rxjs"
 import { TestVisualizationState } from "../dto/test-visualization-state.dto"
 import { ITestVisualizationState } from "../interfaces/test-visualization-state.interface"
 import { IBasicNetworkInfo } from "../../../../measurement/interfaces/basic-network-info.interface"
@@ -10,6 +18,12 @@ import { EMeasurementStatus } from "../../../../measurement/enums/measurement-st
 import { Router } from "@angular/router"
 import { MainStore } from "./main.store"
 import { IMeasurementServerResponse } from "../../../../measurement/interfaces/measurement-server-response.interface"
+import { ERoutes } from "../enums/routes.enum"
+import { ILoopModeInfo } from "../../../../measurement/interfaces/measurement-registration-request.interface"
+import { v4 } from "uuid"
+import { MessageService } from "../services/message.service"
+import { TranslocoService } from "@ngneat/transloco"
+import { SprintfPipe } from "../pipes/sprintf.pipe"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
@@ -27,12 +41,50 @@ export class TestStore {
         null
     )
     servers$ = new BehaviorSubject<IMeasurementServerResponse[]>([])
+    testIntervalMinutes$ = new BehaviorSubject<number | null>(null)
+    enableLoopMode$ = new BehaviorSubject<boolean>(false)
+    loopCounter$ = new BehaviorSubject<number>(1)
+    loopUuid$ = new BehaviorSubject<string | null>(null)
+    loopModeExpired$ = new BehaviorSubject<boolean>(false)
 
-    constructor(private mainStore: MainStore, private router: Router) {}
+    constructor(
+        private message: MessageService,
+        private mainStore: MainStore,
+        private ngZone: NgZone,
+        private router: Router,
+        private sprintf: SprintfPipe,
+        private transloco: TranslocoService
+    ) {
+        window.electronAPI.onRestartMeasurement((loopCounter) => {
+            this.ngZone.run(() => {
+                this.loopCounter$.next(loopCounter + 1)
+                this.router
+                    .navigate(["/", ERoutes.NEWS], {
+                        skipLocationChange: true,
+                    })
+                    .then(() => {
+                        this.router.navigate(["/", ERoutes.LOOP_TEST])
+                    })
+            })
+        })
+        window.electronAPI.onLoopModeExpired(() => {
+            this.ngZone.run(() => {
+                this.loopModeExpired$.next(true)
+            })
+        })
+    }
 
     launchTest() {
         this.resetState()
-        window.electronAPI.runMeasurement()
+        const loopModeInfo: ILoopModeInfo | undefined =
+            this.enableLoopMode$.value === true
+                ? {
+                      max_delay: this.testIntervalMinutes$.value ?? 0,
+                      test_counter: this.loopCounter$.value,
+                      loop_uuid: this.loopUuid$.value ?? "",
+                  }
+                : undefined
+        window.electronAPI.runMeasurement(loopModeInfo)
         return interval(STATE_UPDATE_TIMEOUT).pipe(
             concatMap(() => from(window.electronAPI.getMeasurementState())),
             map((phaseState) => {
@@ -44,6 +96,53 @@ export class TestStore {
                 this.visualization$.next(newState)
                 this.basicNetworkInfo$.next(phaseState)
                 return newState
+            })
+        )
+    }
+
+    launchLoopTest(interval: number) {
+        this.loopUuid$.next(v4())
+        this.loopCounter$.next(1)
+        this.enableLoopMode$.next(true)
+        this.testIntervalMinutes$.next(interval)
+        this.router.navigate(["/", ERoutes.LOOP_TEST])
+    }
+
+    disableLoopMode() {
+        this.enableLoopMode$.next(false)
+    }
+
+    scheduleLoop() {
+        if (this.loopModeExpired$.value === true) {
+            const message = this.transloco.translate(
+                "The loop measurement has expired"
+            )
+            this.message.openConfirmDialog(
+                this.sprintf.transform(
+                    message,
+                    this.mainStore.env$.value!.LOOP_MODE_MAX_DURATION
+                ),
+                () => {
+                    this.loopModeExpired$.next(false)
+                    this.router.navigate([
+                        "/",
+                        ERoutes.LOOP_RESULT.split("/")[0],
+                        this.loopUuid$.value,
+                    ])
+                }
+            )
+            return
+        }
+        const testIntervalMs = this.testIntervalMinutes$.value! * 60 * 1000
+        window.electronAPI.scheduleLoop(testIntervalMs)
+        return interval(200).pipe(
+            map((ms: number) => ms * 200),
+            takeWhile((ms) => ms <= testIntervalMs),
+            map((ms) => {
+                return {
+                    ms: testIntervalMs - ms,
+                    percent: (ms / testIntervalMs) * 100,
+                }
             })
         )
     }
@@ -72,17 +171,6 @@ export class TestStore {
                     serverName: result.measurementServerName,
                     ipAddress: result.ipAddress,
                     providerName: result.providerName,
-                })
-                window.electronAPI.getEnv().then((env) => {
-                    if (
-                        env.ENABLE_LOOP_MODE === "true" &&
-                        !this.mainStore.error$.value
-                    ) {
-                        setTimeout(
-                            () => this.router.navigateByUrl("/test"),
-                            1000
-                        )
-                    }
                 })
                 return result
             })

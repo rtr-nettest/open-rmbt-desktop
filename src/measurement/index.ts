@@ -20,6 +20,7 @@ import "reflect-metadata"
 import { EMeasurementFinalStatus } from "./enums/measurement-final-status"
 import { AutoUpdater } from "./services/auto-updater.service"
 import { ACTIVE_SERVER, Store } from "./services/store.service"
+import { ILoopModeInfo } from "./interfaces/measurement-registration-request.interface"
 
 config({
     path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
@@ -27,6 +28,7 @@ config({
 
 export interface MeasurementOptions {
     platform?: string
+    loopModeInfo?: ILoopModeInfo
 }
 
 export class MeasurementRunner {
@@ -57,6 +59,9 @@ export class MeasurementRunner {
             this.settings = await ControlServer.I.getUserSettings(
                 this.settingsRequest
             )
+            if (this.settings.shouldAcceptTerms) {
+                return this.settings
+            }
             const ipInfo = await NetworkInfoService.I.getIPInfo(
                 this.settings,
                 this.settingsRequest
@@ -76,7 +81,7 @@ export class MeasurementRunner {
                 await this.registerClient(options)
             }
             await this.setMeasurementServer()
-            await this.registerMeasurement()
+            await this.registerMeasurement(options)
 
             const threadResults = await this.rmbtClient!.scheduleMeasurement()
             this.setCPUUsage()
@@ -103,10 +108,26 @@ export class MeasurementRunner {
             ) {
                 this.rmbtClient!.measurementStatus = EMeasurementStatus.END
             }
+            return this.rmbtClient!.measurementStatus
         } catch (e: any) {
             if (e) {
                 Logger.I.error(e)
-                throw e.message
+                try {
+                    await ControlServer.I.submitMeasurement(
+                        new MeasurementResult(
+                            this.registrationRequest!,
+                            this.rmbtClient!.params!,
+                            [],
+                            this.rmbtClient!.finalResultDown,
+                            this.rmbtClient!.finalResultUp,
+                            this.cpuInfo,
+                            EMeasurementFinalStatus.ERROR,
+                            e.message
+                        )
+                    )
+                } finally {
+                    throw e.message
+                }
             }
         } finally {
             this.setCPUUsage()
@@ -128,7 +149,11 @@ export class MeasurementRunner {
     }
 
     abortMeasurement() {
-        this.rmbtClient?.abortMeasurement()
+        if (this.rmbtClient) {
+            this.rmbtClient.abortMeasurement()
+            return !this.rmbtClient.isRunning
+        }
+        return true
     }
 
     getCurrentPhaseState(): IMeasurementPhaseState & IBasicNetworkInfo {
@@ -201,11 +226,12 @@ export class MeasurementRunner {
         }
     }
 
-    private async registerMeasurement() {
+    private async registerMeasurement(options?: MeasurementOptions) {
         this.registrationRequest = new MeasurementRegistrationRequest(
             this.settings!.uuid,
             this.measurementServer?.id,
-            this.settingsRequest
+            this.settingsRequest,
+            options?.loopModeInfo
         )
         const measurementRegistration =
             await ControlServer.I.registerMeasurement(this.registrationRequest)

@@ -12,15 +12,57 @@
 </ng-template>
 
 <ng-template #rtr>
-    <app-body>
+    <app-body *transloco="let t">
         <app-main-menu [disabled]="true"></app-main-menu>
         <app-main-content *ngIf="visualization$ | async">
+            <ng-container *ngIf="(enableLoopMode$ | async) === true">
+                <app-alert
+                    text="Tests are conducted repeatedly until they are stopped manually"
+                >
+                    <app-stop-loop-button></app-stop-loop-button>
+                </app-alert>
+                <h1
+                    *ngIf="(enableLoopMode$ | async) === true"
+                    class="app-title"
+                >
+                    {{ t("Measurement") + " " + (loopCount$ | async) }}
+                </h1>
+            </ng-container>
             <div class="app-main">
-                <app-gauge></app-gauge>
+                <div class="app-progress-bar-wrapper">
+                    <app-gauge
+                        *ngIf="!loopWaitProgress$; else loopWaitProgressBar"
+                    ></app-gauge>
+                </div>
                 <app-spacer></app-spacer>
                 <app-interim-results></app-interim-results>
             </div>
+            <app-recent-history
+                *ngIf="result$ | async as result"
+                class="app-padding"
+                [result]="result"
+                [excludeColumns]="['details']"
+                title="Recent measurements"
+            ></app-recent-history>
         </app-main-content>
         <app-footer></app-footer>
     </app-body>
+</ng-template>
+
+<ng-template #loopWaitProgressBar>
+    <div
+        style="width: 100%; padding: 0.5em"
+        *ngIf="loopWaitProgress$ | async as progress"
+    >
+        <h2 *transloco="let t" class="app-title">
+            {{
+                t("Next measurement in") + " " + (progress.ms | date : "mm:ss")
+            }}
+        </h2>
+        <mat-progress-bar
+            class="app-progress-bar--loop"
+            mode="determinate"
+            [value]="progress.percent"
+        ></mat-progress-bar>
+    </div>
 </ng-template>

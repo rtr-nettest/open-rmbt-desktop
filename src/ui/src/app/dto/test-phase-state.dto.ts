@@ -44,26 +44,17 @@ export class TestPhaseState implements ITestPhaseState {
     }
 
     setRTRChartFromOverallSpeed(overallResults: IOverallResult[]) {
-        let skippedMs = 0
-        let shift = 0
         this.chart = overallResults.reduce((acc, r, i) => {
             const msec = r.nsec / 1e6
-            if (msec > 0 && msec >= STATE_UPDATE_TIMEOUT * skippedMs) {
-                skippedMs++
-                if (!shift) {
-                    shift = msec / 1e3
-                }
-                return [
-                    ...acc,
-                    {
-                        x: msec / 1e3 - shift,
-                        y: this.conversion.speedLog(r.speed / 1e6),
-                    },
-                ]
-            } else {
-                return acc
-            }
+            return [
+                ...acc,
+                {
+                    x: msec / 1e3,
+                    y: this.conversion.speedLog(r.speed / 1e6),
+                },
+            ]
         }, [] as Point[])
+        console.log(this.chart)
     }
 
     setChartFromPings(pings: IPing[]): void {

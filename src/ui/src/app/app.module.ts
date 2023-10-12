@@ -122,6 +122,8 @@ import { ExpandArrowComponent } from "./widgets/expand-arrow/expand-arrow.compon
 import { RouterLinkComponent } from "./widgets/router-link/router-link.component"
 import { LoopResultScreenComponent } from "./screens/loop-result-screen/loop-result-screen.component"
 import { LoopTestScreenComponent } from "./screens/loop-test-screen/loop-test-screen.component"
+import { TranslatePipe } from "./pipes/translate.pipe"
+import { MarkdownModule } from "ngx-markdown"
 
 Chart.register(
     BarElement,
@@ -236,6 +238,7 @@ declare global {
         RouterLinkComponent,
         LoopResultScreenComponent,
         LoopTestScreenComponent,
+        TranslatePipe,
     ],
     imports: [
         AppRoutingModule,
@@ -244,6 +247,7 @@ declare global {
         FormsModule,
         ReactiveFormsModule,
         HttpClientModule,
+        MarkdownModule.forRoot(),
         MatButtonModule,
         MatDialogModule,
         MatIconModule,

@@ -97,5 +97,6 @@
     "The currently running measurement will be aborted": "The currently running measurement will be aborted",
     "App was suspended": "App was suspended",
     "The app was suspended. The last running measurement was aborted": "The app was suspended. The last running measurement was aborted",
-    "Loop measurement results": "Loop measurement results"
+    "Loop measurement results": "Loop measurement results",
+    "Result of measurement - waiting": "Result of measurement %0 - waiting"
 }

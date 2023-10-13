@@ -21,12 +21,23 @@
                 >
                     <app-stop-loop-button></app-stop-loop-button>
                 </app-alert>
-                <h1
-                    *ngIf="(enableLoopMode$ | async) === true"
-                    class="app-title"
-                >
-                    {{ t("Measurement") + " " + (loopCount$ | async) }}
-                </h1>
+                <ng-container *ngIf="loopCount$ | async as loopCount">
+                    <h1
+                        *ngIf="(loopWaiting$ | async) !== true"
+                        class="app-title"
+                    >
+                        {{ t("Measurement") + " " + loopCount }}
+                    </h1>
+                    <h1
+                        *ngIf="(loopWaiting$ | async) === true"
+                        class="app-title"
+                    >
+                        {{
+                            t("Result of measurement - waiting")
+                                | sprintf : loopCount
+                        }}
+                    </h1>
+                </ng-container>
             </ng-container>
             <div class="app-main">
                 <div class="app-progress-bar-wrapper">

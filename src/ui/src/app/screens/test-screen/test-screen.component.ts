@@ -6,6 +6,7 @@ import {
 } from "@angular/core"
 import { Router } from "@angular/router"
 import {
+    BehaviorSubject,
     Observable,
     Subject,
     distinctUntilChanged,
@@ -42,6 +43,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
         tap(([state, error]) => {
             if (!this.startTimeMs) {
                 this.startTimeMs = Date.now()
+                this.loopWaiting$.next(false)
             }
             if (error) {
                 this.stopped$.next()
@@ -67,6 +69,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
         })
     )
     loopWaitProgress$?: Observable<{ ms: number; percent: number }>
+    loopWaiting$ = new BehaviorSubject(false)
     result$ = this.historyStore.getFormattedHistory({ grouped: false })
     private startTimeMs = 0
 
@@ -98,6 +101,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
                 state.phases[state.currentPhaseName].testUuid,
             ])
         } else {
+            this.loopWaiting$.next(true)
             this.loopWaitProgress$ = this.store.scheduleLoop(
                 Date.now() - this.startTimeMs
             )

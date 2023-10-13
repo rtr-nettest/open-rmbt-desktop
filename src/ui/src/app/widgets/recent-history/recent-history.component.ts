@@ -1,5 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core"
-import { Observable, map, of, withLatestFrom } from "rxjs"
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnChanges,
+    Output,
+} from "@angular/core"
+import { Observable, map } from "rxjs"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { MainStore } from "src/app/store/main.store"
@@ -9,14 +15,13 @@ import {
     IHistoryRowONT,
     IHistoryRowRTR,
 } from "src/app/interfaces/history-row.interface"
-import { IEnv } from "../../../../../electron/interfaces/env.interface"
 
 @Component({
     selector: "app-recent-history",
     templateUrl: "./recent-history.component.html",
     styleUrls: ["./recent-history.component.scss"],
 })
-export class RecentHistoryComponent {
+export class RecentHistoryComponent implements OnChanges {
     @Input({ required: true }) result!: {
         content: IHistoryRowONT[] | IHistoryRowRTR[]
         totalElements: number
@@ -117,8 +122,17 @@ export class RecentHistoryComponent {
 
     sort$ = this.store.historySort$
     tableClassNames?: string[]
+    freshlyLoaded = true
 
     constructor(private mainStore: MainStore, private store: HistoryStore) {}
+
+    ngOnChanges(): void {
+        const firstItem = this.result.content[0]
+        if (this.grouped && firstItem?.groupHeader && this.freshlyLoaded) {
+            this.freshlyLoaded = false
+            this.toggleLoopResults(firstItem.id!)
+        }
+    }
 
     changeSort = (sort: ISort) => {
         this.sortChange.emit(sort)

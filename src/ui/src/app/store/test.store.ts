@@ -112,7 +112,7 @@ export class TestStore {
         this.enableLoopMode$.next(false)
     }
 
-    scheduleLoop() {
+    scheduleLoop(prevTestDurationMs: number) {
         if (this.loopModeExpired$.value === true) {
             const message = this.transloco.translate(
                 "The loop measurement has expired"
@@ -133,7 +133,10 @@ export class TestStore {
             )
             return
         }
-        const testIntervalMs = this.testIntervalMinutes$.value! * 60 * 1000
+        const testIntervalMs = Math.max(
+            0,
+            this.testIntervalMinutes$.value! * 60 * 1000 - prevTestDurationMs
+        )
         window.electronAPI.scheduleLoop(testIntervalMs)
         return interval(200).pipe(
             map((ms: number) => ms * 200),

@@ -40,8 +40,12 @@ export class TestScreenComponent implements OnDestroy, OnInit {
         distinctUntilChanged(),
         takeUntil(this.stopped$),
         tap(([state, error]) => {
+            if (!this.startTimeMs) {
+                this.startTimeMs = Date.now()
+            }
             if (error) {
                 this.stopped$.next()
+                this.startTimeMs = 0
                 const message =
                     state.currentPhaseName ===
                     EMeasurementStatus.SUBMITTING_RESULTS
@@ -64,6 +68,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
     )
     loopWaitProgress$?: Observable<{ ms: number; percent: number }>
     result$ = this.historyStore.getFormattedHistory({ grouped: false })
+    private startTimeMs = 0
 
     constructor(
         private historyStore: HistoryStore,
@@ -93,7 +98,10 @@ export class TestScreenComponent implements OnDestroy, OnInit {
                 state.phases[state.currentPhaseName].testUuid,
             ])
         } else {
-            this.loopWaitProgress$ = this.store.scheduleLoop()
+            this.loopWaitProgress$ = this.store.scheduleLoop(
+                Date.now() - this.startTimeMs
+            )
         }
+        this.startTimeMs = 0
     }
 }

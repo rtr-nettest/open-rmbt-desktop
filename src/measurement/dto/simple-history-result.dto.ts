@@ -17,7 +17,7 @@ import {
     THRESHOLD_PING,
     THRESHOLD_UPLOAD,
 } from "../services/classification.service"
-import { RMBTClient } from "../services/rmbt-client.service"
+import { CalcService } from "../services/calc.service"
 
 export const RESULT_DATE_FORMAT = "YYYY-MM-DD HH:mm:ss"
 
@@ -151,13 +151,13 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             uuid,
             response.loop_uuid,
             false,
-            RMBTClient.getOverallResultsFromSpeedCurve(
+            CalcService.I.getOverallResultsFromSpeedCurve(
                 openTestsResponse?.speed_curve.download
             ),
-            RMBTClient.getOverallResultsFromSpeedCurve(
+            CalcService.I.getOverallResultsFromSpeedCurve(
                 openTestsResponse?.speed_curve.upload
             ),
-            RMBTClient.getOverallPings(openTestsResponse?.speed_curve.ping),
+            CalcService.I.getOverallPings(openTestsResponse?.speed_curve.ping),
             response.measurement_result?.download_classification ??
                 ClassificationService.I.classify(
                     response.measurement_result?.download_kbit,
@@ -192,11 +192,11 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             uuid,
             response.loop_uuid,
             false,
-            RMBTClient.getOverallResultsFromSpeedItems(
+            CalcService.I.getOverallResultsFromSpeedItems(
                 response.speed_detail,
                 "download"
             ),
-            RMBTClient.getOverallResultsFromSpeedItems(
+            CalcService.I.getOverallResultsFromSpeedItems(
                 response.speed_detail,
                 "upload"
             )

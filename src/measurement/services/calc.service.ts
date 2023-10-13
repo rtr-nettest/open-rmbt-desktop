@@ -20,6 +20,16 @@ export class CalcService {
         return this.instance
     }
 
+    private _prevNsec = {
+        down: 0,
+        up: 0,
+    }
+
+    private _prevBytes = {
+        down: 0,
+        up: 0,
+    }
+
     private constructor() {}
 
     getOverallPings(
@@ -148,29 +158,51 @@ export class CalcService {
     getCoarseResult(
         threads: IMeasurementThreadResult[],
         resultKey: TransferDirection
-    ): IOverallResult | undefined {
-        const speedCurve: CurveItem[] = threads
-            .reduce((acc, t) => {
-                if (
-                    !(
-                        t &&
-                        t.currentTime?.[resultKey] >= 0 &&
-                        t.currentTransfer?.[resultKey] >= 0
-                    )
-                ) {
-                    return acc
-                }
-                return [
-                    ...acc,
-                    {
-                        bytes_total: t.currentTransfer[resultKey],
-                        time_elapsed: t.currentTime[resultKey] / 1e6,
-                    },
-                ]
-            }, [] as CurveItem[])
-            .sort((a, b) => a.time_elapsed - b.time_elapsed)
-        const overallResults = this.getOverallResultsFromSpeedCurve(speedCurve)
-        return overallResults[overallResults.length - 1]
+    ): IOverallResult {
+        let bytes = 0
+        let minNsec = Infinity
+        let maxNsec = 0
+
+        for (const task of threads) {
+            if (
+                !(
+                    task &&
+                    task.currentTime?.[resultKey] >= 0 &&
+                    task.currentTransfer?.[resultKey] >= 0
+                )
+            ) {
+                continue
+            }
+            if (task.currentTime[resultKey] < minNsec) {
+                minNsec = task.currentTime[resultKey]
+            }
+            if (task.currentTime[resultKey] > maxNsec) {
+                maxNsec = task.currentTime[resultKey]
+            }
+            bytes += task.currentTransfer[resultKey]
+        }
+
+        let nsec = (maxNsec - minNsec) / 2 + minNsec
+        nsec = isNaN(nsec) ? 0 : nsec
+
+        const bytesDiff =
+            this._prevBytes[resultKey] && bytes > this._prevBytes[resultKey]
+                ? bytes - this._prevBytes[resultKey]
+                : bytes
+        const nsecDiff =
+            this._prevNsec[resultKey] && nsec > this._prevNsec[resultKey]
+                ? nsec - this._prevNsec[resultKey]
+                : nsec
+
+        let speed = (bytesDiff / nsecDiff) * 1e9 * 8.0
+        speed = nsec === 0 ? 0 : isNaN(speed) ? 0 : speed
+        this._prevBytes[resultKey] = bytes
+        this._prevNsec[resultKey] = nsec
+        return {
+            bytes,
+            nsec,
+            speed,
+        }
     }
 
     // From https://github.com/rtr-nettest/rmbtws/blob/master/src/WebsockettestDatastructures.js#L177

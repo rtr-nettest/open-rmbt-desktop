@@ -4,7 +4,6 @@ import { IPing } from "../../../../measurement/interfaces/measurement-result.int
 import { IOverallResult } from "../../../../measurement/interfaces/overall-result.interface"
 import { ETestStatuses } from "../enums/test-statuses.enum"
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
-import { STATE_UPDATE_TIMEOUT } from "../store/test.store"
 import { ConversionService } from "../services/conversion.service"
 import * as dayjs from "dayjs"
 
@@ -23,7 +22,6 @@ export class TestPhaseState implements ITestPhaseState {
     time: number = -1
     pings: IPing[] = []
 
-    private startDuration = 0
     private conversion = new ConversionService()
 
     constructor(options?: Partial<ITestPhaseState>) {
@@ -54,7 +52,6 @@ export class TestPhaseState implements ITestPhaseState {
                 },
             ]
         }, [] as Point[])
-        console.log(this.chart)
     }
 
     setChartFromPings(pings: IPing[]): void {
@@ -69,16 +66,13 @@ export class TestPhaseState implements ITestPhaseState {
     }
 
     extendRTRSpeedChart() {
-        if (this.counter <= 0 && !this.startDuration) {
+        if (this.counter < 0) {
             return
-        }
-        if (!this.startDuration) {
-            this.startDuration = this.duration
         }
         this.chart = [
             ...(this.chart || []),
             {
-                x: this.duration - this.startDuration,
+                x: this.duration,
                 y: this.conversion.speedLog(this.counter),
             },
         ]

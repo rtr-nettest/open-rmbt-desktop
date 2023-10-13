@@ -64,31 +64,19 @@ export class RMBTClient {
     }
     private lastMessageReceivedAt = 0
     private _chunkNumbers: number[] = []
-    private _prevInterimDownMbps = 0
-    private _prevInterimUpMbps = 0
 
     get interimDownMbps() {
-        const res = CalcService.I.getCoarseResult(
-            this.interimThreadResults,
-            "down"
-        )?.speed
-        let retVal = res || this._prevInterimDownMbps
-        if (res) {
-            this._prevInterimDownMbps = res
-        }
-        return retVal / 1e6
+        return (
+            (CalcService.I.getCoarseResult(this.interimThreadResults, "down")
+                ?.speed ?? 0) / 1e6
+        )
     }
 
     get interimUpMbps() {
-        const res = CalcService.I.getCoarseResult(
-            this.interimThreadResults,
-            "up"
-        )?.speed
-        let retVal = res || this._prevInterimUpMbps
-        if (res) {
-            this._prevInterimUpMbps = res
-        }
-        return retVal / 1e6
+        return (
+            (CalcService.I.getCoarseResult(this.interimThreadResults, "up")
+                ?.speed ?? 0) / 1e6
+        )
     }
 
     get finalDownMbps() {

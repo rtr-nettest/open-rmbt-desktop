@@ -110,6 +110,7 @@ export class TestStore {
 
     disableLoopMode() {
         this.enableLoopMode$.next(false)
+        this.loopCounter$.next(1)
     }
 
     scheduleLoop(prevTestDurationMs: number) {

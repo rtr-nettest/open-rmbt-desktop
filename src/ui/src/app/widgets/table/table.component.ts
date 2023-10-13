@@ -28,6 +28,7 @@ import { PageEvent } from "@angular/material/paginator"
 })
 export class TableComponent implements OnInit, OnChanges {
     @Input() action?: (...ars: any[]) => any
+    @Input() rowsAreCLickable = false
     @Input() columns: ITableColumn[] = []
     @Input() data?: IBasicResponse<any>
     @Input() expandedColumns: ITableColumn[] = []

@@ -15,6 +15,10 @@ import {
     IHistoryRowONT,
     IHistoryRowRTR,
 } from "src/app/interfaces/history-row.interface"
+import { Router } from "@angular/router"
+import { MessageService } from "src/app/services/message.service"
+import { THIS_INTERRUPTS_ACTION } from "src/app/constants/strings"
+import { TestStore } from "src/app/store/test.store"
 
 @Component({
     selector: "app-recent-history",
@@ -124,7 +128,13 @@ export class RecentHistoryComponent implements OnChanges {
     tableClassNames?: string[]
     freshlyLoaded = true
 
-    constructor(private mainStore: MainStore, private store: HistoryStore) {}
+    constructor(
+        private mainStore: MainStore,
+        private message: MessageService,
+        private router: Router,
+        private store: HistoryStore,
+        private testStore: TestStore
+    ) {}
 
     ngOnChanges(): void {
         const firstItem = this.result.content[0]
@@ -139,6 +149,22 @@ export class RecentHistoryComponent implements OnChanges {
     }
 
     toggleLoopResults(loopUuid: string) {
+        if (!loopUuid.startsWith("L")) {
+            this.message.openConfirmDialog(
+                THIS_INTERRUPTS_ACTION,
+                () => {
+                    window.electronAPI.abortMeasurement()
+                    this.testStore.disableLoopMode()
+                    this.router.navigateByUrl(
+                        "/" + ERoutes.TEST_RESULT.replace(":testUuid", loopUuid)
+                    )
+                },
+                {
+                    canCancel: true,
+                }
+            )
+            return
+        }
         const openLoops = this.store.openLoops$.value
         const index = openLoops.indexOf(loopUuid)
         if (index >= 0) {

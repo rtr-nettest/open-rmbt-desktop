@@ -358,17 +358,6 @@ export class HistoryStore {
                     hi.ping.toLocaleString(locale) +
                     " " +
                     t["ms"],
-                componentField: "details",
-                details: RouterLinkComponent,
-                parameters: {
-                    label: "Details...",
-                    route:
-                        "/" +
-                        ERoutes.TEST_RESULT.replace(
-                            ":testUuid",
-                            hi.testUuid ?? ""
-                        ),
-                },
                 loopUuid: hi.loopUuid,
                 hidden: hi.hidden,
             }

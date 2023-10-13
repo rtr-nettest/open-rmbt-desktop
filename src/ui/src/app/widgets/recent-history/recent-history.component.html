@@ -8,6 +8,7 @@
                 [action]="changeSort"
                 [columns]="(columns$ | async)!"
                 [data]="result"
+                [rowsAreCLickable]="(env$ | async)?.FLAVOR !== 'ont'"
                 [sort]="(sort$ | async)!"
                 [shouldHideHeader]="false"
                 [tableClassNames]="tableClassNames ?? []"

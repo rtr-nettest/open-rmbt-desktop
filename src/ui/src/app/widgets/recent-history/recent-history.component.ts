@@ -33,6 +33,7 @@ export class RecentHistoryComponent implements OnChanges {
     @Input() grouped?: boolean
     @Input() title?: string
     @Input() excludeColumns?: string[]
+    @Input() interruptsTests = false
     @Output() sortChange: EventEmitter<ISort> = new EventEmitter()
     columns$: Observable<ITableColumn<IHistoryRowRTR | IHistoryRowONT>[]> =
         this.mainStore.env$.pipe(
@@ -150,19 +151,24 @@ export class RecentHistoryComponent implements OnChanges {
 
     toggleLoopResults(loopUuid: string) {
         if (!loopUuid.startsWith("L")) {
-            this.message.openConfirmDialog(
-                THIS_INTERRUPTS_ACTION,
-                () => {
-                    window.electronAPI.abortMeasurement()
-                    this.testStore.disableLoopMode()
-                    this.router.navigateByUrl(
-                        "/" + ERoutes.TEST_RESULT.replace(":testUuid", loopUuid)
-                    )
-                },
-                {
-                    canCancel: true,
-                }
-            )
+            const navFunc = () => {
+                window.electronAPI.abortMeasurement()
+                this.testStore.disableLoopMode()
+                this.router.navigateByUrl(
+                    "/" + ERoutes.TEST_RESULT.replace(":testUuid", loopUuid)
+                )
+            }
+            if (this.interruptsTests) {
+                this.message.openConfirmDialog(
+                    THIS_INTERRUPTS_ACTION,
+                    navFunc,
+                    {
+                        canCancel: true,
+                    }
+                )
+            } else {
+                navFunc()
+            }
             return
         }
         const openLoops = this.store.openLoops$.value

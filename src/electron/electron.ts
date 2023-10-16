@@ -256,6 +256,9 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         ACTIVE_LANGUAGE: Store.get(ACTIVE_LANGUAGE) as string,
         APP_VERSION: pack.version,
         CMS_URL: process.env.CMS_URL || "",
+        CPU_WARNING_PERCENT: process.env.CPU_WARNING_PERCENT
+            ? parseFloat(process.env.CPU_WARNING_PERCENT)
+            : undefined,
         CROWDIN_UPDATE_AT_RUNTIME: process.env.CROWDIN_UPDATE_AT_RUNTIME || "",
         ENABLE_LANGUAGE_SWITCH: process.env.ENABLE_LANGUAGE_SWITCH || "",
         ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",

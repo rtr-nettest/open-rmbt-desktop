@@ -98,5 +98,6 @@
     "App was suspended": "DE-App was suspended",
     "The app was suspended. The last running measurement was aborted": "DE-The app was suspended. The last running measurement was aborted",
     "Loop measurement results": "DE-Loop measurement results",
-    "Result of measurement - waiting": "DE-Result of measurement %0 - waiting"
+    "Result of measurement - waiting": "DE-Result of measurement %0 - waiting",
+    "CPU usage is higher than %0%. Results may be skewed.": "DE-CPU usage is higher than %0%. Results may be skewed."
 }

@@ -2,6 +2,7 @@ export interface IEnv {
     ACTIVE_LANGUAGE: string | null
     APP_VERSION: string
     CMS_URL: string
+    CPU_WARNING_PERCENT: number | undefined
     CROWDIN_UPDATE_AT_RUNTIME: string
     ENABLE_LANGUAGE_SWITCH: string
     ENABLE_LOOP_MODE: string

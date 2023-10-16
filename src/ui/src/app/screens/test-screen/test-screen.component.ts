@@ -24,6 +24,7 @@ import {
 } from "src/app/constants/strings"
 import { ITestVisualizationState } from "src/app/interfaces/test-visualization-state.interface"
 import { HistoryStore } from "src/app/store/history.store"
+import { IEnv } from "../../../../../electron/interfaces/env.interface"
 
 @Component({
     selector: "app-test-screen",
@@ -41,6 +42,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
         distinctUntilChanged(),
         takeUntil(this.stopped$),
         tap(([state, error]) => {
+            this.setShowCPUWarning(this.mainStore.env$.value)
             if (!this.startTimeMs) {
                 this.startTimeMs = Date.now()
                 this.loopWaiting$.next(false)
@@ -71,6 +73,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
     loopWaitProgress$?: Observable<{ ms: number; percent: number }>
     loopWaiting$ = new BehaviorSubject(false)
     result$ = this.historyStore.getFormattedHistory({ grouped: false })
+    showCPUWarning$ = new BehaviorSubject(0)
     private startTimeMs = 0
 
     constructor(
@@ -92,6 +95,19 @@ export class TestScreenComponent implements OnDestroy, OnInit {
 
     ngOnDestroy(): void {
         this.stopped$.complete()
+    }
+
+    private setShowCPUWarning(env: IEnv | null) {
+        if (env?.CPU_WARNING_PERCENT) {
+            window.electronAPI.getCPUUsage().then((cpu) => {
+                const cpuLoadMax = cpu && Math.round(cpu.load_max * 100)
+                if (cpuLoadMax > env.CPU_WARNING_PERCENT!) {
+                    this.showCPUWarning$.next(cpuLoadMax)
+                } else {
+                    this.showCPUWarning$.next(0)
+                }
+            })
+        }
     }
 
     private goToResult = (state: ITestVisualizationState) => {

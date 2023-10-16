@@ -39,6 +39,14 @@
                     </h1>
                 </ng-container>
             </ng-container>
+            <app-alert
+                *ngIf="showCPUWarning$ | async as cpuUsage"
+                kind="warning"
+                [text]="
+                    t('CPU usage is higher than %0%. Results may be skewed.')
+                        | sprintf : cpuUsage
+                "
+            ></app-alert>
             <div class="app-main">
                 <div class="app-progress-bar-wrapper">
                     <app-gauge

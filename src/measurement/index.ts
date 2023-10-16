@@ -131,6 +131,8 @@ export class MeasurementRunner {
             }
         } finally {
             this.setCPUUsage()
+            clearInterval(this.cpuInfoInterval)
+            this.cpuInfoInterval = undefined
             if (this.cpuInfo) {
                 Logger.I.info(
                     ELoggerMessage.CPU_USAGE_MIN,
@@ -184,8 +186,6 @@ export class MeasurementRunner {
             this.cpuInfo = undefined
             return
         }
-        clearInterval(this.cpuInfoInterval)
-        this.cpuInfoInterval = undefined
         this.cpuInfo = {
             load_min: this.rounded(Math.min(...this.cpuInfoList) / 100),
             load_max: this.rounded(Math.max(...this.cpuInfoList) / 100),
@@ -208,6 +208,7 @@ export class MeasurementRunner {
                 osu.cpu.usage().then((percent) => {
                     Logger.I.info(ELoggerMessage.CPU_USAGE, percent)
                     this.cpuInfoList.push(percent)
+                    this.setCPUUsage()
                 })
             }, 1000)
         }

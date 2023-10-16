@@ -15,10 +15,12 @@
 .app-link-wrapper {
     &--metrics {
         display: flex;
+        justify-content: space-between;
         margin-top: rem(70);
 
         & > * {
             flex-basis: calc(50% - rem(35));
+            align-self: stretch;
         }
     }
 }

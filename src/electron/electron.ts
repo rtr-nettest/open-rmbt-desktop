@@ -261,6 +261,8 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
             : undefined,
         CROWDIN_UPDATE_AT_RUNTIME: process.env.CROWDIN_UPDATE_AT_RUNTIME || "",
         ENABLE_LANGUAGE_SWITCH: process.env.ENABLE_LANGUAGE_SWITCH || "",
+        ENABLE_HOME_SCREEN_JITTER_BOX:
+            process.env.ENABLE_HOME_SCREEN_JITTER_BOX === "true",
         ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",
         FLAVOR: process.env.FLAVOR || "rtr",
         WEBSITE_HOST: new URL(process.env.FULL_HISTORY_RESULT_URL ?? "").origin,

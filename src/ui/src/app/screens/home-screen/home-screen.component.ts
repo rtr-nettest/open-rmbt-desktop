@@ -53,6 +53,30 @@ export class HomeScreenComponent extends BaseScreen implements OnInit {
             ]
         })
     )
+    jitterInfo$ = this.mainStore.jitterInfo$.pipe(
+        map((info) => {
+            if (info) {
+                const { jitter, packetLoss, ping } = info
+                return [
+                    `${this.transloco.translate(
+                        "Ping"
+                    )}:&nbsp;${ping} ${this.transloco.translate("ms")}`,
+                    `${this.transloco.translate(
+                        "Packet loss"
+                    )}:&nbsp;${packetLoss}%`,
+                    `${this.transloco.translate("Jitter")}:&nbsp;${jitter}`,
+                ]
+            } else {
+                return [
+                    `${this.transloco.translate("Ping")}:&nbsp;${UNKNOWN}`,
+                    `${this.transloco.translate(
+                        "Packet loss"
+                    )}:&nbsp;${UNKNOWN}`,
+                    `${this.transloco.translate("Jitter")}:&nbsp;${UNKNOWN}`,
+                ]
+            }
+        })
+    )
     testInviteImg$ = this.mainStore.env$.pipe(
         switchMap((env) =>
             this.cmsService.getAssetByName(
@@ -84,6 +108,10 @@ export class HomeScreenComponent extends BaseScreen implements OnInit {
 
     ngOnInit(): void {
         this.mainStore.registerClient()
+        this.mainStore
+            .startLoggingJitter()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe()
         this.showProgress = false
     }
 

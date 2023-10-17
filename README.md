@@ -71,6 +71,12 @@ to get a `*.dmg` file for standalone distribution (e.g. via GitHub Releases).
 
 In both cases, a `*.pkg` and a `*.dmg` will be placed in the `out/make` folder at the root of the project.
 
+Provide `--nosign` option to the commands above, if you don't want the builder to go through the signing procedure, like this:
+
+```sh
+$ npm run make:macos -- --nosign
+```
+
 7. To upload the `*.pkg` file to AppStore use Transporter: https://apps.apple.com/us/app/transporter/id1450874784.
 
 _Note: by default macOS overwrites already installed packages, so, if you want to see the app in the menu and in the Applications folder on your dev machine, make sure to remove RMBTDesktop.app from anywhere else, including the `out` folder, before installing the `*.pkg`_

@@ -37,7 +37,7 @@ module.exports = {
             "README.md",
         ],
         appBundleId: process.env.APP_BUNDLE_ID,
-        ...(process.env.APP_STORE !== "true"
+        ...(process.env.MACOS === "true"
             ? {
                   osxSign: {},
                   osxNotarize: {

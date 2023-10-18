@@ -21,6 +21,7 @@ export interface IMainProject extends ITranslatable {
     can_choose_server?: boolean
     enable_cookie_widget: boolean
     enable_stats_mno_isp_switch?: boolean
+    regulator_link?: string
     require_location?: boolean
     location?: { longitude: number; latitude: number }
 }

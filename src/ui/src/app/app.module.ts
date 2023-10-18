@@ -123,7 +123,8 @@ import { RouterLinkComponent } from "./widgets/router-link/router-link.component
 import { LoopResultScreenComponent } from "./screens/loop-result-screen/loop-result-screen.component"
 import { LoopTestScreenComponent } from "./screens/loop-test-screen/loop-test-screen.component"
 import { TranslatePipe } from "./pipes/translate.pipe"
-import { MarkdownModule } from "ngx-markdown"
+import { MarkdownModule } from "ngx-markdown";
+import { SocialButtonsComponent } from './widgets/social-buttons/social-buttons.component'
 
 Chart.register(
     BarElement,
@@ -239,6 +240,7 @@ declare global {
         LoopResultScreenComponent,
         LoopTestScreenComponent,
         TranslatePipe,
+        SocialButtonsComponent,
     ],
     imports: [
         AppRoutingModule,

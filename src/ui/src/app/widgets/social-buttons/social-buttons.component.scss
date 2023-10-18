@@ -1,0 +1,45 @@
+@import "../../../assets/styles/core.scss";
+
+.app-share {
+    display: flex;
+    justify-content: space-around;
+    list-style: none;
+    width: 100%;
+
+    &__item {
+        flex: 0 0 24px;
+        height: 24px;
+    }
+
+    &__link {
+        &::after {
+            display: none !important;
+        }
+    }
+
+    &__icon {
+        background-image: url("/assets/images/social-icons-map.svg");
+        background-repeat: no-repeat;
+        display: block;
+        height: 100%;
+        -ms-interpolation-mode: nearest-neighbor;
+        image-rendering: pixelated;
+        width: 100%;
+
+        &--twitter {
+            background-position: 2px 1px;
+        }
+
+        &--facebook {
+            background-position: -27px 1px;
+        }
+
+        &--whatsapp {
+            background-position: -55px 2px;
+        }
+
+        &--linkedin {
+            background-position: -83px 1px;
+        }
+    }
+}

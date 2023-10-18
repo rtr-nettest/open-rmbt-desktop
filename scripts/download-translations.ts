@@ -26,7 +26,7 @@ async function main() {
                 "i18n",
                 `${lang}.json`,
             ),
-            JSON.stringify(translations, null, 2),
+            JSON.stringify(translations, null, 4),
         )
     }
 }

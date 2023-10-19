@@ -101,5 +101,6 @@
     "Result of measurement - waiting": "Ergebnis der Messung %0 - warte",
     "CPU usage is higher than %0%. Results may be skewed.": "CPU-Auslastung ist höher als %0%. Ergebnisse können verzerrt sein.",
     "Jitter": "Jitter",
-    "Packet loss": "Paketverlust"
+    "Packet loss": "Paketverlust",
+    "The interval must be between %0 and %1 minutes": "DE-The interval must be between %0 and %1 minutes"
 }

@@ -101,5 +101,6 @@
     "Result of measurement - waiting": "Result of measurement %0 - waiting",
     "CPU usage is higher than %0%. Results may be skewed.": "CPU usage is higher than %0%. Results may be skewed.",
     "Jitter": "Jitter",
-    "Packet loss": "Packet loss"
+    "Packet loss": "Packet loss",
+    "The interval must be between %0 and %1 minutes": "The interval must be between %0 and %1 minutes"
 }

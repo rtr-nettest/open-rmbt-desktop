@@ -141,6 +141,7 @@ export class RecentHistoryComponent implements OnChanges {
         const firstItem = this.result.content[0]
         if (this.grouped && firstItem?.groupHeader && this.freshlyLoaded) {
             this.freshlyLoaded = false
+            this.store.openLoops$.next([])
             this.toggleLoopResults(firstItem.id!)
         }
     }

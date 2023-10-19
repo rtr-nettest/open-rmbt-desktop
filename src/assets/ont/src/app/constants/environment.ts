@@ -17,5 +17,11 @@ export const environment: {
             route: ERoutes.HISTORY,
             translations: [],
         },
+        {
+            label: "Help",
+            icon: "help",
+            url: "https://nettest.com/en/open-nettest-for-$os",
+            translations: [],
+        },
     ],
 }

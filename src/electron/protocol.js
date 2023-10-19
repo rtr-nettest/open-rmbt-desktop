@@ -31,6 +31,7 @@ const mimeTypes = {
     ".png": "image/png",
     ".jpg": "image/jpeg",
     ".map": "text/plain",
+    ".ttf": "font/ttf",
 }
 
 function charset(mimeExt) {

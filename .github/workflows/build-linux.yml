@@ -19,6 +19,7 @@ jobs:
         node-version: 18.x
     - name: Build
       run: |
+        apt-get install -y rpm
         npm install
         cd src
         cd ui
@@ -30,9 +31,9 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: application-rpm
-        path: out/**/*.rpm
+        path: out/make/rpm/x64/*.rpm
     - uses: actions/upload-artifact@v3
       with:
         name: application-deb
-        path: out/**/*.deb
+        path: out/make/deb/x64/*.deb
         

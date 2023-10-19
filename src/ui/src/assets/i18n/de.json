@@ -102,5 +102,5 @@
     "CPU usage is higher than %0%. Results may be skewed.": "CPU-Auslastung ist höher als %0%. Ergebnisse können verzerrt sein.",
     "Jitter": "Jitter",
     "Packet loss": "Paketverlust",
-    "The interval must be between %0 and %1 minutes": "DE-The interval must be between %0 and %1 minutes"
+    "The interval must be between %0 and %1 minutes": "Die Wartezeit muss zwischen %0 und %1 Minuten liegen"
 }

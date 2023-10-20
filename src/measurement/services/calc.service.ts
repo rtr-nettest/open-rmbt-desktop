@@ -116,7 +116,8 @@ export class CalcService {
 
     getOverallResultsFromSpeedItems(
         speedItems: ISpeedItem[],
-        direction: "download" | "upload"
+        direction: "download" | "upload",
+        step = 75
     ): IOverallResult[] {
         if (!speedItems) {
             return []
@@ -141,6 +142,7 @@ export class CalcService {
             .sort((a, b) => b[key].bytes.length - a[key].bytes.length)
         const overallResults: IOverallResult[] = []
         const longestThread = threadResults[0]
+        let lastMs = 0
         for (let i = 1; i <= longestThread[key].bytes.length; i++) {
             const threadsSlice = threadResults.map((threadResult) => {
                 const newResult = new MeasurementThreadResult(
@@ -150,7 +152,12 @@ export class CalcService {
                 newResult[key].bytes = threadResult[key].bytes.slice(0, i)
                 return newResult
             })
-            overallResults.push(this.getFineResult(threadsSlice, key))
+            const fineResult = this.getFineResult(threadsSlice, key)
+            const ms = fineResult.nsec / 1e6
+            if (lastMs == 0 || ms - lastMs >= step) {
+                overallResults.push(fineResult)
+                step = ms
+            }
         }
         return overallResults
     }

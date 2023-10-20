@@ -49,7 +49,6 @@ export class TestScreenComponent implements OnDestroy, OnInit {
             }
             if (error) {
                 this.stopped$.next()
-                this.startTimeMs = 0
                 const message =
                     state.currentPhaseName ===
                     EMeasurementStatus.SUBMITTING_RESULTS
@@ -57,7 +56,8 @@ export class TestScreenComponent implements OnDestroy, OnInit {
                         : ERROR_OCCURED
                 const navigate = () =>
                     state.currentPhaseName ===
-                    EMeasurementStatus.SUBMITTING_RESULTS
+                        EMeasurementStatus.SUBMITTING_RESULTS ||
+                    this.enableLoopMode$.value === true
                         ? this.goToResult(state)
                         : this.router.navigate(["/"])
                 this.message.openConfirmDialog(message, () => {

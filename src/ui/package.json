@@ -6,7 +6,7 @@
         "prepare": "node scripts/copy-assets",
         "start": "npm run prepare && ng serve",
         "build": "npm run prepare && ng build",
-        "build-for-packaging": "npm run prepare && ng build --base-href ./ && node scripts/rewrite-asset-paths-for-packaging",
+        "build-for-packaging": "npm run prepare && ng build --base-href ./",
         "watch": "npm run prepare && ng build --watch --configuration development",
         "test": "npm run prepare && ng test"
     },

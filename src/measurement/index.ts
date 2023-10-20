@@ -41,7 +41,7 @@ export class MeasurementRunner {
     private measurementServer?: IMeasurementServerResponse
     private registrationRequest?: MeasurementRegistrationRequest
     private rmbtClient?: RMBTClient
-    private cpuInfoInterval?: NodeJS.Timer
+    private cpuInfoInterval?: NodeJS.Timeout
     private cpuInfoList: number[] = []
     private cpuInfo?: ICPU
     private settingsRequest?: UserSettingsRequest

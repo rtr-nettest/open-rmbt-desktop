@@ -76,19 +76,7 @@ export class AutoUpdater {
                 )
             })
             if (semverGt(latestVersion, pack.version) && file) {
-                const dialogOpts = {
-                    type: "info" as const,
-                    buttons: [t("Download and install"), t("Later")],
-                    title: t("Application Update"),
-                    message: latestRelease!.name,
-                    detail: t(
-                        "A new version is available. Would you like to install it?"
-                    ),
-                }
-                const response = await dialog.showMessageBox(dialogOpts)
-                if (response.response === 0) {
-                    await this.downloadLatestRelease(file)
-                }
+                await this.downloadLatestRelease(file)
             }
         } catch (e) {
             Logger.I.error(e)

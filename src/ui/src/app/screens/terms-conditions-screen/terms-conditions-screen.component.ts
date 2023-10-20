@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core"
 import { Router } from "@angular/router"
-import { of, switchMap } from "rxjs"
+import { of, switchMap, withLatestFrom } from "rxjs"
 import { CMSService } from "src/app/services/cms.service"
 import { MainStore } from "src/app/store/main.store"
 
@@ -10,12 +10,15 @@ import { MainStore } from "src/app/store/main.store"
     styleUrls: ["./terms-conditions-screen.component.scss"],
 })
 export class TermsConditionsScreenComponent implements OnInit {
-    terms$ = this.mainStore.env$.pipe(
-        switchMap((env) =>
-            env?.FLAVOR === "ont" ? this.cms.getTerms() : of(null)
-        )
+    terms$ = this.mainStore.settings$.pipe(
+        withLatestFrom(this.mainStore.env$),
+        switchMap(([settings, env]) => {
+            this.termsText = settings?.termsText || ""
+            return env?.FLAVOR === "ont" ? this.cms.getTerms() : of(null)
+        })
     )
     isRead = false
+    termsText = ""
     timeSinceLoad = 0
 
     constructor(

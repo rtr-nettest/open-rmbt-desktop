@@ -22,6 +22,13 @@ export interface IUserSettings {
         }
     ]
     ipInfo?: IPInfo
-    terms_and_conditions: { version: number; url: string; ndt_url: null }
+    terms_and_conditions: ITerms
     shouldAcceptTerms?: boolean
+    termsText?: string
+}
+
+export interface ITerms {
+    version: number
+    url: string
+    ndt_url: null
 }

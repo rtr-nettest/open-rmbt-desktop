@@ -200,7 +200,13 @@ export class ControlServer {
                 Store.I.get(TERMS_ACCEPTED_VERSION) !==
                     settings.terms_and_conditions?.version
             ) {
-                return { ...settings, shouldAcceptTerms: true }
+                let termsText = (
+                    await axios.get(settings.terms_and_conditions.url)
+                ).data
+                termsText = termsText
+                    ? termsText.replace(/<title>.+<\/title>/gi, "")
+                    : termsText
+                return { ...settings, shouldAcceptTerms: true, termsText }
             }
             return settings
         }

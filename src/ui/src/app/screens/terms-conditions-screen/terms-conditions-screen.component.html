@@ -22,9 +22,5 @@
 </div>
 
 <ng-template #defaultTerms>
-    <div
-        *transloco="let t"
-        class="app-article"
-        [innerHTML]="t('Terms and conditions text')"
-    ></div>
+    <div *transloco="let t" class="app-article" [innerHTML]="termsText"></div>
 </ng-template>

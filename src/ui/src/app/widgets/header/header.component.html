@@ -47,6 +47,16 @@
                     (click)="handleClick($event, link)"
                     src="/assets/images/logo-header.svg"
             /></a>
+            <div
+                *ngIf="(isLoopModeTestScreen$ | async) === true"
+                style="display: flex; justify-content: center; flex: 1"
+            >
+                <app-alert
+                    text="Tests are conducted repeatedly until they are stopped manually"
+                >
+                    <app-stop-loop-button></app-stop-loop-button>
+                </app-alert>
+            </div>
         </header>
         <header class="app-header app-header--small{{ fixed ? '-fixed' : '' }}">
             <a [routerLink]="link"

@@ -12,8 +12,11 @@
     }
 
     &--large {
+        display: flex;
         @include screen-sm {
-            display: none;
+            a {
+                display: none;
+            }
         }
     }
 

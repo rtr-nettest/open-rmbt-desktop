@@ -16,11 +16,6 @@
         <app-main-menu [disabled]="true"></app-main-menu>
         <app-main-content *ngIf="visualization$ | async">
             <ng-container *ngIf="(enableLoopMode$ | async) === true">
-                <app-alert
-                    text="Tests are conducted repeatedly until they are stopped manually"
-                >
-                    <app-stop-loop-button></app-stop-loop-button>
-                </app-alert>
                 <ng-container *ngIf="loopCount$ | async as loopCount">
                     <h1
                         *ngIf="(loopWaiting$ | async) !== true"

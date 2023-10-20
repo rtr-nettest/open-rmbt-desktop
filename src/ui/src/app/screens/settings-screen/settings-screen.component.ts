@@ -25,6 +25,8 @@ import { TestServersComponent } from "src/app/widgets/test-servers/test-servers.
 import { CMSService } from "src/app/services/cms.service"
 import { IEnv } from "../../../../../electron/interfaces/env.interface"
 import { SettingsLocalDataComponent } from "src/app/widgets/settings-local-data/settings-local-data.component"
+import { Router } from "@angular/router"
+import { ERoutes } from "src/app/enums/routes.enum"
 
 export interface ISettingsRow {
     title: string
@@ -56,9 +58,17 @@ export class SettingsScreenComponent
         this.mainStore.env$,
         this.transloco.selectTranslation(),
         this.mainStore.settings$,
-        this.cms.getProject(),
+        this.cms.getProject({ dropCache: true }),
     ]).pipe(
         map(([env, t, settings, project]) => {
+            if (this.env && this.env != env) {
+                this.router
+                    .navigate(["/"], { skipLocationChange: true })
+                    .then(() => {
+                        this.router.navigate(["/", ERoutes.SETTINGS])
+                    })
+                return { content: [], totalElements: 0 }
+            }
             this.env = env ?? undefined
             const content: ISettingsRow[] = [
                 {
@@ -139,6 +149,7 @@ export class SettingsScreenComponent
     constructor(
         mainStore: MainStore,
         message: MessageService,
+        private router: Router,
         private transloco: TranslocoService,
         private cms: CMSService,
         private cdr: ChangeDetectorRef

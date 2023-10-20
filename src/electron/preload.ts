@@ -21,7 +21,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.send(Events.SET_ACTIVE_CLIENT, client),
     setActiveLanguage: (language: string) =>
         ipcRenderer.send(Events.SET_ACTIVE_LANGUAGE, language),
-    setActiveServer: (server: IMeasurementServerResponse) =>
+    setActiveServer: (server: IMeasurementServerResponse | null) =>
         ipcRenderer.send(Events.SET_ACTIVE_SERVER, server),
     setDefaultLanguage: (language: string) =>
         ipcRenderer.send(Events.SET_DEFAULT_LANGUAGE, language),

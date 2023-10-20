@@ -4,10 +4,10 @@ import { IMeasurementRegistrationResponse } from "../interfaces/measurement-regi
 import {
     IMeasurementThreadResult,
     IPing,
-    ISpeedItem,
 } from "../interfaces/measurement-result.interface"
 import {
     IncomingMessageWithData,
+    OutgoingMessageWithData,
     RMBTWorker,
 } from "../interfaces/rmbt-worker.interface"
 import { Logger } from "./logger.service"
@@ -121,13 +121,7 @@ export class RMBTClient {
         }
     }
 
-    private finishMeasurement(
-        resolve: (
-            value:
-                | IMeasurementThreadResult[]
-                | PromiseLike<IMeasurementThreadResult[]>
-        ) => void
-    ) {
+    private finishMeasurement(resolve: Function) {
         if (!this.isRunning) {
             return
         }
@@ -166,7 +160,7 @@ export class RMBTClient {
         this.aborter.abort()
     }
 
-    private cancelMeasurement(reject: (reason: any) => void, error?: Error) {
+    private cancelMeasurement(reject: Function, error?: Error) {
         if (!this.isRunning) {
             return
         }
@@ -235,237 +229,207 @@ export class RMBTClient {
                         return
                     }
                     this.lastMessageReceivedAt = Date.now()
-                    switch (message.message) {
-                        case "error":
-                            this.cancelMeasurement(
-                                reject,
-                                message.data as Error
-                            )
-                            break
-                        case "connected":
-                            if (!!message.data) {
-                                this.initializedThreads.push(index)
-                            }
-                            if (
-                                this.initializedThreads.length ===
-                                this.measurementTasks.length
-                            ) {
-                                for (const w of this.measurementTasks) {
-                                    w.postMessage(
-                                        new IncomingMessageWithData(
-                                            "preDownload"
-                                        )
-                                    )
-                                }
-                                this.initializedThreads = []
-                                this.measurementStatus =
-                                    EMeasurementStatus.INIT_DOWN
-                                this.phaseStartTimeNs[
-                                    EMeasurementStatus.INIT_DOWN
-                                ] = Time.nowNs()
-                                Logger.I.warn(
-                                    "Init is finished in %d s",
-                                    this.getPhaseDuration(
-                                        EMeasurementStatus.INIT
-                                    )
-                                )
-                            }
-                            break
-                        case "preDownloadFinished":
-                            const { chunkSize, bytesPerSec } =
-                                message.data as IPreDownloadResult
-                            this.chunks.push(chunkSize)
-                            this.bytesPerSecPreDownload.push(bytesPerSec)
-                            Logger.I.warn(
-                                "Worker %d finished pre-download with speed %d and chunk size %d.",
-                                index,
-                                bytesPerSec,
-                                chunkSize
-                            )
-                            if (
-                                this.chunks.length ===
-                                this.measurementTasks.length
-                            ) {
-                                this.measurementTasks[0].postMessage(
-                                    new IncomingMessageWithData("ping")
-                                )
-                                this.chunks = []
-                                this.measurementStatus = EMeasurementStatus.PING
-                                this.phaseStartTimeNs[EMeasurementStatus.PING] =
-                                    Time.nowNs()
-                                Logger.I.warn(
-                                    "Pre-download is finished in %d s",
-                                    this.getPhaseDuration(
-                                        EMeasurementStatus.INIT_DOWN
-                                    )
-                                )
-                            }
-                            break
-                        case "pingFinished":
-                            this.pingMedian =
-                                ((message.data! as IMeasurementThreadResult)
-                                    .ping_median ?? -1000000) / 1000000
-                            this.pings = MeasurementResult.getPings([
-                                message.data! as IMeasurementThreadResult,
-                            ])
-                            const calculatedChunkSize = this.getChunkSize()
-                            for (const w of this.measurementTasks) {
-                                w.postMessage(
-                                    new IncomingMessageWithData(
-                                        "download",
-                                        calculatedChunkSize
-                                    )
-                                )
-                            }
-                            this.measurementStatus = EMeasurementStatus.DOWN
-                            this.phaseStartTimeNs[EMeasurementStatus.DOWN] =
-                                Time.nowNs()
-                            Logger.I.info(
-                                "The ping median is %dms.",
-                                this.pingMedian
-                            )
-                            Logger.I.warn(
-                                "Ping is finished in %d s",
-                                this.getPhaseDuration(EMeasurementStatus.PING)
-                            )
-                            break
-                        case "downloadUpdated":
-                            this.interimThreadResults[index] =
-                                message.data! as IMeasurementThreadResult
-                            break
-                        case "downloadFinished":
-                            this.threadResults.push(
-                                message.data! as IMeasurementThreadResult
-                            )
-                            if (
-                                this.threadResults.length ===
-                                this.measurementTasks.length
-                            ) {
-                                this.finalResultDown =
-                                    CalcService.I.getFineResult(
-                                        this.threadResults,
-                                        "down"
-                                    )
-                                this.downThreadResults = [...this.threadResults]
-                                this.threadResults = []
-                                this.interimThreadResults = new Array(
-                                    this.params.test_numthreads
-                                )
-                                for (const w of this.measurementTasks) {
-                                    w.postMessage(
-                                        new IncomingMessageWithData("preUpload")
-                                    )
-                                }
-                                this.measurementStatus =
-                                    EMeasurementStatus.INIT_UP
-                                this.phaseStartTimeNs[
-                                    EMeasurementStatus.INIT_UP
-                                ] = Time.nowNs()
-                                Logger.I.info(
-                                    "Download is finished in %ds",
-                                    this.getPhaseDuration(
-                                        EMeasurementStatus.DOWN
-                                    )
-                                )
-                                Logger.I.info(
-                                    "The total download speed is %dMbps",
-                                    this.finalDownMbps
-                                )
-                            }
-                            break
-                        case "preUploadFinished":
-                            const { chunkSize: cs, chunksCount } =
-                                message.data as IPreUploadResult
-                            this.chunks.push(cs)
-                            this._chunkNumbers.push(chunksCount)
-                            Logger.I.warn(
-                                "Worker %d finished pre-upload with %o chunk sizes.",
-                                index,
-                                this.chunks
-                            )
-                            if (
-                                this.chunks.length ===
-                                this.measurementTasks.length
-                            ) {
-                                this.checkIfShouldUseOneThread(
-                                    this._chunkNumbers
-                                )
-                                for (const w of this.measurementTasks) {
-                                    w.postMessage(
-                                        new IncomingMessageWithData(
-                                            "reconnectForUpload"
-                                        )
-                                    )
-                                }
-                                this.chunks = []
-                                this.measurementStatus = EMeasurementStatus.UP
-                                this.phaseStartTimeNs[EMeasurementStatus.UP] =
-                                    Time.nowNs()
-                                Logger.I.info(
-                                    "Pre-upload is finished in %ds",
-                                    this.getPhaseDuration(
-                                        EMeasurementStatus.INIT_UP
-                                    )
-                                )
-                            }
-                            break
-                        case "reconnectedForUpload":
-                            const isReconnected = message.data as boolean
-                            if (isReconnected) {
-                                Logger.I.warn(
-                                    "Worker %d is ready for upload.",
-                                    index
-                                )
-                                this.initializedThreads.push(index)
-                            } else {
-                                Logger.I.warn(
-                                    "Worker %d errored out. Reattempting connection.",
-                                    index
-                                )
-                                setImmediate(() => {
-                                    worker.postMessage(
-                                        new IncomingMessageWithData(
-                                            "reconnectForUpload"
-                                        )
-                                    )
-                                })
-                            }
-                            if (
-                                this.initializedThreads.length ===
-                                this.measurementTasks.length
-                            ) {
-                                const calculatedUpChunkSize =
-                                    this.getChunkSize()
-                                this.initializedThreads = []
-                                for (const w of this.measurementTasks) {
-                                    w.postMessage(
-                                        new IncomingMessageWithData(
-                                            "upload",
-                                            calculatedUpChunkSize
-                                        )
-                                    )
-                                }
-                            }
-                            break
-                        case "uploadUpdated":
-                            this.interimThreadResults[index] =
-                                message.data! as IMeasurementThreadResult
-                            break
-                        case "uploadFinished":
-                            this.threadResults.push(
-                                message.data! as IMeasurementThreadResult
-                            )
-                            if (
-                                this.threadResults.length ===
-                                this.measurementTasks.length
-                            ) {
-                                this.finishMeasurement(resolve)
-                            }
-                            break
+                    try {
+                        this.parseMessage(message, index, resolve, reject)
+                    } catch (e: any) {
+                        this.cancelMeasurement(reject, e)
                     }
                 })
             }
         })
+    }
+
+    private parseMessage(
+        message: OutgoingMessageWithData,
+        index: number,
+        resolve: Function,
+        reject: Function
+    ) {
+        switch (message.message) {
+            case "error":
+                this.cancelMeasurement(reject, message.data as Error)
+                break
+            case "connected":
+                if (!!message.data) {
+                    this.initializedThreads.push(index)
+                }
+                if (
+                    this.initializedThreads.length ===
+                    this.measurementTasks.length
+                ) {
+                    for (const w of this.measurementTasks) {
+                        w.postMessage(
+                            new IncomingMessageWithData("preDownload")
+                        )
+                    }
+                    this.initializedThreads = []
+                    this.measurementStatus = EMeasurementStatus.INIT_DOWN
+                    this.phaseStartTimeNs[EMeasurementStatus.INIT_DOWN] =
+                        Time.nowNs()
+                    Logger.I.warn(
+                        "Init is finished in %d s",
+                        this.getPhaseDuration(EMeasurementStatus.INIT)
+                    )
+                }
+                break
+            case "preDownloadFinished":
+                const { chunkSize, bytesPerSec } =
+                    message.data as IPreDownloadResult
+                this.chunks.push(chunkSize)
+                this.bytesPerSecPreDownload.push(bytesPerSec)
+                Logger.I.warn(
+                    "Worker %d finished pre-download with speed %d and chunk size %d.",
+                    index,
+                    bytesPerSec,
+                    chunkSize
+                )
+                if (this.chunks.length === this.measurementTasks.length) {
+                    this.measurementTasks[0].postMessage(
+                        new IncomingMessageWithData("ping")
+                    )
+                    this.chunks = []
+                    this.measurementStatus = EMeasurementStatus.PING
+                    this.phaseStartTimeNs[EMeasurementStatus.PING] =
+                        Time.nowNs()
+                    Logger.I.warn(
+                        "Pre-download is finished in %d s",
+                        this.getPhaseDuration(EMeasurementStatus.INIT_DOWN)
+                    )
+                }
+                break
+            case "pingFinished":
+                this.pingMedian =
+                    ((message.data! as IMeasurementThreadResult).ping_median ??
+                        -1000000) / 1000000
+                this.pings = MeasurementResult.getPings([
+                    message.data! as IMeasurementThreadResult,
+                ])
+                const calculatedChunkSize = this.getChunkSize()
+                for (const w of this.measurementTasks) {
+                    w.postMessage(
+                        new IncomingMessageWithData(
+                            "download",
+                            calculatedChunkSize
+                        )
+                    )
+                }
+                this.measurementStatus = EMeasurementStatus.DOWN
+                this.phaseStartTimeNs[EMeasurementStatus.DOWN] = Time.nowNs()
+                Logger.I.info("The ping median is %dms.", this.pingMedian)
+                Logger.I.warn(
+                    "Ping is finished in %d s",
+                    this.getPhaseDuration(EMeasurementStatus.PING)
+                )
+                break
+            case "downloadUpdated":
+                this.interimThreadResults[index] =
+                    message.data! as IMeasurementThreadResult
+                break
+            case "downloadFinished":
+                this.threadResults.push(
+                    message.data! as IMeasurementThreadResult
+                )
+                if (
+                    this.threadResults.length === this.measurementTasks.length
+                ) {
+                    this.finalResultDown = CalcService.I.getFineResult(
+                        this.threadResults,
+                        "down"
+                    )
+                    this.downThreadResults = [...this.threadResults]
+                    this.threadResults = []
+                    this.interimThreadResults = new Array(
+                        this.params.test_numthreads
+                    )
+                    for (const w of this.measurementTasks) {
+                        w.postMessage(new IncomingMessageWithData("preUpload"))
+                    }
+                    this.measurementStatus = EMeasurementStatus.INIT_UP
+                    this.phaseStartTimeNs[EMeasurementStatus.INIT_UP] =
+                        Time.nowNs()
+                    Logger.I.info(
+                        "Download is finished in %ds",
+                        this.getPhaseDuration(EMeasurementStatus.DOWN)
+                    )
+                    Logger.I.info(
+                        "The total download speed is %dMbps",
+                        this.finalDownMbps
+                    )
+                }
+                break
+            case "preUploadFinished":
+                const { chunkSize: cs, chunksCount } =
+                    message.data as IPreUploadResult
+                this.chunks.push(cs)
+                this._chunkNumbers.push(chunksCount)
+                Logger.I.warn(
+                    "Worker %d finished pre-upload with %o chunk sizes.",
+                    index,
+                    this.chunks
+                )
+                if (this.chunks.length === this.measurementTasks.length) {
+                    this.checkIfShouldUseOneThread(this._chunkNumbers)
+                    for (const w of this.measurementTasks) {
+                        w.postMessage(
+                            new IncomingMessageWithData("reconnectForUpload")
+                        )
+                    }
+                    this.chunks = []
+                    this.measurementStatus = EMeasurementStatus.UP
+                    this.phaseStartTimeNs[EMeasurementStatus.UP] = Time.nowNs()
+                    Logger.I.info(
+                        "Pre-upload is finished in %ds",
+                        this.getPhaseDuration(EMeasurementStatus.INIT_UP)
+                    )
+                }
+                break
+            case "reconnectedForUpload":
+                const isReconnected = message.data as boolean
+                if (isReconnected) {
+                    Logger.I.warn("Worker %d is ready for upload.", index)
+                    this.initializedThreads.push(index)
+                } else {
+                    Logger.I.warn(
+                        "Worker %d errored out. Reattempting connection.",
+                        index
+                    )
+                    setImmediate(() => {
+                        this.measurementTasks[index].postMessage(
+                            new IncomingMessageWithData("reconnectForUpload")
+                        )
+                    })
+                }
+                if (
+                    this.initializedThreads.length ===
+                    this.measurementTasks.length
+                ) {
+                    const calculatedUpChunkSize = this.getChunkSize()
+                    this.initializedThreads = []
+                    for (const w of this.measurementTasks) {
+                        w.postMessage(
+                            new IncomingMessageWithData(
+                                "upload",
+                                calculatedUpChunkSize
+                            )
+                        )
+                    }
+                }
+                break
+            case "uploadUpdated":
+                this.interimThreadResults[index] =
+                    message.data! as IMeasurementThreadResult
+                break
+            case "uploadFinished":
+                this.threadResults.push(
+                    message.data! as IMeasurementThreadResult
+                )
+                if (
+                    this.threadResults.length === this.measurementTasks.length
+                ) {
+                    this.finishMeasurement(resolve)
+                }
+                break
+        }
     }
 
     private checkIfShouldUseOneThread(chunkNumbers: number[]) {

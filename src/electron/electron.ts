@@ -203,7 +203,7 @@ ipcMain.on(Events.SET_DEFAULT_LANGUAGE, (event, language: string) => {
 
 ipcMain.on(
     Events.SET_ACTIVE_SERVER,
-    (event, server: IMeasurementServerResponse) => {
+    (event, server: IMeasurementServerResponse | null) => {
         Store.set(ACTIVE_SERVER, server)
     }
 )

@@ -187,10 +187,10 @@ export class TestStore {
         })
     }
 
-    setActiveServer(server: IMeasurementServerResponse) {
+    setActiveServer(server: IMeasurementServerResponse | null) {
         window.electronAPI.setActiveServer(server)
         const updatedServers = this.servers$.value.map((s) =>
-            s.webAddress === server.webAddress
+            s.webAddress === server?.webAddress
                 ? { ...s, active: true }
                 : { ...s, active: false }
         )

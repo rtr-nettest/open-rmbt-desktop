@@ -19,7 +19,6 @@ export class SocialButtonsComponent {
             this.cms.getProject(),
         ]).pipe(
             map(([result, t, project]) => {
-                console.log(result, t, project)
                 if (!result || !t || !project) {
                     return []
                 }

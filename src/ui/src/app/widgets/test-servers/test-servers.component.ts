@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core"
+import { Component, Input, OnInit } from "@angular/core"
 import { MatSelectChange } from "@angular/material/select"
 import { TestStore } from "src/app/store/test.store"
 import { IMeasurementServerResponse } from "../../../../../measurement/interfaces/measurement-server-response.interface"
@@ -15,7 +15,7 @@ import {
     styleUrls: ["./test-servers.component.scss"],
 })
 export class TestServersComponent implements OnInit, IDynamicComponent {
-    parameters?: IDynamicComponentParameters | undefined
+    @Input() parameters?: IDynamicComponentParameters | undefined
     project$ = this.cms.getProject()
     servers$ = this.store.servers$.pipe(
         map((servers) => {

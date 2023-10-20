@@ -1,10 +1,10 @@
 $font-size-3xl: 36;
-$font-size-xxl: 24;
-$font-size-xl: 20;
-$font-size-l: 18;
-$font-size-m: 16;
-$font-size-sm: 14;
-$font-size-xs: 12;
+$font-size-xxl: 22;
+$font-size-xl: 18;
+$font-size-l: 16;
+$font-size-m: 14;
+$font-size-sm: 12;
+$font-size-xs: 10;
 
 $screen-xs: 768px;
 $screen-sm: 1024px;
@@ -32,34 +32,34 @@ html {
     }
 }
 
-$color-primary: #2f5f00;
+$color-primary: #0958bd;
 $color-secondary: black;
 $color-pale: mix(#000000, #ffffff, 33%);
-$color-link: #2f5f00;
+$color-link: #0958bd;
 $color-button-gradient-1: #0958bd;
 $color-button-gradient-2: #00acb1;
 
-// http://mcg.mbitson.com/#!?mcgpalette0=%232f5f00
+// http://mcg.mbitson.com/#!?mcgpalette0=%230958bd
 $palette-primary: (
-    50: #e6ece0,
-    100: #c1cfb3,
-    200: #97af80,
-    300: #6d8f4d,
-    400: #4e7726,
-    500: #2f5f00,
-    600: #2a5700,
-    700: #234d00,
-    800: #1d4300,
-    900: #123200,
-    A100: #8cff6a,
-    A200: #65ff37,
-    A400: #3eff04,
-    A700: #35ea00,
+    50: #e1ebf7,
+    100: #b5cdeb,
+    200: #84acde,
+    300: #538ad1,
+    400: #2e71c7,
+    500: #0958bd,
+    600: #0850b7,
+    700: #0647ae,
+    800: #053da6,
+    900: #022d98,
+    A100: #c3d0ff,
+    A200: #90a8ff,
+    A400: #5d80ff,
+    A700: #446cff,
     contrast: (
         50: #000000,
         100: #000000,
         200: #000000,
-        300: #ffffff,
+        300: #000000,
         400: #ffffff,
         500: #ffffff,
         600: #ffffff,
@@ -69,7 +69,7 @@ $palette-primary: (
         A100: #000000,
         A200: #000000,
         A400: #000000,
-        A700: #000000,
+        A700: #ffffff,
     ),
 );
 $palette-accent: (

@@ -26,5 +26,6 @@ export interface IEnv {
     USER_DATA: string
     CONTROL_SERVER_URL: string
     MEASUREMENT_SERVERS_PATH: string
+    OS: string
     WEBSITE_HOST: string
 }

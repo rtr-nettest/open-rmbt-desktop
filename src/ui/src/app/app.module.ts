@@ -124,6 +124,7 @@ import { LoopResultScreenComponent } from "./screens/loop-result-screen/loop-res
 import { LoopTestScreenComponent } from "./screens/loop-test-screen/loop-test-screen.component"
 import { TranslatePipe } from "./pipes/translate.pipe"
 import { MarkdownModule } from "ngx-markdown"
+import { SocialButtonsComponent } from "./widgets/social-buttons/social-buttons.component"
 
 Chart.register(
     BarElement,
@@ -149,7 +150,7 @@ declare global {
             setActiveClient: (client: string) => Promise<void>
             setActiveLanguage: (language: string) => Promise<void>
             setActiveServer: (
-                server: IMeasurementServerResponse
+                server: IMeasurementServerResponse | null
             ) => Promise<void>
             setDefaultLanguage: (language: string) => Promise<void>
             runMeasurement: (loopModeInfo?: ILoopModeInfo) => Promise<void>
@@ -239,6 +240,7 @@ declare global {
         LoopResultScreenComponent,
         LoopTestScreenComponent,
         TranslatePipe,
+        SocialButtonsComponent,
     ],
     imports: [
         AppRoutingModule,

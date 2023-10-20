@@ -3,6 +3,7 @@ import { Injectable } from "@angular/core"
 import { Observable, of } from "rxjs"
 import {
     catchError,
+    distinct,
     first,
     map,
     switchMap,
@@ -64,28 +65,32 @@ export class CMSService {
             )
     }
 
-    getProject(): Observable<IMainProject | null> {
+    getProject(options?: {
+        dropCache: boolean
+    }): Observable<IMainProject | null> {
         return this.mainStore.project$.pipe(
-            first(),
             withLatestFrom(this.mainStore.env$),
-            switchMap(([project, env]) =>
-                env?.FLAVOR !== "ont"
-                    ? of(null)
-                    : project
-                    ? of(project)
-                    : this.http
-                          .get<IMainProject[]>(`${this.apiUrl}/projects`, {
-                              params: new HttpParams({
-                                  fromObject: {
-                                      slug: this.projectSlug,
-                                      _limit: "1",
-                                  },
-                              }),
-                              headers: this.headers,
-                          })
-                          .pipe(map((projects) => projects?.[0]))
-            ),
-            catchError(() => of(null))
+            switchMap(([project, env]) => {
+                if (env?.FLAVOR !== "ont") {
+                    return of(null)
+                }
+                if (!project || options?.dropCache) {
+                    return this.http
+                        .get<IMainProject[]>(`${this.apiUrl}/projects`, {
+                            params: new HttpParams({
+                                fromObject: {
+                                    slug: this.projectSlug,
+                                    _limit: "1",
+                                },
+                            }),
+                            headers: this.headers,
+                        })
+                        .pipe(map((projects) => projects?.[0]))
+                }
+                return of(project)
+            }),
+            catchError(() => of(null)),
+            distinct((project) => project?.slug)
         )
     }
 

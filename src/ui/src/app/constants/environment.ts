@@ -6,46 +6,21 @@ export const environment: {
 } = {
     menu: [
         {
-            label: "New Test",
+            label: "Run Test",
             icon: "test",
             route: ERoutes.TEST,
             translations: [],
         },
         {
-            label: "Loop Mode",
-            icon: "loop",
-            route: ERoutes.LOOP_MODE,
-            translations: [],
-        },
-        {
-            label: "Certified",
-            icon: "certified",
-            route: ERoutes.CERTIFIED,
-            translations: [],
-            hidden: true,
-        },
-        {
-            label: "Map",
-            icon: "map",
-            route: ERoutes.MAP,
-            translations: [],
-        },
-        {
-            label: "History",
+            label: "My History",
             icon: "history",
             route: ERoutes.HISTORY,
             translations: [],
         },
         {
-            label: "Statistics",
-            icon: "statistics",
-            route: ERoutes.STATISTICS,
-            translations: [],
-        },
-        {
             label: "Help",
             icon: "help",
-            url: "https://www.rtr.at/$lang/tk/netztesthilfe",
+            url: "https://nettest.com/en/open-nettest-for-$os",
             translations: [],
         },
     ],

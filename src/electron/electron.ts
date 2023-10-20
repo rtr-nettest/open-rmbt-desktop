@@ -203,7 +203,7 @@ ipcMain.on(Events.SET_DEFAULT_LANGUAGE, (event, language: string) => {
 
 ipcMain.on(
     Events.SET_ACTIVE_SERVER,
-    (event, server: IMeasurementServerResponse) => {
+    (event, server: IMeasurementServerResponse | null) => {
         Store.set(ACTIVE_SERVER, server)
     }
 )
@@ -294,6 +294,12 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         USER_DATA: app.getPath("temp"),
         MEASUREMENT_SERVERS_PATH: process.env.MEASUREMENT_SERVERS_PATH || "",
         CONTROL_SERVER_URL: process.env.CONTROL_SERVER_URL || "",
+        OS:
+            process.platform === "win32"
+                ? "windows"
+                : process.platform === "darwin"
+                ? "macos"
+                : process.platform,
     }
 })
 

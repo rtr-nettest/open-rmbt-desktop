@@ -48,16 +48,6 @@ export class CalcService {
         }))
     }
 
-    private calcSpeed(bytes: number, timeMs: number) {
-        return Math.max((bytes * 8) / (timeMs / 1e3), 0)
-    }
-
-    private parseCurveItem = (ci: CurveItem) => ({
-        bytes: ci.bytes_total,
-        nsec: ci.time_elapsed * 1e6,
-        speed: ci.speed ?? this.calcSpeed(ci.bytes_total, ci.time_elapsed),
-    })
-
     getOverallResultsFromSpeedCurve(
         curve: CurveItem[],
         stepMs = 175 // value from RTR web
@@ -89,7 +79,7 @@ export class CalcService {
         return resp
     }
 
-    calcResultForStep(
+    private calcResultForStep(
         ci: CurveItem,
         options: {
             lastBytes: number
@@ -114,9 +104,20 @@ export class CalcService {
         return retVal
     }
 
+    private calcSpeed(bytes: number, timeMs: number) {
+        return Math.max((bytes * 8) / (timeMs / 1e3), 0)
+    }
+
+    private parseCurveItem = (ci: CurveItem) => ({
+        bytes: ci.bytes_total,
+        nsec: ci.time_elapsed * 1e6,
+        speed: ci.speed ?? this.calcSpeed(ci.bytes_total, ci.time_elapsed),
+    })
+
     getOverallResultsFromSpeedItems(
         speedItems: ISpeedItem[],
-        direction: "download" | "upload"
+        direction: "download" | "upload",
+        step = 75
     ): IOverallResult[] {
         if (!speedItems) {
             return []
@@ -141,6 +142,7 @@ export class CalcService {
             .sort((a, b) => b[key].bytes.length - a[key].bytes.length)
         const overallResults: IOverallResult[] = []
         const longestThread = threadResults[0]
+        let lastMs = 0
         for (let i = 1; i <= longestThread[key].bytes.length; i++) {
             const threadsSlice = threadResults.map((threadResult) => {
                 const newResult = new MeasurementThreadResult(
@@ -150,12 +152,28 @@ export class CalcService {
                 newResult[key].bytes = threadResult[key].bytes.slice(0, i)
                 return newResult
             })
-            overallResults.push(this.getFineResult(threadsSlice, key))
+            const fineResult = this.getFineResult(threadsSlice, key)
+            const ms = fineResult.nsec / 1e6
+            if (lastMs == 0 || ms - lastMs >= step) {
+                overallResults.push(fineResult)
+                step = ms
+            }
         }
         return overallResults
     }
 
     getCoarseResult(
+        threads: IMeasurementThreadResult[],
+        resultKey: TransferDirection
+    ): IOverallResult {
+        if (process.env.FLAVOR === "ont") {
+            return this.getCoarseResultONT(threads, resultKey)
+        }
+        return this.getCoarseResultRTR(threads, resultKey)
+    }
+
+    // Bytes / nsec for a part of the time of the test
+    getCoarseResultRTR(
         threads: IMeasurementThreadResult[],
         resultKey: TransferDirection
     ): IOverallResult {
@@ -198,6 +216,45 @@ export class CalcService {
         speed = nsec === 0 ? 0 : isNaN(speed) ? 0 : speed
         this._prevBytes[resultKey] = bytes
         this._prevNsec[resultKey] = nsec
+        return {
+            bytes,
+            nsec,
+            speed,
+        }
+    }
+
+    // Total bytes / total nsec transfer at a certain point of the test
+    getCoarseResultONT(
+        threads: IMeasurementThreadResult[],
+        resultKey: TransferDirection
+    ): IOverallResult {
+        let bytes = 0
+        let minNsec = Infinity
+        let maxNsec = 0
+
+        for (const task of threads) {
+            if (
+                !(
+                    task &&
+                    task.currentTime?.[resultKey] >= 0 &&
+                    task.currentTransfer?.[resultKey] >= 0
+                )
+            ) {
+                continue
+            }
+            if (task.currentTime[resultKey] < minNsec) {
+                minNsec = task.currentTime[resultKey]
+            }
+            if (task.currentTime[resultKey] > maxNsec) {
+                maxNsec = task.currentTime[resultKey]
+            }
+            bytes += task.currentTransfer[resultKey]
+        }
+
+        const nsec = (maxNsec - minNsec) / 2 + minNsec
+
+        let speed = (bytes / nsec) * 1e9 * 8.0
+        speed = nsec === 0 ? 0 : isNaN(speed) ? 0 : speed
         return {
             bytes,
             nsec,

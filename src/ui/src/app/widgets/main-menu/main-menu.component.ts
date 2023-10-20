@@ -22,8 +22,9 @@ export class MainMenuComponent {
         this.cmsService.getMenu(),
         this.activeRoute.url,
         this.transloco.selectTranslation(),
+        this.mainStore.env$,
     ]).pipe(
-        map(([menu, activeRoute]) => {
+        map(([menu, activeRoute, _, env]) => {
             this.settingsItem = this.parseMenuItem(
                 {
                     label: "Options",
@@ -42,6 +43,11 @@ export class MainMenuComponent {
                             "$lang",
                             this.i18n.getActiveBrowserLang()
                         ),
+                    }
+                } else if (mi.url?.includes("$os") && env?.OS) {
+                    item = {
+                        ...mi,
+                        url: mi.url.replace("$os", env.OS),
                     }
                 }
                 return this.parseMenuItem(item, activeRoute)

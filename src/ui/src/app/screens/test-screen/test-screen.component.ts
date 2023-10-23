@@ -48,31 +48,21 @@ export class TestScreenComponent implements OnDestroy, OnInit {
                 this.loopWaiting$.next(false)
             }
             if (error) {
-                this.stopped$.next()
-                const message =
-                    state.currentPhaseName ===
-                    EMeasurementStatus.SUBMITTING_RESULTS
-                        ? ERROR_OCCURED_SENDING_RESULTS
-                        : ERROR_OCCURED
-                const navigate = () =>
-                    state.currentPhaseName ===
-                        EMeasurementStatus.SUBMITTING_RESULTS ||
-                    this.enableLoopMode$.value === true
-                        ? this.goToResult(state)
-                        : this.router.navigate(["/"])
-                this.message.openConfirmDialog(message, () => {
-                    this.mainStore.error$.next(null)
-                    navigate()
-                })
+                this.openErrorDialog(state)
             } else if (state.currentPhaseName === EMeasurementStatus.END) {
                 this.stopped$.next()
                 this.goToResult(state)
+            } else if (state.currentPhaseName === EMeasurementStatus.INIT) {
+                this.message.closeAllDialogs()
             }
         })
     )
     loopWaitProgress$?: Observable<{ ms: number; percent: number }>
     loopWaiting$ = new BehaviorSubject(false)
-    result$ = this.historyStore.getFormattedHistory({ grouped: false })
+    result$ = this.historyStore.getFormattedHistory({
+        grouped: false,
+        loopUuid: this.store.loopUuid$.value ?? undefined,
+    })
     showCPUWarning$ = new BehaviorSubject(0)
     private startTimeMs = 0
 
@@ -95,6 +85,25 @@ export class TestScreenComponent implements OnDestroy, OnInit {
 
     ngOnDestroy(): void {
         this.stopped$.complete()
+    }
+
+    private openErrorDialog(state: ITestVisualizationState) {
+        this.stopped$.next()
+        const message =
+            state.currentPhaseName === EMeasurementStatus.SUBMITTING_RESULTS
+                ? ERROR_OCCURED_SENDING_RESULTS
+                : ERROR_OCCURED
+        if (this.enableLoopMode$.value === true) {
+            this.message.openConfirmDialog(message, () => void 0)
+            this.goToResult(state)
+        } else {
+            this.message.openConfirmDialog(message, () => {
+                this.mainStore.error$.next(null)
+                state.currentPhaseName === EMeasurementStatus.SUBMITTING_RESULTS
+                    ? this.goToResult(state)
+                    : this.router.navigate(["/"])
+            })
+        }
     }
 
     private setShowCPUWarning(env: IEnv | null) {
@@ -121,6 +130,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
             this.loopWaitProgress$ = this.store.scheduleLoop(
                 Date.now() - this.startTimeMs
             )
+            this.mainStore.error$.next(null)
         }
         this.startTimeMs = 0
     }

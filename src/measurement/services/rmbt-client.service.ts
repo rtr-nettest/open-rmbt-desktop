@@ -125,6 +125,7 @@ export class RMBTClient {
         if (!this.isRunning) {
             return
         }
+        clearInterval(this.activityInterval)
         try {
             this.finalResultUp = CalcService.I.getFineResult(
                 this.threadResults,
@@ -137,7 +138,6 @@ export class RMBTClient {
                 this.getPhaseDuration(EMeasurementStatus.UP)
             )
             Logger.I.info("The total upload speed is %dMbps", this.finalUpMbps)
-            clearInterval(this.activityInterval)
             this.threadResults = []
             this.interimThreadResults = new Array(this.params.test_numthreads)
             for (const w of this.measurementTasks) {

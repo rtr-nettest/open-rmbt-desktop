@@ -102,5 +102,12 @@
     "CPU usage is higher than %0%. Results may be skewed.": "CPU-Auslastung ist höher als %0%. Ergebnisse können verzerrt sein.",
     "Jitter": "Jitter",
     "Packet loss": "Paketverlust",
-    "The interval must be between %0 and %1 minutes": "Die Wartezeit muss zwischen %0 und %1 Minuten liegen"
+    "The interval must be between %0 and %1 minutes": "Die Wartezeit muss zwischen %0 und %1 Minuten liegen",
+    "Home": "DE-Home",
+    "Go back": "DE-Go back",
+    "Scroll to bottom": "DE-Scroll to bottom",
+    "Export as XLSX": "DE-Export as XLSX",
+    "Export as PDF": "DE-Export as PDF",
+    "Export as CSV": "DE-Export as CSV",
+    "Open in browser": "DE-Open in browser"
 }

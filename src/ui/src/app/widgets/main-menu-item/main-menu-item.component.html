@@ -13,6 +13,7 @@
 
 <ng-template #default let-item let-env="env">
     <a
+        *transloco="let t"
         mat-button
         color="primary"
         class="app-menu-item {{ item.className }} app-menu-item--{{
@@ -22,6 +23,7 @@
         routerLinkActive="app-menu-item--active"
         (click)="menuClick.emit($event)"
         role="menuitem"
+        [title]="t(item.label)"
     >
         <ng-container
             *ngTemplateOutlet="linkText; context: { $implicit: item }"
@@ -31,6 +33,7 @@
 
 <ng-template #external let-item let-env="env">
     <a
+        *transloco="let t"
         mat-button
         color="primary"
         class="app-menu-item {{ item.className }} app-menu-item--{{
@@ -39,6 +42,7 @@
         [href]="item.url"
         role="menuitem"
         target="_blank"
+        [title]="t(item.label)"
     >
         <ng-container
             *ngTemplateOutlet="linkText; context: { $implicit: item }"
@@ -48,6 +52,7 @@
 
 <ng-template #noRoute let-item let-env="env">
     <a
+        *transloco="let t"
         mat-button
         color="primary"
         href="javascript:;"
@@ -56,6 +61,7 @@
         }}"
         (click)="menuClick.emit($event)"
         role="menuitem"
+        [title]="t(item.label)"
     >
         <ng-container
             *ngTemplateOutlet="linkText; context: { $implicit: item }"

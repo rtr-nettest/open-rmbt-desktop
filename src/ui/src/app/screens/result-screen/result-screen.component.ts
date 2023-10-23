@@ -56,7 +56,7 @@ export class ResultScreenComponent {
     }
     actionButtons: IMainMenuItem[] = [
         {
-            label: "",
+            label: "Export as PDF",
             translations: [],
             icon: "filetype-pdf",
             action: () =>
@@ -208,7 +208,7 @@ export class ResultScreenComponent {
 
     private addOpenResultButton() {
         this.actionButtons.push({
-            label: "",
+            label: "Open in browser",
             translations: [],
             icon: "new-window",
             action: () => {

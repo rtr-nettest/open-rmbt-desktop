@@ -102,5 +102,12 @@
     "CPU usage is higher than %0%. Results may be skewed.": "CPU usage is higher than %0%. Results may be skewed.",
     "Jitter": "Jitter",
     "Packet loss": "Packet loss",
-    "The interval must be between %0 and %1 minutes": "The interval must be between %0 and %1 minutes"
+    "The interval must be between %0 and %1 minutes": "The interval must be between %0 and %1 minutes",
+    "Home": "Home",
+    "Go back": "Go back",
+    "Scroll to bottom": "Scroll to bottom",
+    "Export as XLSX": "Export as XLSX",
+    "Export as PDF": "Export as PDF",
+    "Export as CSV": "Export as CSV",
+    "Open in browser": "Open in browser"
 }

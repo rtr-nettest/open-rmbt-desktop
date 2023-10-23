@@ -222,6 +222,7 @@ export class RMBTClient {
             }
             for (const [index, worker] of this.measurementTasks.entries()) {
                 worker.postMessage(new IncomingMessageWithData("connect"))
+                this.lastMessageReceivedAt = Date.now()
                 worker.on("message", (message) => {
                     if (this.aborter.signal.aborted) {
                         this.measurementStatus = EMeasurementStatus.ABORTED

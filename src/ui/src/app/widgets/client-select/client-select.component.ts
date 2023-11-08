@@ -38,5 +38,8 @@ export class ClientSelectComponent implements IDynamicComponent {
         this.activeClient = client
         this.mainStore.setClient(client.slug)
         this.testStore.setActiveServer(null)
+        if (this.parameters?.["reloadPage"]) {
+            location.reload()
+        }
     }
 }

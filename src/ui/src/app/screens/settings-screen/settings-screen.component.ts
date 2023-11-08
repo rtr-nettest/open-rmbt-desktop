@@ -54,22 +54,14 @@ export class SettingsScreenComponent
             isComponent: true,
         },
     ]
+    env$ = this.mainStore.env$
     data$: Observable<IBasicResponse<ISettingsRow>> = combineLatest([
-        this.mainStore.env$,
         this.transloco.selectTranslation(),
         this.mainStore.settings$,
         this.cms.getProject({ dropCache: true }),
     ]).pipe(
-        map(([env, t, settings, project]) => {
-            if (this.env && this.env != env) {
-                this.router
-                    .navigate(["/"], { skipLocationChange: true })
-                    .then(() => {
-                        this.router.navigate(["/", ERoutes.SETTINGS])
-                    })
-                return { content: [], totalElements: 0 }
-            }
-            this.env = env ?? undefined
+        map(([t, settings, project]) => {
+            const env = this.env$.value
             const content: ISettingsRow[] = [
                 {
                     title: t["Client UUID"],
@@ -114,6 +106,7 @@ export class SettingsScreenComponent
                     component: ClientSelectComponent,
                     parameters: {
                         className: "app-client-select--settings",
+                        reloadPage: true,
                     },
                 })
             }
@@ -144,7 +137,6 @@ export class SettingsScreenComponent
         direction: "",
     }
     tableClassNames = ["app-table--wide"]
-    env?: IEnv
 
     constructor(
         mainStore: MainStore,

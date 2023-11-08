@@ -45,7 +45,6 @@ export class TestStore {
     enableLoopMode$ = new BehaviorSubject<boolean>(false)
     loopCounter$ = new BehaviorSubject<number>(1)
     loopUuid$ = new BehaviorSubject<string | null>(null)
-    loopModeExpired$ = new BehaviorSubject<boolean>(false)
 
     constructor(
         private message: MessageService,
@@ -57,7 +56,7 @@ export class TestStore {
     ) {
         window.electronAPI.onRestartMeasurement((loopCounter) => {
             this.ngZone.run(() => {
-                this.loopCounter$.next(loopCounter + 1)
+                this.loopCounter$.next(loopCounter)
                 this.router
                     .navigate(["/", ERoutes.NEWS], {
                         skipLocationChange: true,
@@ -69,7 +68,22 @@ export class TestStore {
         })
         window.electronAPI.onLoopModeExpired(() => {
             this.ngZone.run(() => {
-                this.loopModeExpired$.next(true)
+                const message = this.transloco.translate(
+                    "The loop measurement has expired"
+                )
+                this.message.openConfirmDialog(
+                    this.sprintf.transform(
+                        message,
+                        this.mainStore.env$.value!.LOOP_MODE_MAX_DURATION
+                    ),
+                    () => {
+                        this.router.navigate([
+                            "/",
+                            ERoutes.LOOP_RESULT.split("/")[0],
+                            this.loopUuid$.value,
+                        ])
+                    }
+                )
             })
         })
     }
@@ -106,6 +120,7 @@ export class TestStore {
         this.enableLoopMode$.next(true)
         this.testIntervalMinutes$.next(interval)
         this.router.navigate(["/", ERoutes.LOOP_TEST])
+        this.scheduleLoop(0)
     }
 
     disableLoopMode() {
@@ -114,31 +129,12 @@ export class TestStore {
     }
 
     scheduleLoop(prevTestDurationMs: number) {
-        if (this.loopModeExpired$.value === true) {
-            const message = this.transloco.translate(
-                "The loop measurement has expired"
-            )
-            this.message.openConfirmDialog(
-                this.sprintf.transform(
-                    message,
-                    this.mainStore.env$.value!.LOOP_MODE_MAX_DURATION
-                ),
-                () => {
-                    this.loopModeExpired$.next(false)
-                    this.router.navigate([
-                        "/",
-                        ERoutes.LOOP_RESULT.split("/")[0],
-                        this.loopUuid$.value,
-                    ])
-                }
-            )
-            return
-        }
+        const fullTestIntervalMs = this.testIntervalMinutes$.value! * 60 * 1000
         const testIntervalMs = Math.max(
             0,
-            this.testIntervalMinutes$.value! * 60 * 1000 - prevTestDurationMs
+            fullTestIntervalMs - prevTestDurationMs
         )
-        window.electronAPI.scheduleLoop(testIntervalMs)
+        window.electronAPI.scheduleLoop(fullTestIntervalMs)
         return interval(200).pipe(
             map((ms: number) => ms * 200),
             takeWhile((ms) => ms <= testIntervalMs),

@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core"
+import { Component, Input, NgZone } from "@angular/core"
 import { ActivatedRoute, Router, UrlSegment } from "@angular/router"
 import { TranslocoService } from "@ngneat/transloco"
 import { combineLatest, map } from "rxjs"
@@ -64,6 +64,7 @@ export class MainMenuComponent {
         private testStore: TestStore,
         private mainStore: MainStore,
         private message: MessageService,
+        private ngZone: NgZone,
         private router: Router,
         private transloco: TranslocoService
     ) {}
@@ -108,7 +109,9 @@ export class MainMenuComponent {
                         window.electronAPI.abortMeasurement()
                         window.electronAPI.onMeasurementAborted(() => {
                             window.electronAPI.offMeasurementAborted()
-                            this.router.navigate([item.route])
+                            this.ngZone.run(() => {
+                                this.router.navigate([item.route])
+                            })
                         })
                     } else {
                         this.router.navigate([item.route])

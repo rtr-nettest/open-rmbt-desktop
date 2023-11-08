@@ -85,7 +85,7 @@ const createWindow = () => {
                 EMeasurementStatus.ABORTED,
                 EMeasurementStatus.NOT_STARTED,
             ].includes(MeasurementRunner.I.getCurrentPhaseState().phase) &&
-            !LoopService.I.loopTimeout
+            !LoopService.I.loopInterval
         ) {
             return
         }
@@ -108,7 +108,7 @@ const createWindow = () => {
                 EMeasurementStatus.ABORTED,
                 EMeasurementStatus.NOT_STARTED,
             ].includes(MeasurementRunner.I.getCurrentPhaseState().phase) &&
-            !LoopService.I.loopTimeout
+            !LoopService.I.loopInterval
         ) {
             return
         }

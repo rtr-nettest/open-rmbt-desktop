@@ -65,10 +65,12 @@ export class RMBTClient {
     private lastMessageReceivedAt = 0
     private _chunkNumbers: number[] = []
 
+    interimDownMbps = 0
+    interimUpMbps = 0
     downs: IOverallResult[] = []
     ups: IOverallResult[] = []
 
-    get interimDownMbps() {
+    setInterimDownMbps() {
         const result = CalcService.I.getCoarseResult(
             this.interimThreadResults,
             "down"
@@ -77,10 +79,10 @@ export class RMBTClient {
         if (this.plausibleResult(this.downs, result)) {
             this.downs.push(result)
         }
-        return speed || this.downs[this.downs.length - 1].speed
+        this.interimDownMbps = speed || this.downs[this.downs.length - 1].speed
     }
 
-    get interimUpMbps() {
+    setInterimUpMbps() {
         const result = CalcService.I.getCoarseResult(
             this.interimThreadResults,
             "up"
@@ -89,7 +91,7 @@ export class RMBTClient {
         if (this.plausibleResult(this.ups, result)) {
             this.ups.push(result)
         }
-        return speed || this.ups[this.ups.length - 1].speed
+        this.interimUpMbps = speed || this.ups[this.ups.length - 1].speed
     }
 
     private plausibleResult(list: IOverallResult[], result: IOverallResult) {
@@ -264,6 +266,9 @@ export class RMBTClient {
         })
     }
 
+    interimDownInterval?: NodeJS.Timeout
+    interimUpInterval?: NodeJS.Timeout
+
     private parseMessage(
         message: OutgoingMessageWithData,
         index: number,
@@ -337,6 +342,9 @@ export class RMBTClient {
                             calculatedChunkSize
                         )
                     )
+                    this.interimDownInterval = setInterval(() => {
+                        this.setInterimDownMbps()
+                    }, 200)
                 }
                 this.measurementStatus = EMeasurementStatus.DOWN
                 this.phaseStartTimeNs[EMeasurementStatus.DOWN] = Time.nowNs()
@@ -357,6 +365,7 @@ export class RMBTClient {
                 if (
                     this.threadResults.length === this.measurementTasks.length
                 ) {
+                    clearInterval(this.interimDownInterval)
                     this.finalResultDown = CalcService.I.getFineResult(
                         this.threadResults,
                         "down"
@@ -437,6 +446,9 @@ export class RMBTClient {
                                 calculatedUpChunkSize
                             )
                         )
+                        this.interimUpInterval = setInterval(() => {
+                            this.setInterimUpMbps()
+                        }, 200)
                     }
                 }
                 break
@@ -452,6 +464,7 @@ export class RMBTClient {
                     this.threadResults.length === this.measurementTasks.length
                 ) {
                     this.finishMeasurement(resolve)
+                    clearInterval(this.interimUpInterval)
                 }
                 break
         }

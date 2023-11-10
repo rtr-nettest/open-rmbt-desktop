@@ -122,9 +122,7 @@ const createWindow = () => {
         }
         const response = await dialog.showMessageBox(dialogOpts)
         if (response.response === 0) {
-            LoopService.I.resetCounter()
-            MeasurementRunner.I.abortMeasurement()
-            win.webContents.send(Events.OPEN_SCREEN, ERoutes.HISTORY)
+            app.exit(0)
         }
     })
 }

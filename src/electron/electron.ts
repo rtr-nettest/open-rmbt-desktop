@@ -208,22 +208,21 @@ ipcMain.on(
     }
 )
 
-ipcMain.on(
-    Events.RUN_MEASUREMENT,
-    async (event, loopModeInfo?: ILoopModeInfo) => {
-        const webContents = event.sender
-        try {
-            const status = await MeasurementRunner.I.runMeasurement({
-                loopModeInfo,
-            })
-            if (status === EMeasurementStatus.ABORTED) {
-                webContents.send(Events.MEASUREMENT_ABORTED)
-            }
-        } catch (e) {
-            webContents.send(Events.ERROR, e)
+const onRunMeasurement = async (event, loopModeInfo?: ILoopModeInfo) => {
+    const webContents = event.sender
+    try {
+        const status = await MeasurementRunner.I.runMeasurement({
+            loopModeInfo,
+        })
+        if (status === EMeasurementStatus.ABORTED) {
+            webContents.send(Events.MEASUREMENT_ABORTED)
         }
+    } catch (e) {
+        webContents.send(Events.ERROR, e)
     }
-)
+}
+
+ipcMain.on(Events.RUN_MEASUREMENT, onRunMeasurement)
 
 ipcMain.on(Events.ABORT_MEASUREMENT, (event) => {
     const webContents = event.sender
@@ -234,18 +233,27 @@ ipcMain.on(Events.ABORT_MEASUREMENT, (event) => {
     }
 })
 
-ipcMain.on(Events.SCHEDULE_LOOP, (event, loopInterval) => {
-    const webContents = event.sender
-    LoopService.I.scheduleLoop({
-        interval: loopInterval,
-        onTime: (counter) => {
-            webContents.send(Events.RESTART_MEASUREMENT, counter)
-        },
-        onExpire: () => {
-            webContents.send(Events.LOOP_MODE_EXPIRED)
-        },
-    })
-})
+ipcMain.on(
+    Events.SCHEDULE_LOOP,
+    (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
+        const webContents = event.sender
+        onRunMeasurement(event, loopModeInfo)
+        LoopService.I.scheduleLoop({
+            interval: loopInterval,
+            onTime: (counter) => {
+                const newLoopModeInfo = {
+                    ...loopModeInfo,
+                    test_counter: counter,
+                }
+                onRunMeasurement(event, newLoopModeInfo)
+                webContents.send(Events.RESTART_MEASUREMENT, counter)
+            },
+            onExpire: () => {
+                webContents.send(Events.LOOP_MODE_EXPIRED)
+            },
+        })
+    }
+)
 
 ipcMain.on(Events.DELETE_LOCAL_DATA, () => {
     Store.wipeDataAndQuit()

@@ -177,7 +177,10 @@ declare global {
             ) => Promise<any>
             onLoopModeExpired: (callback: () => any) => Promise<any>
             deleteLocalData: () => Promise<void>
-            scheduleLoop: (loopInterval: number) => Promise<void>
+            scheduleLoop: (
+                loopInterval: number,
+                loopModeInfo: ILoopModeInfo
+            ) => Promise<void>
         }
     }
 }

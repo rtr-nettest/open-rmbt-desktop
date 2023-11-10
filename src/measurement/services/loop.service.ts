@@ -7,14 +7,14 @@ export class LoopService {
         return this.instance
     }
 
-    loopCounter = 0
+    loopCounter = 1
     loopInterval?: NodeJS.Timeout
     expireTimeout?: NodeJS.Timeout
 
     private constructor() {}
 
     resetCounter() {
-        this.loopCounter = 0
+        this.loopCounter = 1
         clearInterval(this.loopInterval)
         this.loopInterval = undefined
         clearTimeout(this.expireTimeout)
@@ -26,11 +26,10 @@ export class LoopService {
         onTime: (counter: number) => void
         onExpire?: () => void
     }) {
-        this.loopCounter += 1
-        Logger.I.info("Scheduling restart %d", this.loopCounter)
         if (!this.loopInterval) {
             this.loopInterval = setInterval(() => {
-                Logger.I.info("Restarting test")
+                this.loopCounter += 1
+                Logger.I.info("Starting test %d", this.loopCounter)
                 options.onTime(this.loopCounter)
             }, options.interval)
         }

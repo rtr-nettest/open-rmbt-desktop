@@ -64,7 +64,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     deleteLocalData: () => {
         ipcRenderer.send(Events.DELETE_LOCAL_DATA)
     },
-    scheduleLoop: (loopInterval: number) => {
-        ipcRenderer.send(Events.SCHEDULE_LOOP, loopInterval)
+    scheduleLoop: (loopInterval: number, loopModeInfo: ILoopModeInfo) => {
+        ipcRenderer.send(Events.SCHEDULE_LOOP, loopInterval, loopModeInfo)
     },
 })

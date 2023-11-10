@@ -127,7 +127,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
             ])
         } else {
             this.loopWaiting$.next(true)
-            this.loopWaitProgress$ = this.store.scheduleLoop(
+            this.loopWaitProgress$ = this.store.setProgressIndicator(
                 Date.now() - this.startTimeMs
             )
             this.mainStore.error$.next(null)

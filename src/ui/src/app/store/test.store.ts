@@ -46,6 +46,10 @@ export class TestStore {
     loopCounter$ = new BehaviorSubject<number>(1)
     loopUuid$ = new BehaviorSubject<string | null>(null)
 
+    private get fullTestIntervalMs() {
+        return this.testIntervalMinutes$.value! * 60 * 1000
+    }
+
     constructor(
         private message: MessageService,
         private mainStore: MainStore,
@@ -90,15 +94,9 @@ export class TestStore {
 
     launchTest() {
         this.resetState()
-        const loopModeInfo: ILoopModeInfo | undefined =
-            this.enableLoopMode$.value === true
-                ? {
-                      max_delay: this.testIntervalMinutes$.value ?? 0,
-                      test_counter: this.loopCounter$.value,
-                      loop_uuid: this.loopUuid$.value ?? "",
-                  }
-                : undefined
-        window.electronAPI.runMeasurement(loopModeInfo)
+        if (!this.enableLoopMode$.value) {
+            window.electronAPI.runMeasurement()
+        }
         return interval(STATE_UPDATE_TIMEOUT).pipe(
             concatMap(() => from(window.electronAPI.getMeasurementState())),
             map((phaseState) => {
@@ -115,12 +113,19 @@ export class TestStore {
     }
 
     launchLoopTest(interval: number) {
-        this.loopUuid$.next(v4())
-        this.loopCounter$.next(1)
+        const loopUuid = v4()
+        const loopCounter = 1
+        this.loopUuid$.next(loopUuid)
+        this.loopCounter$.next(loopCounter)
         this.enableLoopMode$.next(true)
         this.testIntervalMinutes$.next(interval)
+        const loopModeInfo: ILoopModeInfo | undefined = {
+            max_delay: this.testIntervalMinutes$.value ?? 0,
+            test_counter: loopCounter,
+            loop_uuid: loopUuid,
+        }
+        window.electronAPI.scheduleLoop(this.fullTestIntervalMs, loopModeInfo)
         this.router.navigate(["/", ERoutes.LOOP_TEST])
-        this.scheduleLoop(0)
     }
 
     disableLoopMode() {
@@ -128,13 +133,11 @@ export class TestStore {
         this.loopCounter$.next(1)
     }
 
-    scheduleLoop(prevTestDurationMs: number) {
-        const fullTestIntervalMs = this.testIntervalMinutes$.value! * 60 * 1000
+    setProgressIndicator(prevTestDurationMs: number) {
         const testIntervalMs = Math.max(
             0,
-            fullTestIntervalMs - prevTestDurationMs
+            this.fullTestIntervalMs - prevTestDurationMs
         )
-        window.electronAPI.scheduleLoop(fullTestIntervalMs)
         return interval(200).pipe(
             map((ms: number) => ms * 200),
             takeWhile((ms) => ms <= testIntervalMs),

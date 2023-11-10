@@ -87,7 +87,9 @@ export class TestChartComponent implements OnInit, OnDestroy {
                     )
                 }
             }
-            this.chart?.setData(phaseTestState)
+            try {
+                this.chart?.setData(phaseTestState)
+            } catch (_) {}
         })
     }
 

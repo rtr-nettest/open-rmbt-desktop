@@ -85,7 +85,7 @@ const createWindow = () => {
                 EMeasurementStatus.ABORTED,
                 EMeasurementStatus.NOT_STARTED,
             ].includes(MeasurementRunner.I.getCurrentPhaseState().phase) &&
-            !LoopService.I.loopInterval
+            !LoopService.I.loopTimeout
         ) {
             return
         }
@@ -108,7 +108,7 @@ const createWindow = () => {
                 EMeasurementStatus.ABORTED,
                 EMeasurementStatus.NOT_STARTED,
             ].includes(MeasurementRunner.I.getCurrentPhaseState().phase) &&
-            !LoopService.I.loopInterval
+            !LoopService.I.loopTimeout
         ) {
             return
         }
@@ -233,27 +233,26 @@ ipcMain.on(Events.ABORT_MEASUREMENT, (event) => {
     }
 })
 
-ipcMain.on(
-    Events.SCHEDULE_LOOP,
-    (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
-        const webContents = event.sender
-        onRunMeasurement(event, loopModeInfo)
-        LoopService.I.scheduleLoop({
-            interval: loopInterval,
-            onTime: (counter) => {
-                const newLoopModeInfo = {
-                    ...loopModeInfo,
-                    test_counter: counter,
-                }
-                onRunMeasurement(event, newLoopModeInfo)
-                webContents.send(Events.RESTART_MEASUREMENT, counter)
-            },
-            onExpire: () => {
-                webContents.send(Events.LOOP_MODE_EXPIRED)
-            },
-        })
-    }
-)
+const onScheduleLoop = (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
+    const webContents = event.sender
+    onRunMeasurement(event, loopModeInfo)
+    LoopService.I.scheduleLoop({
+        interval: loopInterval,
+        loopModeInfo,
+        onTime: (counter) => {
+            webContents.send(Events.RESTART_MEASUREMENT, counter)
+            onScheduleLoop(event, loopInterval, {
+                ...loopModeInfo,
+                test_counter: counter,
+            })
+        },
+        onExpire: () => {
+            webContents.send(Events.LOOP_MODE_EXPIRED)
+        },
+    })
+}
+
+ipcMain.on(Events.SCHEDULE_LOOP, onScheduleLoop)
 
 ipcMain.on(Events.DELETE_LOCAL_DATA, () => {
     Store.wipeDataAndQuit()

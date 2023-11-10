@@ -161,14 +161,18 @@ export class MeasurementRunner {
     getCurrentPhaseState(): IMeasurementPhaseState & IBasicNetworkInfo {
         const phase =
             this.rmbtClient?.measurementStatus ?? EMeasurementStatus.NOT_STARTED
+        const down = this.rmbtClient?.interimDownMbps ?? -1
+        const up = this.rmbtClient?.interimUpMbps ?? -1
         return {
             duration: this.rmbtClient?.getPhaseDuration(phase) ?? -1,
             progress: this.rmbtClient?.getPhaseProgress(phase) ?? -1,
             time: Date.now(),
             ping: this.rmbtClient?.pingMedian ?? -1,
             pings: this.rmbtClient?.pings ?? [],
-            down: this.rmbtClient?.interimDownMbps ?? -1,
-            up: this.rmbtClient?.interimUpMbps ?? -1,
+            down,
+            downs: this.rmbtClient?.downs ?? [],
+            up,
+            ups: this.rmbtClient?.ups ?? [],
             phase,
             testUuid: this.rmbtClient?.params?.test_uuid ?? "",
             ipAddress: this.rmbtClient?.params.client_remote_ip ?? "-",

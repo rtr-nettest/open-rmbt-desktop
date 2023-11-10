@@ -3,6 +3,8 @@ import {
     Input,
     NgZone,
     ChangeDetectionStrategy,
+    OnInit,
+    OnDestroy,
 } from "@angular/core"
 import { Observable } from "rxjs"
 import { ITestVisualizationState } from "../../interfaces/test-visualization-state.interface"
@@ -15,6 +17,7 @@ import { MainStore } from "src/app/store/main.store"
 import { TestLogChart } from "src/app/dto/test-log-chart.dto"
 import { ChartPhase } from "src/app/dto/test-rtr-chart-dataset.dto"
 import { TestBarChart } from "src/app/dto/test-bar-chart.dto"
+import { TestPhaseState } from "src/app/dto/test-phase-state.dto"
 
 @Component({
     selector: "app-test-chart",
@@ -22,7 +25,7 @@ import { TestBarChart } from "src/app/dto/test-bar-chart.dto"
     styleUrls: ["./test-chart.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TestChartComponent {
+export class TestChartComponent implements OnInit, OnDestroy {
     @Input() phase: ChartPhase = "download"
     @Input() type: "line" | "bar" = "line"
 
@@ -56,6 +59,37 @@ export class TestChartComponent {
         private store: TestStore,
         private transloco: TranslocoService
     ) {}
+
+    ngOnDestroy(): void {
+        window.removeEventListener("focus", this.setChartOnFocus)
+    }
+
+    ngOnInit(): void {
+        window.addEventListener("focus", this.setChartOnFocus)
+    }
+
+    private setChartOnFocus = () => {
+        window.electronAPI.getMeasurementState().then((state) => {
+            this.initChart()
+            const phaseTestState = new TestPhaseState()
+            if (this.phase === "ping") {
+                phaseTestState.setChartFromPings(state.pings)
+            } else {
+                const phaseResultsKey =
+                    this.phase === "download" ? "downs" : "ups"
+                if (this.flavor === "ont") {
+                    phaseTestState.setONTChartFromOverallSpeed(
+                        state[phaseResultsKey]
+                    )
+                } else {
+                    phaseTestState.setRTRChartFromOverallSpeed(
+                        state[phaseResultsKey]
+                    )
+                }
+            }
+            this.chart?.setData(phaseTestState)
+        })
+    }
 
     private handleChanges(visualization: ITestVisualizationState) {
         this.ngZone.runOutsideAngular(async () => {
@@ -121,12 +155,14 @@ export class TestChartComponent {
         if (!ctx) {
             return
         }
-        if (this.flavor !== "rtr") {
-            this.chart = new TestChart(ctx!, this.transloco)
-        } else if (this.phase === "ping") {
-            this.chart = new TestBarChart(ctx!, this.transloco, this.phase)
-        } else {
-            this.chart = new TestLogChart(ctx!, this.transloco, this.phase)
-        }
+        try {
+            if (this.flavor !== "rtr") {
+                this.chart = new TestChart(ctx!, this.transloco)
+            } else if (this.phase === "ping") {
+                this.chart = new TestBarChart(ctx!, this.transloco, this.phase)
+            } else {
+                this.chart = new TestLogChart(ctx!, this.transloco, this.phase)
+            }
+        } catch (_) {}
     }
 }

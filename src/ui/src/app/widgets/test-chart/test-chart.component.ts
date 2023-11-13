@@ -53,6 +53,14 @@ export class TestChartComponent implements OnInit, OnDestroy {
         return `${this.phase}_chart`
     }
 
+    private get blankCanvas() {
+        return document.getElementById(this.id + "_blank") as HTMLCanvasElement
+    }
+
+    private get isCanvasEmpty() {
+        return this.canvas?.toDataURL() === this.blankCanvas?.toDataURL()
+    }
+
     constructor(
         private mainStore: MainStore,
         private ngZone: NgZone,
@@ -95,66 +103,59 @@ export class TestChartComponent implements OnInit, OnDestroy {
 
     private handleChanges(visualization: ITestVisualizationState) {
         this.ngZone.runOutsideAngular(async () => {
-            if (!this.chart) {
-                this.initChart()
-            }
-            switch (visualization.currentPhaseName) {
-                case EMeasurementStatus.INIT:
-                    this.chart?.resetData()
-                    break
-                case EMeasurementStatus.DOWN:
-                    if (this.phase === "download") {
-                        this.chart?.updateData(
-                            visualization.phases[EMeasurementStatus.DOWN]
-                        )
-                    } else if (this.phase === "ping" && !this.pingIsComplete) {
-                        this.chart?.setData(
-                            visualization.phases[EMeasurementStatus.PING]
-                        )
-                        this.pingIsComplete = true
-                    }
-                    break
-                case EMeasurementStatus.UP:
-                    if (this.phase === "upload") {
-                        this.chart?.updateData(
-                            visualization.phases[EMeasurementStatus.UP]
-                        )
-                    } else if (
-                        this.phase === "download" &&
-                        !this.downIsComplete
-                    ) {
-                        this.chart?.setData(
-                            visualization.phases[EMeasurementStatus.DOWN]
-                        )
-                        this.downIsComplete = true
-                    }
-                    break
-                case EMeasurementStatus.SHOWING_RESULTS:
-                    this.initChart()
-                    if (this.phase === "download") {
-                        this.chart?.setData(
-                            visualization.phases[EMeasurementStatus.DOWN]
-                        )
-                    } else if (this.phase === "upload") {
-                        this.chart?.setData(
-                            visualization.phases[EMeasurementStatus.UP]
-                        )
-                    } else if (this.phase === "ping") {
-                        this.chart?.setData(
-                            visualization.phases[EMeasurementStatus.PING]
-                        )
-                    }
-                    break
-            }
+            this.initChart()
+            try {
+                switch (visualization.currentPhaseName) {
+                    case EMeasurementStatus.INIT:
+                        this.chart?.resetData()
+                        break
+                    case EMeasurementStatus.DOWN:
+                        this.updateDownload(visualization)
+                        break
+                    case EMeasurementStatus.UP:
+                        this.updateUpload(visualization)
+                        break
+                    case EMeasurementStatus.SHOWING_RESULTS:
+                        this.showResults(visualization)
+                        break
+                }
+            } catch (_) {}
         })
     }
 
-    private initChart() {
-        if (this.chart) {
-            return
+    private showResults(visualization: ITestVisualizationState) {
+        if (this.phase === "download") {
+            this.chart?.setData(visualization.phases[EMeasurementStatus.DOWN])
+        } else if (this.phase === "upload") {
+            this.chart?.setData(visualization.phases[EMeasurementStatus.UP])
+        } else if (this.phase === "ping") {
+            this.chart?.setData(visualization.phases[EMeasurementStatus.PING])
         }
+    }
+
+    private updateDownload(visualization: ITestVisualizationState) {
+        if (this.phase === "download") {
+            this.chart?.updateData(
+                visualization.phases[EMeasurementStatus.DOWN]
+            )
+        } else if (this.phase === "ping" && !this.pingIsComplete) {
+            this.chart?.setData(visualization.phases[EMeasurementStatus.PING])
+            this.pingIsComplete = true
+        }
+    }
+
+    private updateUpload(visualization: ITestVisualizationState) {
+        if (this.phase === "upload") {
+            this.chart?.updateData(visualization.phases[EMeasurementStatus.UP])
+        } else if (this.phase === "download" && !this.downIsComplete) {
+            this.chart?.setData(visualization.phases[EMeasurementStatus.DOWN])
+            this.downIsComplete = true
+        }
+    }
+
+    private initChart() {
         const ctx = this.canvas?.getContext("2d")
-        if (!ctx) {
+        if (!ctx || !this.isCanvasEmpty) {
             return
         }
         try {

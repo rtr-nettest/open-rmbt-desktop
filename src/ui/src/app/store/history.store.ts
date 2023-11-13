@@ -29,10 +29,6 @@ import {
     IHistoryRowRTR,
 } from "../interfaces/history-row.interface"
 import { ExpandArrowComponent } from "../widgets/expand-arrow/expand-arrow.component"
-import { ERoutes } from "../enums/routes.enum"
-import { RouterLinkComponent } from "../widgets/router-link/router-link.component"
-
-export const STATE_UPDATE_TIMEOUT = 200
 
 @Injectable({
     providedIn: "root",

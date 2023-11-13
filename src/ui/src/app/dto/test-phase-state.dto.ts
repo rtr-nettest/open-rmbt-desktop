@@ -6,6 +6,7 @@ import { ETestStatuses } from "../enums/test-statuses.enum"
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
 import { ConversionService } from "../services/conversion.service"
 import * as dayjs from "dayjs"
+import { STATE_UPDATE_TIMEOUT } from "../store/test.store"
 
 export class TestPhaseState implements ITestPhaseState {
     counter: number = -1
@@ -74,7 +75,7 @@ export class TestPhaseState implements ITestPhaseState {
         this.chart = [
             ...(this.chart || []),
             {
-                x: this.duration,
+                x: Math.max(this.duration - STATE_UPDATE_TIMEOUT / 500, 0),
                 y: this.conversion.speedLog(this.counter),
             },
         ]

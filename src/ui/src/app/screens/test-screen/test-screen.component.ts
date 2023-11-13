@@ -37,7 +37,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
     loopCount$ = this.store.loopCounter$
     env$ = this.mainStore.env$
     stopped$: Subject<void> = new Subject()
-    visualization$ = this.store.launchTest().pipe(
+    visualization$ = this.store.visualization$.pipe(
         withLatestFrom(this.mainStore.error$),
         distinctUntilChanged(),
         takeUntil(this.stopped$),
@@ -81,6 +81,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
                 limit: this.store.loopCounter$.value - 1,
             })
             .subscribe()
+        this.store.launchTest().pipe(takeUntil(this.stopped$)).subscribe()
     }
 
     ngOnDestroy(): void {

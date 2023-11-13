@@ -250,7 +250,16 @@ const onScheduleLoop = (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
     })
 }
 
-ipcMain.on(Events.SCHEDULE_LOOP, onScheduleLoop)
+ipcMain.on(
+    Events.SCHEDULE_LOOP,
+    (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
+        const timeFromWholeSecond = Date.now() % 1000
+        setTimeout(
+            () => onScheduleLoop(event, loopInterval, loopModeInfo),
+            1000 - timeFromWholeSecond
+        )
+    }
+)
 
 ipcMain.on(Events.DELETE_LOCAL_DATA, () => {
     Store.wipeDataAndQuit()

@@ -24,6 +24,7 @@ import { v4 } from "uuid"
 import { MessageService } from "../services/message.service"
 import { TranslocoService } from "@ngneat/transloco"
 import { SprintfPipe } from "../pipes/sprintf.pipe"
+import { IMeasurementPhaseState } from "../../../../measurement/interfaces/measurement-phase-state.interface"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
@@ -90,6 +91,8 @@ export class TestStore {
                 )
             })
         })
+
+        window.addEventListener("focus", this.setLatestTestState)
     }
 
     launchTest() {
@@ -99,17 +102,21 @@ export class TestStore {
         }
         return interval(STATE_UPDATE_TIMEOUT).pipe(
             concatMap(() => from(window.electronAPI.getMeasurementState())),
-            map((phaseState) => {
-                const newState = TestVisualizationState.from(
-                    this.visualization$.value,
-                    phaseState,
-                    this.mainStore.env$.value?.FLAVOR ?? "rtr"
-                )
-                this.visualization$.next(newState)
-                this.basicNetworkInfo$.next(phaseState)
-                return newState
-            })
+            map(this.setTestState)
         )
+    }
+
+    private setTestState = (
+        phaseState: IMeasurementPhaseState & IBasicNetworkInfo
+    ) => {
+        const newState = TestVisualizationState.from(
+            this.visualization$.value,
+            phaseState,
+            this.mainStore.env$.value?.FLAVOR ?? "rtr"
+        )
+        this.visualization$.next(newState)
+        this.basicNetworkInfo$.next(phaseState)
+        return newState
     }
 
     launchLoopTest(interval: number) {
@@ -126,6 +133,39 @@ export class TestStore {
         }
         window.electronAPI.scheduleLoop(this.fullTestIntervalMs, loopModeInfo)
         this.router.navigate(["/", ERoutes.LOOP_TEST])
+    }
+
+    private setLatestTestState = () => {
+        window.electronAPI.getMeasurementState().then((state) => {
+            this.setTestState(state)
+            const phases = Object.values(EMeasurementStatus)
+            const v = this.visualization$.value
+            for (const phase of phases) {
+                if (!v.phases[phase]) {
+                    continue
+                }
+                v.phases[phase].ping = state.ping
+                v.phases[phase].down = state.down
+                v.phases[phase].up = state.up
+            }
+            v.phases[EMeasurementStatus.DOWN].setChartFromPings?.(state.pings)
+            if (this.mainStore.env$.value?.FLAVOR === "ont") {
+                v.phases[EMeasurementStatus.DOWN].setONTChartFromOverallSpeed?.(
+                    state.downs
+                )
+                v.phases[EMeasurementStatus.UP].setONTChartFromOverallSpeed?.(
+                    state.ups
+                )
+            } else {
+                v.phases[EMeasurementStatus.DOWN].setRTRChartFromOverallSpeed?.(
+                    state.downs
+                )
+                v.phases[EMeasurementStatus.UP].setRTRChartFromOverallSpeed?.(
+                    state.ups
+                )
+            }
+            this.visualization$.next(v)
+        })
     }
 
     disableLoopMode() {

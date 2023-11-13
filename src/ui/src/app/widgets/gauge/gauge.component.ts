@@ -135,6 +135,7 @@ export class GaugeComponent {
                 barSelector = "#ping"
                 break
             case EMeasurementStatus.DOWN:
+                this.setBarPercentage("#init", 1)
                 this.setBarPercentage("#ping", 1)
                 barSelector = "#download"
                 //set symbol as unicode, since IE won't handle html entities
@@ -142,12 +143,17 @@ export class GaugeComponent {
                 directionSymbol = "\u21a7" //↧
                 break
             case EMeasurementStatus.INIT_UP:
+                this.setBarPercentage("#init", 1)
+                this.setBarPercentage("#ping", 1)
                 this.setBarPercentage("#download", 1)
                 barSelector = "#upload"
                 progress = Math.min(0.95, progress * 0.1)
                 directionSymbol = "\u21a5" //↥
                 break
             case EMeasurementStatus.UP:
+                this.setBarPercentage("#init", 1)
+                this.setBarPercentage("#ping", 1)
+                this.setBarPercentage("#download", 1)
                 barSelector = "#upload"
                 progress = Math.min(0.95, progress * 0.9 + 0.1)
                 speedMbit = counter
@@ -155,6 +161,9 @@ export class GaugeComponent {
                 break
             case EMeasurementStatus.SUBMITTING_RESULTS:
             case EMeasurementStatus.END:
+                this.setBarPercentage("#init", 1)
+                this.setBarPercentage("#ping", 1)
+                this.setBarPercentage("#download", 1)
                 barSelector = "#upload"
                 progress = 1
                 break

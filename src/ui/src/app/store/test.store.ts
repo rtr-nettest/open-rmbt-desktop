@@ -47,6 +47,7 @@ export class TestStore {
     enableLoopMode$ = new BehaviorSubject<boolean>(false)
     loopCounter$ = new BehaviorSubject<number>(1)
     loopUuid$ = new BehaviorSubject<string | null>(null)
+    loopModeExpired$ = new BehaviorSubject<boolean>(false)
 
     get fullTestIntervalMs() {
         return this.testIntervalMinutes$.value! * 60 * 1000
@@ -71,6 +72,7 @@ export class TestStore {
                 const message = this.transloco.translate(
                     "The loop measurement has expired"
                 )
+                this.loopModeExpired$.next(true)
                 this.message.openConfirmDialog(
                     this.sprintf.transform(
                         message,
@@ -168,6 +170,9 @@ export class TestStore {
                 )
             }
             this.visualization$.next(v)
+            if (this.loopModeExpired$.value) {
+                return
+            }
             this.historyStore
                 .getRecentMeasurementHistory({
                     offset: 0,
@@ -233,5 +238,6 @@ export class TestStore {
         this.visualization$.next(new TestVisualizationState())
         this.simpleHistoryResult$.next(null)
         this.mainStore.error$.next(null)
+        this.loopModeExpired$.next(false)
     }
 }

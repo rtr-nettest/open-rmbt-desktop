@@ -42,8 +42,6 @@ export class TestChartComponent implements OnInit, OnDestroy {
             })
         )
     flavor?: string
-    downIsComplete = false
-    pingIsComplete = false
 
     get canvas() {
         return document.getElementById(this.id) as HTMLCanvasElement
@@ -107,6 +105,8 @@ export class TestChartComponent implements OnInit, OnDestroy {
             try {
                 switch (visualization.currentPhaseName) {
                     case EMeasurementStatus.INIT:
+                    case EMeasurementStatus.INIT_DOWN:
+                    case EMeasurementStatus.PING:
                         this.chart?.resetData()
                         break
                     case EMeasurementStatus.DOWN:
@@ -116,6 +116,10 @@ export class TestChartComponent implements OnInit, OnDestroy {
                         this.updateUpload(visualization)
                         break
                     case EMeasurementStatus.SHOWING_RESULTS:
+                        this.initChart({ force: true })
+                        this.showResults(visualization)
+                        break
+                    case EMeasurementStatus.END:
                         this.showResults(visualization)
                         break
                 }
@@ -124,6 +128,9 @@ export class TestChartComponent implements OnInit, OnDestroy {
     }
 
     private showResults(visualization: ITestVisualizationState) {
+        if (!!this.chart?.finished) {
+            return
+        }
         if (this.phase === "download") {
             this.chart?.setData(visualization.phases[EMeasurementStatus.DOWN])
         } else if (this.phase === "upload") {
@@ -138,34 +145,42 @@ export class TestChartComponent implements OnInit, OnDestroy {
             this.chart?.updateData(
                 visualization.phases[EMeasurementStatus.DOWN]
             )
-        } else if (this.phase === "ping" && !this.pingIsComplete) {
+        } else if (this.phase === "ping" && !this.chart?.finished) {
             this.chart?.setData(visualization.phases[EMeasurementStatus.PING])
-            this.pingIsComplete = true
+        } else if (this.phase === "upload") {
+            this.chart?.resetData()
         }
     }
 
     private updateUpload(visualization: ITestVisualizationState) {
         if (this.phase === "upload") {
             this.chart?.updateData(visualization.phases[EMeasurementStatus.UP])
-        } else if (this.phase === "download" && !this.downIsComplete) {
+        } else if (this.phase === "download" && !this.chart?.finished) {
             this.chart?.setData(visualization.phases[EMeasurementStatus.DOWN])
-            this.downIsComplete = true
+        } else if (this.phase === "ping" && !this.chart?.finished) {
+            this.chart?.setData(visualization.phases[EMeasurementStatus.PING])
         }
     }
 
-    private initChart() {
+    private initChart(options?: { force: boolean }) {
         const ctx = this.canvas?.getContext("2d")
-        if (!ctx || !this.isCanvasEmpty) {
-            return
-        }
-        try {
-            if (this.flavor !== "rtr") {
-                this.chart = new TestChart(ctx!, this.transloco)
-            } else if (this.phase === "ping") {
-                this.chart = new TestBarChart(ctx!, this.transloco, this.phase)
-            } else {
-                this.chart = new TestLogChart(ctx!, this.transloco, this.phase)
-            }
-        } catch (_) {}
+        if (ctx && (options?.force || this.isCanvasEmpty))
+            try {
+                if (this.flavor !== "rtr") {
+                    this.chart = new TestChart(ctx!, this.transloco)
+                } else if (this.phase === "ping") {
+                    this.chart = new TestBarChart(
+                        ctx!,
+                        this.transloco,
+                        this.phase
+                    )
+                } else {
+                    this.chart = new TestLogChart(
+                        ctx!,
+                        this.transloco,
+                        this.phase
+                    )
+                }
+            } catch (_) {}
     }
 }

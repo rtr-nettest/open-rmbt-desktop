@@ -24,6 +24,8 @@ export class TestPhaseState implements ITestPhaseState {
     pings: IPing[] = []
     downs: IOverallResult[] = []
     ups: IOverallResult[] = []
+    startTimeMs: number = 0
+    endTimeMs: number = 0
 
     private conversion = new ConversionService()
 

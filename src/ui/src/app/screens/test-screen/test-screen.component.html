@@ -45,7 +45,10 @@
             <div class="app-main">
                 <div class="app-progress-bar-wrapper">
                     <app-gauge
-                        *ngIf="!loopWaitProgress$; else loopWaitProgressBar"
+                        *ngIf="
+                            (loopWaiting$ | async) !== true;
+                            else loopWaitProgressBar
+                        "
                     ></app-gauge>
                 </div>
                 <app-spacer></app-spacer>
@@ -67,19 +70,16 @@
 </ng-template>
 
 <ng-template #loopWaitProgressBar>
-    <div
-        style="width: 100%; padding: 0.5em"
-        *ngIf="loopWaitProgress$ | async as progress"
-    >
+    <div style="width: 100%; padding: 0.5em">
         <h2 *transloco="let t" class="app-title">
             {{
-                t("Next measurement in") + " " + (progress.ms | date : "mm:ss")
+                t("Next measurement in") + " " + (ms$ | async | date : "mm:ss")
             }}
         </h2>
         <mat-progress-bar
             class="app-progress-bar--loop"
             mode="determinate"
-            [value]="progress.percent"
+            [value]="progress$ | async"
         ></mat-progress-bar>
     </div>
 </ng-template>

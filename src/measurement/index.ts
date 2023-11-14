@@ -46,6 +46,8 @@ export class MeasurementRunner {
     private cpuInfo?: ICPU
     private settingsRequest?: UserSettingsRequest
     private settings?: IUserSettings
+    private startTimeMs = 0
+    private endTimeMs = 0
 
     private constructor() {
         Logger.init()
@@ -75,6 +77,7 @@ export class MeasurementRunner {
 
     async runMeasurement(options?: MeasurementOptions) {
         this.rmbtClient = undefined
+        this.startTimeMs = Date.now()
         try {
             this.setCPUInfoInterval()
             if (!this.settings) {
@@ -133,6 +136,7 @@ export class MeasurementRunner {
             this.setCPUUsage()
             clearInterval(this.cpuInfoInterval)
             this.cpuInfoInterval = undefined
+            this.endTimeMs = Date.now()
             if (this.cpuInfo) {
                 Logger.I.info(
                     ELoggerMessage.CPU_USAGE_MIN,
@@ -178,6 +182,8 @@ export class MeasurementRunner {
             ipAddress: this.rmbtClient?.params.client_remote_ip ?? "-",
             serverName: this.rmbtClient?.params.test_server_name ?? "-",
             providerName: this.rmbtClient?.params.provider ?? "-",
+            startTimeMs: this.startTimeMs,
+            endTimeMs: this.endTimeMs,
         }
     }
 

@@ -6,7 +6,7 @@ import { generateIndexesOfLength } from "../helpers/array"
 import { TranslocoService } from "@ngneat/transloco"
 
 export class TestChart extends Chart {
-    private finished = false
+    finished = false
 
     constructor(
         private context: CanvasRenderingContext2D,
@@ -25,6 +25,9 @@ export class TestChart extends Chart {
         })
     }
 
+    /**
+     * Empties `datasets` and `labels` arrays, sets the chart as not `finished`.
+     */
     resetData() {
         this.resetDatasets()
         this.resetLabels()
@@ -32,6 +35,13 @@ export class TestChart extends Chart {
         this.update()
     }
 
+    /**
+     * Empties `datasets`,
+     * copies all the available data from `data.chart` to `datasets`,
+     * sets the chart as `finished`.
+     *
+     * @param data the current phase state with a non-empty array field `chart`.
+     */
     setData(data: ITestPhaseState) {
         this.resetDatasets()
         this.data.datasets[0].data = this.getAllData(data)
@@ -39,6 +49,12 @@ export class TestChart extends Chart {
         this.update()
     }
 
+    /**
+     * Copies the last available item from `data.chart` to `datasets`, if the chart is not `finished`.
+     * sets the chart as `finished` if the `x` of the last item values is >= 100.
+     *
+     * @param data the current phase state with a non-empty array field `chart`.
+     */
     updateData(data: ITestPhaseState) {
         const lastData = this.getLastData(data)
         if (!lastData) {

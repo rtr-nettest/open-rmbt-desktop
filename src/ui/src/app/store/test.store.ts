@@ -25,6 +25,7 @@ import { MessageService } from "../services/message.service"
 import { TranslocoService } from "@ngneat/transloco"
 import { SprintfPipe } from "../pipes/sprintf.pipe"
 import { IMeasurementPhaseState } from "../../../../measurement/interfaces/measurement-phase-state.interface"
+import { HistoryStore } from "./history.store"
 
 export const STATE_UPDATE_TIMEOUT = 200
 
@@ -47,11 +48,12 @@ export class TestStore {
     loopCounter$ = new BehaviorSubject<number>(1)
     loopUuid$ = new BehaviorSubject<string | null>(null)
 
-    private get fullTestIntervalMs() {
+    get fullTestIntervalMs() {
         return this.testIntervalMinutes$.value! * 60 * 1000
     }
 
     constructor(
+        private historyStore: HistoryStore,
         private message: MessageService,
         private mainStore: MainStore,
         private ngZone: NgZone,
@@ -62,13 +64,6 @@ export class TestStore {
         window.electronAPI.onRestartMeasurement((loopCounter) => {
             this.ngZone.run(() => {
                 this.loopCounter$.next(loopCounter)
-                this.router
-                    .navigate(["/", ERoutes.NEWS], {
-                        skipLocationChange: true,
-                    })
-                    .then(() => {
-                        this.router.navigate(["/", ERoutes.LOOP_TEST])
-                    })
             })
         })
         window.electronAPI.onLoopModeExpired(() => {
@@ -109,8 +104,16 @@ export class TestStore {
     private setTestState = (
         phaseState: IMeasurementPhaseState & IBasicNetworkInfo
     ) => {
+        let oldState = this.visualization$.value
+        if (
+            (oldState.currentPhaseName === EMeasurementStatus.END ||
+                oldState.currentPhaseName === EMeasurementStatus.ERROR) &&
+            phaseState.phase !== oldState.currentPhaseName
+        ) {
+            oldState = new TestVisualizationState()
+        }
         const newState = TestVisualizationState.from(
-            this.visualization$.value,
+            oldState,
             phaseState,
             this.mainStore.env$.value?.FLAVOR ?? "rtr"
         )
@@ -165,29 +168,18 @@ export class TestStore {
                 )
             }
             this.visualization$.next(v)
+            this.historyStore
+                .getRecentMeasurementHistory({
+                    offset: 0,
+                    limit: this.loopCounter$.value - 1,
+                })
+                .subscribe()
         })
     }
 
     disableLoopMode() {
         this.enableLoopMode$.next(false)
         this.loopCounter$.next(1)
-    }
-
-    setProgressIndicator(prevTestDurationMs: number) {
-        const testIntervalMs = Math.max(
-            0,
-            this.fullTestIntervalMs - prevTestDurationMs
-        )
-        return interval(200).pipe(
-            map((ms: number) => ms * 200),
-            takeWhile((ms) => ms <= testIntervalMs),
-            map((ms) => {
-                return {
-                    ms: testIntervalMs - ms,
-                    percent: (ms / testIntervalMs) * 100,
-                }
-            })
-        )
     }
 
     getMeasurementResult(testUuid: string | null) {

@@ -7,6 +7,8 @@ export interface ITestVisualizationState {
     }
     currentPhaseName: EMeasurementStatus
     flavor: string
+    startTimeMs: number
+    endTimeMs: number
 
     setCounter(
         newPhase: EMeasurementStatus,

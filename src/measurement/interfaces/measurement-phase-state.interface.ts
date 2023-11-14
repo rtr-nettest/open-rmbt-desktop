@@ -14,4 +14,6 @@ export interface IMeasurementPhaseState {
     phase: EMeasurementStatus
     testUuid: string
     time: number
+    startTimeMs: number
+    endTimeMs: number
 }

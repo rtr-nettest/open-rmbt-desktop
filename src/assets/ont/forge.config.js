@@ -18,7 +18,7 @@ module.exports = {
                     path.join(process.env.ASSETS_FOLDER, "entitlements.plist"),
                     path.join(
                         process.env.ASSETS_FOLDER,
-                        "RMBTDesktop_Distribution_Profile.provisionprofile"
+                        "Open_Nettest_Desktop.provisionprofile"
                     )
                 )
             }

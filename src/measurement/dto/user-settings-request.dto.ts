@@ -11,6 +11,7 @@ import {
 } from "../services/store.service"
 import { I18nService } from "../services/i18n.service"
 import { v4 } from "uuid"
+import * as packJson from "../../../package.json"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -26,6 +27,8 @@ export class UserSettingsRequest implements IUserSettingsRequest {
     terms_and_conditions_accepted_version?: number
     uuid = ""
     operating_system = `${os.type()}, ${os.release()}`
+    softwareVersion?: string | undefined
+    softwareRevision?: string | undefined
 
     // RTR BE compatibility
     capabilities = { RMBThttp: true }
@@ -49,6 +52,8 @@ export class UserSettingsRequest implements IUserSettingsRequest {
             this.platform = platform
             this.plattform = platform
             this.model = "Desktop_" + os.machine()
+            this.softwareVersion = packJson.version
+            this.softwareRevision = `${packJson.gitInfo.branch}-${packJson.gitInfo.hash}`
         }
     }
 }

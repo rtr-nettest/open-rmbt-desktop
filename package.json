@@ -2,7 +2,7 @@
   "name": "open-rmbt-desktop",
   "productName": "RTR-Netztest",
   "version": "0.2.17",
-  "description": "RTR Desktop App",
+  "description": "RTR-Netztest Desktop App",
   "main": "dist/main.js",
   "engines": {
     "node": ">=18"
@@ -81,7 +81,7 @@
     "uuidv4": "^6.2.13"
   },
   "gitInfo": {
-    "hash": "6352988bb84a09afd318d0b2bcab0bb7c4c38519",
+    "hash": "76497c3dd83cf173129a71064ca699526fe5a1d3",
     "branch": "dev"
   }
 }

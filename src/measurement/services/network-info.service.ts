@@ -84,7 +84,7 @@ export class NetworkInfoService {
             }
         } catch (e) {
             Logger.I.error(e)
-            return 0
+            return undefined
         }
         switch (type) {
             case "wifi":

@@ -12,7 +12,7 @@ function main() {
         hash: execSync("git rev-parse HEAD").toString().trim(),
         branch: execSync("git rev-parse --abbrev-ref HEAD").toString().trim(),
     }
-    fs.writeFileSync("package.json", JSON.stringify(pack, null, 2))
+    fs.writeFileSync("package.json", JSON.stringify(pack, null, 4))
 }
 
 main()

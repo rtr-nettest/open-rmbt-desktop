@@ -40,7 +40,7 @@ export class LoopService {
                 (Date.now() - this.loopStartTime) % options.interval
             Logger.I.info(
                 "Starting test %d within %d ms",
-                counter,
+                counter + 1,
                 options.interval - this.deviationAdjustment
             )
             options.onTime(counter + 1)

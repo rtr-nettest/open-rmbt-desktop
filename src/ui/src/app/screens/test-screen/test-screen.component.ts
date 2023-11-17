@@ -37,9 +37,9 @@ export class TestScreenComponent implements OnDestroy, OnInit {
     env$ = this.mainStore.env$
     stopped$: Subject<void> = new Subject()
     visualization$ = this.store.visualization$.pipe(
-        withLatestFrom(this.mainStore.error$),
+        withLatestFrom(this.mainStore.error$, this.loopCount$),
         distinctUntilChanged(),
-        tap(([state, error]) => {
+        tap(([state, error, loopCount]) => {
             this.setShowCPUWarning(this.mainStore.env$.value)
             if (error) {
                 this.openErrorDialog(state)
@@ -50,7 +50,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
                     this.historyStore
                         .getRecentMeasurementHistory({
                             offset: 0,
-                            limit: this.store.loopCounter$.value - 1,
+                            limit: loopCount - 1,
                         })
                         .subscribe()
                     this.waitingProgressMs = 0

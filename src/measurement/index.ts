@@ -244,6 +244,12 @@ export class MeasurementRunner {
             this.settingsRequest,
             options?.loopModeInfo
         )
+        if (options?.loopModeInfo) {
+            Logger.I.info(
+                "Registering test %d",
+                options?.loopModeInfo.test_counter
+            )
+        }
         const measurementRegistration =
             await ControlServer.I.registerMeasurement(this.registrationRequest)
         this.rmbtClient = new RMBTClient(measurementRegistration)

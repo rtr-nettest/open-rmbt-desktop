@@ -38,7 +38,11 @@ export class LoopService {
         this.loopTimeout = setTimeout(() => {
             this.deviationAdjustment =
                 (Date.now() - this.loopStartTime) % options.interval
-            Logger.I.info("Starting test %d")
+            Logger.I.info(
+                "Starting test %d within %d ms",
+                counter,
+                options.interval - this.deviationAdjustment
+            )
             options.onTime(counter + 1)
         }, options.interval - this.deviationAdjustment)
         const expireTimeout = process.env.LOOP_MODE_MAX_DURATION

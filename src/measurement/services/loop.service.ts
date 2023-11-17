@@ -34,6 +34,7 @@ export class LoopService {
             this.loopStartTime = Date.now()
         }
         const counter = options.loopModeInfo.test_counter
+        clearTimeout(this.loopTimeout)
         this.loopTimeout = setTimeout(() => {
             this.deviationAdjustment =
                 (Date.now() - this.loopStartTime) % options.interval

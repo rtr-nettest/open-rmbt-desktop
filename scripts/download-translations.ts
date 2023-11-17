@@ -16,6 +16,12 @@ async function main() {
         if (!translations) {
             continue
         }
+
+        //non-empty space strings are getting trimmed by the API - restore
+        Object.entries(translations).filter(([k,v])=> (v === "")).forEach(([k,v]) => {
+            translations[k] = " ";
+        })
+
         await fsp.writeFile(
             path.join(
                 projectRoot,

@@ -8,7 +8,6 @@ export class LoopService {
         return this.instance
     }
 
-    loopStartTime = 0
     deviationAdjustment = 0
     loopTimeout?: NodeJS.Timeout
     expireTimeout?: NodeJS.Timeout
@@ -21,7 +20,6 @@ export class LoopService {
         clearTimeout(this.expireTimeout)
         this.expireTimeout = undefined
         this.deviationAdjustment = 0
-        this.loopStartTime = 0
     }
 
     scheduleLoop(options: {
@@ -30,21 +28,18 @@ export class LoopService {
         onTime: (counter: number) => void
         onExpire?: () => void
     }) {
-        if (!this.loopStartTime) {
-            this.loopStartTime = Date.now()
-        }
         const counter = options.loopModeInfo.test_counter
         clearTimeout(this.loopTimeout)
+        const actualInterval = options.interval - this.deviationAdjustment
         this.loopTimeout = setTimeout(() => {
-            this.deviationAdjustment =
-                (Date.now() - this.loopStartTime) % options.interval
             Logger.I.info(
-                "Starting test %d within %d ms",
+                "Starting test %d after %d ms",
                 counter + 1,
-                options.interval - this.deviationAdjustment
+                actualInterval
             )
+            this.deviationAdjustment = Date.now() % 1000
             options.onTime(counter + 1)
-        }, options.interval - this.deviationAdjustment)
+        }, actualInterval)
         const expireTimeout = process.env.LOOP_MODE_MAX_DURATION
             ? parseInt(process.env.LOOP_MODE_MAX_DURATION)
             : 0

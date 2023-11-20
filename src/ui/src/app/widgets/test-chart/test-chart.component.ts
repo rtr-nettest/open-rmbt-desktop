@@ -75,6 +75,13 @@ export class TestChartComponent implements OnInit, OnDestroy {
     }
 
     private setChartOnFocus = () => {
+        if (
+            this.flavor === "ont" ||
+            this.store.visualization$.value.currentPhaseName ===
+                EMeasurementStatus.SHOWING_RESULTS
+        ) {
+            return
+        }
         window.electronAPI.getMeasurementState().then((state) => {
             this.initChart()
             const phaseTestState = new TestPhaseState()
@@ -164,7 +171,7 @@ export class TestChartComponent implements OnInit, OnDestroy {
 
     private initChart(options?: { force: boolean }) {
         const ctx = this.canvas?.getContext("2d")
-        if (ctx && (options?.force || this.isCanvasEmpty))
+        if (ctx && (options?.force || this.isCanvasEmpty)) {
             try {
                 if (this.flavor !== "rtr") {
                     this.chart = new TestChart(ctx!, this.transloco)
@@ -181,6 +188,9 @@ export class TestChartComponent implements OnInit, OnDestroy {
                         this.phase
                     )
                 }
-            } catch (_) {}
+            } catch (e) {
+                console.warn(e)
+            }
+        }
     }
 }

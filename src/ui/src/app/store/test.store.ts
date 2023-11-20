@@ -139,6 +139,13 @@ export class TestStore {
     }
 
     private setLatestTestState = () => {
+        if (
+            this.mainStore.env$.value?.FLAVOR === "ont" ||
+            this.visualization$.value.currentPhaseName ===
+                EMeasurementStatus.SHOWING_RESULTS
+        ) {
+            return
+        }
         window.electronAPI.getMeasurementState().then((state) => {
             this.setTestState(state)
             const phases = Object.values(EMeasurementStatus)
@@ -152,21 +159,12 @@ export class TestStore {
                 v.phases[phase].up = state.up
             }
             v.phases[EMeasurementStatus.DOWN].setChartFromPings?.(state.pings)
-            if (this.mainStore.env$.value?.FLAVOR === "ont") {
-                v.phases[EMeasurementStatus.DOWN].setONTChartFromOverallSpeed?.(
-                    state.downs
-                )
-                v.phases[EMeasurementStatus.UP].setONTChartFromOverallSpeed?.(
-                    state.ups
-                )
-            } else {
-                v.phases[EMeasurementStatus.DOWN].setRTRChartFromOverallSpeed?.(
-                    state.downs
-                )
-                v.phases[EMeasurementStatus.UP].setRTRChartFromOverallSpeed?.(
-                    state.ups
-                )
-            }
+            v.phases[EMeasurementStatus.DOWN].setRTRChartFromOverallSpeed?.(
+                state.downs
+            )
+            v.phases[EMeasurementStatus.UP].setRTRChartFromOverallSpeed?.(
+                state.ups
+            )
             this.visualization$.next(v)
             this.historyStore
                 .getRecentMeasurementHistory({

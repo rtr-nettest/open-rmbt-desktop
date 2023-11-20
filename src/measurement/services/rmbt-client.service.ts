@@ -78,7 +78,9 @@ export class RMBTClient {
         if (this.plausibleResult(this.downs, result)) {
             this.downs.push(result)
         }
-        this.interimDownMbps = this.downs[this.downs.length - 1].speed / 1e6
+        if (this.downs.length > 0) {
+            this.interimDownMbps = this.downs[this.downs.length - 1].speed / 1e6
+        }
     }
 
     setInterimUpMbps() {
@@ -89,7 +91,9 @@ export class RMBTClient {
         if (this.plausibleResult(this.ups, result)) {
             this.ups.push(result)
         }
-        this.interimUpMbps = this.ups[this.ups.length - 1].speed / 1e6
+        if (this.ups.length > 0) {
+            this.interimUpMbps = this.ups[this.ups.length - 1].speed / 1e6
+        }
     }
 
     private plausibleResult(list: IOverallResult[], result: IOverallResult) {

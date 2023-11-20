@@ -54,4 +54,8 @@ export class TestBarChart extends TestChart {
     protected override resetLabels(): void {
         super.data.labels = []
     }
+
+    protected override getAllData(testItem: ITestPhaseState) {
+        return testItem.chart?.length ? testItem.chart : []
+    }
 }

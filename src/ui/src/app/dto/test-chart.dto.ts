@@ -68,7 +68,7 @@ export class TestChart extends Chart {
     }
 
     protected resetLabels() {
-        this.data.labels = []
+        this.data.labels = generateIndexesOfLength(100)
     }
 
     protected resetDatasets() {
@@ -76,7 +76,17 @@ export class TestChart extends Chart {
     }
 
     protected getAllData(testItem: ITestPhaseState) {
-        return testItem.chart?.length ? testItem.chart : []
+        return testItem.chart?.length
+            ? testItem.chart.reduce((acc, item) => {
+                  if (this.finished) {
+                      return acc
+                  }
+                  if (item.x >= 100) {
+                      this.finished = true
+                  }
+                  return [...acc, item]
+              }, [] as { x: number; y: number }[])
+            : []
     }
 
     protected getLastData(testItem: ITestPhaseState) {

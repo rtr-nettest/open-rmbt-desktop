@@ -53,7 +53,7 @@ export class UserSettingsRequest implements IUserSettingsRequest {
             this.plattform = platform
             this.model = "Desktop_" + os.machine()
             this.softwareVersion = packJson.version
-            this.softwareRevision = `${packJson.gitInfo.branch}-${packJson.gitInfo.hash}`
+            this.softwareRevision = `${packJson.gitInfo["branch"]}-${packJson.gitInfo["hash"]}`
         }
     }
 }

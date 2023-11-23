@@ -1,5 +1,5 @@
 export const TranslocoConfigExt: { [key: string]: any } = {
-    availableLangs: ["en", "de", "es-ES"],
+    availableLangs: ["en", "de", "es"],
     availableLocales: [
         { iso: "en", name: "English" },
         { iso: "de", name: "Deutsch" },

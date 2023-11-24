@@ -2,3 +2,4 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 node scripts/reset-package-info.js
+git add .

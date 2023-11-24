@@ -91,10 +91,16 @@ import { MainStore } from "./store/main.store"
 import { HistoryScreenComponent } from "./screens/history-screen/history-screen.component"
 import { ActionButtonsComponent } from "./widgets/action-buttons/action-buttons.component"
 import { ScrollTopComponent } from "./widgets/scroll-top/scroll-top.component"
+import localeCs from "@angular/common/locales/cs"
 import localeDe from "@angular/common/locales/de"
+import localeEs from "@angular/common/locales/es"
+import localeFr from "@angular/common/locales/fr"
+import localeIt from "@angular/common/locales/it"
 import localeNb from "@angular/common/locales/nb"
-import localeSq from "@angular/common/locales/sq"
+import localeNo from "@angular/common/locales/no"
 import localeSk from "@angular/common/locales/sk"
+import localeSl from "@angular/common/locales/sl"
+import localeSq from "@angular/common/locales/sq"
 import localeSr from "@angular/common/locales/sr"
 import localeSrLatn from "@angular/common/locales/sr-Latn"
 import localeSrMeLatn from "@angular/common/locales/sr-Latn-ME"
@@ -286,12 +292,20 @@ declare global {
 })
 export class AppModule {
     constructor() {
-        registerLocaleData(localeNb)
-        registerLocaleData(localeSq)
-        registerLocaleData(localeSk)
-        registerLocaleData(localeSr)
-        registerLocaleData(localeSrLatn)
-        registerLocaleData(localeDe)
-        registerLocaleData(localeSrMeLatn)
+        ;[
+            localeCs,
+            localeDe,
+            localeEs,
+            localeFr,
+            localeIt,
+            localeNb,
+            localeNo,
+            localeSk,
+            localeSl,
+            localeSq,
+            localeSr,
+            localeSrLatn,
+            localeSrMeLatn,
+        ].forEach((locale) => registerLocaleData(locale))
     }
 }

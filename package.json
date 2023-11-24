@@ -81,8 +81,5 @@
         "sql.js": "^1.8.0",
         "uuidv4": "^6.2.13"
     },
-    "gitInfo": {
-        "hash": "a7cac96847a225d479bfb054cd76e81a4c58fe8f",
-        "branch": "dev"
-    }
+    "gitInfo": {}
 }

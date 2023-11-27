@@ -21,6 +21,9 @@ import { EMeasurementFinalStatus } from "./enums/measurement-final-status"
 import { AutoUpdater } from "./services/auto-updater.service"
 import { ACTIVE_SERVER, Store } from "./services/store.service"
 import { ILoopModeInfo } from "./interfaces/measurement-registration-request.interface"
+import { RMBTWorker } from "./interfaces/rmbt-worker.interface"
+import { RMBTWorkerFactory } from "./services/rmbt-worker-factory.service"
+import * as path from "path"
 
 config({
     path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
@@ -32,6 +35,8 @@ export interface MeasurementOptions {
 }
 
 export class MeasurementRunner {
+    static maxWorkersAllowed = 10
+
     private static instance = new MeasurementRunner()
 
     static get I() {
@@ -48,10 +53,32 @@ export class MeasurementRunner {
     private settings?: IUserSettings
     private startTimeMs = 0
     private endTimeMs = 0
+    private workers: RMBTWorker[] = []
 
     private constructor() {
         Logger.init()
         DBService.I.init()
+    }
+
+    initWorkers() {
+        for (let i = 0; i < MeasurementRunner.maxWorkersAllowed; i++) {
+            const worker = RMBTWorkerFactory.getWorker(
+                path.join(__dirname, "worker.service.js"),
+                {
+                    workerData: {
+                        index: i,
+                    },
+                }
+            )
+            if (worker) {
+                this.workers.push(worker)
+            }
+        }
+    }
+
+    destroyWorkers() {
+        this.workers.forEach((w) => w.terminate())
+        this.workers.splice(0, this.workers.length)
     }
 
     async registerClient(options?: MeasurementOptions): Promise<IUserSettings> {
@@ -86,7 +113,9 @@ export class MeasurementRunner {
             await this.setMeasurementServer()
             await this.registerMeasurement(options)
 
-            const threadResults = await this.rmbtClient!.scheduleMeasurement()
+            const threadResults = await this.rmbtClient!.scheduleMeasurement(
+                this.workers
+            )
             this.setCPUUsage()
             this.registrationRequest = {
                 ...this.registrationRequest!,

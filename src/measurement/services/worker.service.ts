@@ -7,27 +7,45 @@ import {
 import { RMBTThread } from "./rmbt-thread.service"
 import { Logger } from "./logger.service"
 import { IPreUploadResult } from "./message-handlers/pre-upload-message-handler.service"
+import { IMeasurementRegistrationResponse } from "../interfaces/measurement-registration-response.interface"
+import { MeasurementThreadResult } from "../dto/measurement-thread-result.dto"
 
 let thread: RMBTThread | undefined
+let result: IMeasurementThreadResult | undefined
 
 parentPort?.on("message", async (message: IncomingMessageWithData) => {
     Logger.init(workerData.index)
-    let result: IMeasurementThreadResult | undefined
     let isConnected = false
     switch (message.message) {
         case "connect":
-            if (!thread) {
-                thread = new RMBTThread(workerData.params, workerData.index)
-                thread.errorHandler = (error) => {
-                    error.message = `Thread ${workerData.index} reported an error. ${error.message}`
-                    parentPort?.postMessage(
-                        new OutgoingMessageWithData("error", error)
+            thread = new RMBTThread(
+                message.data as IMeasurementRegistrationResponse,
+                workerData.index
+            )
+            result = new MeasurementThreadResult(workerData.index)
+            thread.errorHandler = (error) => {
+                error.message = `Thread ${workerData.index} reported an error. ${error.message}`
+                parentPort?.postMessage(
+                    new OutgoingMessageWithData(
+                        "error",
+                        workerData.index,
+                        error
                     )
-                }
+                )
             }
             isConnected = await connectRetrying()
             parentPort?.postMessage(
-                new OutgoingMessageWithData("connected", isConnected)
+                new OutgoingMessageWithData(
+                    "connected",
+                    workerData.index,
+                    isConnected
+                )
+            )
+            break
+        case "disconnect":
+            await thread?.disconnect()
+            parentPort?.postMessage(
+                new OutgoingMessageWithData("disconnected", workerData.index)
             )
             break
         case "preDownload":
@@ -35,6 +53,7 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
             parentPort?.postMessage(
                 new OutgoingMessageWithData(
                     "preDownloadFinished",
+                    workerData.index,
                     preDownloadResult
                 )
             )
@@ -42,7 +61,11 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
         case "ping":
             result = await thread?.managePing()
             parentPort?.postMessage(
-                new OutgoingMessageWithData("pingFinished", result)
+                new OutgoingMessageWithData(
+                    "pingFinished",
+                    workerData.index,
+                    result
+                )
             )
             break
         case "download":
@@ -50,12 +73,17 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
                 parentPort?.postMessage(
                     new OutgoingMessageWithData(
                         "downloadUpdated",
+                        workerData.index,
                         interimResult
                     )
                 )
             result = await thread!.manageDownload(message.data as number)
             parentPort?.postMessage(
-                new OutgoingMessageWithData("downloadFinished", result)
+                new OutgoingMessageWithData(
+                    "downloadFinished",
+                    workerData.index,
+                    result
+                )
             )
             break
         case "preUpload":
@@ -65,7 +93,11 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
                 preUpRes = await thread!.managePreUpload()
             }
             parentPort?.postMessage(
-                new OutgoingMessageWithData("preUploadFinished", preUpRes)
+                new OutgoingMessageWithData(
+                    "preUploadFinished",
+                    workerData.index,
+                    preUpRes
+                )
             )
             break
         case "reconnectForUpload":
@@ -74,17 +106,29 @@ parentPort?.on("message", async (message: IncomingMessageWithData) => {
                 isConnected = await connectRetrying()
             }
             parentPort?.postMessage(
-                new OutgoingMessageWithData("reconnectedForUpload", isConnected)
+                new OutgoingMessageWithData(
+                    "reconnectedForUpload",
+                    workerData.index,
+                    isConnected
+                )
             )
             break
         case "upload":
             thread!.interimHandler = (interimResult) =>
                 parentPort?.postMessage(
-                    new OutgoingMessageWithData("uploadUpdated", interimResult)
+                    new OutgoingMessageWithData(
+                        "uploadUpdated",
+                        workerData.index,
+                        interimResult
+                    )
                 )
             result = await thread!.manageUpload(message.data as number)
             parentPort?.postMessage(
-                new OutgoingMessageWithData("uploadFinished", result)
+                new OutgoingMessageWithData(
+                    "uploadFinished",
+                    workerData.index,
+                    result
+                )
             )
             break
     }
@@ -98,7 +142,7 @@ async function connectRetrying(times = 2): Promise<boolean> {
             new Promise(async (resolve) => {
                 let connected = false
                 try {
-                    await thread!.connect(workerData.result)
+                    await thread!.connect(result!)
                     connected = await thread!.manageInit()
                 } finally {
                     Logger.I.info("Thread %d is connected.", thread!.index)

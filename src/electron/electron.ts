@@ -68,6 +68,7 @@ const createWindow = () => {
     })
 
     Menu.setApplicationMenu(buildMenu())
+    MeasurementRunner.I.initWorkers()
 
     if (process.env.DEV === "true") {
         win.loadURL("http://localhost:4200/")
@@ -79,6 +80,7 @@ const createWindow = () => {
     }
 
     win.on("close", async (event) => {
+        MeasurementRunner.I.destroyWorkers()
         if (
             [
                 EMeasurementStatus.END,

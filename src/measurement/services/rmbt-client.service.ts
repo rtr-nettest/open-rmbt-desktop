@@ -64,6 +64,9 @@ export class RMBTClient {
     }
     private lastMessageReceivedAt = 0
     private _chunkNumbers: number[] = []
+    private _resolve?: Function
+    private _reject?: Function
+    private _error?: Error
 
     interimDownMbps = 0
     interimUpMbps = 0
@@ -134,22 +137,24 @@ export class RMBTClient {
         return Math.min(1, this.getPhaseDuration(phase) / estimatePhaseDuration)
     }
 
-    async scheduleMeasurement(): Promise<IMeasurementThreadResult[]> {
+    async scheduleMeasurement(
+        workers: RMBTWorker[]
+    ): Promise<IMeasurementThreadResult[]> {
         Logger.I.info("Scheduling measurement...")
         this.measurementLastUpdate = new Date().getTime()
         if (this.params.test_wait > 0) {
             this.measurementStatus = EMeasurementStatus.WAIT
             return new Promise((resolve) => {
                 setTimeout(async () => {
-                    resolve(await this.runMeasurement())
+                    resolve(await this.runMeasurement(workers))
                 }, this.params.test_wait * 1000)
             })
         } else {
-            return this.runMeasurement()
+            return this.runMeasurement(workers)
         }
     }
 
-    private finishMeasurement(resolve: Function) {
+    private finishMeasurement() {
         if (!this.isRunning) {
             return
         }
@@ -168,9 +173,6 @@ export class RMBTClient {
             Logger.I.info("The total upload speed is %dMbps", this.finalUpMbps)
             this.threadResults = []
             this.interimThreadResults = new Array(this.params.test_numthreads)
-            for (const w of this.measurementTasks) {
-                w.terminate()
-            }
             if (this.measurementStatus !== EMeasurementStatus.ABORTED) {
                 Logger.I.info("Measurement is finished. Submitting results.")
                 this.measurementStatus = EMeasurementStatus.SUBMITTING_RESULTS
@@ -180,7 +182,10 @@ export class RMBTClient {
                 )
             }
             this.isRunning = false
-            resolve([...this.downThreadResults, ...this.upThreadResults])
+            for (const w of this.measurementTasks) {
+                w.postMessage(new IncomingMessageWithData("disconnect"))
+                w.on("message", this.finishMessageListener)
+            }
         }
     }
 
@@ -188,32 +193,29 @@ export class RMBTClient {
         this.aborter.abort()
     }
 
-    private cancelMeasurement(reject: Function, error?: Error) {
+    private cancelMeasurement(error?: Error) {
         if (!this.isRunning) {
             return
         }
         clearInterval(this.activityInterval)
+        this._error = error
         this.threadResults = []
         this.interimThreadResults = new Array(this.params.test_numthreads)
         this.isRunning = false
         for (const w of this.measurementTasks) {
-            w.terminate()
-        }
-
-        if (error) {
-            Logger.I.error(error)
-            this.measurementStatus = EMeasurementStatus.ERROR
-            reject(error)
-        } else {
-            this.measurementStatus = EMeasurementStatus.ABORTED
-            reject(null)
+            w.postMessage(new IncomingMessageWithData("disconnect"))
+            w.on("message", this.cancelMessageListener)
         }
     }
 
-    private async runMeasurement(): Promise<IMeasurementThreadResult[]> {
+    private async runMeasurement(
+        workers: RMBTWorker[]
+    ): Promise<IMeasurementThreadResult[]> {
         this.isRunning = true
         this.measurementStart = Date.now()
         return new Promise((resolve, reject) => {
+            this._resolve = resolve
+            this._reject = reject
             Logger.I.info("Running measurement...")
             let allowedInactivityMs = Number(process.env.ALLOWED_INACTIVITY_MS)
             if (isNaN(allowedInactivityMs)) {
@@ -224,46 +226,21 @@ export class RMBTClient {
                     Date.now() - this.lastMessageReceivedAt >=
                     allowedInactivityMs
                 ) {
-                    this.cancelMeasurement(
-                        reject,
-                        new Error("Measurement timed out")
-                    )
+                    this.cancelMeasurement(new Error("Measurement timed out"))
                 }
             }, allowedInactivityMs)
             this.measurementStatus = EMeasurementStatus.INIT
             this.interimThreadResults = new Array(this.params.test_numthreads)
             this.phaseStartTimeNs[EMeasurementStatus.INIT] = Time.nowNs()
             for (let i = 0; i < this.params.test_numthreads; i++) {
-                const worker = RMBTWorkerFactory.getWorker(
-                    path.join(__dirname, "worker.service.js"),
-                    {
-                        workerData: {
-                            params: this.params,
-                            index: i,
-                            result: new MeasurementThreadResult(i),
-                        },
-                    }
-                )
-                if (worker) {
-                    this.measurementTasks.push(worker)
-                }
+                this.measurementTasks.push(workers[i])
             }
-            for (const [index, worker] of this.measurementTasks.entries()) {
-                worker.postMessage(new IncomingMessageWithData("connect"))
+            for (const worker of this.measurementTasks) {
+                worker.on("message", this.mainMessageListener)
+                worker.postMessage(
+                    new IncomingMessageWithData("connect", this.params)
+                )
                 this.lastMessageReceivedAt = Date.now()
-                worker.on("message", (message) => {
-                    if (this.aborter.signal.aborted) {
-                        this.measurementStatus = EMeasurementStatus.ABORTED
-                        this.finishMeasurement(resolve)
-                        return
-                    }
-                    this.lastMessageReceivedAt = Date.now()
-                    try {
-                        this.parseMessage(message, index, resolve, reject)
-                    } catch (e: any) {
-                        this.cancelMeasurement(reject, e)
-                    }
-                })
             }
         })
     }
@@ -271,15 +248,59 @@ export class RMBTClient {
     interimDownInterval?: NodeJS.Timeout
     interimUpInterval?: NodeJS.Timeout
 
-    private parseMessage(
-        message: OutgoingMessageWithData,
-        index: number,
-        resolve: Function,
-        reject: Function
-    ) {
+    private finishMessageListener = (message: OutgoingMessageWithData) => {
+        if (message.message === "disconnected") {
+            const w = this.measurementTasks[message.threadIndex]
+            w.removeListener("message", this.finishMessageListener)
+            w.removeListener("message", this.cancelMessageListener)
+            w.removeListener("message", this.mainMessageListener)
+            this._resolve?.([
+                ...this.downThreadResults,
+                ...this.upThreadResults,
+            ])
+        }
+    }
+
+    private cancelMessageListener = (message: OutgoingMessageWithData) => {
+        if (message.message === "disconnected") {
+            const w = this.measurementTasks[message.threadIndex]
+            w.removeListener("message", this.finishMessageListener)
+            w.removeListener("message", this.cancelMessageListener)
+            w.removeListener("message", this.mainMessageListener)
+            if (this._error) {
+                Logger.I.error(this._error)
+                this.measurementStatus = EMeasurementStatus.ERROR
+                const error = { ...this._error }
+                this._error = undefined
+                this._reject?.(error)
+            } else {
+                this.measurementStatus = EMeasurementStatus.ABORTED
+                this._reject?.(null)
+            }
+        }
+    }
+
+    private mainMessageListener = (message: OutgoingMessageWithData) => {
+        if (this.aborter.signal.aborted) {
+            Logger.I.info("ABORTED")
+            this.measurementStatus = EMeasurementStatus.ABORTED
+            this.finishMeasurement()
+            return
+        }
+        this.lastMessageReceivedAt = Date.now()
+        try {
+            this.parseMessage(message)
+        } catch (e: any) {
+            Logger.I.error("ERROR %o", e)
+            this.cancelMeasurement(e)
+        }
+    }
+
+    private parseMessage(message: OutgoingMessageWithData) {
+        const index = message.threadIndex
         switch (message.message) {
             case "error":
-                this.cancelMeasurement(reject, message.data as Error)
+                this.cancelMeasurement(message.data as Error)
                 break
             case "connected":
                 if (!!message.data) {
@@ -465,7 +486,7 @@ export class RMBTClient {
                 if (
                     this.threadResults.length === this.measurementTasks.length
                 ) {
-                    this.finishMeasurement(resolve)
+                    this.finishMeasurement()
                     clearInterval(this.interimUpInterval)
                 }
                 break
@@ -487,7 +508,7 @@ export class RMBTClient {
                     if (index === 0) {
                         return [mt]
                     }
-                    mt.terminate()
+                    mt.postMessage(new IncomingMessageWithData("disconnect"))
                     return acc
                 },
                 [] as RMBTWorker[]

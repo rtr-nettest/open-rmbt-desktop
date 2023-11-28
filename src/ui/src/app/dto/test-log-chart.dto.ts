@@ -62,4 +62,8 @@ export class TestLogChart extends TestChart {
     protected override resetLabels(): void {
         super.data.labels = generateIndexesOfLength(8)
     }
+
+    protected override getAllData(testItem: ITestPhaseState) {
+        return testItem.chart?.length ? testItem.chart : []
+    }
 }

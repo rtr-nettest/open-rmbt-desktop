@@ -2,7 +2,9 @@ export interface IEnv {
     ACTIVE_LANGUAGE: string | null
     APP_VERSION: string
     CMS_URL: string
+    CPU_WARNING_PERCENT: number | undefined
     CROWDIN_UPDATE_AT_RUNTIME: string
+    ENABLE_HOME_SCREEN_JITTER_BOX: boolean
     ENABLE_LANGUAGE_SWITCH: string
     ENABLE_LOOP_MODE: string
     FLAVOR: string
@@ -24,5 +26,6 @@ export interface IEnv {
     USER_DATA: string
     CONTROL_SERVER_URL: string
     MEASUREMENT_SERVERS_PATH: string
+    OS: string
     WEBSITE_HOST: string
 }

@@ -29,10 +29,6 @@ import {
     IHistoryRowRTR,
 } from "../interfaces/history-row.interface"
 import { ExpandArrowComponent } from "../widgets/expand-arrow/expand-arrow.component"
-import { ERoutes } from "../enums/routes.enum"
-import { RouterLinkComponent } from "../widgets/router-link/router-link.component"
-
-export const STATE_UPDATE_TIMEOUT = 200
 
 @Injectable({
     providedIn: "root",
@@ -358,17 +354,6 @@ export class HistoryStore {
                     hi.ping.toLocaleString(locale) +
                     " " +
                     t["ms"],
-                componentField: "details",
-                details: RouterLinkComponent,
-                parameters: {
-                    label: "Details...",
-                    route:
-                        "/" +
-                        ERoutes.TEST_RESULT.replace(
-                            ":testUuid",
-                            hi.testUuid ?? ""
-                        ),
-                },
                 loopUuid: hi.loopUuid,
                 hidden: hi.hidden,
             }

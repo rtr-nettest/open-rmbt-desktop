@@ -1,0 +1,12 @@
+<ul *transloco="let t" class="app-share">
+    <li *ngFor="let btn of shareButtons$ | async" class="app-share__item">
+        <a
+            [href]="btn.url"
+            class="app-share__link"
+            target="_blank"
+            [matTooltip]="t('test.share.' + btn.className)"
+        >
+            <i class="app-share__icon app-share__icon--{{ btn.className }}"></i>
+        </a>
+    </li>
+</ul>

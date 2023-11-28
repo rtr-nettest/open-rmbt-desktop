@@ -150,6 +150,7 @@
 
         <mat-row
             *matRowDef="let row; columns: displayedColumns"
+            [class.mat-row--clickable]="rowsAreCLickable === true"
             [class.mat-row--hidden]="row.hidden === true"
             [class.mat-row--visible]="row.hidden === false"
             [class.mat-row--group-header]="row.groupHeader"

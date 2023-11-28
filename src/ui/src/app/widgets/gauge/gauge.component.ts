@@ -123,6 +123,9 @@ export class GaugeComponent {
         }
         switch (status) {
             case EMeasurementStatus.INIT:
+                this.setBarPercentage("#ping", 0)
+                this.setBarPercentage("#download", 0)
+                this.setBarPercentage("#upload", 0)
                 barSelector = "#init"
                 progress = progress * 0.1
                 break
@@ -132,22 +135,31 @@ export class GaugeComponent {
                 break
             case EMeasurementStatus.PING:
                 this.setBarPercentage("#init", 1)
+                this.setBarPercentage("#download", 0)
+                this.setBarPercentage("#upload", 0)
                 barSelector = "#ping"
                 break
             case EMeasurementStatus.DOWN:
+                this.setBarPercentage("#init", 1)
                 this.setBarPercentage("#ping", 1)
+                this.setBarPercentage("#upload", 0)
                 barSelector = "#download"
                 //set symbol as unicode, since IE won't handle html entities
                 speedMbit = counter
                 directionSymbol = "\u21a7" //↧
                 break
             case EMeasurementStatus.INIT_UP:
+                this.setBarPercentage("#init", 1)
+                this.setBarPercentage("#ping", 1)
                 this.setBarPercentage("#download", 1)
                 barSelector = "#upload"
                 progress = Math.min(0.95, progress * 0.1)
                 directionSymbol = "\u21a5" //↥
                 break
             case EMeasurementStatus.UP:
+                this.setBarPercentage("#init", 1)
+                this.setBarPercentage("#ping", 1)
+                this.setBarPercentage("#download", 1)
                 barSelector = "#upload"
                 progress = Math.min(0.95, progress * 0.9 + 0.1)
                 speedMbit = counter
@@ -155,6 +167,9 @@ export class GaugeComponent {
                 break
             case EMeasurementStatus.SUBMITTING_RESULTS:
             case EMeasurementStatus.END:
+                this.setBarPercentage("#init", 1)
+                this.setBarPercentage("#ping", 1)
+                this.setBarPercentage("#download", 1)
                 barSelector = "#upload"
                 progress = 1
                 break

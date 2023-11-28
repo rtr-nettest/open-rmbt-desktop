@@ -18,6 +18,10 @@ export class MessageService {
         private transloco: TranslocoService
     ) {}
 
+    closeAllDialogs() {
+        this.dialog.closeAll()
+    }
+
     openSnackbar(text: string) {
         this.ngZone.run(() => {
             this.snackbar.open(this.transloco.translate(text), undefined, {
@@ -41,8 +45,8 @@ export class MessageService {
                     },
                 })
                 .afterClosed()
-                .subscribe(({ confirmAction }) => {
-                    if (confirmAction) {
+                .subscribe((result) => {
+                    if (result?.confirmAction) {
                         onConfirm()
                     }
                 })

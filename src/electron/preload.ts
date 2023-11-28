@@ -21,7 +21,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.send(Events.SET_ACTIVE_CLIENT, client),
     setActiveLanguage: (language: string) =>
         ipcRenderer.send(Events.SET_ACTIVE_LANGUAGE, language),
-    setActiveServer: (server: IMeasurementServerResponse) =>
+    setActiveServer: (server: IMeasurementServerResponse | null) =>
         ipcRenderer.send(Events.SET_ACTIVE_SERVER, server),
     setDefaultLanguage: (language: string) =>
         ipcRenderer.send(Events.SET_DEFAULT_LANGUAGE, language),
@@ -64,7 +64,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     deleteLocalData: () => {
         ipcRenderer.send(Events.DELETE_LOCAL_DATA)
     },
-    scheduleLoop: (loopInterval: number) => {
-        ipcRenderer.send(Events.SCHEDULE_LOOP, loopInterval)
+    scheduleLoop: (loopInterval: number, loopModeInfo: ILoopModeInfo) => {
+        ipcRenderer.send(Events.SCHEDULE_LOOP, loopInterval, loopModeInfo)
     },
 })

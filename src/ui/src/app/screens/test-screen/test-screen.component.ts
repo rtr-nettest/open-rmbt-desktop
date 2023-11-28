@@ -6,7 +6,7 @@ import {
 } from "@angular/core"
 import { Router } from "@angular/router"
 import {
-    Observable,
+    BehaviorSubject,
     Subject,
     distinctUntilChanged,
     takeUntil,
@@ -14,7 +14,7 @@ import {
     withLatestFrom,
 } from "rxjs"
 import { MainStore } from "src/app/store/main.store"
-import { TestStore } from "src/app/store/test.store"
+import { STATE_UPDATE_TIMEOUT, TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
 import { MessageService } from "src/app/services/message.service"
 import {
@@ -23,6 +23,7 @@ import {
 } from "src/app/constants/strings"
 import { ITestVisualizationState } from "src/app/interfaces/test-visualization-state.interface"
 import { HistoryStore } from "src/app/store/history.store"
+import { IEnv } from "../../../../../electron/interfaces/env.interface"
 
 @Component({
     selector: "app-test-screen",
@@ -35,35 +36,38 @@ export class TestScreenComponent implements OnDestroy, OnInit {
     loopCount$ = this.store.loopCounter$
     env$ = this.mainStore.env$
     stopped$: Subject<void> = new Subject()
-    visualization$ = this.store.launchTest().pipe(
-        withLatestFrom(this.mainStore.error$),
+    visualization$ = this.store.visualization$.pipe(
+        withLatestFrom(this.mainStore.error$, this.loopCount$),
         distinctUntilChanged(),
-        takeUntil(this.stopped$),
-        tap(([state, error]) => {
+        tap(([state, error, loopCount]) => {
+            this.setShowCPUWarning(this.mainStore.env$.value)
             if (error) {
-                this.stopped$.next()
-                const message =
-                    state.currentPhaseName ===
-                    EMeasurementStatus.SUBMITTING_RESULTS
-                        ? ERROR_OCCURED_SENDING_RESULTS
-                        : ERROR_OCCURED
-                const navigate = () =>
-                    state.currentPhaseName ===
-                    EMeasurementStatus.SUBMITTING_RESULTS
-                        ? this.goToResult(state)
-                        : this.router.navigate(["/"])
-                this.message.openConfirmDialog(message, () => {
-                    this.mainStore.error$.next(null)
-                    navigate()
-                })
+                this.openErrorDialog(state)
             } else if (state.currentPhaseName === EMeasurementStatus.END) {
-                this.stopped$.next()
                 this.goToResult(state)
+            } else {
+                if (!!this.loopWaiting$.value) {
+                    this.historyStore
+                        .getRecentMeasurementHistory({
+                            offset: 0,
+                            limit: loopCount - 1,
+                        })
+                        .subscribe()
+                    this.waitingProgressMs = 0
+                }
+                this.loopWaiting$.next(false)
             }
         })
     )
-    loopWaitProgress$?: Observable<{ ms: number; percent: number }>
-    result$ = this.historyStore.getFormattedHistory({ grouped: false })
+    loopWaiting$ = new BehaviorSubject(false)
+    result$ = this.historyStore.getFormattedHistory({
+        grouped: false,
+        loopUuid: this.store.loopUuid$.value ?? undefined,
+    })
+    showCPUWarning$ = new BehaviorSubject(0)
+    ms$ = new BehaviorSubject(0)
+    progress$ = new BehaviorSubject(0)
+    private waitingProgressMs = 0
 
     constructor(
         private historyStore: HistoryStore,
@@ -74,16 +78,45 @@ export class TestScreenComponent implements OnDestroy, OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.historyStore
-            .getRecentMeasurementHistory({
-                offset: 0,
-                limit: this.store.loopCounter$.value - 1,
-            })
-            .subscribe()
+        this.store.launchTest().pipe(takeUntil(this.stopped$)).subscribe()
     }
 
     ngOnDestroy(): void {
+        this.stopped$.next()
         this.stopped$.complete()
+    }
+
+    private openErrorDialog(state: ITestVisualizationState) {
+        this.message.closeAllDialogs()
+        const message =
+            state.currentPhaseName === EMeasurementStatus.SUBMITTING_RESULTS
+                ? ERROR_OCCURED_SENDING_RESULTS
+                : ERROR_OCCURED
+        if (this.enableLoopMode$.value !== true) {
+            this.stopped$.next()
+            this.message.openConfirmDialog(message, () => {
+                this.mainStore.error$.next(null)
+                state.currentPhaseName === EMeasurementStatus.SUBMITTING_RESULTS
+                    ? this.goToResult(state)
+                    : this.router.navigate(["/"])
+            })
+        } else {
+            this.message.openConfirmDialog(message, () => void 0)
+            this.goToResult(state)
+        }
+    }
+
+    private setShowCPUWarning(env: IEnv | null) {
+        if (env?.CPU_WARNING_PERCENT) {
+            window.electronAPI.getCPUUsage().then((cpu) => {
+                const cpuLoadMax = cpu && Math.round(cpu.load_max * 100)
+                if (cpuLoadMax > env.CPU_WARNING_PERCENT!) {
+                    this.showCPUWarning$.next(cpuLoadMax)
+                } else {
+                    this.showCPUWarning$.next(0)
+                }
+            })
+        }
     }
 
     private goToResult = (state: ITestVisualizationState) => {
@@ -93,7 +126,18 @@ export class TestScreenComponent implements OnDestroy, OnInit {
                 state.phases[state.currentPhaseName].testUuid,
             ])
         } else {
-            this.loopWaitProgress$ = this.store.scheduleLoop()
+            this.loopWaiting$.next(true)
+            this.mainStore.error$.next(null)
+            this.setProgressIndicator(state)
         }
+    }
+
+    private setProgressIndicator(state: ITestVisualizationState) {
+        this.waitingProgressMs += STATE_UPDATE_TIMEOUT
+        const timeTillEndMs =
+            state.startTimeMs + this.store.fullTestIntervalMs - state.endTimeMs
+        const currentMs = Math.max(0, timeTillEndMs - this.waitingProgressMs)
+        this.ms$.next(currentMs)
+        this.progress$.next((this.waitingProgressMs / timeTillEndMs) * 100)
     }
 }

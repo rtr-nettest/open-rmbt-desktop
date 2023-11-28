@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core"
+import { Component, Input, NgZone } from "@angular/core"
 import { ActivatedRoute, Router, UrlSegment } from "@angular/router"
 import { TranslocoService } from "@ngneat/transloco"
 import { combineLatest, map } from "rxjs"
@@ -22,8 +22,9 @@ export class MainMenuComponent {
         this.cmsService.getMenu(),
         this.activeRoute.url,
         this.transloco.selectTranslation(),
+        this.mainStore.env$,
     ]).pipe(
-        map(([menu, activeRoute]) => {
+        map(([menu, activeRoute, _, env]) => {
             this.settingsItem = this.parseMenuItem(
                 {
                     label: "Options",
@@ -43,6 +44,11 @@ export class MainMenuComponent {
                             this.i18n.getActiveBrowserLang()
                         ),
                     }
+                } else if (mi.url?.includes("$os") && env?.OS) {
+                    item = {
+                        ...mi,
+                        url: mi.url.replace("$os", env.OS),
+                    }
                 }
                 return this.parseMenuItem(item, activeRoute)
             })
@@ -58,6 +64,7 @@ export class MainMenuComponent {
         private testStore: TestStore,
         private mainStore: MainStore,
         private message: MessageService,
+        private ngZone: NgZone,
         private router: Router,
         private transloco: TranslocoService
     ) {}
@@ -102,7 +109,9 @@ export class MainMenuComponent {
                         window.electronAPI.abortMeasurement()
                         window.electronAPI.onMeasurementAborted(() => {
                             window.electronAPI.offMeasurementAborted()
-                            this.router.navigate([item.route])
+                            this.ngZone.run(() => {
+                                this.router.navigate([item.route])
+                            })
                         })
                     } else {
                         this.router.navigate([item.route])

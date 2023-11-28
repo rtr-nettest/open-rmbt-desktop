@@ -1,5 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core"
-import { Observable, map, of, withLatestFrom } from "rxjs"
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnChanges,
+    Output,
+} from "@angular/core"
+import { Observable, map } from "rxjs"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { MainStore } from "src/app/store/main.store"
@@ -9,14 +15,17 @@ import {
     IHistoryRowONT,
     IHistoryRowRTR,
 } from "src/app/interfaces/history-row.interface"
-import { IEnv } from "../../../../../electron/interfaces/env.interface"
+import { Router } from "@angular/router"
+import { MessageService } from "src/app/services/message.service"
+import { THIS_INTERRUPTS_ACTION } from "src/app/constants/strings"
+import { TestStore } from "src/app/store/test.store"
 
 @Component({
     selector: "app-recent-history",
     templateUrl: "./recent-history.component.html",
     styleUrls: ["./recent-history.component.scss"],
 })
-export class RecentHistoryComponent {
+export class RecentHistoryComponent implements OnChanges {
     @Input({ required: true }) result!: {
         content: IHistoryRowONT[] | IHistoryRowRTR[]
         totalElements: number
@@ -24,6 +33,7 @@ export class RecentHistoryComponent {
     @Input() grouped?: boolean
     @Input() title?: string
     @Input() excludeColumns?: string[]
+    @Input() interruptsTests = false
     @Output() sortChange: EventEmitter<ISort> = new EventEmitter()
     columns$: Observable<ITableColumn<IHistoryRowRTR | IHistoryRowONT>[]> =
         this.mainStore.env$.pipe(
@@ -117,14 +127,51 @@ export class RecentHistoryComponent {
 
     sort$ = this.store.historySort$
     tableClassNames?: string[]
+    freshlyLoaded = true
 
-    constructor(private mainStore: MainStore, private store: HistoryStore) {}
+    constructor(
+        private mainStore: MainStore,
+        private message: MessageService,
+        private router: Router,
+        private store: HistoryStore,
+        private testStore: TestStore
+    ) {}
+
+    ngOnChanges(): void {
+        const firstItem = this.result.content[0]
+        if (this.grouped && firstItem?.groupHeader && this.freshlyLoaded) {
+            this.freshlyLoaded = false
+            this.store.openLoops$.next([])
+            this.toggleLoopResults(firstItem.id!)
+        }
+    }
 
     changeSort = (sort: ISort) => {
         this.sortChange.emit(sort)
     }
 
     toggleLoopResults(loopUuid: string) {
+        if (!loopUuid.startsWith("L")) {
+            const navFunc = () => {
+                window.electronAPI.abortMeasurement()
+                this.testStore.disableLoopMode()
+                this.router.navigateByUrl(
+                    "/" + ERoutes.TEST_RESULT.replace(":testUuid", loopUuid)
+                )
+            }
+            if (this.interruptsTests) {
+                this.message.openConfirmDialog(
+                    THIS_INTERRUPTS_ACTION,
+                    navFunc,
+                    {
+                        canCancel: true,
+                    }
+                )
+            } else {
+                navFunc()
+            }
+            return
+        }
         const openLoops = this.store.openLoops$.value
         const index = openLoops.indexOf(loopUuid)
         if (index >= 0) {

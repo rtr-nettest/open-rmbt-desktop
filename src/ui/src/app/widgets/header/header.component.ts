@@ -7,6 +7,7 @@ import { ERoutes } from "src/app/enums/routes.enum"
 import { CMSService } from "src/app/services/cms.service"
 import { MessageService } from "src/app/services/message.service"
 import { MainStore } from "src/app/store/main.store"
+import { TestStore } from "src/app/store/test.store"
 
 @Component({
     selector: "app-header",
@@ -30,6 +31,7 @@ export class HeaderComponent {
         })
     )
     env$ = this.mainStore.env$
+    isLoopModeTestScreen$ = this.testStore.enableLoopMode$
     ontLogo$ = this.mainStore.env$.pipe(
         concatMap((env) =>
             this.cms.getAssetByName(
@@ -54,6 +56,7 @@ export class HeaderComponent {
         private activeRoute: ActivatedRoute,
         private cms: CMSService,
         private mainStore: MainStore,
+        private testStore: TestStore,
         private message: MessageService,
         private router: Router,
         private transloco: TranslocoService

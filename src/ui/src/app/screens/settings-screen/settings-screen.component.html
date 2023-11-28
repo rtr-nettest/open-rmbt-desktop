@@ -1,5 +1,5 @@
 <app-header></app-header>
-<app-body>
+<app-body *ngIf="env$ | async as env">
     <app-main-menu *ngIf="env?.FLAVOR !== 'ont'"></app-main-menu>
     <app-main-content>
         <div class="app-main" *transloco="let t">

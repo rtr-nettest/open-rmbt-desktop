@@ -1,5 +1,9 @@
 <div class="app-wrapper" *transloco="let t">
-    <div class="app-article" [innerHTML]="t('Terms and conditions text')"></div>
+    <div
+        class="app-article"
+        *ngIf="terms$ | async as terms; else defaultTerms"
+        [innerHTML]="terms | translate : 'content' : 'parseMarkdown'"
+    ></div>
     <app-scroll-bottom [isVisible]="!isRead"></app-scroll-bottom>
     <footer class="app-footer">
         <button mat-button color="primary" (click)="cancel()">
@@ -16,3 +20,7 @@
         </button>
     </footer>
 </div>
+
+<ng-template #defaultTerms>
+    <div *transloco="let t" class="app-article" [innerHTML]="termsText"></div>
+</ng-template>

@@ -36,19 +36,19 @@ export class HistoryScreenComponent
     isLodaMoreButtonVisible = !!this.mainStore.env$.value?.HISTORY_RESULTS_LIMIT
     actionButtons: IMainMenuItem[] = [
         {
-            label: "",
+            label: "Export as CSV",
             translations: [],
             icon: "filetype-csv",
             action: () => this.store.exportAs("csv", this.store.history$.value),
         },
         {
-            label: "",
+            label: "Export as PDF",
             translations: [],
             icon: "filetype-pdf",
             action: () => this.store.exportAsPdf(this.store.history$.value),
         },
         {
-            label: "",
+            label: "Export as XLSX",
             translations: [],
             icon: "filetype-xlsx",
             action: () =>

@@ -16,53 +16,70 @@
         <app-main-menu [disabled]="true"></app-main-menu>
         <app-main-content *ngIf="visualization$ | async">
             <ng-container *ngIf="(enableLoopMode$ | async) === true">
-                <app-alert
-                    text="Tests are conducted repeatedly until they are stopped manually"
-                >
-                    <app-stop-loop-button></app-stop-loop-button>
-                </app-alert>
-                <h1
-                    *ngIf="(enableLoopMode$ | async) === true"
-                    class="app-title"
-                >
-                    {{ t("Measurement") + " " + (loopCount$ | async) }}
-                </h1>
+                <ng-container *ngIf="loopCount$ | async as loopCount">
+                    <h1
+                        *ngIf="(loopWaiting$ | async) !== true"
+                        class="app-title"
+                    >
+                        {{ t("Measurement") + " " + loopCount }}
+                    </h1>
+                    <h1
+                        *ngIf="(loopWaiting$ | async) === true"
+                        class="app-title"
+                    >
+                        {{
+                            t("Result of measurement - waiting")
+                                | sprintf : loopCount
+                        }}
+                    </h1>
+                </ng-container>
             </ng-container>
+            <app-alert
+                *ngIf="showCPUWarning$ | async as cpuUsage"
+                kind="warning"
+                [text]="
+                    t('CPU usage is higher than %0%. Results may be skewed.')
+                        | sprintf : cpuUsage
+                "
+            ></app-alert>
             <div class="app-main">
                 <div class="app-progress-bar-wrapper">
                     <app-gauge
-                        *ngIf="!loopWaitProgress$; else loopWaitProgressBar"
+                        *ngIf="
+                            (loopWaiting$ | async) !== true;
+                            else loopWaitProgressBar
+                        "
                     ></app-gauge>
                 </div>
                 <app-spacer></app-spacer>
                 <app-interim-results></app-interim-results>
             </div>
-            <app-recent-history
-                *ngIf="result$ | async as result"
-                class="app-padding"
-                [result]="result"
-                [excludeColumns]="['details']"
-                title="Recent measurements"
-            ></app-recent-history>
+            <ng-container *ngIf="(enableLoopMode$ | async) === true">
+                <app-recent-history
+                    *ngIf="result$ | async as result"
+                    class="app-padding"
+                    [result]="result"
+                    [excludeColumns]="['details']"
+                    [interruptsTests]="true"
+                    title="Recent measurements"
+                ></app-recent-history>
+            </ng-container>
         </app-main-content>
         <app-footer></app-footer>
     </app-body>
 </ng-template>
 
 <ng-template #loopWaitProgressBar>
-    <div
-        style="width: 100%; padding: 0.5em"
-        *ngIf="loopWaitProgress$ | async as progress"
-    >
+    <div style="width: 100%; padding: 0.5em">
         <h2 *transloco="let t" class="app-title">
             {{
-                t("Next measurement in") + " " + (progress.ms | date : "mm:ss")
+                t("Next measurement in") + " " + (ms$ | async | date : "mm:ss")
             }}
         </h2>
         <mat-progress-bar
             class="app-progress-bar--loop"
             mode="determinate"
-            [value]="progress.percent"
+            [value]="progress$ | async"
         ></mat-progress-bar>
     </div>
 </ng-template>

@@ -28,14 +28,17 @@
                 }"
             ></app-dl>
             <ng-container *ngIf="isShowingResult">
-                <a
-                    *transloco="let t"
-                    routerLink="/test"
-                    mat-flat-button
-                    class="nt-run-again"
-                    color="primary"
-                    >{{ t("test.run_test_again") }}</a
-                >
+                <div style="margin-bottom: 24px">
+                    <a
+                        *transloco="let t"
+                        routerLink="/test"
+                        mat-flat-button
+                        class="nt-run-again"
+                        color="primary"
+                        >{{ t("test.run_test_again") }}</a
+                    >
+                </div>
+                <app-social-buttons></app-social-buttons>
             </ng-container>
         </ng-container>
     </div>

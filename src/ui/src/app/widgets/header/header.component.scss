@@ -12,8 +12,11 @@
     }
 
     &--large {
+        display: flex;
         @include screen-sm {
-            display: none;
+            a {
+                display: none;
+            }
         }
     }
 
@@ -23,6 +26,7 @@
         }
         @include screen-sm {
             height: 0;
+            padding: 0;
         }
     }
 

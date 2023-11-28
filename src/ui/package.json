@@ -6,7 +6,7 @@
         "prepare": "node scripts/copy-assets",
         "start": "npm run prepare && ng serve",
         "build": "npm run prepare && ng build",
-        "build-for-packaging": "npm run prepare && ng build --base-href ./ && node scripts/rewrite-asset-paths-for-packaging",
+        "build-for-packaging": "npm run prepare && ng build --base-href ./",
         "watch": "npm run prepare && ng build --watch --configuration development",
         "test": "npm run prepare && ng test"
     },
@@ -27,6 +27,8 @@
         "chartjs-adapter-dayjs-4": "^1.0.4",
         "dayjs": "^1.11.8",
         "file-saver": "^2.0.5",
+        "marked": "^4.3.0",
+        "ngx-markdown": "^16.0.0",
         "rxjs": "~7.5.0",
         "tslib": "^2.3.0",
         "zone.js": "~0.13.1"
@@ -38,6 +40,7 @@
         "@types/chart.js": "^2.9.37",
         "@types/file-saver": "^2.0.5",
         "@types/jasmine": "~4.3.0",
+        "@types/marked": "^4.3.2",
         "dotenv": "^16.0.3",
         "fs-extra": "^11.1.0",
         "jasmine-core": "~4.5.0",

@@ -107,10 +107,18 @@ async function connectRetrying(times = 2): Promise<boolean> {
                 }
             }),
             new Promise((resolve) => {
-                timeout = setTimeout(() => {
-                    Logger.I.info("Thread %d is not connected.", thread!.index)
-                    resolve(false)
-                }, 3000)
+                timeout = setTimeout(
+                    () => {
+                        Logger.I.info(
+                            "Thread %d is not connected.",
+                            thread!.index
+                        )
+                        resolve(false)
+                    },
+                    process.env.ALLOWED_INACTIVITY_MS
+                        ? parseInt(process.env.ALLOWED_INACTIVITY_MS)
+                        : 10000
+                )
             }),
         ])) as boolean
         if (isConnected) {

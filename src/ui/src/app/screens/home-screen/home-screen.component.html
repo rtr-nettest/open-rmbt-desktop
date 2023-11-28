@@ -29,6 +29,11 @@
             [list]="ipInfo$ | async"
             title="Your IP address"
         ></app-home-metrics>
+        <ng-container
+            *ngIf="(env$ | async)?.ENABLE_HOME_SCREEN_JITTER_BOX === true"
+        >
+            <app-home-metrics [list]="jitterInfo$ | async"></app-home-metrics>
+        </ng-container>
     </div>
 </ng-template>
 

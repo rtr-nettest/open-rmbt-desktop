@@ -25,6 +25,8 @@ import { TestServersComponent } from "src/app/widgets/test-servers/test-servers.
 import { CMSService } from "src/app/services/cms.service"
 import { IEnv } from "../../../../../electron/interfaces/env.interface"
 import { SettingsLocalDataComponent } from "src/app/widgets/settings-local-data/settings-local-data.component"
+import { Router } from "@angular/router"
+import { ERoutes } from "src/app/enums/routes.enum"
 
 export interface ISettingsRow {
     title: string
@@ -52,14 +54,14 @@ export class SettingsScreenComponent
             isComponent: true,
         },
     ]
+    env$ = this.mainStore.env$
     data$: Observable<IBasicResponse<ISettingsRow>> = combineLatest([
-        this.mainStore.env$,
         this.transloco.selectTranslation(),
         this.mainStore.settings$,
-        this.cms.getProject(),
+        this.cms.getProject({ dropCache: true }),
     ]).pipe(
-        map(([env, t, settings, project]) => {
-            this.env = env ?? undefined
+        map(([t, settings, project]) => {
+            const env = this.env$.value
             const content: ISettingsRow[] = [
                 {
                     title: t["Client UUID"],
@@ -104,6 +106,7 @@ export class SettingsScreenComponent
                     component: ClientSelectComponent,
                     parameters: {
                         className: "app-client-select--settings",
+                        reloadPage: true,
                     },
                 })
             }
@@ -134,11 +137,11 @@ export class SettingsScreenComponent
         direction: "",
     }
     tableClassNames = ["app-table--wide"]
-    env?: IEnv
 
     constructor(
         mainStore: MainStore,
         message: MessageService,
+        private router: Router,
         private transloco: TranslocoService,
         private cms: CMSService,
         private cdr: ChangeDetectorRef

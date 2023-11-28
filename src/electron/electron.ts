@@ -10,7 +10,7 @@ import {
 } from "electron"
 if (require("electron-squirrel-startup")) app.quit()
 import path from "path"
-import { t } from "../measurement/services/i18n.service"
+import { I18nService, t } from "../measurement/services/i18n.service"
 import { MeasurementRunner } from "../measurement"
 import { Events } from "./enums/events.enum"
 import { IEnv } from "./interfaces/env.interface"
@@ -122,9 +122,7 @@ const createWindow = () => {
         }
         const response = await dialog.showMessageBox(dialogOpts)
         if (response.response === 0) {
-            LoopService.I.resetCounter()
-            MeasurementRunner.I.abortMeasurement()
-            win.webContents.send(Events.OPEN_SCREEN, ERoutes.HISTORY)
+            app.exit(0)
         }
     })
 }
@@ -203,27 +201,26 @@ ipcMain.on(Events.SET_DEFAULT_LANGUAGE, (event, language: string) => {
 
 ipcMain.on(
     Events.SET_ACTIVE_SERVER,
-    (event, server: IMeasurementServerResponse) => {
+    (event, server: IMeasurementServerResponse | null) => {
         Store.set(ACTIVE_SERVER, server)
     }
 )
 
-ipcMain.on(
-    Events.RUN_MEASUREMENT,
-    async (event, loopModeInfo?: ILoopModeInfo) => {
-        const webContents = event.sender
-        try {
-            const status = await MeasurementRunner.I.runMeasurement({
-                loopModeInfo,
-            })
-            if (status === EMeasurementStatus.ABORTED) {
-                webContents.send(Events.MEASUREMENT_ABORTED)
-            }
-        } catch (e) {
-            webContents.send(Events.ERROR, e)
+const onRunMeasurement = async (event, loopModeInfo?: ILoopModeInfo) => {
+    const webContents = event.sender
+    try {
+        const status = await MeasurementRunner.I.runMeasurement({
+            loopModeInfo,
+        })
+        if (status === EMeasurementStatus.ABORTED) {
+            webContents.send(Events.MEASUREMENT_ABORTED)
         }
+    } catch (e) {
+        webContents.send(Events.ERROR, e)
     }
-)
+}
+
+ipcMain.on(Events.RUN_MEASUREMENT, onRunMeasurement)
 
 ipcMain.on(Events.ABORT_MEASUREMENT, (event) => {
     const webContents = event.sender
@@ -234,18 +231,35 @@ ipcMain.on(Events.ABORT_MEASUREMENT, (event) => {
     }
 })
 
-ipcMain.on(Events.SCHEDULE_LOOP, (event, loopInterval) => {
+const onScheduleLoop = (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
     const webContents = event.sender
+    onRunMeasurement(event, loopModeInfo)
     LoopService.I.scheduleLoop({
         interval: loopInterval,
+        loopModeInfo,
         onTime: (counter) => {
             webContents.send(Events.RESTART_MEASUREMENT, counter)
+            onScheduleLoop(event, loopInterval, {
+                ...loopModeInfo,
+                test_counter: counter,
+            })
         },
         onExpire: () => {
             webContents.send(Events.LOOP_MODE_EXPIRED)
         },
     })
-})
+}
+
+ipcMain.on(
+    Events.SCHEDULE_LOOP,
+    (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
+        const timeFromWholeSecond = Date.now() % 1000
+        setTimeout(
+            () => onScheduleLoop(event, loopInterval, loopModeInfo),
+            1000 - timeFromWholeSecond
+        )
+    }
+)
 
 ipcMain.on(Events.DELETE_LOCAL_DATA, () => {
     Store.wipeDataAndQuit()
@@ -253,11 +267,16 @@ ipcMain.on(Events.DELETE_LOCAL_DATA, () => {
 
 ipcMain.handle(Events.GET_ENV, (): IEnv => {
     return {
-        ACTIVE_LANGUAGE: Store.get(ACTIVE_LANGUAGE) as string,
+        ACTIVE_LANGUAGE: I18nService.I.getActiveLanguage(),
         APP_VERSION: pack.version,
         CMS_URL: process.env.CMS_URL || "",
+        CPU_WARNING_PERCENT: process.env.CPU_WARNING_PERCENT
+            ? parseFloat(process.env.CPU_WARNING_PERCENT)
+            : undefined,
         CROWDIN_UPDATE_AT_RUNTIME: process.env.CROWDIN_UPDATE_AT_RUNTIME || "",
         ENABLE_LANGUAGE_SWITCH: process.env.ENABLE_LANGUAGE_SWITCH || "",
+        ENABLE_HOME_SCREEN_JITTER_BOX:
+            process.env.ENABLE_HOME_SCREEN_JITTER_BOX === "true",
         ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",
         FLAVOR: process.env.FLAVOR || "rtr",
         WEBSITE_HOST: new URL(process.env.FULL_HISTORY_RESULT_URL ?? "").origin,
@@ -289,6 +308,12 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
         USER_DATA: app.getPath("temp"),
         MEASUREMENT_SERVERS_PATH: process.env.MEASUREMENT_SERVERS_PATH || "",
         CONTROL_SERVER_URL: process.env.CONTROL_SERVER_URL || "",
+        OS:
+            process.platform === "win32"
+                ? "windows"
+                : process.platform === "darwin"
+                ? "macos"
+                : process.platform,
     }
 })
 

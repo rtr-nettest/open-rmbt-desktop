@@ -15,6 +15,7 @@ export class BaseScreen implements OnDestroy {
             tap((error) => {
                 if (error) {
                     this.message.openSnackbar(error.message)
+                    this.mainStore.error$.next(null)
                 }
             })
         )

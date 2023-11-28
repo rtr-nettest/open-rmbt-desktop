@@ -91,10 +91,16 @@ import { MainStore } from "./store/main.store"
 import { HistoryScreenComponent } from "./screens/history-screen/history-screen.component"
 import { ActionButtonsComponent } from "./widgets/action-buttons/action-buttons.component"
 import { ScrollTopComponent } from "./widgets/scroll-top/scroll-top.component"
+import localeCs from "@angular/common/locales/cs"
 import localeDe from "@angular/common/locales/de"
+import localeEs from "@angular/common/locales/es"
+import localeFr from "@angular/common/locales/fr"
+import localeIt from "@angular/common/locales/it"
 import localeNb from "@angular/common/locales/nb"
-import localeSq from "@angular/common/locales/sq"
+import localeNo from "@angular/common/locales/no"
 import localeSk from "@angular/common/locales/sk"
+import localeSl from "@angular/common/locales/sl"
+import localeSq from "@angular/common/locales/sq"
 import localeSr from "@angular/common/locales/sr"
 import localeSrLatn from "@angular/common/locales/sr-Latn"
 import localeSrMeLatn from "@angular/common/locales/sr-Latn-ME"
@@ -122,6 +128,9 @@ import { ExpandArrowComponent } from "./widgets/expand-arrow/expand-arrow.compon
 import { RouterLinkComponent } from "./widgets/router-link/router-link.component"
 import { LoopResultScreenComponent } from "./screens/loop-result-screen/loop-result-screen.component"
 import { LoopTestScreenComponent } from "./screens/loop-test-screen/loop-test-screen.component"
+import { TranslatePipe } from "./pipes/translate.pipe"
+import { MarkdownModule } from "ngx-markdown"
+import { SocialButtonsComponent } from "./widgets/social-buttons/social-buttons.component"
 
 Chart.register(
     BarElement,
@@ -147,7 +156,7 @@ declare global {
             setActiveClient: (client: string) => Promise<void>
             setActiveLanguage: (language: string) => Promise<void>
             setActiveServer: (
-                server: IMeasurementServerResponse
+                server: IMeasurementServerResponse | null
             ) => Promise<void>
             setDefaultLanguage: (language: string) => Promise<void>
             runMeasurement: (loopModeInfo?: ILoopModeInfo) => Promise<void>
@@ -174,7 +183,10 @@ declare global {
             ) => Promise<any>
             onLoopModeExpired: (callback: () => any) => Promise<any>
             deleteLocalData: () => Promise<void>
-            scheduleLoop: (loopInterval: number) => Promise<void>
+            scheduleLoop: (
+                loopInterval: number,
+                loopModeInfo: ILoopModeInfo
+            ) => Promise<void>
         }
     }
 }
@@ -236,6 +248,8 @@ declare global {
         RouterLinkComponent,
         LoopResultScreenComponent,
         LoopTestScreenComponent,
+        TranslatePipe,
+        SocialButtonsComponent,
     ],
     imports: [
         AppRoutingModule,
@@ -244,6 +258,7 @@ declare global {
         FormsModule,
         ReactiveFormsModule,
         HttpClientModule,
+        MarkdownModule.forRoot(),
         MatButtonModule,
         MatDialogModule,
         MatIconModule,
@@ -277,12 +292,20 @@ declare global {
 })
 export class AppModule {
     constructor() {
-        registerLocaleData(localeNb)
-        registerLocaleData(localeSq)
-        registerLocaleData(localeSk)
-        registerLocaleData(localeSr)
-        registerLocaleData(localeSrLatn)
-        registerLocaleData(localeDe)
-        registerLocaleData(localeSrMeLatn)
+        ;[
+            localeCs,
+            localeDe,
+            localeEs,
+            localeFr,
+            localeIt,
+            localeNb,
+            localeNo,
+            localeSk,
+            localeSl,
+            localeSq,
+            localeSr,
+            localeSrLatn,
+            localeSrMeLatn,
+        ].forEach((locale) => registerLocaleData(locale))
     }
 }

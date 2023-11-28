@@ -1,11 +1,15 @@
 const path = require("path")
 const { codeSignApp } = require("../../../scripts/codesign-app.js")
 const packJson = require("../../../package.json")
-const fs = require("fs")
+const yargs = require("yargs")
+const argv = yargs.option("nosign").argv
 
 module.exports = {
     hooks: {
         postPackage: async (_, options) => {
+            if (argv.nosign) {
+                return
+            }
             if (
                 process.platform === "darwin" &&
                 process.env.APP_STORE === "true"
@@ -37,8 +41,9 @@ module.exports = {
             "README.md",
         ],
         appBundleId: process.env.APP_BUNDLE_ID,
-        ...(process.env.APP_STORE !== "true"
-            ? {
+        ...(process.env.MACOS !== "true" || argv.nosign
+            ? {}
+            : {
                   osxSign: {},
                   osxNotarize: {
                       tool: "notarytool",
@@ -46,8 +51,7 @@ module.exports = {
                       appleIdPassword: process.env.APPLE_PASSWORD,
                       teamId: process.env.APPLE_TEAM_ID,
                   },
-              }
-            : {}),
+              }),
     },
     rebuildConfig: {},
     makers: [

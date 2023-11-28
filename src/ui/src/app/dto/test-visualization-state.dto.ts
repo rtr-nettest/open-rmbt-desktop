@@ -34,6 +34,14 @@ export class TestVisualizationState implements ITestVisualizationState {
     }
     currentPhaseName: EMeasurementStatus = EMeasurementStatus.NOT_STARTED
 
+    get startTimeMs() {
+        return this.phases[this.currentPhaseName].startTimeMs
+    }
+
+    get endTimeMs() {
+        return this.phases[this.currentPhaseName].endTimeMs
+    }
+
     static from(
         initialState: ITestVisualizationState,
         phaseState: IMeasurementPhaseState,

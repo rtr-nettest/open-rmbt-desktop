@@ -21,7 +21,7 @@ export class MeasurementResult implements IMeasurementResult {
     model: string
     ip_address?: string | undefined
     measurement_server?: string
-    network_type = 0
+    network_type?: number
     num_threads_ul?: number
     operating_system: string
     pings: IPing[]
@@ -96,7 +96,7 @@ export class MeasurementResult implements IMeasurementResult {
         this.provider_name = registrationResponse.provider
         this.ip_address = registrationResponse.client_remote_ip
         this.test_status = testStatus
-        this.network_type = registrationRequest.networkType ?? 0
+        this.network_type = registrationRequest.networkType
         if (testError) {
             this.test_error = testError
         }

@@ -86,6 +86,10 @@ $color-border: rgba(0, 0, 0, 0.1);
         &-ping {
             flex-wrap: wrap;
         }
+
+        &-details {
+            flex: 0 0 10%;
+        }
     }
 
     &--wide {
@@ -139,7 +143,8 @@ mat-paginator {
         padding-left: rem(24);
     }
 
-    &--group-header {
+    &--group-header,
+    &--clickable {
         cursor: pointer;
     }
 }

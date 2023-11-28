@@ -1,2 +1,3 @@
 <canvas [id]="id" [style.height.%]="100" [style.width.%]="100"></canvas>
 <ng-container *ngIf="visualization$ | async"></ng-container>
+<canvas [id]="id + '_blank'" style="display: none"></canvas>

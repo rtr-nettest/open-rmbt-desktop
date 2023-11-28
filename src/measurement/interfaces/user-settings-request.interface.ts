@@ -11,6 +11,7 @@ export interface IUserSettingsRequest {
     plattform?: string
     softwareRevision?: string
     softwareRevisionCode?: number
+    softwareVersion?: string
     softwareVersionName?: string
     terms_and_conditions_accepted: boolean
     terms_and_conditions_accepted_version?: number

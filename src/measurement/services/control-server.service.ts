@@ -96,7 +96,7 @@ export class ControlServer {
     }
 
     async getNews() {
-        if (!process.env.NEWS_PATH) {
+        if (!process.env.NEWS_PATH || process.env.FLAVOR === "ont") {
             return null
         }
         const lastNewsUid = Store.get(LAST_NEWS_UID) as number
@@ -196,10 +196,17 @@ export class ControlServer {
             Store.set(CLIENT_UUID, settings.uuid)
             Store.set(SETTINGS, settings)
             if (
+                process.env.FLAVOR !== "ont" &&
                 Store.I.get(TERMS_ACCEPTED_VERSION) !==
-                settings.terms_and_conditions.version
+                    settings.terms_and_conditions?.version
             ) {
-                return { ...settings, shouldAcceptTerms: true }
+                let termsText = (
+                    await axios.get(settings.terms_and_conditions.url)
+                ).data
+                termsText = termsText
+                    ? termsText.replace(/<title>.+<\/title>/gi, "")
+                    : termsText
+                return { ...settings, shouldAcceptTerms: true, termsText }
             }
             return settings
         }

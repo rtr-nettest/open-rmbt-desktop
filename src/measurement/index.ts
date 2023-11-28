@@ -41,11 +41,13 @@ export class MeasurementRunner {
     private measurementServer?: IMeasurementServerResponse
     private registrationRequest?: MeasurementRegistrationRequest
     private rmbtClient?: RMBTClient
-    private cpuInfoInterval?: NodeJS.Timer
+    private cpuInfoInterval?: NodeJS.Timeout
     private cpuInfoList: number[] = []
     private cpuInfo?: ICPU
     private settingsRequest?: UserSettingsRequest
     private settings?: IUserSettings
+    private startTimeMs = 0
+    private endTimeMs = 0
 
     private constructor() {
         Logger.init()
@@ -75,6 +77,7 @@ export class MeasurementRunner {
 
     async runMeasurement(options?: MeasurementOptions) {
         this.rmbtClient = undefined
+        this.startTimeMs = Date.now()
         try {
             this.setCPUInfoInterval()
             if (!this.settings) {
@@ -131,6 +134,9 @@ export class MeasurementRunner {
             }
         } finally {
             this.setCPUUsage()
+            clearInterval(this.cpuInfoInterval)
+            this.cpuInfoInterval = undefined
+            this.endTimeMs = Date.now()
             if (this.cpuInfo) {
                 Logger.I.info(
                     ELoggerMessage.CPU_USAGE_MIN,
@@ -159,19 +165,25 @@ export class MeasurementRunner {
     getCurrentPhaseState(): IMeasurementPhaseState & IBasicNetworkInfo {
         const phase =
             this.rmbtClient?.measurementStatus ?? EMeasurementStatus.NOT_STARTED
+        const down = this.rmbtClient?.interimDownMbps ?? -1
+        const up = this.rmbtClient?.interimUpMbps ?? -1
         return {
             duration: this.rmbtClient?.getPhaseDuration(phase) ?? -1,
             progress: this.rmbtClient?.getPhaseProgress(phase) ?? -1,
             time: Date.now(),
             ping: this.rmbtClient?.pingMedian ?? -1,
             pings: this.rmbtClient?.pings ?? [],
-            down: this.rmbtClient?.interimDownMbps ?? -1,
-            up: this.rmbtClient?.interimUpMbps ?? -1,
+            down,
+            downs: this.rmbtClient?.downs ?? [],
+            up,
+            ups: this.rmbtClient?.ups ?? [],
             phase,
             testUuid: this.rmbtClient?.params?.test_uuid ?? "",
             ipAddress: this.rmbtClient?.params.client_remote_ip ?? "-",
             serverName: this.rmbtClient?.params.test_server_name ?? "-",
             providerName: this.rmbtClient?.params.provider ?? "-",
+            startTimeMs: this.startTimeMs,
+            endTimeMs: this.endTimeMs,
         }
     }
 
@@ -184,8 +196,6 @@ export class MeasurementRunner {
             this.cpuInfo = undefined
             return
         }
-        clearInterval(this.cpuInfoInterval)
-        this.cpuInfoInterval = undefined
         this.cpuInfo = {
             load_min: this.rounded(Math.min(...this.cpuInfoList) / 100),
             load_max: this.rounded(Math.max(...this.cpuInfoList) / 100),
@@ -208,6 +218,7 @@ export class MeasurementRunner {
                 osu.cpu.usage().then((percent) => {
                     Logger.I.info(ELoggerMessage.CPU_USAGE, percent)
                     this.cpuInfoList.push(percent)
+                    this.setCPUUsage()
                 })
             }, 1000)
         }
@@ -233,6 +244,12 @@ export class MeasurementRunner {
             this.settingsRequest,
             options?.loopModeInfo
         )
+        if (options?.loopModeInfo) {
+            Logger.I.info(
+                "Registering test %d",
+                options?.loopModeInfo.test_counter
+            )
+        }
         const measurementRegistration =
             await ControlServer.I.registerMeasurement(this.registrationRequest)
         this.rmbtClient = new RMBTClient(measurementRegistration)

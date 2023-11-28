@@ -6,54 +6,77 @@
 
 <ng-template #ont>
     <ng-container *ngIf="link$ | async as link">
-        <header
-            class="app-header app-header--ont app-header--{{
-                hideMenu ? 'transparent' : 'opaque'
-            }}"
-        >
-            <a
-                class="app-logo"
-                [routerLink]="link"
-                (click)="handleClick($event, link)"
-                ><img
-                    (click)="handleClick($event, link)"
-                    [src]="ontLogo$ | async"
-            /></a>
-            <app-header-menu *ngIf="!hideMenu"></app-header-menu>
-            <div
-                *ngIf="!hideMenu"
-                style="width: 142px; display: flex; justify-content: end"
+        <ng-container *transloco="let t">
+            <header
+                class="app-header app-header--ont app-header--{{
+                    hideMenu ? 'transparent' : 'opaque'
+                }}"
             >
                 <a
-                    routerLink="/settings"
+                    class="app-logo"
+                    [routerLink]="link"
                     (click)="handleClick($event, link)"
-                    routerLinkActive="app-menu-item--active"
-                    class="app-menu-item"
-                    mat-icon-button
+                    [title]="t('Home')"
+                    ><img
+                        (click)="handleClick($event, link)"
+                        [src]="ontLogo$ | async"
+                /></a>
+                <app-header-menu *ngIf="!hideMenu"></app-header-menu>
+                <div
+                    *ngIf="!hideMenu"
+                    style="width: 142px; display: flex; justify-content: end"
                 >
-                    <mat-icon>settings</mat-icon>
-                </a>
-            </div>
-        </header>
+                    <a
+                        routerLink="/settings"
+                        (click)="handleClick($event, link)"
+                        routerLinkActive="app-menu-item--active"
+                        class="app-menu-item"
+                        mat-icon-button
+                        [title]="t('Home')"
+                    >
+                        <mat-icon>settings</mat-icon>
+                    </a>
+                </div>
+            </header>
+        </ng-container>
         <div *ngIf="!hideMenu" class="app-header-placeholder"></div>
     </ng-container>
 </ng-template>
 
 <ng-template #rtr>
     <ng-container *ngIf="link$ | async as link">
-        <header class="app-header app-header--large{{ fixed ? '-fixed' : '' }}">
-            <a [routerLink]="link" (click)="handleClick($event, link)"
-                ><img
+        <ng-container *transloco="let t">
+            <header
+                class="app-header app-header--large{{ fixed ? '-fixed' : '' }}"
+            >
+                <a
+                    [routerLink]="link"
                     (click)="handleClick($event, link)"
-                    src="/assets/images/logo-header.svg"
-            /></a>
-        </header>
-        <header class="app-header app-header--small{{ fixed ? '-fixed' : '' }}">
-            <a [routerLink]="link"
-                ><img
-                    (click)="handleClick($event, link)"
-                    src="/assets/images/logo-header-small.svg"
-            /></a>
-        </header>
+                    [title]="t('Home')"
+                    ><img
+                        (click)="handleClick($event, link)"
+                        src="/assets/images/logo-header.svg"
+                /></a>
+                <div
+                    *ngIf="(isLoopModeTestScreen$ | async) === true"
+                    style="display: flex; justify-content: center; flex: 1"
+                >
+                    <app-alert
+                        text="Tests are conducted repeatedly until they are stopped manually"
+                    >
+                        <app-stop-loop-button></app-stop-loop-button>
+                    </app-alert>
+                </div>
+            </header>
+            <header
+                class="app-header app-header--small{{ fixed ? '-fixed' : '' }}"
+            >
+                <a [routerLink]="link" [title]="t('Home')"
+                    ><img
+                        (click)="handleClick($event, link)"
+                        src="/assets/images/logo-header-small.svg"
+                /></a>
+            </header>
+        </ng-container>
     </ng-container>
 </ng-template>

@@ -1,3 +1,5 @@
+import { MeasurementRunner } from ".."
+import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { ILoopModeInfo } from "../interfaces/measurement-registration-request.interface"
 import { Logger } from "./logger.service"
 
@@ -30,16 +32,31 @@ export class LoopService {
     }) {
         const counter = options.loopModeInfo.test_counter
         clearTimeout(this.loopTimeout)
-        const actualInterval = options.interval - this.deviationAdjustment
-        this.loopTimeout = setTimeout(() => {
-            Logger.I.info(
-                "Starting test %d after %d ms",
-                counter + 1,
-                actualInterval
-            )
-            this.deviationAdjustment = Date.now() % 1000
-            options.onTime(counter + 1)
-        }, actualInterval)
+        const setLoopTimeout = () => {
+            const actualInterval = options.interval - this.deviationAdjustment
+            return setTimeout(() => {
+                Logger.I.info(
+                    "Starting test %d after %d ms",
+                    counter + 1,
+                    actualInterval
+                )
+                this.deviationAdjustment = Date.now() % 1000
+                const endPhases = [
+                    EMeasurementStatus.END,
+                    EMeasurementStatus.ERROR,
+                ]
+                if (
+                    endPhases.includes(
+                        MeasurementRunner.I.getCurrentPhaseState().phase
+                    )
+                ) {
+                    options.onTime(counter + 1)
+                } else {
+                    this.loopTimeout = setLoopTimeout()
+                }
+            }, actualInterval)
+        }
+        this.loopTimeout = setLoopTimeout()
         const expireTimeout = process.env.LOOP_MODE_MAX_DURATION
             ? parseInt(process.env.LOOP_MODE_MAX_DURATION)
             : 0

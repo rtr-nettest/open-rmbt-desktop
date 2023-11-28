@@ -70,15 +70,22 @@
 </ng-template>
 
 <ng-template #loopWaitProgressBar>
-    <div style="width: 100%; padding: 0.5em">
-        <h2 *transloco="let t" class="app-title">
-            {{
-                t("Next measurement in") + " " + (ms$ | async | date : "mm:ss")
-            }}
-        </h2>
+    <div
+        *ngIf="progressMode$ | async as progressMode"
+        style="width: 100%; padding: 0.5em"
+    >
+        <ng-container *ngIf="progressMode === 'determinate'">
+            <h2 *transloco="let t" class="app-title">
+                {{
+                    t("Next measurement in") +
+                        " " +
+                        (ms$ | async | date : "mm:ss")
+                }}
+            </h2>
+        </ng-container>
         <mat-progress-bar
             class="app-progress-bar--loop"
-            mode="determinate"
+            [mode]="progressMode"
             [value]="progress$ | async"
         ></mat-progress-bar>
     </div>

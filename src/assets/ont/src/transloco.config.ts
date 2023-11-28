@@ -1,6 +1,7 @@
 export const TranslocoConfigExt: { [key: string]: any } = {
     availableLangs: ["en", "de", "nb", "sk", "sr", "sr-Latn", "sr-Latn-ME"],
     availableLocales: [
+        // languages shown in the Settings
         { iso: "en", name: "English" },
         { iso: "de", name: "Deutsch" },
         { iso: "nb", name: "Norsk" },

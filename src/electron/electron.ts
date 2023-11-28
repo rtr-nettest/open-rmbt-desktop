@@ -10,7 +10,7 @@ import {
 } from "electron"
 if (require("electron-squirrel-startup")) app.quit()
 import path from "path"
-import { t } from "../measurement/services/i18n.service"
+import { I18nService, t } from "../measurement/services/i18n.service"
 import { MeasurementRunner } from "../measurement"
 import { Events } from "./enums/events.enum"
 import { IEnv } from "./interfaces/env.interface"
@@ -267,7 +267,7 @@ ipcMain.on(Events.DELETE_LOCAL_DATA, () => {
 
 ipcMain.handle(Events.GET_ENV, (): IEnv => {
     return {
-        ACTIVE_LANGUAGE: Store.get(ACTIVE_LANGUAGE) as string,
+        ACTIVE_LANGUAGE: I18nService.I.getActiveLanguage(),
         APP_VERSION: pack.version,
         CMS_URL: process.env.CMS_URL || "",
         CPU_WARNING_PERCENT: process.env.CPU_WARNING_PERCENT

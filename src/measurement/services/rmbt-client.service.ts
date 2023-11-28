@@ -346,7 +346,7 @@ export class RMBTClient {
                     )
                     this.interimDownInterval = setInterval(() => {
                         this.setInterimDownMbps()
-                    }, 200)
+                    }, 175)
                 }
                 this.measurementStatus = EMeasurementStatus.DOWN
                 this.phaseStartTimeNs[EMeasurementStatus.DOWN] = Time.nowNs()
@@ -450,7 +450,7 @@ export class RMBTClient {
                         )
                         this.interimUpInterval = setInterval(() => {
                             this.setInterimUpMbps()
-                        }, 200)
+                        }, 175)
                     }
                 }
                 break

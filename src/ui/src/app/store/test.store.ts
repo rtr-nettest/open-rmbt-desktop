@@ -1,13 +1,5 @@
 import { Injectable, NgZone } from "@angular/core"
-import {
-    BehaviorSubject,
-    concatMap,
-    from,
-    interval,
-    map,
-    of,
-    takeWhile,
-} from "rxjs"
+import { BehaviorSubject, concatMap, from, interval, map, of } from "rxjs"
 import { TestVisualizationState } from "../dto/test-visualization-state.dto"
 import { ITestVisualizationState } from "../interfaces/test-visualization-state.interface"
 import { IBasicNetworkInfo } from "../../../../measurement/interfaces/basic-network-info.interface"
@@ -27,7 +19,7 @@ import { SprintfPipe } from "../pipes/sprintf.pipe"
 import { IMeasurementPhaseState } from "../../../../measurement/interfaces/measurement-phase-state.interface"
 import { HistoryStore } from "./history.store"
 
-export const STATE_UPDATE_TIMEOUT = 200
+export const STATE_UPDATE_TIMEOUT = 175
 
 @Injectable({
     providedIn: "root",

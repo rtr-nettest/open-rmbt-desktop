@@ -67,6 +67,9 @@ export class TestScreenComponent implements OnDestroy, OnInit {
     showCPUWarning$ = new BehaviorSubject(0)
     ms$ = new BehaviorSubject(0)
     progress$ = new BehaviorSubject(0)
+    progressMode$ = new BehaviorSubject<"determinate" | "indeterminate">(
+        "determinate"
+    )
     private waitingProgressMs = 0
 
     constructor(
@@ -137,7 +140,12 @@ export class TestScreenComponent implements OnDestroy, OnInit {
         const timeTillEndMs =
             state.startTimeMs + this.store.fullTestIntervalMs - state.endTimeMs
         const currentMs = Math.max(0, timeTillEndMs - this.waitingProgressMs)
-        this.ms$.next(currentMs)
-        this.progress$.next((this.waitingProgressMs / timeTillEndMs) * 100)
+        if (currentMs <= 0) {
+            this.progressMode$.next("indeterminate")
+        } else {
+            this.progressMode$.next("determinate")
+            this.ms$.next(currentMs)
+            this.progress$.next((this.waitingProgressMs / timeTillEndMs) * 100)
+        }
     }
 }

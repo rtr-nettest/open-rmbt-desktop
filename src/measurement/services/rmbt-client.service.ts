@@ -346,7 +346,7 @@ export class RMBTClient {
                     )
                     this.interimDownInterval = setInterval(() => {
                         this.setInterimDownMbps()
-                    }, 200)
+                    }, 175)
                 }
                 this.measurementStatus = EMeasurementStatus.DOWN
                 this.phaseStartTimeNs[EMeasurementStatus.DOWN] = Time.nowNs()
@@ -368,6 +368,9 @@ export class RMBTClient {
                     this.threadResults.length === this.measurementTasks.length
                 ) {
                     clearInterval(this.interimDownInterval)
+                    this.interimThreadResults[index] =
+                        message.data! as IMeasurementThreadResult
+                    this.setInterimDownMbps()
                     this.finalResultDown = CalcService.I.getFineResult(
                         this.threadResults,
                         "down"
@@ -450,7 +453,7 @@ export class RMBTClient {
                         )
                         this.interimUpInterval = setInterval(() => {
                             this.setInterimUpMbps()
-                        }, 200)
+                        }, 175)
                     }
                 }
                 break
@@ -465,8 +468,11 @@ export class RMBTClient {
                 if (
                     this.threadResults.length === this.measurementTasks.length
                 ) {
-                    this.finishMeasurement(resolve)
                     clearInterval(this.interimUpInterval)
+                    this.interimThreadResults[index] =
+                        message.data! as IMeasurementThreadResult
+                    this.setInterimUpMbps()
+                    this.finishMeasurement(resolve)
                 }
                 break
         }

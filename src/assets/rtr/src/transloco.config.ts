@@ -1,5 +1,8 @@
 export const TranslocoConfigExt: { [key: string]: any } = {
     availableLangs: ["en", "de", "es", "sl", "cs", "fr", "it", "no"],
+    crowdinMappings: { //for some languages, crowdin will default to lang/country
+        "es": "es-ES"
+    },
     availableLocales: [
         // languages shown in the Settings
         { iso: "en", name: "English" },

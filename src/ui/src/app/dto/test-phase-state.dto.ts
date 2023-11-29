@@ -77,7 +77,7 @@ export class TestPhaseState implements ITestPhaseState {
         this.chart = [
             ...(this.chart || []),
             {
-                x: Math.max(this.duration - STATE_UPDATE_TIMEOUT / 500, 0),
+                x: Math.max(this.duration - STATE_UPDATE_TIMEOUT / 1000, 0),
                 y: this.conversion.speedLog(this.counter),
             },
         ]

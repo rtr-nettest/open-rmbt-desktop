@@ -9,10 +9,15 @@ async function main() {
     const dotenvConfig = path.join(projectRoot, ".env")
     console.log(`Loading .env file from ${dotenvConfig}`)
     dotenv.config({ path: dotenvConfig })
-    const { availableLangs } = TranslocoConfigExt
+    const { availableLangs, crowdinMappings } = TranslocoConfigExt
     console.log(`Available languages`, availableLangs)
     for (const lang of availableLangs) {
-        const translations = await CrowdinService.I.getTranslations(lang)
+        let crowdinLang = lang;
+        if (lang in crowdinMappings) {
+            crowdinLang = crowdinMappings[lang];
+        }
+
+        const translations = await CrowdinService.I.getTranslations(crowdinLang)
         if (!translations) {
             continue
         }

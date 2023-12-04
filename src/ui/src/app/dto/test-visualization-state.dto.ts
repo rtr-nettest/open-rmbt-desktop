@@ -111,14 +111,30 @@ export class TestVisualizationState implements ITestVisualizationState {
             }
             this.phases[EMeasurementStatus.DOWN].counter =
                 newTestPhaseState.down
-        } else if (newPhaseName === EMeasurementStatus.UP) {
-            this.phases[EMeasurementStatus.UP].counter = newTestPhaseState.up
-        } else if (newPhaseName === EMeasurementStatus.SHOWING_RESULTS) {
+        } else if (
+            newPhaseName === EMeasurementStatus.INIT_UP ||
+            newPhaseName === EMeasurementStatus.UP ||
+            newPhaseName === EMeasurementStatus.SUBMITTING_RESULTS ||
+            newPhaseName === EMeasurementStatus.SHOWING_RESULTS
+        ) {
             this.phases[EMeasurementStatus.PING].counter =
                 newTestPhaseState.ping
             this.phases[EMeasurementStatus.DOWN].counter =
                 newTestPhaseState.down
             this.phases[EMeasurementStatus.UP].counter = newTestPhaseState.up
+        }
+        this.setResultsForEachPhase(newTestPhaseState)
+    }
+
+    private setResultsForEachPhase(newTestPhaseState: ITestPhaseState) {
+        const phases = Object.values(EMeasurementStatus)
+        for (const phase of phases) {
+            if (!this.phases[phase]) {
+                continue
+            }
+            this.phases[phase].ping = newTestPhaseState.ping
+            this.phases[phase].down = newTestPhaseState.down
+            this.phases[phase].up = newTestPhaseState.up
         }
     }
 

@@ -140,16 +140,7 @@ export class TestStore {
         }
         window.electronAPI.getMeasurementState().then((state) => {
             this.setTestState(state)
-            const phases = Object.values(EMeasurementStatus)
             const v = this.visualization$.value
-            for (const phase of phases) {
-                if (!v.phases[phase]) {
-                    continue
-                }
-                v.phases[phase].ping = state.ping
-                v.phases[phase].down = state.down
-                v.phases[phase].up = state.up
-            }
             v.phases[EMeasurementStatus.DOWN].setChartFromPings?.(state.pings)
             v.phases[EMeasurementStatus.DOWN].setRTRChartFromOverallSpeed?.(
                 state.downs

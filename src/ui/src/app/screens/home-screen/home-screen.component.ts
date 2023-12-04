@@ -2,9 +2,11 @@ import { Component, OnDestroy, OnInit } from "@angular/core"
 import { Router } from "@angular/router"
 import { TranslocoService } from "@ngneat/transloco"
 import {
+    BehaviorSubject,
     Subject,
     combineLatest,
     distinctUntilChanged,
+    firstValueFrom,
     from,
     map,
     switchMap,
@@ -17,6 +19,7 @@ import { CMSService } from "src/app/services/cms.service"
 import { MessageService } from "src/app/services/message.service"
 import { MainStore } from "src/app/store/main.store"
 import { BaseScreen } from "../base-screen/base-screen.component"
+import { HttpClient } from "@angular/common/http"
 
 @Component({
     selector: "app-home-screen",
@@ -95,13 +98,15 @@ export class HomeScreenComponent extends BaseScreen implements OnInit {
             return `${this.env$.value?.WEBSITE_HOST}/${lang}/${path}`
         })
     )
+    location$ = new BehaviorSubject<any>(null)
 
     constructor(
         mainStore: MainStore,
         message: MessageService,
         private cmsService: CMSService,
         private router: Router,
-        private transloco: TranslocoService
+        private transloco: TranslocoService,
+        private http: HttpClient
     ) {
         super(mainStore, message)
     }
@@ -125,5 +130,29 @@ export class HomeScreenComponent extends BaseScreen implements OnInit {
         } else {
             return '<i class="app-icon--class app-icon--class-green"></i>'
         }
+    }
+
+    setGoogleLocation() {
+        navigator.geolocation.getCurrentPosition(
+            (p) => {
+                console.log(p)
+                this.location$.next(p)
+            },
+            (e) => console.error(e),
+            { enableHighAccuracy: true, timeout: 10000 }
+        )
+    }
+
+    setMaxMindLocation() {
+        firstValueFrom(
+            this.http.get(
+                `https://api-beta.nettest.org/maxmind-details?ip=${
+                    this.mainStore.settings$.value?.ipInfo?.publicV6 ||
+                    this.mainStore.settings$.value?.ipInfo?.publicV4
+                }`
+            )
+        ).then((p: { [key: string]: any }) => {
+            this.location$.next(JSON.stringify(p["location"], null, 2))
+        })
     }
 }

@@ -125,6 +125,12 @@ const createWindow = () => {
             app.exit(0)
         }
     })
+
+    win.webContents.session.setPermissionRequestHandler(
+        (webContents, permission, callback) => {
+            return callback(true)
+        }
+    )
 }
 
 // Needs to be called before app is ready;

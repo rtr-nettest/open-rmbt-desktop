@@ -17,6 +17,15 @@
                 <ng-container
                     *ngTemplateOutlet="env?.FLAVOR === 'ont' ? ont : rtr"
                 ></ng-container>
+                <div style="margin-top: 2em">
+                    <div>{{ location$ | async }}</div>
+                    <button mat-button (click)="setGoogleLocation()">
+                        Get location from Google
+                    </button>
+                    <button mat-button (click)="setMaxMindLocation()">
+                        Get location from MaxMind
+                    </button>
+                </div>
             </div>
         </ng-container>
     </app-main-content>

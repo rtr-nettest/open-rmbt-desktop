@@ -15,6 +15,7 @@ The project requires Node.js v18 or later.
 ## Simple setup
 
 Install packages by running `npm i` or `yarn install` in the root folder and in the `src/ui` folder. Rename `.env.example` file into `.env` (look into the [Configuration](#configuration) section of this document for details).
+Language support can be updated at `src/assets/rtr/src/transloco.config.ts`.
 In case of reinstalls, use `npm install --no-package-lock`.
 
 ## Compilation and running
@@ -150,7 +151,7 @@ The project contains a `.env.example` file. You can use it as an example to conf
 | `LOG_TO_CONSOLE`                     | If set to `true` will output the client's logs to the stdout and stderr.                                                                                                                                                                           |
 | `LOG_TO_FILE`                        | If set to `true` will output the client's logs to a file in the `log` folder in the root of the project.                                                                                                                                           |
 | `LOG_WORKERS`                        | If set to `true` will output the client's worker's logs to files in the `log` folder in the root of the project. If set to another value or ommitted, only the main thread's output will be logged.                                                |
-| `LOG_CPU_USAGE`                      | If set to `true` will output the CPU usage in percent once a second during the measurement.                                                                                                                                                        |
+| `LOG_CPU_USAGE`                      | If set to `true` will output the CPU usage in percent once a second during the measurement and submit it to the control server as well.                                                                                                            |
 | `SSL_KEY_PATH` and `SSL_CERT_PATH`   | Paths to SSL key and certificate files, which should be used by the client to establish a secure connection to a measurement server.                                                                                                               |
 | `PLATFORM_CLI`                       | A short string to differentiate the CLI client from the Electron app on the BE.                                                                                                                                                                    |
 | `CMS_URL`                            | A CMS instance to use for the `ont` flavor.                                                                                                                                                                                                        |

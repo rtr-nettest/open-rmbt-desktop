@@ -82,5 +82,8 @@
         "sql.js": "^1.8.0",
         "uuidv4": "^6.2.13"
     },
-    "gitInfo": {}
+    "gitInfo": {
+        "hash": "28af7a40cc9ed41d99b3522ffbd05585b25fb5f1",
+        "branch": "geolocation"
+    }
 }

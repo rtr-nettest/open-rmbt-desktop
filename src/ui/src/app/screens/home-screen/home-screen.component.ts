@@ -136,7 +136,9 @@ export class HomeScreenComponent extends BaseScreen implements OnInit {
         navigator.geolocation.getCurrentPosition(
             (p) => {
                 console.log(p)
-                this.location$.next(p)
+                this.location$.next(
+                    `Lat: ${p.coords.latitude}, lon: ${p.coords.longitude}`
+                )
             },
             (e) => console.error(e),
             { enableHighAccuracy: true, timeout: 10000 }
@@ -152,7 +154,9 @@ export class HomeScreenComponent extends BaseScreen implements OnInit {
                 }`
             )
         ).then((p: { [key: string]: any }) => {
-            this.location$.next(JSON.stringify(p["location"], null, 2))
+            this.location$.next(
+                `Lat: ${p["location"].latitude}, lon: ${p["location"].longitude}`
+            )
         })
     }
 }

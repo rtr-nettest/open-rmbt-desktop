@@ -12,6 +12,12 @@ export const environment: {
             translations: [],
         },
         {
+            label: "History",
+            icon: "history",
+            route: ERoutes.HISTORY,
+            translations: [],
+        },
+        {
             label: "Loop Mode",
             icon: "loop",
             route: ERoutes.LOOP_MODE,
@@ -28,12 +34,6 @@ export const environment: {
             label: "Map",
             icon: "map",
             route: ERoutes.MAP,
-            translations: [],
-        },
-        {
-            label: "History",
-            icon: "history",
-            route: ERoutes.HISTORY,
             translations: [],
         },
         {

@@ -165,8 +165,12 @@ export class MeasurementRunner {
     getCurrentPhaseState(): IMeasurementPhaseState & IBasicNetworkInfo {
         const phase =
             this.rmbtClient?.measurementStatus ?? EMeasurementStatus.NOT_STARTED
-        const down = this.rmbtClient?.interimDownMbps ?? -1
-        const up = this.rmbtClient?.interimUpMbps ?? -1
+        const down =
+            this.rmbtClient?.finalDownMbps ||
+            this.rmbtClient?.interimDownMbps ||
+            -1
+        const up =
+            this.rmbtClient?.finalUpMbps || this.rmbtClient?.interimUpMbps || -1
         return {
             duration: this.rmbtClient?.getPhaseDuration(phase) ?? -1,
             progress: this.rmbtClient?.getPhaseProgress(phase) ?? -1,

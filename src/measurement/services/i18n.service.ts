@@ -1,7 +1,5 @@
 import { TranslocoConfigExt } from "../../ui/src/transloco.config"
 import { ACTIVE_LANGUAGE, DEFAULT_LANGUAGE, Store } from "./store.service"
-import * as en from "../../ui/src/assets/i18n/en.json"
-import * as de from "../../ui/src/assets/i18n/de.json"
 
 export class I18nService {
     static get I() {
@@ -10,12 +8,19 @@ export class I18nService {
 
     private static instance = new I18nService()
 
-    private translations: { [key: string]: { [key: string]: string } } = {
-        en,
-        de,
-    }
+    private translations: { [key: string]: { [key: string]: string } } = {}
 
-    private constructor() {}
+    private constructor() {
+        for (const lang of TranslocoConfigExt["availableLangs"]) {
+            try {
+                this.translations[
+                    lang
+                ] = require(`../../ui/src/assets/i18n/${lang}.json`)
+            } catch (_) {
+                continue
+            }
+        }
+    }
 
     getActiveLanguage() {
         let language = Store.get(ACTIVE_LANGUAGE) as string

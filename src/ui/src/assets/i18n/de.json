@@ -108,5 +108,6 @@
     "Export as XLSX": "Als XLSX exportieren",
     "Export as PDF": "Als PDF exportieren",
     "Export as CSV": "Als CSV exportieren",
-    "Open in browser": "Im Browser öffnen"
+    "Open in browser": "Im Browser öffnen",
+    "An error occurred during test": "DE-An error occurred during test"
 }

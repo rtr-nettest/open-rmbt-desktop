@@ -108,5 +108,6 @@
     "Export as XLSX": "Izvozi kot XLSX",
     "Export as PDF": "Izvozi kot PDF",
     "Export as CSV": "Izvozi kot CSV",
-    "Open in browser": "Odpri v brskalniku"
+    "Open in browser": "Odpri v brskalniku",
+    "An error occurred during test": "SL-An error occurred during test"
 }

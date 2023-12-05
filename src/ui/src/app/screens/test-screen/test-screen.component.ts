@@ -19,6 +19,7 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
 import { MessageService } from "src/app/services/message.service"
 import {
     ERROR_OCCURED,
+    ERROR_OCCURED_DURING_LOOP,
     ERROR_OCCURED_SENDING_RESULTS,
 } from "src/app/constants/strings"
 import { ITestVisualizationState } from "src/app/interfaces/test-visualization-state.interface"
@@ -91,10 +92,14 @@ export class TestScreenComponent implements OnDestroy, OnInit {
 
     private openErrorDialog(state: ITestVisualizationState) {
         this.message.closeAllDialogs()
-        const message =
+        let message = ERROR_OCCURED
+        if (this.enableLoopMode$.value === true) {
+            message = ERROR_OCCURED_DURING_LOOP + " " + this.loopCount$.value
+        } else if (
             state.currentPhaseName === EMeasurementStatus.SUBMITTING_RESULTS
-                ? ERROR_OCCURED_SENDING_RESULTS
-                : ERROR_OCCURED
+        ) {
+            message = ERROR_OCCURED_SENDING_RESULTS
+        }
         if (this.enableLoopMode$.value !== true) {
             this.stopped$.next()
             this.message.openConfirmDialog(message, () => {

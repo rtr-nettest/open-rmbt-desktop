@@ -132,7 +132,8 @@ import { TranslatePipe } from "./pipes/translate.pipe"
 import { MarkdownModule } from "ngx-markdown"
 import { SocialButtonsComponent } from "./widgets/social-buttons/social-buttons.component"
 import { CertifiedScreenComponent } from "./screens/certified-screen/certified-screen.component"
-import { CertifiedInfoComponent } from "./widgets/certified-info/certified-info.component"
+import { CertifiedInfoComponent } from "./widgets/certified-info/certified-info.component";
+import { CertifiedDataFormComponent } from './widgets/certified-data-form/certified-data-form.component'
 
 Chart.register(
     BarElement,
@@ -254,6 +255,7 @@ declare global {
         SocialButtonsComponent,
         CertifiedScreenComponent,
         CertifiedInfoComponent,
+        CertifiedDataFormComponent,
     ],
     imports: [
         AppRoutingModule,

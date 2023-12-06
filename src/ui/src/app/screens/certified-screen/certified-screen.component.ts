@@ -7,7 +7,7 @@ import { MainStore } from "src/app/store/main.store"
     styleUrls: ["./certified-screen.component.scss"],
 })
 export class CertifiedScreenComponent {
-    activeBreadCrumbIndex = 0
+    activeBreadCrumbIndex = 1
     breadCrumbs = ["Info", "Data", "Environment", "Measurement", "Result"]
     env$ = this.mainStore.env$
 

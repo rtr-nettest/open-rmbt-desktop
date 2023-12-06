@@ -1,7 +1,29 @@
 <app-header></app-header>
 <app-body *ngIf="env$ | async as env">
     <app-main-menu *ngIf="env?.FLAVOR !== 'ont'"></app-main-menu>
-    <app-main-content>
-        <app-certified-info class="app-main"></app-certified-info>
+    <app-main-content *transloco="let t">
+        <div class="app-main">
+            <ul class="app-breadcrumbs">
+                <li
+                    *ngFor="let bc of breadCrumbs; let i = index"
+                    class="app-breadcrumbs__item"
+                    [class.active]="i == activeBreadCrumbIndex"
+                >
+                    <a>{{ i + 1 }}. {{ t(bc) }}</a>
+                </li>
+            </ul>
+            <div style="clear: both; margin-bottom: 20px"></div>
+            <app-certified-info
+                *ngIf="activeBreadCrumbIndex == 0"
+            ></app-certified-info>
+            <button
+                mat-flat-button
+                color="primary"
+                style="margin-top: 1.6em"
+                (click)="nextBreadCrumb()"
+            >
+                {{ t("Next") }}
+            </button>
+        </div>
     </app-main-content>
 </app-body>

@@ -131,6 +131,8 @@ import { LoopTestScreenComponent } from "./screens/loop-test-screen/loop-test-sc
 import { TranslatePipe } from "./pipes/translate.pipe"
 import { MarkdownModule } from "ngx-markdown"
 import { SocialButtonsComponent } from "./widgets/social-buttons/social-buttons.component"
+import { CertifiedScreenComponent } from "./screens/certified-screen/certified-screen.component"
+import { CertifiedInfoComponent } from "./widgets/certified-info/certified-info.component"
 
 Chart.register(
     BarElement,
@@ -250,6 +252,8 @@ declare global {
         LoopTestScreenComponent,
         TranslatePipe,
         SocialButtonsComponent,
+        CertifiedScreenComponent,
+        CertifiedInfoComponent,
     ],
     imports: [
         AppRoutingModule,

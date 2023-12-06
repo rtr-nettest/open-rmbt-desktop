@@ -1,0 +1,16 @@
+@import "../../../assets/styles/core.scss";
+
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+app-main-content {
+    align-items: flex-start;
+}
+
+.app-main {
+    padding: 0 rem(30) rem(30);
+    width: 100%;
+}

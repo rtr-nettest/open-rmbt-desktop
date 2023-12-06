@@ -1,0 +1,7 @@
+<app-header></app-header>
+<app-body *ngIf="env$ | async as env">
+    <app-main-menu *ngIf="env?.FLAVOR !== 'ont'"></app-main-menu>
+    <app-main-content>
+        <app-certified-info class="app-main"></app-certified-info>
+    </app-main-content>
+</app-body>

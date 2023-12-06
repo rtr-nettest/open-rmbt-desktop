@@ -25,7 +25,7 @@ export class DynamicComponentDirective implements OnInit, OnChanges {
     constructor(private container: ViewContainerRef) {}
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (this.component) {
+        if (this.component && changes["parameters"]) {
             this.component.setInput(
                 "parameters",
                 changes["parameters"].currentValue

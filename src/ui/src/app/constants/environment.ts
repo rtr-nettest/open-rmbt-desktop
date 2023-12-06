@@ -28,7 +28,6 @@ export const environment: {
             icon: "certified",
             route: ERoutes.CERTIFIED,
             translations: [],
-            hidden: true,
         },
         {
             label: "Map",

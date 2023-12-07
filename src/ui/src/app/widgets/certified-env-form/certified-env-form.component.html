@@ -1,0 +1,47 @@
+<ng-container *transloco="let t">
+    <h1>{{ t("Certified measurement") }}</h1>
+    <h2>{{ t("Further information on the certified measurement") }}</h2>
+    <p>
+        {{
+            t(
+                "Since this is the first measurement cycle, we ask you to answer the following questions in order to understand the circumstances of the measurement. For further measuring cycles, answering these questions is no longer necessary. "
+            )
+        }}
+    </p>
+    <div *ngIf="form">
+        <form [formGroup]="form">
+            <h4>
+                {{ t("Please describe the location of your Internet access")
+                }}<sup>*</sup>
+            </h4>
+            <ul>
+                <li
+                    *ngFor="
+                        let control of form.controls.locationType.controls;
+                        let i = index
+                    "
+                >
+                    <mat-checkbox
+                        [value]="locationValues[i]"
+                        [formControl]="control"
+                        >{{ t(locationNames[i]) }}</mat-checkbox
+                    >
+                </li>
+                <li>
+                    <mat-checkbox
+                        (change)="toggleLocationTypeOther(!$event.checked)"
+                        [value]="locationValues[locationValues.length - 1]"
+                        >{{ t("Other") }}:</mat-checkbox
+                    >
+                </li>
+            </ul>
+            <mat-form-field appearance="outline">
+                <textarea
+                    matInput
+                    formControlName="locationTypeOther"
+                    name="locationTypeOther"
+                ></textarea>
+            </mat-form-field>
+        </form>
+    </div>
+</ng-container>

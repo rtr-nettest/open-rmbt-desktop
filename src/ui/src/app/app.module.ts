@@ -21,6 +21,7 @@ import { IUserSettings } from "../../../measurement/interfaces/user-settings-res
 import { IEnv } from "../../../electron/interfaces/env.interface"
 import { MatIconModule } from "@angular/material/icon"
 import { MatButtonModule } from "@angular/material/button"
+import { MatCheckboxModule } from "@angular/material/checkbox"
 import { MatTooltipModule } from "@angular/material/tooltip"
 import { MatSnackBarModule } from "@angular/material/snack-bar"
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
@@ -135,6 +136,7 @@ import { SocialButtonsComponent } from "./widgets/social-buttons/social-buttons.
 import { CertifiedScreenComponent } from "./screens/certified-screen/certified-screen.component"
 import { CertifiedInfoComponent } from "./widgets/certified-info/certified-info.component"
 import { CertifiedDataFormComponent } from "./widgets/certified-data-form/certified-data-form.component"
+import { CertifiedEnvFormComponent } from "./widgets/certified-env-form/certified-env-form.component"
 
 Chart.register(
     BarElement,
@@ -257,6 +259,7 @@ declare global {
         CertifiedScreenComponent,
         CertifiedInfoComponent,
         CertifiedDataFormComponent,
+        CertifiedEnvFormComponent,
     ],
     imports: [
         AppRoutingModule,
@@ -267,6 +270,7 @@ declare global {
         HttpClientModule,
         MarkdownModule.forRoot(),
         MatButtonModule,
+        MatCheckboxModule,
         MatDialogModule,
         MatIconModule,
         MatInputModule,

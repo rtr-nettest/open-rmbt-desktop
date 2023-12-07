@@ -10,7 +10,7 @@ import { Subject, map, takeUntil } from "rxjs"
 import {
     ICertifiedDataForm,
     ICertifiedDataFormControls,
-} from "src/app/interfaces/certified-form.interface"
+} from "src/app/interfaces/certified-data-form.interface"
 
 @Component({
     selector: "app-certified-data-form",

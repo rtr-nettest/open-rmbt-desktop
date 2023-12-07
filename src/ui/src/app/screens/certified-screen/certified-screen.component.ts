@@ -1,5 +1,6 @@
 import { Component } from "@angular/core"
-import { ICertifiedDataForm } from "src/app/interfaces/certified-form.interface"
+import { ICertifiedDataForm } from "src/app/interfaces/certified-data-form.interface"
+import { ICertifiedEnvForm } from "src/app/interfaces/certified-env-form.interface"
 import { MainStore } from "src/app/store/main.store"
 
 @Component({
@@ -8,7 +9,7 @@ import { MainStore } from "src/app/store/main.store"
     styleUrls: ["./certified-screen.component.scss"],
 })
 export class CertifiedScreenComponent {
-    activeBreadCrumbIndex = 1
+    activeBreadCrumbIndex = 2
     breadCrumbs = ["Info", "Data", "Environment", "Measurement", "Result"]
     env$ = this.mainStore.env$
     isReady = false
@@ -26,8 +27,16 @@ export class CertifiedScreenComponent {
         console.log("Measurement, here we go!")
     }
 
-    onFormChange(value: ICertifiedDataForm | undefined) {
+    onDataFormChange(value: ICertifiedDataForm | undefined) {
         if (value && !value.isFirstCycle) {
+            this.isReady = true
+        } else {
+            this.isReady = false
+        }
+    }
+
+    onEnvFormChange(value: ICertifiedEnvForm | undefined) {
+        if (value) {
             this.isReady = true
         } else {
             this.isReady = false

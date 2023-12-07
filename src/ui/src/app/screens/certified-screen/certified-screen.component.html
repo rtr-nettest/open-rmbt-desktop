@@ -17,9 +17,13 @@
                 *ngIf="activeBreadCrumbIndex == 0"
             ></app-certified-info>
             <app-certified-data-form
-                (formChange)="onFormChange($event)"
+                (formChange)="onDataFormChange($event)"
                 *ngIf="activeBreadCrumbIndex == 1"
             ></app-certified-data-form>
+            <app-certified-env-form
+                (formChange)="onEnvFormChange($event)"
+                *ngIf="activeBreadCrumbIndex == 2"
+            ></app-certified-env-form>
             <button
                 *ngIf="!isReady"
                 mat-flat-button

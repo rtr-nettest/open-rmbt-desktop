@@ -25,6 +25,7 @@ import {
 import { ITestVisualizationState } from "src/app/interfaces/test-visualization-state.interface"
 import { HistoryStore } from "src/app/store/history.store"
 import { IEnv } from "../../../../../electron/interfaces/env.interface"
+import { TranslocoService } from "@ngneat/transloco"
 
 @Component({
     selector: "app-test-screen",
@@ -78,7 +79,8 @@ export class TestScreenComponent implements OnDestroy, OnInit {
         private store: TestStore,
         private mainStore: MainStore,
         private router: Router,
-        private message: MessageService
+        private message: MessageService,
+        private transloco: TranslocoService
     ) {}
 
     ngOnInit(): void {
@@ -94,7 +96,10 @@ export class TestScreenComponent implements OnDestroy, OnInit {
         this.message.closeAllDialogs()
         let message = ERROR_OCCURED
         if (this.enableLoopMode$.value === true) {
-            message = ERROR_OCCURED_DURING_LOOP + " " + this.loopCount$.value
+            message =
+                this.transloco.translate(ERROR_OCCURED_DURING_LOOP) +
+                " " +
+                this.loopCount$.value
         } else if (
             state.currentPhaseName === EMeasurementStatus.SUBMITTING_RESULTS
         ) {

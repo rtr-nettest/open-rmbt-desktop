@@ -77,6 +77,7 @@ import { MatSortModule } from "@angular/material/sort"
 import { MatPaginatorModule } from "@angular/material/paginator"
 import { MatSlideToggleModule } from "@angular/material/slide-toggle"
 import { MatSelectModule } from "@angular/material/select"
+import { MatRadioModule } from "@angular/material/radio"
 import { TableComponent } from "./widgets/table/table.component"
 import { PaginatorComponent } from "./widgets/paginator/paginator.component"
 import { DynamicComponentDirective } from "./directives/dynamic-component.directive"
@@ -132,8 +133,8 @@ import { TranslatePipe } from "./pipes/translate.pipe"
 import { MarkdownModule } from "ngx-markdown"
 import { SocialButtonsComponent } from "./widgets/social-buttons/social-buttons.component"
 import { CertifiedScreenComponent } from "./screens/certified-screen/certified-screen.component"
-import { CertifiedInfoComponent } from "./widgets/certified-info/certified-info.component";
-import { CertifiedDataFormComponent } from './widgets/certified-data-form/certified-data-form.component'
+import { CertifiedInfoComponent } from "./widgets/certified-info/certified-info.component"
+import { CertifiedDataFormComponent } from "./widgets/certified-data-form/certified-data-form.component"
 
 Chart.register(
     BarElement,
@@ -272,6 +273,7 @@ declare global {
         MatPaginatorModule,
         MatProgressBarModule,
         MatProgressSpinnerModule,
+        MatRadioModule,
         MatSnackBarModule,
         MatTableModule,
         MatSortModule,

@@ -17,15 +17,26 @@
                 *ngIf="activeBreadCrumbIndex == 0"
             ></app-certified-info>
             <app-certified-data-form
+                (formChange)="onFormChange($event)"
                 *ngIf="activeBreadCrumbIndex == 1"
             ></app-certified-data-form>
             <button
+                *ngIf="!isReady"
                 mat-flat-button
                 color="primary"
                 style="margin-top: 1.6em"
                 (click)="nextBreadCrumb()"
             >
                 {{ t("Next") }}
+            </button>
+            <button
+                *ngIf="isReady"
+                mat-flat-button
+                color="primary"
+                style="margin-top: 1.6em"
+                (click)="startCertifiedMeasurement()"
+            >
+                {{ t("Start certified measurement") }}
             </button>
         </div>
     </app-main-content>

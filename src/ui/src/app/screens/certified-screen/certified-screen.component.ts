@@ -3,16 +3,35 @@ import { ICertifiedDataForm } from "src/app/interfaces/certified-data-form.inter
 import { ICertifiedEnvForm } from "src/app/interfaces/certified-env-form.interface"
 import { MainStore } from "src/app/store/main.store"
 
+enum EBreadCrumbs {
+    INFO,
+    DATA,
+    ENVIRONMENT,
+    MEASUREMENT,
+    RESULT,
+}
+
+const BreadCrumbsNames = {
+    [EBreadCrumbs.INFO]: "Info",
+    [EBreadCrumbs.DATA]: "Data",
+    [EBreadCrumbs.ENVIRONMENT]: "Environment",
+    [EBreadCrumbs.MEASUREMENT]: "Measurement",
+    [EBreadCrumbs.RESULT]: "Result",
+}
+
 @Component({
     selector: "app-certified-screen",
     templateUrl: "./certified-screen.component.html",
     styleUrls: ["./certified-screen.component.scss"],
 })
 export class CertifiedScreenComponent {
-    activeBreadCrumbIndex = 0
-    breadCrumbs = ["Info", "Data", "Environment", "Measurement", "Result"]
+    activeBreadCrumbIndex = EBreadCrumbs.INFO
+    breadCrumbs = EBreadCrumbs
+    breadCrumbsNames = Object.values(BreadCrumbsNames)
     env$ = this.mainStore.env$
     isReady = false
+    isDataFormValid = false
+    isEnvFormValid = false
     dataForm: ICertifiedDataForm | null = null
     envForm: ICertifiedEnvForm | null = null
 
@@ -23,7 +42,7 @@ export class CertifiedScreenComponent {
     constructor(private mainStore: MainStore) {}
 
     nextBreadCrumb() {
-        if (this.activeBreadCrumbIndex >= this.breadCrumbs.length - 1) {
+        if (this.activeBreadCrumbIndex >= this.breadCrumbsNames.length - 1) {
             return
         }
         this.activeBreadCrumbIndex++
@@ -34,9 +53,15 @@ export class CertifiedScreenComponent {
     }
 
     onDataFormChange(value: ICertifiedDataForm | null) {
-        if (value && !value.isFirstCycle) {
-            this.isReady = true
+        if (value) {
+            this.isDataFormValid = true
+            if (!value.isFirstCycle) {
+                this.isReady = true
+            } else {
+                this.isReady = false
+            }
         } else {
+            this.isDataFormValid = false
             this.isReady = false
         }
         this.dataForm = value
@@ -44,8 +69,10 @@ export class CertifiedScreenComponent {
 
     onEnvFormChange(value: ICertifiedEnvForm | null) {
         if (value) {
+            this.isEnvFormValid = true
             this.isReady = true
         } else {
+            this.isEnvFormValid = false
             this.isReady = false
         }
         this.envForm = value

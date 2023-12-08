@@ -5,7 +5,7 @@
         <div class="app-main">
             <ul class="app-breadcrumbs">
                 <li
-                    *ngFor="let bc of breadCrumbs; let i = index"
+                    *ngFor="let bc of breadCrumbsNames; let i = index"
                     class="app-breadcrumbs__item"
                     [class.active]="i == activeBreadCrumbIndex"
                 >
@@ -14,31 +14,43 @@
             </ul>
             <div style="clear: both; margin-bottom: 20px"></div>
             <app-certified-info
-                *ngIf="activeBreadCrumbIndex == 0"
+                *ngIf="activeBreadCrumbIndex == breadCrumbs.INFO"
             ></app-certified-info>
             <app-certified-data-form
                 (formChange)="onDataFormChange($event)"
-                *ngIf="activeBreadCrumbIndex == 1"
+                *ngIf="activeBreadCrumbIndex == breadCrumbs.DATA"
             ></app-certified-data-form>
             <app-certified-env-form
                 (formChange)="onEnvFormChange($event)"
-                *ngIf="activeBreadCrumbIndex == 2"
+                *ngIf="activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT"
             ></app-certified-env-form>
             <button
-                *ngIf="!isReady && activeBreadCrumbIndex < 2"
+                *ngIf="
+                    !isReady && activeBreadCrumbIndex < breadCrumbs.ENVIRONMENT
+                "
                 mat-flat-button
                 color="primary"
                 style="margin-top: 1.6em"
                 (click)="nextBreadCrumb()"
+                [disabled]="
+                    activeBreadCrumbIndex > breadCrumbs.INFO && !isDataFormValid
+                "
             >
                 {{ t("Next") }}
             </button>
             <button
-                *ngIf="isReady"
+                *ngIf="
+                    isReady || activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT
+                "
                 mat-flat-button
                 color="primary"
                 style="margin-top: 1.6em"
                 (click)="startCertifiedMeasurement()"
+                [disabled]="
+                    activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT
+                        ? !isEnvFormValid
+                        : !isDataFormValid
+                "
             >
                 {{ t("Start certified measurement") }}
             </button>

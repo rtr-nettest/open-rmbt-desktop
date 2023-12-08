@@ -18,7 +18,7 @@ import {
     styleUrls: ["./certified-data-form.component.scss"],
 })
 export class CertifiedDataFormComponent implements OnInit, OnDestroy {
-    @Output() formChange = new EventEmitter<ICertifiedDataForm | undefined>()
+    @Output() formChange = new EventEmitter<ICertifiedDataForm | null>()
     form?: FormGroup<ICertifiedDataFormControls>
     private destroyed$ = new Subject()
 
@@ -55,6 +55,8 @@ export class CertifiedDataFormComponent implements OnInit, OnDestroy {
                 map((f) => {
                     if (this.form?.valid) {
                         this.formChange.emit(f as ICertifiedDataForm)
+                    } else {
+                        this.formChange.emit(null)
                     }
                 }),
                 takeUntil(this.destroyed$)

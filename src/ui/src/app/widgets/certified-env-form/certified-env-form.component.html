@@ -22,16 +22,17 @@
                     "
                 >
                     <mat-checkbox
+                        *ngIf="i < locationValues.length - 1"
                         [value]="locationValues[i]"
                         [formControl]="control"
                         >{{ t(locationNames[i]) }}</mat-checkbox
                     >
-                </li>
-                <li>
                     <mat-checkbox
+                        *ngIf="i === locationValues.length - 1"
                         (change)="toggleLocationTypeOther(!$event.checked)"
-                        [value]="locationValues[locationValues.length - 1]"
-                        >{{ t("Other") }}:</mat-checkbox
+                        [value]="locationValues[i]"
+                        [formControl]="control"
+                        >{{ t(locationNames[i]) }}:</mat-checkbox
                     >
                 </li>
             </ul>
@@ -42,6 +43,82 @@
                     name="locationTypeOther"
                 ></textarea>
             </mat-form-field>
+            <h4>
+                {{ t("Please describe your Internet access") }}
+            </h4>
+            <p>
+                {{
+                    t(
+                        "What kind of Internet access (DSL, cable, radio, other) do you have? Which modem or which router do you use? If possible, specify an exact type designation."
+                    )
+                }}
+            </p>
+            <mat-form-field appearance="outline">
+                <textarea
+                    matInput
+                    formControlName="typeText"
+                    name="typeText"
+                ></textarea>
+            </mat-form-field>
+            <h4>
+                {{ t("Please describe your device used for measuring") }}
+            </h4>
+            <p>
+                {{
+                    t(
+                        "Describe the computer that you are running the test with. How is the computer connected to the modem/router? Are your devices connected wired (LAN) or wireless (WLAN)? Are the electrical wires in your house also used to transmit data (PowerLAN)? For WLAN: Are the test device and modem / router in the same room?"
+                    )
+                }}
+            </p>
+            <mat-form-field appearance="outline">
+                <textarea
+                    matInput
+                    formControlName="testDevice"
+                    name="testDevice"
+                ></textarea>
+            </mat-form-field>
+            <h4>
+                {{ t("Photo upload") }}
+            </h4>
+            <p>
+                {{
+                    t(
+                        "Please send us a photo of the modem / router, the computer (if possible together on one picture) and photos of the individual type designations. If possible, please also send a photo of the wall socket"
+                    )
+                }}
+            </p>
+            <p
+                *ngFor="let fileId of fileIds"
+                style="
+                    align-items: center;
+                    display: flex;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                "
+            >
+                <input
+                    [id]="fileId"
+                    style="display: none"
+                    type="file"
+                    (change)="onFileSelected($event, fileId)"
+                />
+                <button mat-button (click)="onFileUploadClick(fileId)">
+                    <mat-icon>attach_file</mat-icon>{{ t("Upload file") }}
+                </button>
+                <span
+                    *ngIf="files[fileId]?.name"
+                    style="margin-left: 1em; margin-right: 1em"
+                    >{{ files[fileId].name }}</span
+                >
+                <button
+                    *ngIf="files[fileId]?.name"
+                    mat-icon-button
+                    (click)="onDeleteFile(fileId)"
+                >
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </p>
         </form>
     </div>
 </ng-container>

@@ -25,7 +25,7 @@
                 *ngIf="activeBreadCrumbIndex == 2"
             ></app-certified-env-form>
             <button
-                *ngIf="!isReady"
+                *ngIf="!isReady && activeBreadCrumbIndex < 2"
                 mat-flat-button
                 color="primary"
                 style="margin-top: 1.6em"

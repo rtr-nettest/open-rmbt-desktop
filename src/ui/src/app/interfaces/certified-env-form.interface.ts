@@ -5,13 +5,14 @@ export enum ECertifiedLocationType {
     s2 = "s2",
     s3 = "s3",
     s4 = "s4",
+    s5 = "s5",
 }
 
 export interface ICertifiedEnvForm {
     locationType: ECertifiedLocationType[]
-    locationTypeOther: string | null
-    typeText: string | null
-    testDevice: string | null
+    locationTypeOther?: string | null
+    typeText?: string | null
+    testDevice?: string | null
     testPictures: Array<File>
 }
 

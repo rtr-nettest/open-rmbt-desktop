@@ -27,7 +27,7 @@ export class CertifiedScreenComponent {
         console.log("Measurement, here we go!")
     }
 
-    onDataFormChange(value: ICertifiedDataForm | undefined) {
+    onDataFormChange(value: ICertifiedDataForm | null) {
         if (value && !value.isFirstCycle) {
             this.isReady = true
         } else {
@@ -35,7 +35,7 @@ export class CertifiedScreenComponent {
         }
     }
 
-    onEnvFormChange(value: ICertifiedEnvForm | undefined) {
+    onEnvFormChange(value: ICertifiedEnvForm | null) {
         if (value) {
             this.isReady = true
         } else {

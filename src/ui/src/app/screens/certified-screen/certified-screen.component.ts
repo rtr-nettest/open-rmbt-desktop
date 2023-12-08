@@ -9,10 +9,16 @@ import { MainStore } from "src/app/store/main.store"
     styleUrls: ["./certified-screen.component.scss"],
 })
 export class CertifiedScreenComponent {
-    activeBreadCrumbIndex = 2
+    activeBreadCrumbIndex = 0
     breadCrumbs = ["Info", "Data", "Environment", "Measurement", "Result"]
     env$ = this.mainStore.env$
     isReady = false
+    dataForm: ICertifiedDataForm | null = null
+    envForm: ICertifiedEnvForm | null = null
+
+    private get form() {
+        return { ...(this.dataForm ?? {}), ...(this.envForm ?? {}) }
+    }
 
     constructor(private mainStore: MainStore) {}
 
@@ -33,6 +39,7 @@ export class CertifiedScreenComponent {
         } else {
             this.isReady = false
         }
+        this.dataForm = value
     }
 
     onEnvFormChange(value: ICertifiedEnvForm | null) {
@@ -41,5 +48,6 @@ export class CertifiedScreenComponent {
         } else {
             this.isReady = false
         }
+        this.envForm = value
     }
 }

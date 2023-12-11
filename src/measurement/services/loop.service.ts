@@ -13,6 +13,7 @@ export class LoopService {
     deviationAdjustment = 0
     loopTimeout?: NodeJS.Timeout
     expireTimeout?: NodeJS.Timeout
+    maxTests?: number
 
     private constructor() {}
 
@@ -22,6 +23,7 @@ export class LoopService {
         clearTimeout(this.expireTimeout)
         this.expireTimeout = undefined
         this.deviationAdjustment = 0
+        this.maxTests = undefined
     }
 
     scheduleLoop(options: {
@@ -29,15 +31,18 @@ export class LoopService {
         loopModeInfo: ILoopModeInfo
         onTime: (counter: number) => void
         onExpire?: () => void
+        onMaxTests?: () => void
     }) {
+        this.maxTests = options.loopModeInfo.max_tests
         const counter = options.loopModeInfo.test_counter
         clearTimeout(this.loopTimeout)
         const setLoopTimeout = () => {
             const actualInterval = options.interval - this.deviationAdjustment
             return setTimeout(() => {
+                const nextCounter = counter + 1
                 Logger.I.info(
                     "Starting test %d after %d ms",
-                    counter + 1,
+                    nextCounter,
                     actualInterval
                 )
                 this.deviationAdjustment = Date.now() % 1000
@@ -50,7 +55,12 @@ export class LoopService {
                         MeasurementRunner.I.getCurrentPhaseState().phase
                     )
                 ) {
-                    options.onTime(counter + 1)
+                    if (this.maxTests && counter >= this.maxTests) {
+                        this.maxTests = undefined
+                        options.onMaxTests?.()
+                    } else {
+                        options.onTime(nextCounter)
+                    }
                 } else {
                     this.loopTimeout = setLoopTimeout()
                 }

@@ -247,6 +247,9 @@ const onScheduleLoop = (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
         onExpire: () => {
             webContents.send(Events.LOOP_MODE_EXPIRED)
         },
+        onMaxTests: () => {
+            webContents.send(Events.MAX_TESTS_REACHED)
+        },
     })
 }
 
@@ -269,6 +272,12 @@ ipcMain.handle(Events.GET_ENV, (): IEnv => {
     return {
         ACTIVE_LANGUAGE: I18nService.I.getActiveLanguage(),
         APP_VERSION: pack.version,
+        CERTIFIED_TEST_INTERVAL: process.env.CERTIFIED_TEST_INTERVAL
+            ? parseFloat(process.env.CERTIFIED_TEST_INTERVAL)
+            : 15,
+        CERTIFIED_TEST_COUNT: process.env.CERTIFIED_TEST_COUNT
+            ? parseFloat(process.env.CERTIFIED_TEST_COUNT)
+            : 8,
         CMS_URL: process.env.CMS_URL || "",
         CPU_WARNING_PERCENT: process.env.CPU_WARNING_PERCENT
             ? parseFloat(process.env.CPU_WARNING_PERCENT)

@@ -39,6 +39,7 @@ export class TestStore {
     enableLoopMode$ = new BehaviorSubject<boolean>(false)
     loopCounter$ = new BehaviorSubject<number>(1)
     loopUuid$ = new BehaviorSubject<string | null>(null)
+    maxTestsReached$ = new BehaviorSubject<boolean>(false)
 
     get fullTestIntervalMs() {
         return this.testIntervalMinutes$.value! * 60 * 1000
@@ -112,6 +113,27 @@ export class TestStore {
         this.visualization$.next(newState)
         this.basicNetworkInfo$.next(phaseState)
         return newState
+    }
+
+    launchCertifiedTest() {
+        const loopUuid = v4()
+        const loopCounter = 1
+        this.loopUuid$.next(loopUuid)
+        this.loopCounter$.next(loopCounter)
+        this.enableLoopMode$.next(true)
+        this.testIntervalMinutes$.next(
+            this.mainStore.env$.value!.CERTIFIED_TEST_INTERVAL
+        )
+        const loopModeInfo: ILoopModeInfo | undefined = {
+            max_delay: this.testIntervalMinutes$.value ?? 0,
+            max_tests: this.mainStore.env$.value!.CERTIFIED_TEST_COUNT,
+            test_counter: loopCounter,
+            loop_uuid: loopUuid,
+        }
+        window.electronAPI.onMaxTestsReached(() =>
+            this.maxTestsReached$.next(true)
+        )
+        window.electronAPI.scheduleLoop(this.fullTestIntervalMs, loopModeInfo)
     }
 
     launchLoopTest(interval: number) {

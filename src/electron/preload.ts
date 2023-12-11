@@ -61,6 +61,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.removeAllListeners(Events.LOOP_MODE_EXPIRED)
         ipcRenderer.on(Events.LOOP_MODE_EXPIRED, callback)
     },
+    onMaxTestsReached: (callback: () => any) => {
+        ipcRenderer.removeAllListeners(Events.MAX_TESTS_REACHED)
+        ipcRenderer.on(Events.MAX_TESTS_REACHED, callback)
+    },
     deleteLocalData: () => {
         ipcRenderer.send(Events.DELETE_LOCAL_DATA)
     },

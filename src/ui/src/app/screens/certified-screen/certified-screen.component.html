@@ -34,6 +34,9 @@
                 (formChange)="onEnvFormChange($event)"
                 *ngIf="activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT"
             ></app-certified-env-form>
+            <app-loop-test-screen
+                *ngIf="activeBreadCrumbIndex == breadCrumbs.MEASUREMENT"
+            ></app-loop-test-screen>
             <button
                 *ngIf="
                     !isReady && activeBreadCrumbIndex < breadCrumbs.ENVIRONMENT

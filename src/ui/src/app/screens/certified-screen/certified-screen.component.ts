@@ -41,7 +41,15 @@ export class CertifiedScreenComponent {
 
     constructor(private mainStore: MainStore) {}
 
-    nextBreadCrumb() {
+    back() {
+        if (this.activeBreadCrumbIndex <= 0) {
+            window.history.back()
+            return
+        }
+        this.activeBreadCrumbIndex--
+    }
+
+    forward() {
         if (this.activeBreadCrumbIndex >= this.breadCrumbsNames.length - 1) {
             return
         }

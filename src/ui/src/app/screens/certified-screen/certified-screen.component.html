@@ -3,16 +3,26 @@
     <app-main-menu *ngIf="env?.FLAVOR !== 'ont'"></app-main-menu>
     <app-main-content *transloco="let t">
         <div class="app-main">
-            <ul class="app-breadcrumbs">
-                <li
-                    *ngFor="let bc of breadCrumbsNames; let i = index"
-                    class="app-breadcrumbs__item"
-                    [class.active]="i == activeBreadCrumbIndex"
+            <div class="app-breadcrumbs-wrapper">
+                <button
+                    mat-icon-button
+                    (click)="back()"
+                    style="margin-right: 1ex"
+                    [title]="t('Go back')"
                 >
-                    <a>{{ i + 1 }}. {{ t(bc) }}</a>
-                </li>
-            </ul>
-            <div style="clear: both; margin-bottom: 20px"></div>
+                    <i class="app-icon app-icon--chevron-left"></i>
+                </button>
+                <ul class="app-breadcrumbs">
+                    <li
+                        *ngFor="let bc of breadCrumbsNames; let i = index"
+                        class="app-breadcrumbs__item"
+                        [class.active]="i == activeBreadCrumbIndex"
+                        [class.visited]="i < activeBreadCrumbIndex"
+                    >
+                        <a>{{ i + 1 }}. {{ t(bc) }}</a>
+                    </li>
+                </ul>
+            </div>
             <app-certified-info
                 *ngIf="activeBreadCrumbIndex == breadCrumbs.INFO"
             ></app-certified-info>
@@ -31,7 +41,7 @@
                 mat-flat-button
                 color="primary"
                 style="margin-top: 1.6em"
-                (click)="nextBreadCrumb()"
+                (click)="forward()"
                 [disabled]="
                     activeBreadCrumbIndex > breadCrumbs.INFO && !isDataFormValid
                 "

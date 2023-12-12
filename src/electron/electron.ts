@@ -209,6 +209,11 @@ const onRunMeasurement = async (event, loopModeInfo?: ILoopModeInfo) => {
         })
         if (status === EMeasurementStatus.ABORTED) {
             webContents.send(Events.MEASUREMENT_ABORTED)
+        } else if (loopModeInfo) {
+            const { test_counter: counter, max_tests: maxTests } = loopModeInfo
+            if (counter >= (maxTests || Infinity)) {
+                webContents.send(Events.MAX_TESTS_REACHED)
+            }
         }
     } catch (e) {
         webContents.send(Events.ERROR, e)
@@ -229,23 +234,22 @@ ipcMain.on(Events.ABORT_MEASUREMENT, (event) => {
 const onScheduleLoop = (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
     const webContents = event.sender
     onRunMeasurement(event, loopModeInfo)
-    LoopService.I.scheduleLoop({
-        interval: loopInterval,
-        loopModeInfo,
-        onTime: (counter) => {
-            webContents.send(Events.RESTART_MEASUREMENT, counter)
-            onScheduleLoop(event, loopInterval, {
-                ...loopModeInfo,
-                test_counter: counter,
-            })
-        },
-        onExpire: () => {
-            webContents.send(Events.LOOP_MODE_EXPIRED)
-        },
-        onMaxTests: () => {
-            webContents.send(Events.MAX_TESTS_REACHED)
-        },
-    })
+    if (loopModeInfo.test_counter < (loopModeInfo.max_tests || Infinity)) {
+        LoopService.I.scheduleLoop({
+            interval: loopInterval,
+            loopModeInfo,
+            onTime: (counter) => {
+                webContents.send(Events.RESTART_MEASUREMENT, counter)
+                onScheduleLoop(event, loopInterval, {
+                    ...loopModeInfo,
+                    test_counter: counter,
+                })
+            },
+            onExpire: () => {
+                webContents.send(Events.LOOP_MODE_EXPIRED)
+            },
+        })
+    }
 }
 
 ipcMain.on(

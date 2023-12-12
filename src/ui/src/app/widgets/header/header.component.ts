@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input } from "@angular/core"
 import { ActivatedRoute, Router } from "@angular/router"
 import { TranslocoService } from "@ngneat/transloco"
-import { concatMap, map, of } from "rxjs"
+import { combineLatest, concatMap, map, of } from "rxjs"
 import { THIS_INTERRUPTS_ACTION } from "src/app/constants/strings"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { CMSService } from "src/app/services/cms.service"
@@ -31,7 +31,14 @@ export class HeaderComponent {
         })
     )
     env$ = this.mainStore.env$
-    isLoopModeTestScreen$ = this.testStore.enableLoopMode$
+    isLoopModeTestScreen$ = combineLatest([
+        this.testStore.enableLoopMode$,
+        this.testStore.isCertifiedMeasurement$,
+    ]).pipe(
+        map(([loopMode, certifiedMeasurement]) => {
+            return !!loopMode && !certifiedMeasurement
+        })
+    )
     ontLogo$ = this.mainStore.env$.pipe(
         concatMap((env) =>
             this.cms.getAssetByName(

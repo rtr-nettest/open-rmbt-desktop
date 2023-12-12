@@ -1,6 +1,7 @@
 import {
     ChangeDetectionStrategy,
     Component,
+    Input,
     OnDestroy,
     OnInit,
 } from "@angular/core"
@@ -34,6 +35,7 @@ import { TranslocoService } from "@ngneat/transloco"
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestScreenComponent implements OnDestroy, OnInit {
+    @Input() hideMenu = false
     enableLoopMode$ = this.store.enableLoopMode$
     loopCount$ = this.store.loopCounter$
     env$ = this.mainStore.env$

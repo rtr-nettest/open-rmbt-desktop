@@ -41,6 +41,11 @@
 app-main-content {
     flex-direction: column;
     align-items: start;
+
+    &.hidden-menu .app-title {
+        margin-left: 0;
+        margin-right: 0;
+    }
 }
 
 .app-title {

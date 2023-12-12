@@ -36,6 +36,7 @@
             ></app-certified-env-form>
             <app-loop-test-screen
                 *ngIf="activeBreadCrumbIndex == breadCrumbs.MEASUREMENT"
+                [hideMenu]="true"
             ></app-loop-test-screen>
             <button
                 *ngIf="
@@ -53,7 +54,9 @@
             </button>
             <button
                 *ngIf="
-                    isReady || activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT
+                    (isReady &&
+                        activeBreadCrumbIndex < breadCrumbs.MEASUREMENT) ||
+                    activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT
                 "
                 mat-flat-button
                 color="primary"

@@ -65,17 +65,19 @@ export class CertifiedScreenComponent implements OnDestroy {
     }
 
     startCertifiedMeasurement() {
-        this.activeBreadCrumbIndex = EBreadCrumbs.MEASUREMENT
         this.testStore.maxTestsReached$
             .pipe(
                 takeUntil(this.destroyed$),
                 tap((isMaxValueReached) => {
                     if (isMaxValueReached) {
                         this.activeBreadCrumbIndex = EBreadCrumbs.RESULT
+                        this.testStore.disableLoopMode()
                     }
                 })
             )
             .subscribe()
+        this.testStore.launchCertifiedTest()
+        this.activeBreadCrumbIndex = EBreadCrumbs.MEASUREMENT
     }
 
     onDataFormChange(value: ICertifiedDataForm | null) {

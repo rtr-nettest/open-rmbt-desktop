@@ -37,6 +37,7 @@ export class TestStore {
     servers$ = new BehaviorSubject<IMeasurementServerResponse[]>([])
     testIntervalMinutes$ = new BehaviorSubject<number | null>(null)
     enableLoopMode$ = new BehaviorSubject<boolean>(false)
+    isCertifiedMeasurement$ = new BehaviorSubject<boolean>(false)
     loopCounter$ = new BehaviorSubject<number>(1)
     loopUuid$ = new BehaviorSubject<string | null>(null)
     maxTestsReached$ = new BehaviorSubject<boolean>(false)
@@ -121,6 +122,7 @@ export class TestStore {
         this.loopUuid$.next(loopUuid)
         this.loopCounter$.next(loopCounter)
         this.enableLoopMode$.next(true)
+        this.isCertifiedMeasurement$.next(true)
         this.testIntervalMinutes$.next(
             this.mainStore.env$.value!.CERTIFIED_TEST_INTERVAL
         )
@@ -182,6 +184,7 @@ export class TestStore {
 
     disableLoopMode() {
         this.enableLoopMode$.next(false)
+        this.isCertifiedMeasurement$.next(false)
         this.loopCounter$.next(1)
     }
 

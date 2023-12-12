@@ -142,12 +142,7 @@ protocol.registerSchemesAsPrivileged([
 ])
 
 app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") {
-        app.quit()
-    } else {
-        LoopService.I.resetCounter()
-        MeasurementRunner.I.abortMeasurement()
-    }
+    app.quit()
 })
 
 app.on("activate", () => {

@@ -19,11 +19,13 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
 import { MessageService } from "src/app/services/message.service"
 import {
     ERROR_OCCURED,
+    ERROR_OCCURED_DURING_LOOP,
     ERROR_OCCURED_SENDING_RESULTS,
 } from "src/app/constants/strings"
 import { ITestVisualizationState } from "src/app/interfaces/test-visualization-state.interface"
 import { HistoryStore } from "src/app/store/history.store"
 import { IEnv } from "../../../../../electron/interfaces/env.interface"
+import { TranslocoService } from "@ngneat/transloco"
 
 @Component({
     selector: "app-test-screen",
@@ -77,7 +79,8 @@ export class TestScreenComponent implements OnDestroy, OnInit {
         private store: TestStore,
         private mainStore: MainStore,
         private router: Router,
-        private message: MessageService
+        private message: MessageService,
+        private transloco: TranslocoService
     ) {}
 
     ngOnInit(): void {
@@ -91,10 +94,17 @@ export class TestScreenComponent implements OnDestroy, OnInit {
 
     private openErrorDialog(state: ITestVisualizationState) {
         this.message.closeAllDialogs()
-        const message =
+        let message = ERROR_OCCURED
+        if (this.enableLoopMode$.value === true) {
+            message =
+                this.transloco.translate(ERROR_OCCURED_DURING_LOOP) +
+                " " +
+                this.loopCount$.value
+        } else if (
             state.currentPhaseName === EMeasurementStatus.SUBMITTING_RESULTS
-                ? ERROR_OCCURED_SENDING_RESULTS
-                : ERROR_OCCURED
+        ) {
+            message = ERROR_OCCURED_SENDING_RESULTS
+        }
         if (this.enableLoopMode$.value !== true) {
             this.stopped$.next()
             this.message.openConfirmDialog(message, () => {

@@ -108,7 +108,6 @@
     "Export as XLSX": "Esporta come XLSX",
     "Export as PDF": "Esporta come PDF",
     "Export as ITV": "Esporta come ITV",
-    "Open in browser": "Apri nel browser",
     "An error occurred during test": "IT-An error occurred during test",
     "Info": "IT-Info",
     "Data": "IT-Data",
@@ -140,5 +139,7 @@
     "Urban area": "IT-Urban area",
     "Rural area": "IT-Rural area",
     "Other": "IT-Other",
-    "Start certified measurement": "IT-Start certified measurement"
+    "Start certified measurement": "IT-Start certified measurement",
+    "Export as CSV": "Esporta come CSV",
+    "Open in browser": "Apri nel browser"
 }

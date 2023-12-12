@@ -108,7 +108,6 @@
     "Export as XLSX": "Izvozi kot XLSX",
     "Export as PDF": "Izvozi kot PDF",
     "Export as SLV": "Izvozi kot SLV",
-    "Open in browser": "Odpri v brskalniku",
     "An error occurred during test": "SL-An error occurred during test",
     "Info": "SL-Info",
     "Data": "SL-Data",
@@ -140,5 +139,7 @@
     "Urban area": "SL-Urban area",
     "Rural area": "SL-Rural area",
     "Other": "SL-Other",
-    "Start certified measurement": "SL-Start certified measurement"
+    "Start certified measurement": "SL-Start certified measurement",
+    "Export as CSV": "Izvozi kot CSV",
+    "Open in browser": "Odpri v brskalniku"
 }

@@ -108,7 +108,6 @@
     "Export as XLSX": "Exportar como XLSX",
     "Export as PDF": "Exportar como PDF",
     "Export as ESV": "Exportar como ESV",
-    "Open in browser": "Abrir en el navegador",
     "An error occurred during test": "ES-An error occurred during test",
     "Info": "ES-Info",
     "Data": "ES-Data",
@@ -140,5 +139,7 @@
     "Urban area": "ES-Urban area",
     "Rural area": "ES-Rural area",
     "Other": "ES-Other",
-    "Start certified measurement": "ES-Start certified measurement"
+    "Start certified measurement": "ES-Start certified measurement",
+    "Export as CSV": "Exportar como CSV",
+    "Open in browser": "Abrir en el navegador"
 }

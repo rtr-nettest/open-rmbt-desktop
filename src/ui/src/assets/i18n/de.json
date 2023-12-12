@@ -108,7 +108,6 @@
     "Export as XLSX": "Als XLSX exportieren",
     "Export as PDF": "Als PDF exportieren",
     "Export as DEV": "Als DEV exportieren",
-    "Open in browser": "Im Browser öffnen",
     "An error occurred during test": "DE-An error occurred during test",
     "Info": "DE-Info",
     "Data": "DE-Data",
@@ -140,5 +139,7 @@
     "Urban area": "DE-Urban area",
     "Rural area": "DE-Rural area",
     "Other": "DE-Other",
-    "Start certified measurement": "DE-Start certified measurement"
+    "Start certified measurement": "DE-Start certified measurement",
+    "Export as CSV": "Als CSV exportieren",
+    "Open in browser": "Im Browser öffnen"
 }

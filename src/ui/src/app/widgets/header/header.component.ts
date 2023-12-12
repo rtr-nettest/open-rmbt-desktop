@@ -19,11 +19,15 @@ export class HeaderComponent {
     @Input() fixed = false
     @Input() hideMenu = false
     private noGo = "javascript:;"
-    link$ = this.activeRoute.url.pipe(
-        map((segments) => {
+    link$ = combineLatest([
+        this.activeRoute.url,
+        this.testStore.isCertifiedMeasurement$,
+    ]).pipe(
+        map(([segments, isCertifiedMeasurement]) => {
             if (
                 segments.join("/") === ERoutes.TEST ||
-                segments.join("/") === ERoutes.LOOP_TEST
+                segments.join("/") === ERoutes.LOOP_TEST ||
+                isCertifiedMeasurement
             ) {
                 return this.noGo
             }

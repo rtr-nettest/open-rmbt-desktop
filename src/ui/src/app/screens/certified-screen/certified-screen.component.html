@@ -1,6 +1,9 @@
 <app-header></app-header>
 <app-body *ngIf="env$ | async as env">
-    <app-main-menu *ngIf="env?.FLAVOR !== 'ont'"></app-main-menu>
+    <app-main-menu
+        *ngIf="env?.FLAVOR !== 'ont'"
+        [disabled]="activeBreadCrumbIndex >= breadCrumbs.MEASUREMENT"
+    ></app-main-menu>
     <app-main-content *transloco="let t">
         <div class="app-main">
             <div class="app-breadcrumbs-wrapper">

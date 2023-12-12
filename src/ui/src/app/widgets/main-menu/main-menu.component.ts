@@ -1,4 +1,10 @@
-import { Component, Input, NgZone } from "@angular/core"
+import {
+    Component,
+    Input,
+    NgZone,
+    OnChanges,
+    SimpleChanges,
+} from "@angular/core"
 import { ActivatedRoute, Router, UrlSegment } from "@angular/router"
 import { TranslocoService } from "@ngneat/transloco"
 import { combineLatest, map } from "rxjs"
@@ -16,44 +22,9 @@ import { TestStore } from "src/app/store/test.store"
     templateUrl: "./main-menu.component.html",
     styleUrls: ["./main-menu.component.scss"],
 })
-export class MainMenuComponent {
+export class MainMenuComponent implements OnChanges {
     @Input() disabled = false
-    menu$ = combineLatest([
-        this.cmsService.getMenu(),
-        this.activeRoute.url,
-        this.transloco.selectTranslation(),
-        this.mainStore.env$,
-    ]).pipe(
-        map(([menu, activeRoute, _, env]) => {
-            this.settingsItem = this.parseMenuItem(
-                {
-                    label: "Options",
-                    translations: [],
-                    route: ERoutes.SETTINGS,
-                    icon: "settings",
-                },
-                activeRoute
-            )
-            return menu.map((mi) => {
-                let item = mi
-                if (mi.url?.includes("$lang")) {
-                    item = {
-                        ...mi,
-                        url: mi.url.replace(
-                            "$lang",
-                            this.i18n.getActiveBrowserLang()
-                        ),
-                    }
-                } else if (mi.url?.includes("$os") && env?.OS) {
-                    item = {
-                        ...mi,
-                        url: mi.url.replace("$os", env.OS),
-                    }
-                }
-                return this.parseMenuItem(item, activeRoute)
-            })
-        })
-    )
+    menu$ = this.buildMenu()
     settingsItem?: IMainMenuItem
     env$ = this.mainStore.env$
 
@@ -68,6 +39,12 @@ export class MainMenuComponent {
         private router: Router,
         private transloco: TranslocoService
     ) {}
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if ("disabled" in changes) {
+            this.menu$ = this.buildMenu()
+        }
+    }
 
     handleClick(event: MouseEvent, item: IMainMenuItem) {
         if (!item.route) {
@@ -86,6 +63,45 @@ export class MainMenuComponent {
 
     trackBy(index: number, item: any) {
         return item.label
+    }
+
+    private buildMenu() {
+        return combineLatest([
+            this.cmsService.getMenu(),
+            this.activeRoute.url,
+            this.transloco.selectTranslation(),
+            this.mainStore.env$,
+        ]).pipe(
+            map(([menu, activeRoute, _, env]) => {
+                this.settingsItem = this.parseMenuItem(
+                    {
+                        label: "Options",
+                        translations: [],
+                        route: ERoutes.SETTINGS,
+                        icon: "settings",
+                    },
+                    activeRoute
+                )
+                return menu.map((mi) => {
+                    let item = mi
+                    if (mi.url?.includes("$lang")) {
+                        item = {
+                            ...mi,
+                            url: mi.url.replace(
+                                "$lang",
+                                this.i18n.getActiveBrowserLang()
+                            ),
+                        }
+                    } else if (mi.url?.includes("$os") && env?.OS) {
+                        item = {
+                            ...mi,
+                            url: mi.url.replace("$os", env.OS),
+                        }
+                    }
+                    return this.parseMenuItem(item, activeRoute)
+                })
+            })
+        )
     }
 
     private parseMenuItem = (

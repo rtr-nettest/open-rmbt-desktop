@@ -108,5 +108,6 @@
     "Export as XLSX": "Eksporter som XLSX",
     "Export as PDF": "Eksporter som PDF",
     "Export as CSV": "Eksporter som CSV",
-    "Open in browser": "Åpne i nettleser"
+    "Open in browser": "Åpne i nettleser",
+    "An error occurred during test": "En feil oppstod under testen"
 }

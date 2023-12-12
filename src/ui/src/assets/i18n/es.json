@@ -108,5 +108,6 @@
     "Export as XLSX": "Exportar como XLSX",
     "Export as PDF": "Exportar como PDF",
     "Export as CSV": "Exportar como CSV",
-    "Open in browser": "Abrir en el navegador"
+    "Open in browser": "Abrir en el navegador",
+    "An error occurred during test": "Se ha producido un error"
 }

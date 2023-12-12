@@ -108,5 +108,6 @@
     "Export as XLSX": "Exportovat jako XLSX",
     "Export as PDF": "Exportovat jako PDF",
     "Export as CSV": "Exportovat jako CSV",
-    "Open in browser": "Otevřít v prohlížeči"
+    "Open in browser": "Otevřít v prohlížeči",
+    "An error occurred during test": "Došlo k chybě během testu"
 }

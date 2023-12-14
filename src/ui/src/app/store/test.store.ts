@@ -136,6 +136,7 @@ export class TestStore {
             this.maxTestsReached$.next(true)
         )
         window.electronAPI.scheduleLoop(this.fullTestIntervalMs, loopModeInfo)
+        return loopModeInfo
     }
 
     launchLoopTest(interval: number) {

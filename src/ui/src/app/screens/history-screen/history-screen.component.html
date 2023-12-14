@@ -1,9 +1,16 @@
-<app-header></app-header>
+<app-header *ngIf="!hideMenu"></app-header>
 <app-body *ngIf="env$ | async as env">
-    <app-main-menu *ngIf="env?.FLAVOR !== 'ont'"></app-main-menu>
-    <app-main-content *ngIf="result$ | async as result; else noResult">
+    <app-main-menu *ngIf="env?.FLAVOR !== 'ont' && !hideMenu"></app-main-menu>
+    <app-main-content
+        *ngIf="result$ | async as result; else noResult"
+        [class.hidden-menu]="hideMenu"
+    >
         <app-export-warning></app-export-warning>
-        <div class="app-main" *transloco="let t">
+        <div
+            class="app-main"
+            [class.app-main--no-padding]="hideMenu"
+            *transloco="let t"
+        >
             <h1 *ngIf="env?.FLAVOR && env?.FLAVOR !== 'ont'" class="app-title">
                 {{ t(pageTitle) }}
                 <app-action-buttons

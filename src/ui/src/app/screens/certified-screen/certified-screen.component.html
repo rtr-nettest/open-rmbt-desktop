@@ -2,7 +2,7 @@
 <app-body *ngIf="env$ | async as env">
     <app-main-menu
         *ngIf="env?.FLAVOR !== 'ont'"
-        [disabled]="activeBreadCrumbIndex >= breadCrumbs.MEASUREMENT"
+        [disabled]="activeBreadCrumbIndex === breadCrumbs.MEASUREMENT"
     ></app-main-menu>
     <app-main-content *transloco="let t">
         <div class="app-main">
@@ -41,6 +41,11 @@
                 *ngIf="activeBreadCrumbIndex == breadCrumbs.MEASUREMENT"
                 [hideMenu]="true"
             ></app-loop-test-screen>
+            <app-certified-result-screen
+                *ngIf="activeBreadCrumbIndex == breadCrumbs.RESULT"
+                [hideMenu]="true"
+                [loopUuid]="loopUuid"
+            ></app-certified-result-screen>
             <button
                 *ngIf="
                     !isReady && activeBreadCrumbIndex < breadCrumbs.ENVIRONMENT

@@ -3,6 +3,7 @@ import {
     ChangeDetectorRef,
     Component,
     HostListener,
+    Input,
     OnDestroy,
     OnInit,
 } from "@angular/core"
@@ -29,6 +30,7 @@ export class HistoryScreenComponent
     extends BaseScreen
     implements OnInit, OnDestroy, AfterViewChecked
 {
+    @Input() hideMenu = false
     env$ = this.mainStore.env$
     shouldGroupHistory = true
     loading = false

@@ -3,6 +3,7 @@ import {
     BehaviorSubject,
     catchError,
     combineLatest,
+    concatMap,
     from,
     map,
     of,
@@ -29,6 +30,11 @@ import {
     IHistoryRowRTR,
 } from "../interfaces/history-row.interface"
 import { ExpandArrowComponent } from "../widgets/expand-arrow/expand-arrow.component"
+import { ICertifiedDataForm } from "../interfaces/certified-data-form.interface"
+import {
+    ECertifiedLocationType,
+    ICertifiedEnvForm,
+} from "../interfaces/certified-env-form.interface"
 
 @Injectable({
     providedIn: "root",
@@ -43,6 +49,8 @@ export class HistoryStore {
         direction: "desc",
     })
     openLoops$ = new BehaviorSubject<string[]>([])
+    certifiedDataForm$ = new BehaviorSubject<ICertifiedDataForm | null>(null)
+    certifiedEnvForm$ = new BehaviorSubject<ICertifiedEnvForm | null>(null)
 
     constructor(
         private classification: ClassificationService,
@@ -54,7 +62,10 @@ export class HistoryStore {
         private message: MessageService
     ) {}
 
-    getFormattedHistory(options?: { grouped?: boolean; loopUuid?: string }) {
+    getFormattedHistory(options?: {
+        grouped?: boolean
+        loopUuid?: string | null
+    }) {
         return combineLatest([
             this.history$,
             this.transloco.selectTranslation(),
@@ -251,6 +262,86 @@ export class HistoryStore {
             )
     }
 
+    exportAsCertified(loopUuid?: string | null) {
+        const exportUrl = this.mainStore.env$.value?.HISTORY_EXPORT_URL
+        if (!exportUrl || !loopUuid) {
+            return of(null)
+        }
+        const dataForm = this.certifiedDataForm$.value
+        const envForm = this.certifiedEnvForm$.value
+        console.log("loopUuid", loopUuid)
+        console.log("dataForm", dataForm)
+        console.log("envForm", envForm)
+        const formData = new FormData()
+        const textFields = {
+            location_type_other: "locationTypeOther",
+            type_text: "typeText",
+            test_device: "testDevice",
+            title_prepend: "titlePrepend",
+            first_name: "firstName",
+            last_name: "lastName",
+            title_append: "titleAppend",
+            address: "address",
+        }
+        formData.append("loop_uuid", "L" + loopUuid)
+        if (envForm?.locationType.length) {
+            for (const [i, l] of Object.values(
+                ECertifiedLocationType
+            ).entries()) {
+                if (envForm.locationType.includes(l)) {
+                    formData.append(`location_type_${i}`, l)
+                }
+            }
+        }
+        for (const [targetField, srcField] of Object.entries(textFields)) {
+            if ((envForm as any)?.[srcField]?.length > 0) {
+                formData.append(targetField, (envForm as any)?.[srcField])
+            } else if ((dataForm as any)?.[srcField]?.length > 0) {
+                formData.append(targetField, (dataForm as any)?.[srcField])
+            }
+        }
+        if (!!dataForm?.isFirstCycle) {
+            formData.append("first", "y")
+        } else {
+            formData.append("first", "n")
+        }
+        if (envForm && envForm.testPictures.length > 0) {
+            for (const file of envForm.testPictures) {
+                formData.append("test_pictures[]", file)
+            }
+        }
+        return this.http
+            .post<any>(
+                exportUrl + "/pdf/" + this.transloco.getActiveLang(),
+                formData
+            )
+            .pipe(
+                concatMap((resp: any) => {
+                    if (resp["file"]) {
+                        return this.http.get(
+                            exportUrl + "/pdf/" + resp["file"],
+                            {
+                                responseType: "blob",
+                                observe: "response",
+                            }
+                        )
+                    }
+                    return of(null)
+                }),
+                tap((data: any) => {
+                    if (data?.body)
+                        saveAs(data.body, `${new Date().toISOString()}.pdf`)
+
+                    this.mainStore.inProgress$.next(false)
+                }),
+                catchError(() => {
+                    this.mainStore.inProgress$.next(false)
+                    this.message.openSnackbar(ERROR_OCCURED)
+                    return of(null)
+                })
+            )
+    }
+
     private getExportParams(format: string, results: ISimpleHistoryResult[]) {
         return new HttpParams({
             fromObject: {
@@ -261,7 +352,7 @@ export class HistoryStore {
         })
     }
 
-    getLoopResults(history: ISimpleHistoryResult[], loopUuid?: string) {
+    getLoopResults(history: ISimpleHistoryResult[], loopUuid?: string | null) {
         if (!loopUuid) {
             return history
         }

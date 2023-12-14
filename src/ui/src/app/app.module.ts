@@ -136,7 +136,8 @@ import { SocialButtonsComponent } from "./widgets/social-buttons/social-buttons.
 import { CertifiedScreenComponent } from "./screens/certified-screen/certified-screen.component"
 import { CertifiedInfoComponent } from "./widgets/certified-info/certified-info.component"
 import { CertifiedDataFormComponent } from "./widgets/certified-data-form/certified-data-form.component"
-import { CertifiedEnvFormComponent } from "./widgets/certified-env-form/certified-env-form.component"
+import { CertifiedEnvFormComponent } from "./widgets/certified-env-form/certified-env-form.component";
+import { CertifiedResultScreenComponent } from './screens/certified-result-screen/certified-result-screen.component'
 
 Chart.register(
     BarElement,
@@ -261,6 +262,7 @@ declare global {
         CertifiedInfoComponent,
         CertifiedDataFormComponent,
         CertifiedEnvFormComponent,
+        CertifiedResultScreenComponent,
     ],
     imports: [
         AppRoutingModule,

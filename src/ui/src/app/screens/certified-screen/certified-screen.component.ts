@@ -2,6 +2,7 @@ import { Component, OnDestroy } from "@angular/core"
 import { Subject, takeUntil, tap } from "rxjs"
 import { ICertifiedDataForm } from "src/app/interfaces/certified-data-form.interface"
 import { ICertifiedEnvForm } from "src/app/interfaces/certified-env-form.interface"
+import { HistoryStore } from "src/app/store/history.store"
 import { MainStore } from "src/app/store/main.store"
 import { TestStore } from "src/app/store/test.store"
 
@@ -35,14 +36,13 @@ export class CertifiedScreenComponent implements OnDestroy {
     isReady = false
     isDataFormValid = false
     isEnvFormValid = false
-    dataForm: ICertifiedDataForm | null = null
-    envForm: ICertifiedEnvForm | null = null
+    loopUuid = ""
 
-    private get form() {
-        return { ...(this.dataForm ?? {}), ...(this.envForm ?? {}) }
-    }
-
-    constructor(private mainStore: MainStore, private testStore: TestStore) {}
+    constructor(
+        private mainStore: MainStore,
+        private testStore: TestStore,
+        private historyStore: HistoryStore
+    ) {}
 
     ngOnDestroy(): void {
         this.destroyed$.next(void 0)
@@ -76,7 +76,7 @@ export class CertifiedScreenComponent implements OnDestroy {
                 })
             )
             .subscribe()
-        this.testStore.launchCertifiedTest()
+        this.loopUuid = this.testStore.launchCertifiedTest().loop_uuid
         this.activeBreadCrumbIndex = EBreadCrumbs.MEASUREMENT
     }
 
@@ -92,7 +92,7 @@ export class CertifiedScreenComponent implements OnDestroy {
             this.isDataFormValid = false
             this.isReady = false
         }
-        this.dataForm = value
+        this.historyStore.certifiedDataForm$.next(value)
     }
 
     onEnvFormChange(value: ICertifiedEnvForm | null) {
@@ -103,6 +103,6 @@ export class CertifiedScreenComponent implements OnDestroy {
             this.isEnvFormValid = false
             this.isReady = false
         }
-        this.envForm = value
+        this.historyStore.certifiedEnvForm$.next(value)
     }
 }

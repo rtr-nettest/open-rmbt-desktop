@@ -213,6 +213,7 @@ const onRunMeasurement = async (event, loopModeInfo?: ILoopModeInfo) => {
             const { test_counter: counter, max_tests: maxTests } = loopModeInfo
             if (counter >= (maxTests || Infinity)) {
                 webContents.send(Events.MAX_TESTS_REACHED)
+                LoopService.I.resetTimeout()
             }
         }
     } catch (e) {
@@ -222,13 +223,9 @@ const onRunMeasurement = async (event, loopModeInfo?: ILoopModeInfo) => {
 
 ipcMain.on(Events.RUN_MEASUREMENT, onRunMeasurement)
 
-ipcMain.on(Events.ABORT_MEASUREMENT, (event) => {
-    const webContents = event.sender
-    LoopService.I.resetCounter()
-    let aborted = MeasurementRunner.I.abortMeasurement()
-    if (aborted) {
-        webContents.send(Events.MEASUREMENT_ABORTED)
-    }
+ipcMain.on(Events.ABORT_MEASUREMENT, () => {
+    LoopService.I.resetTimeout()
+    MeasurementRunner.I.abortMeasurement()
 })
 
 const onScheduleLoop = (event, loopInterval, loopModeInfo: ILoopModeInfo) => {

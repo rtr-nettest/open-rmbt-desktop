@@ -2,6 +2,7 @@ import { MeasurementRunner } from ".."
 import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { ILoopModeInfo } from "../interfaces/measurement-registration-request.interface"
 import { Logger } from "./logger.service"
+import { powerSaveBlocker } from "electron"
 
 export class LoopService {
     private static instance = new LoopService()
@@ -13,15 +14,23 @@ export class LoopService {
     deviationAdjustment = 0
     loopTimeout?: NodeJS.Timeout
     expireTimeout?: NodeJS.Timeout
+    powerSaverBlockerId?: number
 
     private constructor() {}
 
-    resetCounter() {
+    resetTimeout() {
         clearTimeout(this.loopTimeout)
         this.loopTimeout = undefined
         clearTimeout(this.expireTimeout)
         this.expireTimeout = undefined
         this.deviationAdjustment = 0
+        if (this.powerSaverBlockerId) {
+            const stopped = powerSaveBlocker.stop(this.powerSaverBlockerId)
+            Logger.I.warn(`Power saving is ${stopped ? "ON" : "OFF"}`)
+            this.powerSaverBlockerId = stopped
+                ? undefined
+                : this.powerSaverBlockerId
+        }
     }
 
     scheduleLoop(options: {
@@ -58,15 +67,29 @@ export class LoopService {
             }, actualInterval)
         }
         this.loopTimeout = setLoopTimeout()
+
         const expireTimeout = process.env.LOOP_MODE_MAX_DURATION
             ? parseInt(process.env.LOOP_MODE_MAX_DURATION)
             : 0
         if (!this.expireTimeout && options.onExpire && expireTimeout > 0) {
             this.expireTimeout = setTimeout(() => {
                 Logger.I.info("Loop mode expired")
-                this.resetCounter()
+                this.resetTimeout()
                 options.onExpire?.()
             }, expireTimeout * 60 * 1000)
+        }
+
+        if (!!options.loopModeInfo.max_tests && !this.powerSaverBlockerId) {
+            this.powerSaverBlockerId = powerSaveBlocker.start(
+                "prevent-display-sleep"
+            )
+            Logger.I.warn(
+                `Power saving is ${
+                    powerSaveBlocker.isStarted(this.powerSaverBlockerId)
+                        ? "OFF"
+                        : "ON"
+                }`
+            )
         }
     }
 }

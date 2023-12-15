@@ -1,7 +1,5 @@
 # Open RMBT Desktop
 
-## Status
-
 ## Requirements
 
 The project requires Node.js v18 or later.

@@ -12,6 +12,7 @@ import {
     ICertifiedEnvForm,
     ICertifiedEnvFormControls,
 } from "src/app/interfaces/certified-env-form.interface"
+import { FileService } from "src/app/services/file.service"
 import { v4 } from "uuid"
 
 @Component({
@@ -34,7 +35,7 @@ export class CertifiedEnvFormComponent {
     files: { [key: string]: File } = {}
     private destroyed$ = new Subject()
 
-    constructor(private fb: FormBuilder) {}
+    constructor(private fb: FormBuilder, private fs: FileService) {}
 
     ngOnDestroy(): void {
         this.destroyed$.next(void 0)
@@ -70,7 +71,7 @@ export class CertifiedEnvFormComponent {
                             ) || []
                         const formValue: ICertifiedEnvForm = {
                             ...f,
-                            testPictures: Object.values(this.files),
+                            testPictures: this.files,
                             locationType,
                         }
                         this.formChange.emit(formValue)
@@ -91,13 +92,14 @@ export class CertifiedEnvFormComponent {
         }
     }
 
-    onFileSelected(event: Event, fileId: string) {
+    async onFileSelected(event: Event, fileId: string) {
         const file = (event.target as HTMLInputElement).files![0]
-        if (file) {
+        const compressed = await this.fs.compress(file)
+        if (compressed) {
             if (!Object.hasOwn(this.files, fileId)) {
                 this.fileIds.push(v4())
             }
-            this.files[fileId] = file
+            this.files[fileId] = compressed
         }
     }
 

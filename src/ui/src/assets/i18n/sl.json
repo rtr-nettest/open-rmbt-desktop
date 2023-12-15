@@ -141,5 +141,6 @@
     "Other": "SL-Other",
     "Start certified measurement": "SL-Start certified measurement",
     "Export as CSV": "Izvozi kot CSV",
-    "Open in browser": "Odpri v brskalniku"
+    "Open in browser": "Odpri v brskalniku",
+    "The file is not an image": "SL-The file is not an image"
 }

@@ -23,6 +23,7 @@
         "@angular/platform-browser-dynamic": "^16.2.8",
         "@angular/router": "^16.2.8",
         "@ngneat/transloco": "^4.2.6",
+        "browser-image-compression": "^2.0.2",
         "chart.js": "^4.2.1",
         "chartjs-adapter-dayjs-4": "^1.0.4",
         "dayjs": "^1.11.8",

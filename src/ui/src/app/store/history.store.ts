@@ -305,8 +305,8 @@ export class HistoryStore {
         } else {
             formData.append("first", "n")
         }
-        if (envForm && envForm.testPictures.length > 0) {
-            for (const file of envForm.testPictures) {
+        if (envForm && Object.keys(envForm.testPictures).length > 0) {
+            for (const file of Object.values(envForm.testPictures)) {
                 formData.append("test_pictures[]", file)
             }
         }

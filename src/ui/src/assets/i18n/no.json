@@ -141,5 +141,6 @@
     "Other": "NO-Other",
     "Start certified measurement": "NO-Start certified measurement",
     "Export as CSV": "Eksporter som CSV",
-    "Open in browser": "Åpne i nettleser"
+    "Open in browser": "Åpne i nettleser",
+    "The file is not an image": "NO-The file is not an image"
 }

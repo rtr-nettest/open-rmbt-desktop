@@ -141,5 +141,6 @@
     "Other": "IT-Other",
     "Start certified measurement": "IT-Start certified measurement",
     "Export as CSV": "Esporta come CSV",
-    "Open in browser": "Apri nel browser"
+    "Open in browser": "Apri nel browser",
+    "The file is not an image": "IT-The file is not an image"
 }

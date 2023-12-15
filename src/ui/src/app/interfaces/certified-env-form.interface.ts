@@ -13,7 +13,7 @@ export interface ICertifiedEnvForm {
     locationTypeOther?: string | null
     typeText?: string | null
     testDevice?: string | null
-    testPictures: Array<File>
+    testPictures: { [key: string]: File }
 }
 
 export interface ICertifiedEnvFormControls {

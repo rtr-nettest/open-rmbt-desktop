@@ -141,5 +141,6 @@
     "Other": "ES-Other",
     "Start certified measurement": "ES-Start certified measurement",
     "Export as CSV": "Exportar como CSV",
-    "Open in browser": "Abrir en el navegador"
+    "Open in browser": "Abrir en el navegador",
+    "The file is not an image": "ES-The file is not an image"
 }

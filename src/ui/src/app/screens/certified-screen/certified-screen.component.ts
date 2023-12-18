@@ -1,7 +1,9 @@
 import { Component, OnDestroy } from "@angular/core"
-import { Subject, takeUntil, tap } from "rxjs"
+import { DomSanitizer, SafeUrl } from "@angular/platform-browser"
+import { Observable, Subject, firstValueFrom, of, takeUntil, tap } from "rxjs"
 import { ICertifiedDataForm } from "src/app/interfaces/certified-data-form.interface"
 import { ICertifiedEnvForm } from "src/app/interfaces/certified-env-form.interface"
+import { HistoryExportService } from "src/app/services/history-export.service"
 import { HistoryStore } from "src/app/store/history.store"
 import { MainStore } from "src/app/store/main.store"
 import { TestStore } from "src/app/store/test.store"
@@ -37,11 +39,13 @@ export class CertifiedScreenComponent implements OnDestroy {
     isDataFormValid = false
     isEnvFormValid = false
     loopUuid = ""
+    pdfUrl$: Observable<SafeUrl | null> = of(null)
 
     constructor(
         private mainStore: MainStore,
         private testStore: TestStore,
-        private historyStore: HistoryStore
+        private historyStore: HistoryStore,
+        private exporter: HistoryExportService
     ) {}
 
     ngOnDestroy(): void {
@@ -54,7 +58,11 @@ export class CertifiedScreenComponent implements OnDestroy {
             window.history.back()
             return
         }
-        this.activeBreadCrumbIndex--
+        if (this.activeBreadCrumbIndex === this.breadCrumbs.RESULT) {
+            this.activeBreadCrumbIndex -= 3
+        } else {
+            this.activeBreadCrumbIndex--
+        }
     }
 
     forward() {
@@ -70,6 +78,11 @@ export class CertifiedScreenComponent implements OnDestroy {
                 takeUntil(this.destroyed$),
                 tap((isMaxValueReached) => {
                     if (isMaxValueReached) {
+                        firstValueFrom(
+                            this.exporter.getCertifiedPdfUrl(this.loopUuid)
+                        ).then((url) =>
+                            url ? window.electronAPI.openPdf(url) : void 0
+                        )
                         this.activeBreadCrumbIndex = EBreadCrumbs.RESULT
                         this.testStore.disableLoopMode()
                     }

@@ -20,6 +20,7 @@ import {
     IHistoryRowONT,
     IHistoryRowRTR,
 } from "src/app/interfaces/history-row.interface"
+import { HistoryExportService } from "src/app/services/history-export.service"
 
 @Component({
     selector: "app-history-screen",
@@ -41,20 +42,21 @@ export class HistoryScreenComponent
             label: "Export as CSV",
             translations: [],
             icon: "filetype-csv",
-            action: () => this.store.exportAs("csv", this.store.history$.value),
+            action: () =>
+                this.exporter.exportAs("csv", this.store.history$.value),
         },
         {
             label: "Export as PDF",
             translations: [],
             icon: "filetype-pdf",
-            action: () => this.store.exportAsPdf(this.store.history$.value),
+            action: () => this.exporter.exportAsPdf(this.store.history$.value),
         },
         {
             label: "Export as XLSX",
             translations: [],
             icon: "filetype-xlsx",
             action: () =>
-                this.store.exportAs("xlsx", this.store.history$.value),
+                this.exporter.exportAs("xlsx", this.store.history$.value),
         },
     ]
     pageTitle = "History"
@@ -64,6 +66,7 @@ export class HistoryScreenComponent
     constructor(
         mainStore: MainStore,
         message: MessageService,
+        protected exporter: HistoryExportService,
         protected store: HistoryStore,
         private cdr: ChangeDetectorRef,
         private transloco: TranslocoService

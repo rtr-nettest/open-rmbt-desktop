@@ -1,11 +1,11 @@
 import { contextBridge, ipcRenderer } from "electron"
-import { Events } from "./enums/events.enum"
-import { EIPVersion } from "../measurement/enums/ip-version.enum"
-import { IMeasurementServerResponse } from "../measurement/interfaces/measurement-server-response.interface"
-import { IPaginator } from "../ui/src/app/interfaces/paginator.interface"
-import { ISort } from "../ui/src/app/interfaces/sort.interface"
-import { ILoopModeInfo } from "../measurement/interfaces/measurement-registration-request.interface"
-import { ERoutes } from "../ui/src/app/enums/routes.enum"
+import { Events } from "../enums/events.enum"
+import { EIPVersion } from "../../measurement/enums/ip-version.enum"
+import { IMeasurementServerResponse } from "../../measurement/interfaces/measurement-server-response.interface"
+import { IPaginator } from "../../ui/src/app/interfaces/paginator.interface"
+import { ISort } from "../../ui/src/app/interfaces/sort.interface"
+import { ILoopModeInfo } from "../../measurement/interfaces/measurement-registration-request.interface"
+import { ERoutes } from "../../ui/src/app/enums/routes.enum"
 
 contextBridge.exposeInMainWorld("electronAPI", {
     quit: () => ipcRenderer.send(Events.QUIT),
@@ -64,6 +64,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
     onMaxTestsReached: (callback: () => any) => {
         ipcRenderer.removeAllListeners(Events.MAX_TESTS_REACHED)
         ipcRenderer.on(Events.MAX_TESTS_REACHED, callback)
+    },
+    openPdf: (url: string) => {
+        ipcRenderer.send(Events.OPEN_PDF, url)
     },
     deleteLocalData: () => {
         ipcRenderer.send(Events.DELETE_LOCAL_DATA)

@@ -186,6 +186,7 @@ export class TestStore {
     disableLoopMode() {
         this.enableLoopMode$.next(false)
         this.isCertifiedMeasurement$.next(false)
+        this.maxTestsReached$.next(false)
         this.loopCounter$.next(1)
     }
 

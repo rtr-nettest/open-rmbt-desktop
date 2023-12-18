@@ -1,7 +1,7 @@
-import { Store } from "../measurement/services/store.service"
-import { I18nService, t } from "../measurement/services/i18n.service"
-import { Events } from "./enums/events.enum"
-import { ERoutes } from "../ui/src/app/enums/routes.enum"
+import { Store } from "../../measurement/services/store.service"
+import { I18nService, t } from "../../measurement/services/i18n.service"
+import { Events } from "../enums/events.enum"
+import { ERoutes } from "../../ui/src/app/enums/routes.enum"
 
 const { app, Menu } = require("electron")
 

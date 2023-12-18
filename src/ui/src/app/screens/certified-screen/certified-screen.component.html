@@ -48,7 +48,9 @@
             ></app-certified-result-screen>
             <button
                 *ngIf="
-                    !isReady && activeBreadCrumbIndex < breadCrumbs.ENVIRONMENT
+                    activeBreadCrumbIndex == breadCrumbs.INFO ||
+                    (!isReady &&
+                        activeBreadCrumbIndex < breadCrumbs.ENVIRONMENT)
                 "
                 mat-flat-button
                 color="primary"
@@ -63,6 +65,7 @@
             <button
                 *ngIf="
                     (isReady &&
+                        activeBreadCrumbIndex != breadCrumbs.INFO &&
                         activeBreadCrumbIndex < breadCrumbs.MEASUREMENT) ||
                     activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT
                 "

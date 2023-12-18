@@ -26,7 +26,7 @@ export class CertifiedResultScreenComponent extends HistoryScreenComponent {
             label: "",
             translations: [],
             icon: "filetype-pdf",
-            action: () => this.store.exportAsCertified(this.loopUuid),
+            action: () => this.exporter.exportAsCertified(this.loopUuid),
         },
     ]
 

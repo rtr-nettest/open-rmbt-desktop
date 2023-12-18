@@ -7,8 +7,8 @@ import { TranslocoService } from "@ngneat/transloco"
 import { MessageService } from "./message.service"
 import * as saveAs from "file-saver"
 import { ERROR_OCCURED } from "../constants/strings"
-import { HistoryStore } from "../store/history.store"
 import { ECertifiedLocationType } from "../interfaces/certified-env-form.interface"
+import { TestStore } from "../store/test.store"
 
 @Injectable({
     providedIn: "root",
@@ -26,7 +26,7 @@ export class HistoryExportService {
     }
 
     constructor(
-        private historyStore: HistoryStore,
+        private testStore: TestStore,
         private mainStore: MainStore,
         private message: MessageService,
         private http: HttpClient,
@@ -66,6 +66,7 @@ export class HistoryExportService {
         if (!this.pdfUrl || !loopUuid) {
             return of(null)
         }
+        this.mainStore.inProgress$.next(true)
         return this.http
             .post<any>(this.pdfUrl, this.getFormData(loopUuid))
             .pipe(
@@ -116,8 +117,8 @@ export class HistoryExportService {
     }
 
     private getFormData(loopUuid: string) {
-        const dataForm = this.historyStore.certifiedDataForm$.value
-        const envForm = this.historyStore.certifiedEnvForm$.value
+        const dataForm = this.testStore.certifiedDataForm$.value
+        const envForm = this.testStore.certifiedEnvForm$.value
         const formData = new FormData()
         const textFields = {
             location_type_other: "locationTypeOther",

@@ -18,6 +18,8 @@ import { TranslocoService } from "@ngneat/transloco"
 import { SprintfPipe } from "../pipes/sprintf.pipe"
 import { IMeasurementPhaseState } from "../../../../measurement/interfaces/measurement-phase-state.interface"
 import { HistoryStore } from "./history.store"
+import { ICertifiedDataForm } from "../interfaces/certified-data-form.interface"
+import { ICertifiedEnvForm } from "../interfaces/certified-env-form.interface"
 
 export const STATE_UPDATE_TIMEOUT = 175
 
@@ -41,6 +43,8 @@ export class TestStore {
     loopCounter$ = new BehaviorSubject<number>(1)
     loopUuid$ = new BehaviorSubject<string | null>(null)
     maxTestsReached$ = new BehaviorSubject<boolean>(false)
+    certifiedDataForm$ = new BehaviorSubject<ICertifiedDataForm | null>(null)
+    certifiedEnvForm$ = new BehaviorSubject<ICertifiedEnvForm | null>(null)
 
     get fullTestIntervalMs() {
         return this.testIntervalMinutes$.value! * 60 * 1000

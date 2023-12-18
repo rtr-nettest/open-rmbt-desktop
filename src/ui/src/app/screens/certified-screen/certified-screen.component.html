@@ -8,6 +8,7 @@
         <div class="app-main">
             <div class="app-breadcrumbs-wrapper">
                 <button
+                    *ngIf="activeBreadCrumbIndex > 0"
                     mat-icon-button
                     (click)="back()"
                     style="margin-right: 1ex"

@@ -11,6 +11,7 @@ import {
     ICertifiedDataForm,
     ICertifiedDataFormControls,
 } from "src/app/interfaces/certified-data-form.interface"
+import { TestStore } from "src/app/store/test.store"
 
 @Component({
     selector: "app-certified-data-form",
@@ -22,7 +23,7 @@ export class CertifiedDataFormComponent implements OnInit, OnDestroy {
     form?: FormGroup<ICertifiedDataFormControls>
     private destroyed$ = new Subject()
 
-    constructor(private fb: FormBuilder) {}
+    constructor(private fb: FormBuilder, private testStore: TestStore) {}
 
     ngOnDestroy(): void {
         this.destroyed$.next(void 0)
@@ -30,25 +31,29 @@ export class CertifiedDataFormComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        const savedForm = this.testStore.certifiedDataForm$.value
         this.form = this.fb.group({
-            titlePrepend: new FormControl(""),
-            firstName: new FormControl("", {
+            titlePrepend: new FormControl(savedForm?.titlePrepend || ""),
+            firstName: new FormControl(savedForm?.firstName || "", {
                 nonNullable: true,
                 validators: Validators.required,
             }),
-            lastName: new FormControl("", {
+            lastName: new FormControl(savedForm?.lastName || "", {
                 nonNullable: true,
                 validators: Validators.required,
             }),
-            titleAppend: new FormControl(""),
-            address: new FormControl("", {
+            titleAppend: new FormControl(savedForm?.titleAppend || ""),
+            address: new FormControl(savedForm?.address || "", {
                 nonNullable: true,
                 validators: Validators.required,
             }),
-            isFirstCycle: new FormControl(true, {
-                nonNullable: true,
-                validators: Validators.required,
-            }),
+            isFirstCycle: new FormControl<boolean>(
+                savedForm?.isFirstCycle || true,
+                {
+                    nonNullable: true,
+                    validators: Validators.required,
+                }
+            ),
         })
         this.form.valueChanges
             .pipe(

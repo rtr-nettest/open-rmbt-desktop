@@ -40,8 +40,6 @@ export class HistoryStore {
         direction: "desc",
     })
     openLoops$ = new BehaviorSubject<string[]>([])
-    certifiedDataForm$ = new BehaviorSubject<ICertifiedDataForm | null>(null)
-    certifiedEnvForm$ = new BehaviorSubject<ICertifiedEnvForm | null>(null)
 
     constructor(
         private classification: ClassificationService,

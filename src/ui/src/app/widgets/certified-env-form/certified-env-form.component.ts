@@ -13,6 +13,7 @@ import {
     ICertifiedEnvFormControls,
 } from "src/app/interfaces/certified-env-form.interface"
 import { FileService } from "src/app/services/file.service"
+import { TestStore } from "src/app/store/test.store"
 import { v4 } from "uuid"
 
 @Component({
@@ -35,7 +36,11 @@ export class CertifiedEnvFormComponent {
     files: { [key: string]: File } = {}
     private destroyed$ = new Subject()
 
-    constructor(private fb: FormBuilder, private fs: FileService) {}
+    constructor(
+        private fb: FormBuilder,
+        private fs: FileService,
+        private ts: TestStore
+    ) {}
 
     ngOnDestroy(): void {
         this.destroyed$.next(void 0)
@@ -43,15 +48,22 @@ export class CertifiedEnvFormComponent {
     }
 
     ngOnInit(): void {
+        const savedForm = this.ts.certifiedEnvForm$.value
         this.form = this.fb.group({
             locationType: new FormArray<FormControl<boolean>>(
                 Object.values(ECertifiedLocationType).map(
-                    (_) => new FormControl(false, { nonNullable: true })
+                    (_, i) =>
+                        new FormControl(!!savedForm?.locationType[i], {
+                            nonNullable: true,
+                        })
                 )
             ),
-            locationTypeOther: new FormControl("", Validators.required),
-            typeText: new FormControl(""),
-            testDevice: new FormControl(""),
+            locationTypeOther: new FormControl(
+                savedForm?.locationTypeOther || "",
+                Validators.required
+            ),
+            typeText: new FormControl(savedForm?.typeText || ""),
+            testDevice: new FormControl(savedForm?.testDevice || ""),
         })
         this.toggleLocationTypeOther(true)
         this.form.valueChanges

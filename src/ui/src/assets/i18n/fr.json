@@ -109,5 +109,8 @@
     "Export as PDF": "Exporter en PDF",
     "Export as CSV": "Exporter en CSV",
     "Open in browser": "Ouvrir dans le navigateur",
-    "An error occurred during test": "Une erreur est survenue lors du test"
+    "An error occurred during test": "Une erreur est survenue lors du test",
+    "Back to Startpage": "FR-Back to Startpage",
+    "Icon RTR-NetTest": "FR-Icon RTR-NetTest",
+    "Text RTR-NetTest": "FR-Text RTR-NetTest"
 }

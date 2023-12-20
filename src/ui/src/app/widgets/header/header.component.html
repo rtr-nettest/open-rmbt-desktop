@@ -49,13 +49,12 @@
             <header
                 class="app-header app-header--large{{ fixed ? '-fixed' : '' }}"
             >
-                <a
-                    [routerLink]="link"
-                    (click)="handleClick($event, link)"
-                    [title]="t('Home')"
+                <a [routerLink]="link" (click)="handleClick($event, link)"
                     ><img
                         (click)="handleClick($event, link)"
                         src="/assets/images/logo-header.svg"
+                        [alt]="t('Text RTR-NetTest')"
+                        [title]="t('Back to Startpage')"
                 /></a>
                 <div
                     *ngIf="(isLoopModeTestScreen$ | async) === true"
@@ -71,10 +70,12 @@
             <header
                 class="app-header app-header--small{{ fixed ? '-fixed' : '' }}"
             >
-                <a [routerLink]="link" [title]="t('Home')"
+                <a [routerLink]="link"
                     ><img
                         (click)="handleClick($event, link)"
                         src="/assets/images/logo-header-small.svg"
+                        [alt]="t('Icon RTR-NetTest')"
+                        [title]="t('Back to Startpage')"
                 /></a>
             </header>
         </ng-container>

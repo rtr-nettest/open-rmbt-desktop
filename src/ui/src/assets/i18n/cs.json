@@ -112,5 +112,9 @@
     "An error occurred during test": "Došlo k chybě během testu",
     "Back to Startpage": "CS-Back to Startpage",
     "Icon RTR-NetTest": "CS-Icon RTR-NetTest",
-    "Text RTR-NetTest": "CS-Text RTR-NetTest"
+    "Text RTR-NetTest": "CS-Text RTR-NetTest",
+    "Unknown": "CS-Unknown",
+    "No connectivity": "CS-No connectivity",
+    "NAT": "CS-NAT",
+    "Public IP": "CS-Public IP"
 }

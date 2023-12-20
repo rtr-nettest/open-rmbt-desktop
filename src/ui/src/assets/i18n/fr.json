@@ -112,5 +112,9 @@
     "An error occurred during test": "Une erreur est survenue lors du test",
     "Back to Startpage": "FR-Back to Startpage",
     "Icon RTR-NetTest": "FR-Icon RTR-NetTest",
-    "Text RTR-NetTest": "FR-Text RTR-NetTest"
+    "Text RTR-NetTest": "FR-Text RTR-NetTest",
+    "Unknown": "FR-Unknown",
+    "No connectivity": "FR-No connectivity",
+    "NAT": "FR-NAT",
+    "Public IP": "FR-Public IP"
 }

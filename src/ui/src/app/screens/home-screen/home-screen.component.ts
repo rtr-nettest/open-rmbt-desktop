@@ -116,14 +116,23 @@ export class HomeScreenComponent extends BaseScreen implements OnInit {
     }
 
     getIPIcon(publicAddress: string, privateAddress: string) {
+        const t = (str: string) => this.transloco.translate(str)
         if (publicAddress === UNKNOWN) {
-            return '<i class="app-icon--class app-icon--class-gray"></i>'
+            return `<i title="${t(
+                "Unknown"
+            )}" class="app-icon--class app-icon--class-gray"></i>`
         } else if (!publicAddress) {
-            return '<i class="app-icon--class app-icon--class-red"></i>'
+            return `<i title="${t(
+                "No connectivity"
+            )}" class="app-icon--class app-icon--class-red"></i>`
         } else if (publicAddress !== privateAddress) {
-            return '<i class="app-icon--class app-icon--class-yellow"></i>'
+            return `<i title="${t(
+                "NAT"
+            )}" class="app-icon--class app-icon--class-yellow"></i>`
         } else {
-            return '<i class="app-icon--class app-icon--class-green"></i>'
+            return `<i title="${t(
+                "Public IP"
+            )}" class="app-icon--class app-icon--class-green"></i>`
         }
     }
 }

@@ -116,5 +116,6 @@
     "Unknown": "DE-Unknown",
     "No connectivity": "DE-No connectivity",
     "NAT": "DE-NAT",
-    "Public IP": "DE-Public IP"
+    "Public IP": "DE-Public IP",
+    "Test progress": "DE-Test progress"
 }

@@ -116,5 +116,6 @@
     "Unknown": "FR-Unknown",
     "No connectivity": "FR-No connectivity",
     "NAT": "FR-NAT",
-    "Public IP": "FR-Public IP"
+    "Public IP": "FR-Public IP",
+    "Test progress": "FR-Test progress"
 }

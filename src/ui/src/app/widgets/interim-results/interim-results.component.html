@@ -1,4 +1,8 @@
-<div class="app-wrapper app-wrapper--charts" *transloco="let t">
+<div
+    class="app-wrapper app-wrapper--charts"
+    *transloco="let t"
+    aria-live="assertive"
+>
     <ng-container *ngIf="visualization$ | async as state">
         <div class="app-container">
             <h4 class="app-title">

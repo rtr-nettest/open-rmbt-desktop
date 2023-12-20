@@ -116,5 +116,6 @@
     "Unknown": "IT-Unknown",
     "No connectivity": "IT-No connectivity",
     "NAT": "IT-NAT",
-    "Public IP": "IT-Public IP"
+    "Public IP": "IT-Public IP",
+    "Test progress": "IT-Test progress"
 }

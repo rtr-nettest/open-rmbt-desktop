@@ -23,7 +23,7 @@
         >
             <app-export-warning></app-export-warning>
             <div class="app-main" *transloco="let t">
-                <h1 class="app-title">
+                <div class="app-title">
                     <button
                         mat-icon-button
                         (click)="weHaveToGoBack()"
@@ -32,20 +32,23 @@
                     >
                         <i class="app-icon app-icon--chevron-left"></i>
                     </button>
-                    {{ t("Measurement result from") }}
-                    {{
-                        result.measurementDate
-                            | date : "medium" : undefined : locale
-                    }}
+                    <h1 aria-live="polite">
+                        {{ t("Measurement result from") }}
+                        {{
+                            result.measurementDate
+                                | date : "medium" : undefined : locale
+                        }}
+                    </h1>
                     <app-action-buttons
                         [items]="actionButtons"
                     ></app-action-buttons>
-                </h1>
+                </div>
                 <div class="app-wrapper">
                     <app-table
                         [columns]="columns"
                         [data]="getBasicResults(result)"
                         [sort]="sort"
+                        aria-live="polite"
                     ></app-table>
                 </div>
                 <ng-container

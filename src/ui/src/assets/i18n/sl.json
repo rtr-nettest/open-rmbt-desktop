@@ -116,5 +116,6 @@
     "Unknown": "SL-Unknown",
     "No connectivity": "SL-No connectivity",
     "NAT": "SL-NAT",
-    "Public IP": "SL-Public IP"
+    "Public IP": "SL-Public IP",
+    "Test progress": "SL-Test progress"
 }

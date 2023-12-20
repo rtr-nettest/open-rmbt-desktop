@@ -116,5 +116,6 @@
     "Unknown": "CS-Unknown",
     "No connectivity": "CS-No connectivity",
     "NAT": "CS-NAT",
-    "Public IP": "CS-Public IP"
+    "Public IP": "CS-Public IP",
+    "Test progress": "CS-Test progress"
 }

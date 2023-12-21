@@ -21,9 +21,8 @@ import { LoopService } from "../measurement/services/loop.service"
 import { ILoopModeInfo } from "../measurement/interfaces/measurement-registration-request.interface"
 import { EMeasurementStatus } from "../measurement/enums/measurement-status.enum"
 import { ERoutes } from "../ui/src/app/enums/routes.enum"
-import { createWindow } from "./lib/create-window"
+import { WindowManager } from "./lib/window-manager"
 import { getEnv } from "./lib/get-env"
-import { openPdf } from "./lib/open-pdf"
 
 // Needs to be called before app is ready;
 // gives our scheme access to load relative files,
@@ -44,7 +43,8 @@ app.on("window-all-closed", () => {
 })
 
 app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0)
+        WindowManager.I.createWindow()
 })
 
 ipcMain.on(Events.QUIT, () => {
@@ -205,7 +205,7 @@ ipcMain.handle(Events.GET_SERVERS, async (event) => {
     }
 })
 
-ipcMain.on(Events.OPEN_PDF, (_, url) => openPdf(url))
+ipcMain.on(Events.OPEN_PDF, (_, url) => WindowManager.I.openPdf(url))
 
-app.whenReady().then(() => createWindow())
+app.whenReady().then(() => WindowManager.I.createWindow())
 app.disableHardwareAcceleration()

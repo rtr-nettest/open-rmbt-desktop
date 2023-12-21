@@ -86,6 +86,19 @@ export class TestStore {
         })
 
         window.addEventListener("focus", this.setLatestTestState)
+
+        window.electronAPI.onAppSuspended(() => {
+            this.ngZone.run(() => {
+                const message = this.transloco.translate(
+                    "The app was suspended. The last running measurement was aborted"
+                )
+                this.message.openConfirmDialog(message, () => {
+                    if (!this.enableLoopMode$.value) {
+                        this.router.navigate(["/"])
+                    }
+                })
+            })
+        })
     }
 
     launchTest() {

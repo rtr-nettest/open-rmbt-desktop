@@ -49,6 +49,15 @@ export class MeasurementRunner {
     private startTimeMs = 0
     private endTimeMs = 0
 
+    get isMeasurementInProgress() {
+        return ![
+            EMeasurementStatus.ABORTED,
+            EMeasurementStatus.END,
+            EMeasurementStatus.ERROR,
+            EMeasurementStatus.NOT_STARTED,
+        ].includes(this.getCurrentPhaseState().phase)
+    }
+
     private constructor() {
         Logger.init()
         DBService.I.init()

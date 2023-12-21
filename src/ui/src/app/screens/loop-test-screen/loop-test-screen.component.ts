@@ -21,7 +21,10 @@ export class LoopTestScreenComponent extends TestScreenComponent {
             this.setShowCPUWarning(this.mainStore.env$.value)
             if (error) {
                 this.openErrorDialog(state)
-            } else if (state.currentPhaseName === EMeasurementStatus.END) {
+            } else if (
+                state.currentPhaseName === EMeasurementStatus.END ||
+                this.store.appSuspended$.value
+            ) {
                 this.goToResult(state)
             } else {
                 this.getRecentHistory(loopCount)

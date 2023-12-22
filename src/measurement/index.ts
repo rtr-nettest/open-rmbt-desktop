@@ -63,6 +63,11 @@ export class MeasurementRunner {
         DBService.I.init()
     }
 
+    resumeMeasurement() {
+        this.startTimeMs = Date.now()
+        this.rmbtClient = undefined
+    }
+
     async registerClient(options?: MeasurementOptions): Promise<IUserSettings> {
         try {
             AutoUpdater.I.checkForNewRelease()

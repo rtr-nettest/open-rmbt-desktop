@@ -106,6 +106,7 @@ export class WindowManager {
 
         powerMonitor.on("resume", () => {
             this.isSuspended = false
+            MeasurementRunner.I.resumeMeasurement()
         })
     }
 

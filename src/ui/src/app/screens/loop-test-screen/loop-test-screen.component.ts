@@ -63,10 +63,11 @@ export class LoopTestScreenComponent extends TestScreenComponent {
 
     private setProgressIndicator(state: ITestVisualizationState) {
         this.waitingProgressMs += STATE_UPDATE_TIMEOUT
+        const endTimeMs = Math.max(state.startTimeMs, state.endTimeMs)
         const timeTillEndMs =
-            state.startTimeMs + this.store.fullTestIntervalMs - state.endTimeMs
+            state.startTimeMs + this.store.fullTestIntervalMs - endTimeMs
         const currentMs = Math.max(0, timeTillEndMs - this.waitingProgressMs)
-        if (currentMs <= 0) {
+        if (currentMs <= 0 || currentMs > this.store.fullTestIntervalMs) {
             this.progressMode$.next("indeterminate")
         } else {
             this.progressMode$.next("determinate")

@@ -134,7 +134,8 @@ export class TestStore {
         )
         this.visualization$.next(newState)
         this.basicNetworkInfo$.next(phaseState)
-        if (phaseState.phase === EMeasurementStatus.INIT) {
+        if (phaseState.phase !== EMeasurementStatus.NOT_STARTED) {
+            // when app is suspended, a measurement is aborted and its state is reset to NOT_STARTED
             this.appSuspended$.next(false)
         }
         return newState

@@ -35,8 +35,6 @@ export class RMBTClient {
     initializedThreads: number[] = []
     interimThreadResults: IMeasurementThreadResult[] = []
     threadResults: IMeasurementThreadResult[] = []
-    downThreadResults: IMeasurementThreadResult[] = []
-    upThreadResults: IMeasurementThreadResult[] = []
     chunks: number[] = []
     timestamps: { index: number; time: number }[] = []
     pingMedian = -1
@@ -45,6 +43,8 @@ export class RMBTClient {
     activityInterval?: NodeJS.Timeout
     aborter = new AbortController()
     pings: IPing[] = []
+    downs: IOverallResult[] = []
+    ups: IOverallResult[] = []
     private bytesPerSecPreDownload: number[] = []
     private estimatePhaseDuration: { [key: string]: number } = {
         [EMeasurementStatus.INIT]: 0.5,
@@ -65,10 +65,18 @@ export class RMBTClient {
     private lastMessageReceivedAt = 0
     private _chunkNumbers: number[] = []
 
-    interimDownMbps = 0
-    interimUpMbps = 0
-    downs: IOverallResult[] = []
-    ups: IOverallResult[] = []
+    private _interimDownMbps = 0
+    private _interimUpMbps = 0
+    private downThreadResults: IMeasurementThreadResult[] = []
+    private upThreadResults: IMeasurementThreadResult[] = []
+
+    get interimDownMbps() {
+        return this._interimDownMbps
+    }
+
+    get interimUpMbps() {
+        return this._interimUpMbps
+    }
 
     setInterimDownMbps() {
         const result = CalcService.I.getCoarseResult(
@@ -79,7 +87,8 @@ export class RMBTClient {
             this.downs.push(result)
         }
         if (this.downs.length > 0) {
-            this.interimDownMbps = this.downs[this.downs.length - 1].speed / 1e6
+            this._interimDownMbps =
+                this.downs[this.downs.length - 1].speed / 1e6
         }
     }
 
@@ -92,7 +101,7 @@ export class RMBTClient {
             this.ups.push(result)
         }
         if (this.ups.length > 0) {
-            this.interimUpMbps = this.ups[this.ups.length - 1].speed / 1e6
+            this._interimUpMbps = this.ups[this.ups.length - 1].speed / 1e6
         }
     }
 

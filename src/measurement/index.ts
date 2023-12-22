@@ -63,8 +63,12 @@ export class MeasurementRunner {
         DBService.I.init()
     }
 
+    updateStartTime() {
+        this.startTimeMs = this.endTimeMs || this.startTimeMs
+        this.endTimeMs = Date.now()
+    }
+
     resumeMeasurement() {
-        this.startTimeMs = Date.now()
         this.rmbtClient = undefined
     }
 

@@ -44,6 +44,7 @@ export class LoopService {
         const setLoopTimeout = () => {
             const actualInterval = options.interval - this.deviationAdjustment
             return setTimeout(() => {
+                MeasurementRunner.I.updateStartTime()
                 this.deviationAdjustment = Date.now() % 1000
                 if (
                     WindowManager.I.isSuspended ||

@@ -95,6 +95,7 @@ export class WindowManager {
             this.isSuspended = true
             if (MeasurementRunner.I.isMeasurementInProgress) {
                 MeasurementRunner.I.abortMeasurement()
+                LoopService.I.resetTimeout()
             }
             if (
                 MeasurementRunner.I.getCurrentPhaseState().phase !==
@@ -106,7 +107,8 @@ export class WindowManager {
 
         powerMonitor.on("resume", () => {
             this.isSuspended = false
-            MeasurementRunner.I.resumeMeasurement()
+            MeasurementRunner.I.resumeMeasurement({ sender: win })
+            win.webContents.send(Events.APP_RESUMED)
         })
     }
 

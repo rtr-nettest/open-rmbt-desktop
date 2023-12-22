@@ -45,7 +45,6 @@ export class TestStore {
     maxTestsReached$ = new BehaviorSubject<boolean>(false)
     certifiedDataForm$ = new BehaviorSubject<ICertifiedDataForm | null>(null)
     certifiedEnvForm$ = new BehaviorSubject<ICertifiedEnvForm | null>(null)
-    appSuspended$ = new BehaviorSubject<boolean>(false)
 
     get fullTestIntervalMs() {
         return this.testIntervalMinutes$.value! * 60 * 1000
@@ -92,11 +91,12 @@ export class TestStore {
             this.ngZone.run(() => {
                 const message =
                     "The app was suspended. The last running measurement was aborted"
+                this.loopCounter$.next(this.loopCounter$.value + 1)
                 this.message.openConfirmDialog(message, () => {
                     if (!this.enableLoopMode$.value) {
                         this.router.navigate(["/"])
-                    } else {
-                        this.appSuspended$.next(true)
+                    } else if (!this.isCertifiedMeasurement$.value) {
+                        this.router.navigate([ERoutes.LOOP_MODE])
                     }
                 })
             })
@@ -134,10 +134,6 @@ export class TestStore {
         )
         this.visualization$.next(newState)
         this.basicNetworkInfo$.next(phaseState)
-        if (phaseState.phase !== EMeasurementStatus.NOT_STARTED) {
-            // when app is suspended, a measurement is aborted and its state is reset to NOT_STARTED
-            this.appSuspended$.next(false)
-        }
         return newState
     }
 

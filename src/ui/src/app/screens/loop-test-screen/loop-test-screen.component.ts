@@ -21,16 +21,22 @@ export class LoopTestScreenComponent extends TestScreenComponent {
             this.setShowCPUWarning(this.mainStore.env$.value)
             if (error) {
                 this.openErrorDialog(state)
-            } else if (
-                state.currentPhaseName === EMeasurementStatus.END ||
-                this.store.appSuspended$.value
-            ) {
+            } else if (state.currentPhaseName === EMeasurementStatus.END) {
                 this.goToResult(state)
             } else {
                 this.getRecentHistory(loopCount)
             }
         })
     )
+
+    override ngOnInit(): void {
+        super.ngOnInit()
+        window.electronAPI.onAppResumed(() => {
+            this.ngZone.run(() => {
+                this.getRecentHistory(this.loopCount$.value)
+            })
+        })
+    }
 
     protected override openErrorDialog(state: ITestVisualizationState) {
         this.message.closeAllDialogs()

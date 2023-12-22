@@ -181,6 +181,7 @@ declare global {
                 paginator?: IPaginator,
                 sort?: ISort
             ) => Promise<ISimpleHistoryResult[]>
+            onAppResumed: (callback: () => any) => Promise<any>
             onAppSuspended: (callback: () => any) => Promise<any>
             onError: (callback: (error: Error) => any) => Promise<any>
             onMeasurementAborted: (callback: () => any) => Promise<any>

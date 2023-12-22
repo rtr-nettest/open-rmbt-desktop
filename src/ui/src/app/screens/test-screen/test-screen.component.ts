@@ -2,6 +2,7 @@ import {
     ChangeDetectionStrategy,
     Component,
     Input,
+    NgZone,
     OnDestroy,
     OnInit,
 } from "@angular/core"
@@ -68,6 +69,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
         protected historyStore: HistoryStore,
         protected store: TestStore,
         protected mainStore: MainStore,
+        protected ngZone: NgZone,
         protected router: Router,
         protected message: MessageService,
         protected transloco: TranslocoService

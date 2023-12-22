@@ -15,12 +15,20 @@
         border: 1px solid darkorange;
     }
 
+    &:hover {
+        background-color: $color-hover;
+    }
+
     &--active {
         background: #737373;
         color: white !important;
 
         .app-icon {
             filter: invert(1);
+        }
+
+        &:hover {
+            background-color: mix($color-hover, black);
         }
     }
 

@@ -86,6 +86,21 @@ export class TestStore {
         })
 
         window.addEventListener("focus", this.setLatestTestState)
+
+        window.electronAPI.onAppSuspended(() => {
+            this.ngZone.run(() => {
+                const message =
+                    "The app was suspended. The last running measurement was aborted"
+                this.loopCounter$.next(this.loopCounter$.value + 1)
+                this.message.openConfirmDialog(message, () => {
+                    if (!this.enableLoopMode$.value) {
+                        this.router.navigate(["/"])
+                    } else if (!this.isCertifiedMeasurement$.value) {
+                        this.router.navigate([ERoutes.LOOP_MODE])
+                    }
+                })
+            })
+        })
     }
 
     launchTest() {
@@ -102,16 +117,18 @@ export class TestStore {
     private setTestState = (
         phaseState: IMeasurementPhaseState & IBasicNetworkInfo
     ) => {
-        let oldState = this.visualization$.value
+        let newState = this.visualization$.value
+        const oldPhaseName = this.visualization$.value.currentPhaseName
         if (
-            (oldState.currentPhaseName === EMeasurementStatus.END ||
-                oldState.currentPhaseName === EMeasurementStatus.ERROR) &&
-            phaseState.phase !== oldState.currentPhaseName
+            (oldPhaseName === EMeasurementStatus.END ||
+                oldPhaseName === EMeasurementStatus.ERROR ||
+                oldPhaseName === EMeasurementStatus.ABORTED) &&
+            phaseState.phase !== oldPhaseName
         ) {
-            oldState = new TestVisualizationState()
+            newState = new TestVisualizationState()
         }
-        const newState = TestVisualizationState.from(
-            oldState,
+        newState = TestVisualizationState.from(
+            newState,
             phaseState,
             this.mainStore.env$.value?.FLAVOR ?? "rtr"
         )

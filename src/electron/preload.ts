@@ -36,6 +36,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.invoke(Events.GET_MEASUREMENT_RESULT, testUuid),
     getMeasurementHistory: (paginator?: IPaginator, sort?: ISort) =>
         ipcRenderer.invoke(Events.GET_MEASUREMENT_HISTORY, paginator, sort),
+    onAppResumed: (callback: () => any) => {
+        ipcRenderer.removeAllListeners(Events.APP_RESUMED)
+        ipcRenderer.on(Events.APP_RESUMED, () => callback())
+    },
+    onAppSuspended: (callback: () => any) => {
+        ipcRenderer.removeAllListeners(Events.APP_SUSPENDED)
+        ipcRenderer.on(Events.APP_SUSPENDED, () => callback())
+    },
     onError: (callback: (error: Error) => any) => {
         ipcRenderer.removeAllListeners(Events.ERROR)
         ipcRenderer.on(Events.ERROR, (event, error) => callback(error))

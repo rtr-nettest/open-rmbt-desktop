@@ -21,9 +21,8 @@ import { LoopService } from "../measurement/services/loop.service"
 import { ILoopModeInfo } from "../measurement/interfaces/measurement-registration-request.interface"
 import { EMeasurementStatus } from "../measurement/enums/measurement-status.enum"
 import { ERoutes } from "../ui/src/app/enums/routes.enum"
-import { createWindow } from "./lib/create-window"
+import { WindowManager } from "./lib/window-manager"
 import { getEnv } from "./lib/get-env"
-import { openPdf } from "./lib/open-pdf"
 
 // Needs to be called before app is ready;
 // gives our scheme access to load relative files,
@@ -44,7 +43,8 @@ app.on("window-all-closed", () => {
 })
 
 app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0)
+        WindowManager.I.createWindow()
 })
 
 ipcMain.on(Events.QUIT, () => {
@@ -99,60 +99,26 @@ ipcMain.on(
     }
 )
 
-const onRunMeasurement = async (event, loopModeInfo?: ILoopModeInfo) => {
-    const webContents = event.sender
-    try {
-        const status = await MeasurementRunner.I.runMeasurement({
-            loopModeInfo,
-        })
-        if (status === EMeasurementStatus.ABORTED) {
-            webContents.send(Events.MEASUREMENT_ABORTED)
-        } else if (loopModeInfo) {
-            const { test_counter: counter, max_tests: maxTests } = loopModeInfo
-            if (counter >= (maxTests || Infinity)) {
-                webContents.send(Events.MAX_TESTS_REACHED)
-                LoopService.I.resetTimeout()
-            }
-        }
-    } catch (e) {
-        webContents.send(Events.ERROR, e)
-    }
-}
-
-ipcMain.on(Events.RUN_MEASUREMENT, onRunMeasurement)
+ipcMain.on(Events.RUN_MEASUREMENT, (event, loopModeInfo) =>
+    MeasurementRunner.I.onRunMeasurement(event, loopModeInfo)
+)
 
 ipcMain.on(Events.ABORT_MEASUREMENT, () => {
     LoopService.I.resetTimeout()
     MeasurementRunner.I.abortMeasurement()
 })
 
-const onScheduleLoop = (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
-    const webContents = event.sender
-    onRunMeasurement(event, loopModeInfo)
-    if (loopModeInfo.test_counter < (loopModeInfo.max_tests || Infinity)) {
-        LoopService.I.scheduleLoop({
-            interval: loopInterval,
-            loopModeInfo,
-            onTime: (counter) => {
-                webContents.send(Events.RESTART_MEASUREMENT, counter)
-                onScheduleLoop(event, loopInterval, {
-                    ...loopModeInfo,
-                    test_counter: counter,
-                })
-            },
-            onExpire: () => {
-                webContents.send(Events.LOOP_MODE_EXPIRED)
-            },
-        })
-    }
-}
-
 ipcMain.on(
     Events.SCHEDULE_LOOP,
     (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
         const timeFromWholeSecond = Date.now() % 1000
         setTimeout(
-            () => onScheduleLoop(event, loopInterval, loopModeInfo),
+            () =>
+                MeasurementRunner.I.onScheduleLoop(
+                    event,
+                    loopInterval,
+                    loopModeInfo
+                ),
             1000 - timeFromWholeSecond
         )
     }
@@ -205,7 +171,7 @@ ipcMain.handle(Events.GET_SERVERS, async (event) => {
     }
 })
 
-ipcMain.on(Events.OPEN_PDF, (_, url) => openPdf(url))
+ipcMain.on(Events.OPEN_PDF, (_, url) => WindowManager.I.openPdf(url))
 
-app.whenReady().then(() => createWindow())
+app.whenReady().then(() => WindowManager.I.createWindow())
 app.disableHardwareAcceleration()

@@ -1,5 +1,5 @@
+import { WindowManager } from "../../electron/lib/window-manager"
 import { MeasurementRunner } from ".."
-import { EMeasurementStatus } from "../enums/measurement-status.enum"
 import { ILoopModeInfo } from "../interfaces/measurement-registration-request.interface"
 import { Logger } from "./logger.service"
 import { powerSaveBlocker } from "electron"
@@ -44,16 +44,14 @@ export class LoopService {
         const setLoopTimeout = () => {
             const actualInterval = options.interval - this.deviationAdjustment
             return setTimeout(() => {
+                MeasurementRunner.I.updateStartTime()
                 this.deviationAdjustment = Date.now() % 1000
-                const endPhases = [
-                    EMeasurementStatus.END,
-                    EMeasurementStatus.ERROR,
-                ]
                 if (
-                    endPhases.includes(
-                        MeasurementRunner.I.getCurrentPhaseState().phase
-                    )
+                    WindowManager.I.isSuspended ||
+                    MeasurementRunner.I.isMeasurementInProgress
                 ) {
+                    this.loopTimeout = setLoopTimeout()
+                } else {
                     const nextCounter = counter + 1
                     Logger.I.info(
                         "Starting test %d after %d ms",
@@ -61,8 +59,6 @@ export class LoopService {
                         actualInterval
                     )
                     options.onTime(nextCounter)
-                } else {
-                    this.loopTimeout = setLoopTimeout()
                 }
             }, actualInterval)
         }

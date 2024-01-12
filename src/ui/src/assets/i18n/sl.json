@@ -109,13 +109,5 @@
     "Export as PDF": "Izvozi kot PDF",
     "Export as CSV": "Izvozi kot CSV",
     "Open in browser": "Odpri v brskalniku",
-    "An error occurred during test": "Med preizkusom je prišlo do napake",
-    "Back to Startpage": "SL-Back to Startpage",
-    "Icon RTR-NetTest": "SL-Icon RTR-NetTest",
-    "Text RTR-NetTest": "SL-Text RTR-NetTest",
-    "Unknown": "SL-Unknown",
-    "No connectivity": "SL-No connectivity",
-    "NAT": "SL-NAT",
-    "Public IP": "SL-Public IP",
-    "Test progress": "SL-Test progress"
+    "An error occurred during test": "Med preizkusom je prišlo do napake"
 }

@@ -109,13 +109,5 @@
     "Export as PDF": "Exportar como PDF",
     "Export as CSV": "Exportar como CSV",
     "Open in browser": "Abrir en el navegador",
-    "An error occurred during test": "Se ha producido un error",
-    "Back to Startpage": "ES-Back to Startpage",
-    "Icon RTR-NetTest": "ES-Icon RTR-NetTest",
-    "Text RTR-NetTest": "ES-Text RTR-NetTest",
-    "Unknown": "ES-Unknown",
-    "No connectivity": "ES-No connectivity",
-    "NAT": "ES-NAT",
-    "Public IP": "ES-Public IP",
-    "Test progress": "ES-Test progress"
+    "An error occurred during test": "Se ha producido un error"
 }

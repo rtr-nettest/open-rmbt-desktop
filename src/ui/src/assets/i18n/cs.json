@@ -109,13 +109,13 @@
     "Export as PDF": "Exportovat jako PDF",
     "Export as CSV": "Exportovat jako CSV",
     "Open in browser": "Otevřít v prohlížeči",
-    "An error occurred during test": "Došlo k chybě během testu",
-    "Back to Startpage": "CS-Back to Startpage",
-    "Icon RTR-NetTest": "CS-Icon RTR-NetTest",
-    "Text RTR-NetTest": "CS-Text RTR-NetTest",
-    "Unknown": "CS-Unknown",
-    "No connectivity": "CS-No connectivity",
-    "NAT": "CS-NAT",
-    "Public IP": "CS-Public IP",
-    "Test progress": "CS-Test progress"
+    "An error occurred during test": "Během testu došlo k chybě",
+    "Back to Startpage": "Back to Startpage",
+    "Icon RTR-NetTest": "Icon RTR-NetTest",
+    "Text RTR-NetTest": "Text RTR-NetTest",
+    "Unknown": "Unknown",
+    "No connectivity": "No connectivity",
+    "NAT": "NAT",
+    "Public IP": "Public IP",
+    "Test progress": "Test progress"
 }

@@ -110,12 +110,12 @@
     "Export as CSV": "Izvozi kot CSV",
     "Open in browser": "Odpri v brskalniku",
     "An error occurred during test": "Med preizkusom je prišlo do napake",
-    "Back to Startpage": "SL-Back to Startpage",
-    "Icon RTR-NetTest": "SL-Icon RTR-NetTest",
-    "Text RTR-NetTest": "SL-Text RTR-NetTest",
-    "Unknown": "SL-Unknown",
-    "No connectivity": "SL-No connectivity",
-    "NAT": "SL-NAT",
-    "Public IP": "SL-Public IP",
-    "Test progress": "SL-Test progress"
+    "Back to Startpage": "Back to Startpage",
+    "Icon RTR-NetTest": "Icon RTR-NetTest",
+    "Text RTR-NetTest": "Text RTR-NetTest",
+    "Unknown": "Unknown",
+    "No connectivity": "No connectivity",
+    "NAT": "NAT",
+    "Public IP": "Public IP",
+    "Test progress": "Test progress"
 }

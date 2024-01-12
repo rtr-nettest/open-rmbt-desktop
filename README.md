@@ -26,7 +26,7 @@ To download translations from the Crowdin API run
 $ npm run prepare:translations
 ```
 
-To run a measurement from the command line use
+To run a measurement from the command line use (for development purposes only)
 
 ```sh
 $ npm run start:cli

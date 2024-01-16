@@ -182,6 +182,9 @@ declare global {
                 callback: (loopCounter: number) => any
             ) => Promise<any>
             onLoopModeExpired: (callback: () => any) => Promise<any>
+            onSetIp: (
+                callback: (settings: IUserSettings) => any
+            ) => Promise<any>
             deleteLocalData: () => Promise<void>
             scheduleLoop: (
                 loopInterval: number,

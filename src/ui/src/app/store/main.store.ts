@@ -90,6 +90,7 @@ export class MainStore {
     }
 
     registerClient() {
+        window.electronAPI.onSetIp((settings) => this.settings$.next(settings))
         window.electronAPI
             .registerClient()
             .then((settings) => this.settings$.next(settings))

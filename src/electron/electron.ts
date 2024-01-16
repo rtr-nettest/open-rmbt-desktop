@@ -172,6 +172,9 @@ ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
         if (settings.shouldAcceptTerms) {
             webContents.send(Events.OPEN_SCREEN, ERoutes.TERMS_CONDITIONS)
         }
+        MeasurementRunner.I.getIpInfo(settings).then((settingsWithIp) => {
+            webContents.send(Events.SET_IP, settingsWithIp)
+        })
         return settings
     } catch (e) {
         webContents.send(Events.ERROR, e)

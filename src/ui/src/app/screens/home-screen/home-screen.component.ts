@@ -1,18 +1,7 @@
-import { Component, OnDestroy, OnInit } from "@angular/core"
-import { Router } from "@angular/router"
+import { ChangeDetectorRef, Component, OnInit } from "@angular/core"
 import { TranslocoService } from "@ngneat/transloco"
-import {
-    Subject,
-    combineLatest,
-    distinctUntilChanged,
-    from,
-    map,
-    switchMap,
-    takeUntil,
-    tap,
-} from "rxjs"
-import { TERMS_AND_CONDITIONS, UNKNOWN } from "src/app/constants/strings"
-import { ERoutes } from "src/app/enums/routes.enum"
+import { map, switchMap, takeUntil } from "rxjs"
+import { UNKNOWN } from "src/app/constants/strings"
 import { CMSService } from "src/app/services/cms.service"
 import { MessageService } from "src/app/services/message.service"
 import { MainStore } from "src/app/store/main.store"
@@ -27,6 +16,7 @@ export class HomeScreenComponent extends BaseScreen implements OnInit {
     env$ = this.mainStore.env$
     ipInfo$ = this.mainStore.settings$.pipe(
         map((settings) => {
+            setTimeout(() => this.cdr.detectChanges(), 100)
             if (settings?.ipInfo) {
                 const { publicV4, publicV6, privateV4, privateV6 } =
                     settings?.ipInfo
@@ -99,8 +89,8 @@ export class HomeScreenComponent extends BaseScreen implements OnInit {
     constructor(
         mainStore: MainStore,
         message: MessageService,
+        private cdr: ChangeDetectorRef,
         private cmsService: CMSService,
-        private router: Router,
         private transloco: TranslocoService
     ) {
         super(mainStore, message)

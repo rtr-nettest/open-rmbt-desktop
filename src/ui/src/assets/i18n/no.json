@@ -110,12 +110,12 @@
     "Export as CSV": "Eksporter som CSV",
     "Open in browser": "Åpne i nettleser",
     "An error occurred during test": "En feil oppstod under testen",
-    "Back to Startpage": "NO-Back to Startpage",
-    "Icon RTR-NetTest": "NO-Icon RTR-NetTest",
-    "Text RTR-NetTest": "NO-Text RTR-NetTest",
-    "Unknown": "NO-Unknown",
-    "No connectivity": "NO-No connectivity",
-    "NAT": "NO-NAT",
-    "Public IP": "NO-Public IP",
-    "Test progress": "NO-Test progress"
+    "Back to Startpage": "Back to Startpage",
+    "Icon RTR-NetTest": "Icon RTR-NetTest",
+    "Text RTR-NetTest": "Text RTR-NetTest",
+    "Unknown": "Unknown",
+    "No connectivity": "No connectivity",
+    "NAT": "NAT",
+    "Public IP": "Public IP",
+    "Test progress": "Test progress"
 }

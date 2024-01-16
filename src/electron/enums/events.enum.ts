@@ -3,6 +3,7 @@ export enum Events {
     ACCEPT_TERMS = "ACCEPT_TERMS",
     DELETE_LOCAL_DATA = "DELETE_LOCAL_DATA",
     ERROR = "ERROR",
+    SET_IP = "SET_IP",
     GET_SERVERS = "GET_SERVERS",
     GET_CPU_USAGE = "GET_CPU_USAGE",
     GET_ENV = "GET_ENV",

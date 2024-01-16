@@ -6,6 +6,7 @@ import { IPaginator } from "../ui/src/app/interfaces/paginator.interface"
 import { ISort } from "../ui/src/app/interfaces/sort.interface"
 import { ILoopModeInfo } from "../measurement/interfaces/measurement-registration-request.interface"
 import { ERoutes } from "../ui/src/app/enums/routes.enum"
+import { IUserSettings } from "../measurement/interfaces/user-settings-response.interface"
 
 contextBridge.exposeInMainWorld("electronAPI", {
     quit: () => ipcRenderer.send(Events.QUIT),
@@ -60,6 +61,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
     onLoopModeExpired: (callback: () => any) => {
         ipcRenderer.removeAllListeners(Events.LOOP_MODE_EXPIRED)
         ipcRenderer.on(Events.LOOP_MODE_EXPIRED, callback)
+    },
+    onSetIp: (callback: (settings: IUserSettings) => any) => {
+        ipcRenderer.removeAllListeners(Events.SET_IP)
+        ipcRenderer.on(Events.SET_IP, (_, settings) => callback(settings))
     },
     deleteLocalData: () => {
         ipcRenderer.send(Events.DELETE_LOCAL_DATA)

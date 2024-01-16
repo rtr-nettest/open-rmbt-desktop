@@ -3,9 +3,13 @@
         <aside class="app-aside">
             <div>
                 <app-header [fixed]="true"></app-header>
-                <ul *ngIf="menu$ | async as menu" class="app-list">
+                <ul *ngIf="menu$ | async as menu" class="app-list" role="menu">
                     <ng-container *ngFor="let item of menu; trackBy: trackBy">
-                        <li *ngIf="!item.hidden" class="app-list-item">
+                        <li
+                            *ngIf="!item.hidden"
+                            class="app-list-item"
+                            role="menuitem"
+                        >
                             <app-main-menu-item
                                 [item]="item"
                                 (menuClick)="handleClick($event, item)"

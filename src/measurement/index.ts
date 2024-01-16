@@ -64,15 +64,22 @@ export class MeasurementRunner {
             if (this.settings.shouldAcceptTerms) {
                 return this.settings
             }
-            const ipInfo = await NetworkInfoService.I.getIPInfo(
-                this.settings,
-                this.settingsRequest
-            )
             await ControlServer.I.submitUnsentMeasurements()
-            return { ...this.settings, ipInfo }
+            return this.settings
         } catch (e) {
             throw new Error("The registration couldn't be completed")
         }
+    }
+
+    async getIpInfo(settings: IUserSettings) {
+        if (!this.settingsRequest) {
+            return undefined
+        }
+        const ipInfo = await NetworkInfoService.I.getIPInfo(
+            settings,
+            this.settingsRequest
+        )
+        return { ...settings, ipInfo }
     }
 
     async runMeasurement(options?: MeasurementOptions) {

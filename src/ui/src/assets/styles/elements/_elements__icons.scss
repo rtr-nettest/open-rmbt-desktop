@@ -94,4 +94,74 @@
                 no-repeat;
         }
     }
+
+    &--phase {
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        display: inline-block;
+        height: 20px;
+        margin-right: 1ex;
+        width: 20px;
+
+        &-down {
+            background-image: url("/assets/images/down-0.svg");
+
+            &-red {
+                background-image: url("/assets/images/down-1.svg");
+            }
+
+            &-yellow {
+                background-image: url("/assets/images/down-2.svg");
+            }
+
+            &-green {
+                background-image: url("/assets/images/down-3.svg");
+            }
+
+            &-greenest {
+                background-image: url("/assets/images/down-4.svg");
+            }
+        }
+
+        &-up {
+            background-image: url("/assets/images/up-0.svg");
+
+            &-red {
+                background-image: url("/assets/images/up-1.svg");
+            }
+
+            &-yellow {
+                background-image: url("/assets/images/up-2.svg");
+            }
+
+            &-green {
+                background-image: url("/assets/images/up-3.svg");
+            }
+
+            &-greenest {
+                background-image: url("/assets/images/up-4.svg");
+            }
+        }
+
+        &-ping {
+            background-image: url("/assets/images/ping-0.svg");
+
+            &-red {
+                background-image: url("/assets/images/ping-1.svg");
+            }
+
+            &-yellow {
+                background-image: url("/assets/images/ping-2.svg");
+            }
+
+            &-green {
+                background-image: url("/assets/images/ping-3.svg");
+            }
+
+            &-greenest {
+                background-image: url("/assets/images/ping-4.svg");
+            }
+        }
+    }
 }

@@ -336,21 +336,30 @@ export class HistoryStore {
                 count: hi.count,
                 measurementDate,
                 download:
-                    this.classification.getIconByClass(hi.downloadClass) +
+                    this.classification.getPhaseIconByClass(
+                        "down",
+                        hi.downloadClass
+                    ) +
                     this.conversion
                         .getSignificantDigits(hi.downloadKbit / 1e3)
                         .toLocaleString(locale) +
                     " " +
                     t["Mbps"],
                 upload:
-                    this.classification.getIconByClass(hi.uploadClass) +
+                    this.classification.getPhaseIconByClass(
+                        "up",
+                        hi.uploadClass
+                    ) +
                     this.conversion
                         .getSignificantDigits(hi.uploadKbit / 1e3)
                         .toLocaleString(locale) +
                     " " +
                     t["Mbps"],
                 ping:
-                    this.classification.getIconByClass(hi.pingClass) +
+                    this.classification.getPhaseIconByClass(
+                        "ping",
+                        hi.pingClass
+                    ) +
                     hi.ping.toLocaleString(locale) +
                     " " +
                     t["ms"],

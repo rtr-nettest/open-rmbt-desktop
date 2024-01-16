@@ -1,7 +1,7 @@
 @import "../../../assets/styles/core.scss";
 
 .app-menu-item {
-    border: none;
+    border: 1px solid transparent;
     border-radius: 0;
     color: black !important;
     font-size: rem($font-size-xxl);
@@ -10,12 +10,25 @@
     padding: 0.75rem 1.125rem;
     width: 100%;
 
+    &:focus {
+        outline: none;
+        border: 1px solid darkorange;
+    }
+
+    &:hover {
+        background-color: $color-hover;
+    }
+
     &--active {
         background: #737373;
         color: white !important;
 
         .app-icon {
             filter: invert(1);
+        }
+
+        &:hover {
+            background-color: mix($color-hover, black);
         }
     }
 

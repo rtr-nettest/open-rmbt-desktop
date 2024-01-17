@@ -174,10 +174,16 @@ ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
             webContents.send(Events.OPEN_SCREEN, ERoutes.TERMS_CONDITIONS)
         }
         MeasurementRunner.I.getIpV4Info(settings).then(async (ipV4Info) => {
+            let ipInfo: IPInfo = {
+                privateV4: ipV4Info?.privateV4 ?? "",
+                privateV6: "UNKNOWN",
+                publicV4: ipV4Info?.publicV4 ?? "",
+                publicV6: "UNKNOWN",
+            }
             let settingsWithIp = { ...settings, ipInfo: ipV4Info }
             webContents.send(Events.SET_IP, settingsWithIp)
             const ipV6Info = await MeasurementRunner.I.getIpV6Info(settings)
-            const ipInfo: IPInfo = {
+            ipInfo = {
                 privateV4: ipV4Info?.privateV4 ?? "",
                 privateV6: ipV6Info?.privateV6 ?? "",
                 publicV4: ipV4Info?.publicV4 ?? "",

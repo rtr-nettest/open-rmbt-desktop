@@ -35,6 +35,7 @@ import { LoopService } from "../measurement/services/loop.service"
 import { ILoopModeInfo } from "../measurement/interfaces/measurement-registration-request.interface"
 import { EMeasurementStatus } from "../measurement/enums/measurement-status.enum"
 import { ERoutes } from "../ui/src/app/enums/routes.enum"
+import { IPInfo } from "../measurement/interfaces/ip-info.interface"
 
 const createWindow = () => {
     if (process.env.DEV !== "true") {
@@ -172,7 +173,17 @@ ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
         if (settings.shouldAcceptTerms) {
             webContents.send(Events.OPEN_SCREEN, ERoutes.TERMS_CONDITIONS)
         }
-        MeasurementRunner.I.getIpInfo(settings).then((settingsWithIp) => {
+        MeasurementRunner.I.getIpV4Info(settings).then(async (ipV4Info) => {
+            let settingsWithIp = { ...settings, ipInfo: ipV4Info }
+            webContents.send(Events.SET_IP, settingsWithIp)
+            const ipV6Info = await MeasurementRunner.I.getIpV6Info(settings)
+            const ipInfo: IPInfo = {
+                privateV4: ipV4Info?.privateV4 ?? "",
+                privateV6: ipV6Info?.privateV6 ?? "",
+                publicV4: ipV4Info?.publicV4 ?? "",
+                publicV6: ipV6Info?.publicV6 ?? "",
+            }
+            settingsWithIp = { ...settings, ipInfo }
             webContents.send(Events.SET_IP, settingsWithIp)
         })
         return settings

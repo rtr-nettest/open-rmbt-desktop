@@ -71,15 +71,26 @@ export class MeasurementRunner {
         }
     }
 
-    async getIpInfo(settings: IUserSettings) {
+    async getIpV4Info(settings: IUserSettings) {
         if (!this.settingsRequest) {
             return undefined
         }
-        const ipInfo = await NetworkInfoService.I.getIPInfo(
+        const ipInfo = await NetworkInfoService.I.getIpV4Info(
             settings,
             this.settingsRequest
         )
-        return { ...settings, ipInfo }
+        return ipInfo
+    }
+
+    async getIpV6Info(settings: IUserSettings) {
+        if (!this.settingsRequest) {
+            return undefined
+        }
+        const ipInfo = await NetworkInfoService.I.getIpV6Info(
+            settings,
+            this.settingsRequest
+        )
+        return ipInfo
     }
 
     async runMeasurement(options?: MeasurementOptions) {

@@ -20,6 +20,7 @@ export class GaugeComponent {
             })
         })
     )
+    measurementProgress: string = ""
 
     constructor(
         private conversion: ConversionService,
@@ -120,6 +121,9 @@ export class GaugeComponent {
         const percents = document.querySelector("#percents")
         if (percents) {
             percents.textContent = fullProgress + "\u200a%"
+            if (fullProgress % 10 == 0) {
+                this.measurementProgress = percents.textContent
+            }
         }
         switch (status) {
             case EMeasurementStatus.INIT:

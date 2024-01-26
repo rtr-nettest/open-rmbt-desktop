@@ -193,6 +193,9 @@ declare global {
             onLoopModeExpired: (callback: () => any) => Promise<any>
             onMaxTestsReached: (callback: () => any) => Promise<any>
             openPdf: (url: string) => Promise<void>
+            onSetIp: (
+                callback: (settings: IUserSettings) => any
+            ) => Promise<any>
             deleteLocalData: () => Promise<void>
             scheduleLoop: (
                 loopInterval: number,

@@ -108,7 +108,6 @@
     "Export as XLSX": "Exportovat jako XLSX",
     "Export as PDF": "Exportovat jako PDF",
     "Export as CSV": "Exportovat jako CSV",
-    "An error occurred during test": "CS-An error occurred during test",
     "Info": "CS-Info",
     "Data": "CS-Data",
     "Environment": "CS-Environment",
@@ -140,6 +139,15 @@
     "Rural area": "CS-Rural area",
     "Other": "CS-Other",
     "Start certified measurement": "CS-Start certified measurement",
+    "The file is not an image": "CS-The file is not an image",
     "Open in browser": "Otevřít v prohlížeči",
-    "The file is not an image": "CS-The file is not an image"
+    "An error occurred during test": "Během testu došlo k chybě",
+    "Back to Startpage": "Back to Startpage",
+    "Icon RTR-NetTest": "Icon RTR-NetTest",
+    "Text RTR-NetTest": "Text RTR-NetTest",
+    "Unknown": "Unknown",
+    "No connectivity": "No connectivity",
+    "NAT": "NAT",
+    "Public IP": "Public IP",
+    "Test progress": "Test progress"
 }

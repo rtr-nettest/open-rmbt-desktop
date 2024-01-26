@@ -108,7 +108,6 @@
     "Export as XLSX": "Eksporter som XLSX",
     "Export as PDF": "Eksporter som PDF",
     "Export as NOV": "Eksporter som NOV",
-    "An error occurred during test": "NO-An error occurred during test",
     "Info": "NO-Info",
     "Data": "NO-Data",
     "Environment": "NO-Environment",
@@ -142,5 +141,14 @@
     "Start certified measurement": "NO-Start certified measurement",
     "Export as CSV": "Eksporter som CSV",
     "Open in browser": "Åpne i nettleser",
-    "The file is not an image": "NO-The file is not an image"
+    "The file is not an image": "NO-The file is not an image",
+    "An error occurred during test": "En feil oppstod under testen",
+    "Back to Startpage": "Back to Startpage",
+    "Icon RTR-NetTest": "Icon RTR-NetTest",
+    "Text RTR-NetTest": "Text RTR-NetTest",
+    "Unknown": "Unknown",
+    "No connectivity": "No connectivity",
+    "NAT": "NAT",
+    "Public IP": "Public IP",
+    "Test progress": "Test progress"
 }

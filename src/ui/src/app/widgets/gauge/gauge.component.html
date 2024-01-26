@@ -1,4 +1,13 @@
 <div *ngIf="visualization$ | async" class="gauge uk-width-1-2@s">
+    <!-- [START] For screen readers only -->
+    <div
+        *transloco="let t"
+        aria-live="polite"
+        style="position: absolute; left: -9999px"
+    >
+        {{ t("Test progress") + " " + measurementProgress }}
+    </div>
+    <!-- [END] For screen readers only -->
     <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 500 500"

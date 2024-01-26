@@ -23,12 +23,14 @@
                     <h1
                         *ngIf="(loopWaiting$ | async) !== true"
                         class="app-title"
+                        aria-live="polite"
                     >
                         {{ t("Measurement") + " " + loopCount }}
                     </h1>
                     <h1
                         *ngIf="(loopWaiting$ | async) === true"
                         class="app-title"
+                        aria-live="polite"
                     >
                         {{
                             t("Result of measurement - waiting")
@@ -38,6 +40,7 @@
                 </ng-container>
             </ng-container>
             <app-alert
+                aria-live="assertive"
                 *ngIf="showCPUWarning$ | async as cpuUsage"
                 kind="warning"
                 [text]="

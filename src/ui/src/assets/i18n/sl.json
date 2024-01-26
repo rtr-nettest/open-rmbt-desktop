@@ -108,7 +108,6 @@
     "Export as XLSX": "Izvozi kot XLSX",
     "Export as PDF": "Izvozi kot PDF",
     "Export as SLV": "Izvozi kot SLV",
-    "An error occurred during test": "SL-An error occurred during test",
     "Info": "SL-Info",
     "Data": "SL-Data",
     "Environment": "SL-Environment",
@@ -142,5 +141,14 @@
     "Start certified measurement": "SL-Start certified measurement",
     "Export as CSV": "Izvozi kot CSV",
     "Open in browser": "Odpri v brskalniku",
-    "The file is not an image": "SL-The file is not an image"
+    "The file is not an image": "SL-The file is not an image",
+    "An error occurred during test": "Med preizkusom je prišlo do napake",
+    "Back to Startpage": "Back to Startpage",
+    "Icon RTR-NetTest": "Icon RTR-NetTest",
+    "Text RTR-NetTest": "Text RTR-NetTest",
+    "Unknown": "Unknown",
+    "No connectivity": "No connectivity",
+    "NAT": "NAT",
+    "Public IP": "Public IP",
+    "Test progress": "Test progress"
 }

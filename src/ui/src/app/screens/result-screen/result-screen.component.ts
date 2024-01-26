@@ -114,7 +114,8 @@ export class ResultScreenComponent implements OnDestroy {
                         {
                             title: "Download",
                             value:
-                                this.classification.getIconByClass(
+                                this.classification.getPhaseIconByClass(
+                                    "down",
                                     result.downloadClass
                                 ) + this.getSpeedInMbps(value),
                         },
@@ -125,7 +126,8 @@ export class ResultScreenComponent implements OnDestroy {
                         {
                             title: "Upload",
                             value:
-                                this.classification.getIconByClass(
+                                this.classification.getPhaseIconByClass(
+                                    "up",
                                     result.uploadClass
                                 ) + this.getSpeedInMbps(value),
                         },
@@ -136,7 +138,8 @@ export class ResultScreenComponent implements OnDestroy {
                         {
                             title: "Ping",
                             value:
-                                this.classification.getIconByClass(
+                                this.classification.getPhaseIconByClass(
+                                    "ping",
                                     result.pingClass
                                 ) + this.getPingInMs(value),
                         },

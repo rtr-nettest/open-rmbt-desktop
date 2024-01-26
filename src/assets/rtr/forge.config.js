@@ -59,7 +59,15 @@ module.exports = {
             name: "@electron-forge/maker-squirrel",
             config: {
                 authors: "Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
-
+                ...(process.env.WINDOWS_CERT_PATH
+                    ? {
+                          certificateFile: process.env.WINDOWS_CERT_PATH,
+                      }
+                    : {
+                          // https://www.files.certum.eu/documents/manual_en/Code-Signing-signing-the-code-using-tools-like-Singtool-and-Jarsigner_v2.3.pdf
+                          signWithParams:
+                              "/fd sha256 /a /t http://time.certum.pl/",
+                      }),
                 loadingGif: path.join(
                     process.env.ASSETS_FOLDER,
                     "images",

@@ -1,6 +1,5 @@
 import { Component, OnDestroy } from "@angular/core"
-import { SafeUrl } from "@angular/platform-browser"
-import { Observable, Subject, firstValueFrom, of, takeUntil, tap } from "rxjs"
+import { Subject, firstValueFrom, takeWhile, tap } from "rxjs"
 import { ICertifiedDataForm } from "src/app/interfaces/certified-data-form.interface"
 import { ICertifiedEnvForm } from "src/app/interfaces/certified-env-form.interface"
 import { HistoryExportService } from "src/app/services/history-export.service"
@@ -38,7 +37,6 @@ export class CertifiedScreenComponent implements OnDestroy {
     isDataFormValid = false
     isEnvFormValid = false
     loopUuid = ""
-    pdfUrl$: Observable<SafeUrl | null> = of(null)
 
     constructor(
         private mainStore: MainStore,
@@ -73,7 +71,6 @@ export class CertifiedScreenComponent implements OnDestroy {
     startCertifiedMeasurement() {
         this.testStore.maxTestsReached$
             .pipe(
-                takeUntil(this.destroyed$),
                 tap((isMaxValueReached) => {
                     if (isMaxValueReached) {
                         firstValueFrom(
@@ -84,7 +81,8 @@ export class CertifiedScreenComponent implements OnDestroy {
                         this.activeBreadCrumbIndex = EBreadCrumbs.RESULT
                         this.testStore.disableLoopMode()
                     }
-                })
+                }),
+                takeWhile((isMaxValueReached) => !isMaxValueReached)
             )
             .subscribe()
         this.loopUuid = this.testStore.launchCertifiedTest().loop_uuid

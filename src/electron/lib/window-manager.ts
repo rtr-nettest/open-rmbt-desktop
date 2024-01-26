@@ -17,10 +17,12 @@ import { t } from "../../measurement/services/i18n.service"
 import { download } from "electron-dl"
 import { Logger } from "../../measurement/services/logger.service"
 import fs from "fs"
+import nodeUrl from "url"
 import { Events } from "../enums/events.enum"
 
 export class WindowManager {
     private static instance = new WindowManager()
+    private pdfs: { [key: string]: string } = {}
 
     static get I() {
         return this.instance
@@ -29,6 +31,12 @@ export class WindowManager {
     isSuspended = false
 
     private constructor() {}
+
+    onQuit() {
+        Object.values(this.pdfs).forEach((pdf) => {
+            if (fs.existsSync(pdf)) fs.unlinkSync(pdf)
+        })
+    }
 
     createWindow() {
         if (process.env.DEV !== "true") {
@@ -128,22 +136,26 @@ export class WindowManager {
             icon: path.join(__dirname, "assets", "images", "icon-linux.png"),
         })
 
-        const filename = new Date().toISOString() + ".pdf"
-        const downItem = await download(pdfWindow, url, {
-            directory: app.getPath("temp"),
-            filename,
-        })
+        let pdf = this.pdfs[url]
 
-        Logger.I.warn(`The PDF was downloaded to %o`, downItem)
+        if (!pdf) {
+            try {
+                const filename =
+                    new Date().toISOString().replaceAll(":", ".") + ".pdf"
+                const directory = app.getPath("temp")
+                const downItem = await download(pdfWindow, url, {
+                    directory,
+                    filename,
+                })
+                pdf = nodeUrl.pathToFileURL(downItem.getSavePath()).toString()
+                this.pdfs[url] = pdf
+                Logger.I.warn(`PDF URL is %s`, pdf)
+            } catch (e) {
+                Logger.I.error(`PDF download error: %o`, e)
+            }
+        }
 
-        pdfWindow.loadURL("file://" + downItem.getSavePath())
-
+        pdfWindow.loadURL(pdf)
         pdfWindow.setMenu(null)
-
-        pdfWindow.on("closed", function () {
-            if (fs.existsSync(downItem.getSavePath()))
-                fs.unlinkSync(downItem.getSavePath())
-            pdfWindow = undefined
-        })
     }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core"
 import { MainStore } from "../store/main.store"
 import { ISimpleHistoryResult } from "../../../../measurement/interfaces/simple-history-result.interface"
-import { catchError, concatMap, map, of, tap } from "rxjs"
+import { BehaviorSubject, catchError, concatMap, map, of, tap } from "rxjs"
 import { HttpClient, HttpParams } from "@angular/common/http"
 import { TranslocoService } from "@ngneat/transloco"
 import { MessageService } from "./message.service"
@@ -14,6 +14,8 @@ import { TestStore } from "../store/test.store"
     providedIn: "root",
 })
 export class HistoryExportService {
+    lastCertifiedPdfUrl$ = new BehaviorSubject("")
+
     private get exportUrl() {
         return this.mainStore.env$.value?.HISTORY_EXPORT_URL
     }
@@ -63,6 +65,10 @@ export class HistoryExportService {
     }
 
     exportAsCertified(loopUuid?: string | null) {
+        if (this.lastCertifiedPdfUrl$.value) {
+            window.electronAPI.openPdf(this.lastCertifiedPdfUrl$.value)
+            return this.lastCertifiedPdfUrl$.asObservable()
+        }
         if (!this.pdfUrl || !loopUuid) {
             return of(null)
         }
@@ -85,7 +91,9 @@ export class HistoryExportService {
             .pipe(
                 map((resp: any) => {
                     if (resp?.["file"]) {
-                        return this.exportUrl + "/pdf/" + resp["file"]
+                        const fileUrl = this.exportUrl + "/pdf/" + resp["file"]
+                        this.lastCertifiedPdfUrl$.next(fileUrl)
+                        return fileUrl
                     }
                     return null
                 }),

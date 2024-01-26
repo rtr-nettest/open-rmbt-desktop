@@ -48,6 +48,7 @@ app.on("activate", () => {
 })
 
 ipcMain.on(Events.QUIT, () => {
+    WindowManager.I.onQuit()
     app.quit()
 })
 

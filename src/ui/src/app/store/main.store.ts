@@ -32,6 +32,7 @@ export class MainStore {
     assets$ = new BehaviorSubject<{ [key: string]: IMainAsset }>({})
     env$ = new BehaviorSubject<IEnv | null>(null)
     inProgress$ = new BehaviorSubject<boolean>(false)
+    isOnline$ = new BehaviorSubject<boolean>(navigator.onLine)
     jitterInfo$ = new BehaviorSubject<IJitterInfo | null>({
         jitter: 1,
         packetLoss: 1,
@@ -57,6 +58,13 @@ export class MainStore {
         window.electronAPI.onOpenScreen((route) => {
             this.router.navigate(["/", route])
         })
+        window.addEventListener("online", this.setIsOnline.bind(this))
+        window.addEventListener("offline", this.setIsOnline.bind(this))
+    }
+
+    setIsOnline() {
+        this.isOnline$.next(navigator.onLine)
+        setTimeout(() => this.registerClient(navigator.onLine))
     }
 
     setEnv() {
@@ -89,10 +97,10 @@ export class MainStore {
         return of(0)
     }
 
-    registerClient() {
+    registerClient(isOnline: boolean) {
         window.electronAPI.onSetIp((settings) => this.settings$.next(settings))
         window.electronAPI
-            .registerClient()
+            .registerClient(isOnline)
             .then((settings) => this.settings$.next(settings))
     }
 

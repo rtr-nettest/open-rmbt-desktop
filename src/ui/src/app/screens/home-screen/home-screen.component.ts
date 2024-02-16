@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from "@angular/core"
 import { TranslocoService } from "@ngneat/transloco"
-import { map, switchMap, takeUntil } from "rxjs"
+import { map, switchMap, takeUntil, withLatestFrom } from "rxjs"
 import { UNKNOWN } from "src/app/constants/strings"
 import { CMSService } from "src/app/services/cms.service"
 import { MessageService } from "src/app/services/message.service"
@@ -15,9 +15,10 @@ import { BaseScreen } from "../base-screen/base-screen.component"
 export class HomeScreenComponent extends BaseScreen implements OnInit {
     env$ = this.mainStore.env$
     ipInfo$ = this.mainStore.settings$.pipe(
-        map((settings) => {
+        withLatestFrom(this.mainStore.isOnline$),
+        map(([settings, isOnline]) => {
             setTimeout(() => this.cdr.detectChanges(), 100)
-            if (settings?.ipInfo) {
+            if (settings?.ipInfo && isOnline) {
                 const { publicV4, publicV6, privateV4, privateV6 } =
                     settings?.ipInfo
                 return [
@@ -97,7 +98,7 @@ export class HomeScreenComponent extends BaseScreen implements OnInit {
     }
 
     ngOnInit(): void {
-        this.mainStore.registerClient()
+        this.mainStore.registerClient(navigator.onLine)
         this.mainStore
             .startLoggingJitter()
             .pipe(takeUntil(this.destroyed$))

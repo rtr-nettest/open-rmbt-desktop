@@ -155,7 +155,7 @@ export class SettingsScreenComponent
 
     ngOnInit(): void {
         if (!this.mainStore.settings$.value) {
-            this.mainStore.registerClient()
+            this.mainStore.registerClient(navigator.onLine)
         }
     }
 }

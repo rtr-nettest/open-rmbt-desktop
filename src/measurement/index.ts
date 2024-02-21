@@ -153,6 +153,16 @@ export class MeasurementRunner {
                     ? EMeasurementFinalStatus.ABORTED
                     : EMeasurementFinalStatus.SUCCESS
             )
+
+            console.log("options?.loopModeInfo", options?.loopModeInfo)
+            /*** TEST ERROR */
+            if (options?.loopModeInfo?.test_counter == 3) {
+                result.pings = []
+                result.test_speed_download = -1
+                result.test_speed_upload = -1
+            }
+            /*** END TEST ERROR */
+
             await ControlServer.I.submitMeasurement(result)
             if (
                 this.rmbtClient!.measurementStatus !==
@@ -163,6 +173,7 @@ export class MeasurementRunner {
             return this.rmbtClient!.measurementStatus
         } catch (e: any) {
             if (e) {
+                this.rmbtClient!.measurementStatus = EMeasurementStatus.ERROR
                 Logger.I.error(e)
                 try {
                     await ControlServer.I.submitMeasurement(
@@ -252,7 +263,12 @@ export class MeasurementRunner {
             })
             if (status === EMeasurementStatus.ABORTED) {
                 webContents.send(Events.MEASUREMENT_ABORTED)
-            } else if (loopModeInfo) {
+                LoopService.I.resetTimeout()
+            }
+        } catch (e) {
+            webContents.send(Events.ERROR, e)
+        } finally {
+            if (loopModeInfo) {
                 const { test_counter: counter, max_tests: maxTests } =
                     loopModeInfo
                 if (counter >= (maxTests || Infinity)) {
@@ -260,8 +276,6 @@ export class MeasurementRunner {
                     LoopService.I.resetTimeout()
                 }
             }
-        } catch (e) {
-            webContents.send(Events.ERROR, e)
         }
     }
 

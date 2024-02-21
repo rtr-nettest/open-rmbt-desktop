@@ -153,16 +153,6 @@ export class MeasurementRunner {
                     ? EMeasurementFinalStatus.ABORTED
                     : EMeasurementFinalStatus.SUCCESS
             )
-
-            console.log("options?.loopModeInfo", options?.loopModeInfo)
-            /*** TEST ERROR */
-            if (options?.loopModeInfo?.test_counter == 3) {
-                result.pings = []
-                result.test_speed_download = -1
-                result.test_speed_upload = -1
-            }
-            /*** END TEST ERROR */
-
             await ControlServer.I.submitMeasurement(result)
             if (
                 this.rmbtClient!.measurementStatus !==

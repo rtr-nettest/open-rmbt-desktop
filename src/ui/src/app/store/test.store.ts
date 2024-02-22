@@ -1,5 +1,13 @@
 import { Injectable, NgZone } from "@angular/core"
-import { BehaviorSubject, concatMap, from, interval, map, of } from "rxjs"
+import {
+    BehaviorSubject,
+    concatMap,
+    from,
+    interval,
+    map,
+    of,
+    withLatestFrom,
+} from "rxjs"
 import { TestVisualizationState } from "../dto/test-visualization-state.dto"
 import { ITestVisualizationState } from "../interfaces/test-visualization-state.interface"
 import { IBasicNetworkInfo } from "../../../../measurement/interfaces/basic-network-info.interface"
@@ -110,22 +118,25 @@ export class TestStore {
         }
         return interval(STATE_UPDATE_TIMEOUT).pipe(
             concatMap(() => from(window.electronAPI.getMeasurementState())),
-            map(this.setTestState)
+            withLatestFrom(this.visualization$),
+            map(([state, vis]) => this.setTestState(state, vis))
         )
     }
 
     private setTestState = (
-        phaseState: IMeasurementPhaseState & IBasicNetworkInfo
+        phaseState: IMeasurementPhaseState & IBasicNetworkInfo,
+        oldVisualization: ITestVisualizationState
     ) => {
-        let newState = this.visualization$.value
-        const oldPhaseName = this.visualization$.value.currentPhaseName
-        if (
-            (oldPhaseName === EMeasurementStatus.END ||
-                oldPhaseName === EMeasurementStatus.ERROR ||
-                oldPhaseName === EMeasurementStatus.ABORTED) &&
-            phaseState.phase !== oldPhaseName
-        ) {
+        const oldPhaseName = oldVisualization.currentPhaseName
+        const oldPhaseIsOfFinishType =
+            oldPhaseName === EMeasurementStatus.END ||
+            oldPhaseName === EMeasurementStatus.ERROR ||
+            oldPhaseName === EMeasurementStatus.ABORTED
+        let newState
+        if (phaseState.phase !== oldPhaseName && oldPhaseIsOfFinishType) {
             newState = new TestVisualizationState()
+        } else {
+            newState = oldVisualization
         }
         newState = TestVisualizationState.from(
             newState,
@@ -185,8 +196,8 @@ export class TestStore {
             return
         }
         window.electronAPI.getMeasurementState().then((state) => {
-            this.setTestState(state)
             const v = this.visualization$.value
+            this.setTestState(state, v)
             v.phases[EMeasurementStatus.DOWN].setChartFromPings?.(state.pings)
             v.phases[EMeasurementStatus.DOWN].setRTRChartFromOverallSpeed?.(
                 state.downs

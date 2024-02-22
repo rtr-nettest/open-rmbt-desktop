@@ -253,7 +253,6 @@ export class MeasurementRunner {
             })
             if (status === EMeasurementStatus.ABORTED) {
                 webContents.send(Events.MEASUREMENT_ABORTED)
-                LoopService.I.resetTimeout()
             }
         } catch (e) {
             webContents.send(Events.ERROR, e)

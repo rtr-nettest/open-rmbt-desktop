@@ -19,14 +19,14 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
 export class LoopTestScreenComponent extends TestScreenComponent {
     private waitingProgressMs = 0
     private shouldGetHistory$ = new BehaviorSubject<boolean>(false)
-    private currentLoopCount$ = new BehaviorSubject<number | null>(null)
+    private currentTestUuid$ = new BehaviorSubject<string | null>(null)
 
     override visualization$ = this.store.visualization$.pipe(
         withLatestFrom(this.mainStore.error$, this.loopCount$),
         distinctUntilChanged(),
         tap(([state, error, loopCount]) => {
             this.setShowCPUWarning(this.mainStore.env$.value)
-            this.initNewLoop(loopCount)
+            this.initNewLoop(state.phases[state.currentPhaseName].testUuid)
             if (error) {
                 this.openErrorDialog(state)
             } else if (state.currentPhaseName === EMeasurementStatus.END) {
@@ -47,10 +47,10 @@ export class LoopTestScreenComponent extends TestScreenComponent {
         })
     }
 
-    private initNewLoop(loopCount: number) {
-        const lastLoopCount = this.currentLoopCount$.value
-        if (lastLoopCount !== loopCount) {
-            this.currentLoopCount$.next(loopCount)
+    private initNewLoop(testUuid: string) {
+        const lastTestUuid = this.currentTestUuid$.value
+        if (lastTestUuid !== testUuid) {
+            this.currentTestUuid$.next(testUuid)
             this.loopWaiting$.next(false)
             this.waitingProgressMs = 0
         }

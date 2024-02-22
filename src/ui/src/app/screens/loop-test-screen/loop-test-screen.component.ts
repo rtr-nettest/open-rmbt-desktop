@@ -3,7 +3,12 @@ import { TestScreenComponent } from "../test-screen/test-screen.component"
 import { ITestVisualizationState } from "src/app/interfaces/test-visualization-state.interface"
 import { STATE_UPDATE_TIMEOUT } from "src/app/store/test.store"
 import { ERROR_OCCURED_DURING_LOOP } from "src/app/constants/strings"
-import { distinctUntilChanged, tap, withLatestFrom } from "rxjs"
+import {
+    BehaviorSubject,
+    distinctUntilChanged,
+    tap,
+    withLatestFrom,
+} from "rxjs"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
 
 @Component({
@@ -13,12 +18,15 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
 })
 export class LoopTestScreenComponent extends TestScreenComponent {
     private waitingProgressMs = 0
+    private shouldGetHistory$ = new BehaviorSubject<boolean>(false)
+    private currentLoopCount$ = new BehaviorSubject<number | null>(null)
 
     override visualization$ = this.store.visualization$.pipe(
         withLatestFrom(this.mainStore.error$, this.loopCount$),
         distinctUntilChanged(),
         tap(([state, error, loopCount]) => {
             this.setShowCPUWarning(this.mainStore.env$.value)
+            this.initNewLoop(loopCount)
             if (error) {
                 this.openErrorDialog(state)
             } else if (state.currentPhaseName === EMeasurementStatus.END) {
@@ -26,6 +34,7 @@ export class LoopTestScreenComponent extends TestScreenComponent {
             } else {
                 this.getRecentHistory(loopCount)
             }
+            this.setProgressIndicator(state)
         })
     )
 
@@ -36,6 +45,15 @@ export class LoopTestScreenComponent extends TestScreenComponent {
                 this.getRecentHistory(this.loopCount$.value)
             })
         })
+    }
+
+    private initNewLoop(loopCount: number) {
+        const lastLoopCount = this.currentLoopCount$.value
+        if (lastLoopCount !== loopCount) {
+            this.currentLoopCount$.next(loopCount)
+            this.loopWaiting$.next(false)
+            this.waitingProgressMs = 0
+        }
     }
 
     protected override openErrorDialog(state: ITestVisualizationState) {
@@ -50,24 +68,27 @@ export class LoopTestScreenComponent extends TestScreenComponent {
 
     protected override goToResult = (state: ITestVisualizationState) => {
         this.loopWaiting$.next(true)
+        this.shouldGetHistory$.next(true)
         this.mainStore.error$.next(null)
-        this.setProgressIndicator(state)
     }
 
     private getRecentHistory(loopCount: number) {
-        if (!!this.loopWaiting$.value) {
-            this.historyStore
-                .getRecentMeasurementHistory({
-                    offset: 0,
-                    limit: loopCount - 1,
-                })
-                .subscribe()
-            this.waitingProgressMs = 0
+        if (!this.shouldGetHistory$.value) {
+            return
         }
-        this.loopWaiting$.next(false)
+        this.historyStore
+            .getRecentMeasurementHistory({
+                offset: 0,
+                limit: loopCount - 1,
+            })
+            .subscribe()
+        this.shouldGetHistory$.next(false)
     }
 
     private setProgressIndicator(state: ITestVisualizationState) {
+        if (!this.loopWaiting$.value) {
+            return
+        }
         this.waitingProgressMs += STATE_UPDATE_TIMEOUT
         const endTimeMs = Math.max(state.startTimeMs, state.endTimeMs)
         const timeTillEndMs =

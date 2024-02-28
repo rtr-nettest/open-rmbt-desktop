@@ -30,11 +30,8 @@ export class NetworkInfoService {
             request
         )
         try {
-            publicV4 = (
-                await axios.post(settings.urls.url_ipv4_check, request, {
-                    signal: AbortSignal.timeout(connectionTimeout),
-                })
-            ).data.ip
+            publicV4 = (await axios.post(settings.urls.url_ipv4_check, request))
+                .data.ip
         } catch (e) {}
 
         let privateV4 = ""
@@ -80,11 +77,8 @@ export class NetworkInfoService {
             request
         )
         try {
-            publicV6 = (
-                await axios.post(settings.urls.url_ipv6_check, request, {
-                    signal: AbortSignal.timeout(connectionTimeout),
-                })
-            ).data.ip
+            publicV6 = (await axios.post(settings.urls.url_ipv6_check, request))
+                .data.ip
         } catch (e) {}
 
         let privateV6 = ""

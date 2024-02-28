@@ -3,6 +3,7 @@ export interface IEnv {
     APP_VERSION: string
     CERTIFIED_TEST_INTERVAL: number
     CERTIFIED_TEST_COUNT: number
+    CHECK_IP_INTERVAL_MS: number
     CMS_URL: string
     CPU_WARNING_PERCENT: number | undefined
     CROWDIN_UPDATE_AT_RUNTIME: string

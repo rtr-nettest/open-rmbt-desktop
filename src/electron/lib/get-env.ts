@@ -61,4 +61,7 @@ export const getEnv = () =>
                 : process.platform === "darwin"
                 ? "macos"
                 : process.platform,
+        CHECK_IP_INTERVAL_MS: process.env.CHECK_IP_INTERVAL_MS
+            ? parseInt(process.env.CHECK_IP_INTERVAL_MS)
+            : 10000,
     } as IEnv)

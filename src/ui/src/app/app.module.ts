@@ -158,7 +158,7 @@ declare global {
             getTranslations: (lang: string) => Promise<ICrowdinJson | null>
             getNews: () => Promise<INewsItem[] | null>
             acceptTerms: (terms: number) => Promise<void>
-            registerClient: (isOnline: boolean) => Promise<IUserSettings>
+            registerClient: () => Promise<IUserSettings>
             setIpVersion: (ipv: EIPVersion | null) => Promise<void>
             setActiveClient: (client: string) => Promise<void>
             setActiveLanguage: (language: string) => Promise<void>

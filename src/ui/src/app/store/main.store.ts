@@ -58,13 +58,6 @@ export class MainStore {
         window.electronAPI.onOpenScreen((route) => {
             this.router.navigate(["/", route])
         })
-        window.addEventListener("online", this.setIsOnline.bind(this))
-        window.addEventListener("offline", this.setIsOnline.bind(this))
-    }
-
-    setIsOnline() {
-        this.isOnline$.next(navigator.onLine)
-        setTimeout(() => this.registerClient(navigator.onLine))
     }
 
     setEnv() {
@@ -72,9 +65,7 @@ export class MainStore {
             return this.env$
         }
         return from(window.electronAPI.getEnv()).pipe(
-            tap((env) => {
-                this.env$.next(env)
-            })
+            tap((env) => this.env$.next(env))
         )
     }
 
@@ -97,10 +88,15 @@ export class MainStore {
         return of(0)
     }
 
-    registerClient(isOnline: boolean) {
-        window.electronAPI.onSetIp((settings) => this.settings$.next(settings))
+    registerClient() {
+        window.electronAPI.onSetIp((settings) => {
+            this.isOnline$.next(
+                !!(settings.ipInfo?.publicV4 || settings.ipInfo?.publicV6)
+            )
+            this.settings$.next(settings)
+        })
         window.electronAPI
-            .registerClient(isOnline)
+            .registerClient()
             .then((settings) => this.settings$.next(settings))
     }
 

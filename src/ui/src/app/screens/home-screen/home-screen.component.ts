@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from "@angular/core"
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core"
 import { TranslocoService } from "@ngneat/transloco"
 import { map, switchMap, takeUntil, withLatestFrom } from "rxjs"
 import { UNKNOWN } from "src/app/constants/strings"
@@ -12,7 +12,10 @@ import { BaseScreen } from "../base-screen/base-screen.component"
     templateUrl: "./home-screen.component.html",
     styleUrls: ["./home-screen.component.scss"],
 })
-export class HomeScreenComponent extends BaseScreen implements OnInit {
+export class HomeScreenComponent
+    extends BaseScreen
+    implements OnInit, OnDestroy
+{
     env$ = this.mainStore.env$
     ipInfo$ = this.mainStore.settings$.pipe(
         withLatestFrom(this.mainStore.isOnline$),
@@ -86,6 +89,7 @@ export class HomeScreenComponent extends BaseScreen implements OnInit {
             return `${this.env$.value?.WEBSITE_HOST}/${lang}/${path}`
         })
     )
+    private checkIpInterval?: NodeJS.Timeout
 
     constructor(
         mainStore: MainStore,
@@ -98,12 +102,24 @@ export class HomeScreenComponent extends BaseScreen implements OnInit {
     }
 
     ngOnInit(): void {
-        this.mainStore.registerClient(navigator.onLine)
+        this.mainStore.registerClient()
         this.mainStore
             .startLoggingJitter()
             .pipe(takeUntil(this.destroyed$))
             .subscribe()
         this.showProgress = false
+        const intervalMs = this.env$.value?.CHECK_IP_INTERVAL_MS
+        if (intervalMs) {
+            clearInterval(this.checkIpInterval)
+            this.checkIpInterval = setInterval(() => {
+                this.mainStore.registerClient()
+            }, intervalMs)
+        }
+    }
+
+    override ngOnDestroy(): void {
+        clearInterval(this.checkIpInterval)
+        super.ngOnDestroy()
     }
 
     getIPIcon(publicAddress: string, privateAddress: string) {

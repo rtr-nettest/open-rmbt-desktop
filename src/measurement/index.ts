@@ -41,6 +41,8 @@ export class MeasurementRunner {
         return this.instance
     }
 
+    public settings?: IUserSettings
+
     private measurementServer?: IMeasurementServerResponse
     private registrationRequest?: MeasurementRegistrationRequest
     private rmbtClient?: RMBTClient
@@ -48,7 +50,6 @@ export class MeasurementRunner {
     private cpuInfoList: number[] = []
     private cpuInfo?: ICPU
     private settingsRequest?: UserSettingsRequest
-    private settings?: IUserSettings
     private startTimeMs = 0
     private endTimeMs = 0
 
@@ -102,8 +103,8 @@ export class MeasurementRunner {
         }
     }
 
-    async getIpV4Info(settings: IUserSettings) {
-        if (!this.settingsRequest) {
+    async getIpV4Info(settings?: IUserSettings) {
+        if (!this.settingsRequest || !settings) {
             return undefined
         }
         const ipInfo = await NetworkInfoService.I.getIpV4Info(
@@ -113,8 +114,8 @@ export class MeasurementRunner {
         return ipInfo
     }
 
-    async getIpV6Info(settings: IUserSettings) {
-        if (!this.settingsRequest) {
+    async getIpV6Info(settings?: IUserSettings) {
+        if (!this.settingsRequest || !settings) {
             return undefined
         }
         const ipInfo = await NetworkInfoService.I.getIpV6Info(

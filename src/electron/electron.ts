@@ -23,6 +23,7 @@ import { ERoutes } from "../ui/src/app/enums/routes.enum"
 import { IPInfo } from "../measurement/interfaces/ip-info.interface"
 import { WindowManager } from "./lib/window-manager"
 import { getEnv } from "./lib/get-env"
+import { IUserSettings } from "../measurement/interfaces/user-settings-response.interface"
 
 // Needs to be called before app is ready;
 // gives our scheme access to load relative files,
@@ -64,68 +65,41 @@ ipcMain.on(Events.ACCEPT_TERMS, (event, terms: number) => {
     Store.set(TERMS_ACCEPTED_VERSION, terms)
 })
 
-const registerClient = async (webContents: Electron.WebContents) => {
-    const settings = await MeasurementRunner.I.registerClient()
-    if (settings.shouldAcceptTerms) {
-        webContents.send(Events.OPEN_SCREEN, ERoutes.TERMS_CONDITIONS)
+ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
+    const webContents = event.sender
+    let settings = MeasurementRunner.I.settings
+    if (!settings) {
+        try {
+            settings = await MeasurementRunner.I.registerClient()
+            if (settings.shouldAcceptTerms) {
+                webContents.send(Events.OPEN_SCREEN, ERoutes.TERMS_CONDITIONS)
+            }
+        } catch (_) {}
     }
     MeasurementRunner.I.getIpV4Info(settings).then(async (ipV4Info) => {
+        const unknown = "UNKNOWN"
         let ipInfo: IPInfo = {
             privateV4: ipV4Info?.privateV4 ?? "",
-            privateV6: "UNKNOWN",
             publicV4: ipV4Info?.publicV4 ?? "",
-            publicV6: "UNKNOWN",
+            privateV6: unknown,
+            publicV6: unknown,
         }
-        let settingsWithIp = { ...settings, ipInfo: ipV4Info }
-        webContents.send(Events.SET_IP, settingsWithIp)
-        const ipV6Info = await MeasurementRunner.I.getIpV6Info(settings)
+        MeasurementRunner.I.settings = {
+            ...settings,
+            ipInfo: ipV4Info,
+        } as IUserSettings
+        webContents.send(Events.SET_IP, MeasurementRunner.I.settings)
+        const ipV6Info = await MeasurementRunner.I.getIpV6Info(settings!)
         ipInfo = {
             privateV4: ipV4Info?.privateV4 ?? "",
             privateV6: ipV6Info?.privateV6 ?? "",
             publicV4: ipV4Info?.publicV4 ?? "",
             publicV6: ipV6Info?.publicV6 ?? "",
         }
-        settingsWithIp = { ...settings, ipInfo }
-        webContents.send(Events.SET_IP, settingsWithIp)
+        MeasurementRunner.I.settings = { ...settings, ipInfo } as IUserSettings
+        webContents.send(Events.SET_IP, MeasurementRunner.I.settings)
     })
     return settings
-}
-
-ipcMain.handle(Events.REGISTER_CLIENT, async (event, isOnline) => {
-    if (!isOnline) {
-        return null
-    }
-    const webContents = event.sender
-    let attempts = 0
-    let maxAttempts = process.env.RECONNECT_ATTEMPTS
-        ? parseInt(process.env.RECONNECT_ATTEMPTS)
-        : 10
-    if (isNaN(maxAttempts)) {
-        maxAttempts = 10
-    }
-    let intervalMs = process.env.RECONNECT_INTERVAL_MS
-        ? parseInt(process.env.RECONNECT_INTERVAL_MS)
-        : 1000
-    if (isNaN(intervalMs)) {
-        intervalMs = 1000
-    }
-    return new Promise((res) => {
-        let interval = setInterval(async () => {
-            try {
-                const settings = await registerClient(webContents)
-                clearInterval(interval)
-                res(settings)
-            } catch (e) {
-                if (attempts >= maxAttempts) {
-                    clearInterval(interval)
-                    webContents.send(Events.ERROR, e)
-                    res(void 0)
-                } else {
-                    attempts++
-                }
-            }
-        }, intervalMs)
-    })
 })
 
 ipcMain.on(Events.SET_IP_VERSION, (event, ipv: EIPVersion | null) => {

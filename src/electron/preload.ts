@@ -15,8 +15,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getNews: () => ipcRenderer.invoke(Events.GET_NEWS),
     acceptTerms: (terms: number) =>
         ipcRenderer.send(Events.ACCEPT_TERMS, terms),
-    registerClient: (isOnline: boolean) =>
-        ipcRenderer.invoke(Events.REGISTER_CLIENT, isOnline),
+    registerClient: () => ipcRenderer.invoke(Events.REGISTER_CLIENT),
     setIpVersion: (ipv: EIPVersion | null) =>
         ipcRenderer.send(Events.SET_IP_VERSION, ipv),
     setActiveClient: (client: string) =>

@@ -11,9 +11,9 @@ import { TestStore } from "src/app/store/test.store"
 })
 export class StartTestButtonComponent {
     env$ = this.mainStore.env$
-    disabled$ = this.mainStore.settings$.pipe(
-        withLatestFrom(this.mainStore.isOnline$),
-        map(([settings, isOnline]) => !settings?.uuid || !isOnline)
+    disabled$ = this.mainStore.isOnline$.pipe(
+        withLatestFrom(this.mainStore.settings$),
+        map(([isOnline, settings]) => !settings?.uuid || !isOnline)
     )
 
     constructor(private mainStore: MainStore) {}

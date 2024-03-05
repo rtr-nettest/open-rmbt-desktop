@@ -76,27 +76,26 @@ ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
             }
         } catch (_) {}
     }
-    MeasurementRunner.I.getIpV4Info(settings).then(async (ipV4Info) => {
-        const unknown = "UNKNOWN"
-        let ipInfo: IPInfo = {
-            privateV4: ipV4Info?.privateV4 ?? "",
-            publicV4: ipV4Info?.publicV4 ?? "",
-            privateV6: unknown,
-            publicV6: unknown,
-        }
+    MeasurementRunner.I.getIpV4Info(settings).then((ipV4Info) => {
         MeasurementRunner.I.settings = {
             ...settings,
-            ipInfo: ipV4Info,
+            ipInfo: {
+                ...MeasurementRunner.I.settings?.ipInfo,
+                privateV4: ipV4Info?.privateV4 ?? "",
+                publicV4: ipV4Info?.publicV4 ?? "",
+            },
         } as IUserSettings
         webContents.send(Events.SET_IP, MeasurementRunner.I.settings)
-        const ipV6Info = await MeasurementRunner.I.getIpV6Info(settings!)
-        ipInfo = {
-            privateV4: ipV4Info?.privateV4 ?? "",
-            privateV6: ipV6Info?.privateV6 ?? "",
-            publicV4: ipV4Info?.publicV4 ?? "",
-            publicV6: ipV6Info?.publicV6 ?? "",
-        }
-        MeasurementRunner.I.settings = { ...settings, ipInfo } as IUserSettings
+    })
+    MeasurementRunner.I.getIpV6Info(settings).then((ipV6Info) => {
+        MeasurementRunner.I.settings = {
+            ...settings,
+            ipInfo: {
+                ...MeasurementRunner.I.settings?.ipInfo,
+                privateV6: ipV6Info?.privateV6 ?? "",
+                publicV6: ipV6Info?.publicV6 ?? "",
+            },
+        } as IUserSettings
         webContents.send(Events.SET_IP, MeasurementRunner.I.settings)
     })
     return settings

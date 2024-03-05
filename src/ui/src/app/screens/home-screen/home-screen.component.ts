@@ -23,15 +23,17 @@ export class HomeScreenComponent
             setTimeout(() => this.cdr.detectChanges(), 100)
             if (ipInfo && isOnline) {
                 const { publicV4, publicV6, privateV4, privateV6 } = ipInfo
+                const textV4 = publicV4 == UNKNOWN ? "" : publicV4
+                const textV6 = publicV6 == UNKNOWN ? "" : publicV6
                 return [
                     `${this.transloco.translate("IPv4")}:&nbsp;${this.getIPIcon(
                         publicV4,
                         privateV4
-                    )}&nbsp;${publicV4}`,
+                    )}&nbsp;${textV4}`,
                     `${this.transloco.translate("IPv6")}:&nbsp;${this.getIPIcon(
                         publicV6,
                         privateV6
-                    )}&nbsp;${publicV6}`,
+                    )}&nbsp;${textV6}`,
                 ]
             }
             return [

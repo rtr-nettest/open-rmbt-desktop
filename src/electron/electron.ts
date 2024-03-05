@@ -76,11 +76,15 @@ ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
             }
         } catch (_) {}
     }
+    const unknown = "UNKNOWN"
     MeasurementRunner.I.getIpV4Info(settings).then((ipV4Info) => {
         MeasurementRunner.I.settings = {
             ...settings,
             ipInfo: {
-                ...MeasurementRunner.I.settings?.ipInfo,
+                publicV6:
+                    MeasurementRunner.I.settings?.ipInfo?.publicV6 ?? unknown,
+                privateV6:
+                    MeasurementRunner.I.settings?.ipInfo?.privateV6 ?? unknown,
                 privateV4: ipV4Info?.privateV4 ?? "",
                 publicV4: ipV4Info?.publicV4 ?? "",
             },
@@ -91,7 +95,10 @@ ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
         MeasurementRunner.I.settings = {
             ...settings,
             ipInfo: {
-                ...MeasurementRunner.I.settings?.ipInfo,
+                publicV4:
+                    MeasurementRunner.I.settings?.ipInfo?.publicV4 ?? unknown,
+                privateV4:
+                    MeasurementRunner.I.settings?.ipInfo?.privateV4 ?? unknown,
                 privateV6: ipV6Info?.privateV6 ?? "",
                 publicV6: ipV6Info?.publicV6 ?? "",
             },

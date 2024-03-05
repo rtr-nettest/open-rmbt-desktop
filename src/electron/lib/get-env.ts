@@ -64,4 +64,8 @@ export const getEnv = () =>
         CHECK_IP_INTERVAL_MS: process.env.CHECK_IP_INTERVAL_MS
             ? parseInt(process.env.CHECK_IP_INTERVAL_MS)
             : 10000,
+        GIT_INFO: `${pack.gitInfo["branch"]}-${pack.gitInfo["hash"].slice(
+            0,
+            8
+        )}`,
     } as IEnv)

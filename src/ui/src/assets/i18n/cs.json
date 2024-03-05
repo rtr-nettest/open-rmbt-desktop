@@ -149,5 +149,6 @@
     "No connectivity": "No connectivity",
     "NAT": "NAT",
     "Public IP": "Public IP",
-    "Test progress": "Test progress"
+    "Test progress": "Test progress",
+    "Commit hash": "Commit hash"
 }

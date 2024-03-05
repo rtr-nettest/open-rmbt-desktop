@@ -17,13 +17,12 @@ export class HomeScreenComponent
     implements OnInit, OnDestroy
 {
     env$ = this.mainStore.env$
-    ipInfo$ = this.mainStore.settings$.pipe(
+    ipInfo$ = this.mainStore.ipInfo$.pipe(
         withLatestFrom(this.mainStore.isOnline$),
-        map(([settings, isOnline]) => {
+        map(([ipInfo, isOnline]) => {
             setTimeout(() => this.cdr.detectChanges(), 100)
-            if (settings?.ipInfo && isOnline) {
-                const { publicV4, publicV6, privateV4, privateV6 } =
-                    settings?.ipInfo
+            if (ipInfo && isOnline) {
+                const { publicV4, publicV6, privateV4, privateV6 } = ipInfo
                 return [
                     `${this.transloco.translate("IPv4")}:&nbsp;${this.getIPIcon(
                         publicV4,

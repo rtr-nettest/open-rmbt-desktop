@@ -20,6 +20,7 @@ import { Translation, TranslocoService } from "@ngneat/transloco"
 import { TranslocoHttpLoader } from "../transloco-root.module"
 import { IMainPage } from "../interfaces/main-page.interface"
 import { IJitterInfo } from "../../../../measurement/interfaces/jitter-info.interface"
+import { IPInfo } from "../../../../measurement/interfaces/ip-info.interface"
 
 @Injectable({
     providedIn: "root",
@@ -39,6 +40,7 @@ export class MainStore {
         ping: 1,
     })
     project$ = new BehaviorSubject<IMainProject | null>(null)
+    ipInfo$ = new BehaviorSubject<IPInfo | null>(null)
     settings$ = new BehaviorSubject<IUserSettings | null>(null)
     error$ = new BehaviorSubject<Error | null>(null)
     news$ = new BehaviorSubject<INewsItem[] | null>(null)
@@ -93,7 +95,7 @@ export class MainStore {
             this.isOnline$.next(
                 !!(settings.ipInfo?.publicV4 || settings.ipInfo?.publicV6)
             )
-            this.settings$.next(settings)
+            this.ipInfo$.next(settings.ipInfo ?? null)
         })
         window.electronAPI
             .registerClient()

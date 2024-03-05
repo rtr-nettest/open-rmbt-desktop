@@ -68,7 +68,7 @@ ipcMain.on(Events.ACCEPT_TERMS, (event, terms: number) => {
 ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
     const webContents = event.sender
     let settings = MeasurementRunner.I.settings
-    if (!settings) {
+    if (!settings?.uuid || !settings?.urls) {
         try {
             settings = await MeasurementRunner.I.registerClient()
             if (settings.shouldAcceptTerms) {

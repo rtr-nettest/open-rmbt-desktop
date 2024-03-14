@@ -1,4 +1,4 @@
-<app-header></app-header>
+<app-header *ngIf="!hideMenu"></app-header>
 <ng-container
     [ngTemplateOutlet]="(env$ | async)?.FLAVOR === 'ont' ? ont : rtr"
 ></ng-container>
@@ -13,8 +13,11 @@
 
 <ng-template #rtr>
     <app-body *transloco="let t">
-        <app-main-menu [disabled]="true"></app-main-menu>
-        <app-main-content *ngIf="visualization$ | async">
+        <app-main-menu *ngIf="!hideMenu" [disabled]="true"></app-main-menu>
+        <app-main-content
+            *ngIf="visualization$ | async"
+            [class.hidden-menu]="hideMenu"
+        >
             <ng-container *ngIf="(enableLoopMode$ | async) === true">
                 <ng-container *ngIf="loopCount$ | async as loopCount">
                     <h1
@@ -61,6 +64,7 @@
                 <app-recent-history
                     *ngIf="result$ | async as result"
                     class="app-padding"
+                    [class.app-padding--hidden-menu]="hideMenu"
                     [result]="result"
                     [excludeColumns]="['details']"
                     [interruptsTests]="true"

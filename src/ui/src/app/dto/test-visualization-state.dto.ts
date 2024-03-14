@@ -31,6 +31,7 @@ export class TestVisualizationState implements ITestVisualizationState {
         [EMeasurementStatus.SUBMITTING_RESULTS]: new TestPhaseState(),
         [EMeasurementStatus.END]: new TestPhaseState(),
         [EMeasurementStatus.SHOWING_RESULTS]: new TestPhaseState(),
+        [EMeasurementStatus.ERROR]: new TestPhaseState(),
     }
     currentPhaseName: EMeasurementStatus = EMeasurementStatus.NOT_STARTED
 

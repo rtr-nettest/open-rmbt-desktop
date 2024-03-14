@@ -23,10 +23,9 @@ import { MessageService } from "src/app/services/message.service"
 import { ClientSelectComponent } from "src/app/widgets/client-select/client-select.component"
 import { TestServersComponent } from "src/app/widgets/test-servers/test-servers.component"
 import { CMSService } from "src/app/services/cms.service"
-import { IEnv } from "../../../../../electron/interfaces/env.interface"
 import { SettingsLocalDataComponent } from "src/app/widgets/settings-local-data/settings-local-data.component"
 import { Router } from "@angular/router"
-import { ERoutes } from "src/app/enums/routes.enum"
+import { SettingsCommitComponent } from "src/app/widgets/settings-commit/settings-commit.component"
 
 export interface ISettingsRow {
     title: string
@@ -70,6 +69,10 @@ export class SettingsScreenComponent
                 {
                     title: t["Version"],
                     component: SettingsVersionComponent,
+                },
+                {
+                    title: t["Commit hash"],
+                    component: SettingsCommitComponent,
                 },
                 {
                     title: t["Open source"],
@@ -155,7 +158,7 @@ export class SettingsScreenComponent
 
     ngOnInit(): void {
         if (!this.mainStore.settings$.value) {
-            this.mainStore.registerClient(navigator.onLine)
+            this.mainStore.registerClient()
         }
     }
 }

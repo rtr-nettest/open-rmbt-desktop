@@ -12,6 +12,7 @@ import { HistoryStore } from "src/app/store/history.store"
 import { TranslocoService } from "@ngneat/transloco"
 import { ActivatedRoute } from "@angular/router"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
+import { HistoryExportService } from "src/app/services/history-export.service"
 
 @Component({
     selector: "app-loop-result-screen",
@@ -32,19 +33,19 @@ export class LoopResultScreenComponent extends HistoryScreenComponent {
             label: "",
             translations: [],
             icon: "filetype-csv",
-            action: () => this.store.exportAs("csv", this.loopResults),
+            action: () => this.exporter.exportAs("csv", this.loopResults),
         },
         {
             label: "",
             translations: [],
             icon: "filetype-pdf",
-            action: () => this.store.exportAsPdf(this.loopResults),
+            action: () => this.exporter.exportAsPdf(this.loopResults),
         },
         {
             label: "",
             translations: [],
             icon: "filetype-xlsx",
-            action: () => this.store.exportAs("xlsx", this.loopResults),
+            action: () => this.exporter.exportAs("xlsx", this.loopResults),
         },
     ]
 
@@ -56,6 +57,7 @@ export class LoopResultScreenComponent extends HistoryScreenComponent {
     }
 
     constructor(
+        exporter: HistoryExportService,
         mainStore: MainStore,
         message: MessageService,
         cdr: ChangeDetectorRef,
@@ -63,6 +65,6 @@ export class LoopResultScreenComponent extends HistoryScreenComponent {
         transloco: TranslocoService,
         private activatedRoute: ActivatedRoute
     ) {
-        super(mainStore, message, store, cdr, transloco)
+        super(mainStore, message, exporter, store, cdr, transloco)
     }
 }

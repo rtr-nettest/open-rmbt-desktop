@@ -15,8 +15,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getNews: () => ipcRenderer.invoke(Events.GET_NEWS),
     acceptTerms: (terms: number) =>
         ipcRenderer.send(Events.ACCEPT_TERMS, terms),
-    registerClient: (isOnline: boolean) =>
-        ipcRenderer.invoke(Events.REGISTER_CLIENT, isOnline),
+    registerClient: () => ipcRenderer.invoke(Events.REGISTER_CLIENT),
     setIpVersion: (ipv: EIPVersion | null) =>
         ipcRenderer.send(Events.SET_IP_VERSION, ipv),
     setActiveClient: (client: string) =>
@@ -38,6 +37,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.invoke(Events.GET_MEASUREMENT_RESULT, testUuid),
     getMeasurementHistory: (paginator?: IPaginator, sort?: ISort) =>
         ipcRenderer.invoke(Events.GET_MEASUREMENT_HISTORY, paginator, sort),
+    onAppResumed: (callback: () => any) => {
+        ipcRenderer.removeAllListeners(Events.APP_RESUMED)
+        ipcRenderer.on(Events.APP_RESUMED, () => callback())
+    },
+    onAppSuspended: (callback: () => any) => {
+        ipcRenderer.removeAllListeners(Events.APP_SUSPENDED)
+        ipcRenderer.on(Events.APP_SUSPENDED, () => callback())
+    },
     onError: (callback: (error: Error) => any) => {
         ipcRenderer.removeAllListeners(Events.ERROR)
         ipcRenderer.on(Events.ERROR, (event, error) => callback(error))
@@ -62,6 +69,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
     onLoopModeExpired: (callback: () => any) => {
         ipcRenderer.removeAllListeners(Events.LOOP_MODE_EXPIRED)
         ipcRenderer.on(Events.LOOP_MODE_EXPIRED, callback)
+    },
+    onMaxTestsReached: (callback: () => any) => {
+        ipcRenderer.removeAllListeners(Events.MAX_TESTS_REACHED)
+        ipcRenderer.on(Events.MAX_TESTS_REACHED, callback)
+    },
+    openPdf: (url: string) => {
+        ipcRenderer.send(Events.OPEN_PDF, url)
     },
     onSetIp: (callback: (settings: IUserSettings) => any) => {
         ipcRenderer.removeAllListeners(Events.SET_IP)

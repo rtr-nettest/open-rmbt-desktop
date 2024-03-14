@@ -1,0 +1,86 @@
+@import "../../../assets/styles/core.scss";
+
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+app-main-content {
+    align-items: flex-start;
+}
+
+.app-main {
+    padding: 0 rem(30) rem(30);
+    width: 100%;
+}
+
+.app-breadcrumbs {
+    display: flex;
+    position: relative;
+    padding-left: 0 !important;
+    list-style: none;
+
+    &-wrapper {
+        align-items: center;
+        display: flex;
+        margin-bottom: rem(20);
+    }
+
+    &__item {
+        position: relative;
+        border-left: none !important;
+        padding-left: 0 !important;
+
+        a {
+            display: block;
+            padding: 0 10px 0 30px;
+            line-height: 30px;
+            font-size: 10pt;
+            color: #545454 !important;
+            background: #f8f8f8;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        &::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: -14.5px;
+            display: block;
+            width: 0;
+            height: 0;
+            border-top: 15px solid rgba(0, 0, 0, 0);
+            border-bottom: 15px solid rgba(0, 0, 0, 0);
+            border-left: 15px solid #f8f8f8;
+            border-left-color: rgb(248, 248, 248);
+            z-index: 10;
+        }
+
+        &:first-child a {
+            padding: 0 10px 0 20px;
+        }
+
+        &.active {
+            &::after {
+                border-left-color: #2f5f00;
+            }
+
+            a {
+                background-color: #2f5f00;
+                color: #fff !important;
+            }
+        }
+
+        &.visited {
+            &::after {
+                border-left-color: #bebab0;
+            }
+
+            a {
+                background-color: #bebab0;
+            }
+        }
+    }
+}

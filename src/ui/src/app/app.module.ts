@@ -21,6 +21,7 @@ import { IUserSettings } from "../../../measurement/interfaces/user-settings-res
 import { IEnv } from "../../../electron/interfaces/env.interface"
 import { MatIconModule } from "@angular/material/icon"
 import { MatButtonModule } from "@angular/material/button"
+import { MatCheckboxModule } from "@angular/material/checkbox"
 import { MatTooltipModule } from "@angular/material/tooltip"
 import { MatSnackBarModule } from "@angular/material/snack-bar"
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
@@ -77,6 +78,7 @@ import { MatSortModule } from "@angular/material/sort"
 import { MatPaginatorModule } from "@angular/material/paginator"
 import { MatSlideToggleModule } from "@angular/material/slide-toggle"
 import { MatSelectModule } from "@angular/material/select"
+import { MatRadioModule } from "@angular/material/radio"
 import { TableComponent } from "./widgets/table/table.component"
 import { PaginatorComponent } from "./widgets/paginator/paginator.component"
 import { DynamicComponentDirective } from "./directives/dynamic-component.directive"
@@ -131,6 +133,12 @@ import { LoopTestScreenComponent } from "./screens/loop-test-screen/loop-test-sc
 import { TranslatePipe } from "./pipes/translate.pipe"
 import { MarkdownModule } from "ngx-markdown"
 import { SocialButtonsComponent } from "./widgets/social-buttons/social-buttons.component"
+import { CertifiedScreenComponent } from "./screens/certified-screen/certified-screen.component"
+import { CertifiedInfoComponent } from "./widgets/certified-info/certified-info.component"
+import { CertifiedDataFormComponent } from "./widgets/certified-data-form/certified-data-form.component"
+import { CertifiedEnvFormComponent } from "./widgets/certified-env-form/certified-env-form.component"
+import { CertifiedResultScreenComponent } from "./screens/certified-result-screen/certified-result-screen.component";
+import { SettingsCommitComponent } from './widgets/settings-commit/settings-commit.component'
 
 Chart.register(
     BarElement,
@@ -151,7 +159,7 @@ declare global {
             getTranslations: (lang: string) => Promise<ICrowdinJson | null>
             getNews: () => Promise<INewsItem[] | null>
             acceptTerms: (terms: number) => Promise<void>
-            registerClient: (isOnline: boolean) => Promise<IUserSettings>
+            registerClient: () => Promise<IUserSettings>
             setIpVersion: (ipv: EIPVersion | null) => Promise<void>
             setActiveClient: (client: string) => Promise<void>
             setActiveLanguage: (language: string) => Promise<void>
@@ -174,6 +182,8 @@ declare global {
                 paginator?: IPaginator,
                 sort?: ISort
             ) => Promise<ISimpleHistoryResult[]>
+            onAppResumed: (callback: () => any) => Promise<any>
+            onAppSuspended: (callback: () => any) => Promise<any>
             onError: (callback: (error: Error) => any) => Promise<any>
             onMeasurementAborted: (callback: () => any) => Promise<any>
             offMeasurementAborted: () => Promise<any>
@@ -182,6 +192,8 @@ declare global {
                 callback: (loopCounter: number) => any
             ) => Promise<any>
             onLoopModeExpired: (callback: () => any) => Promise<any>
+            onMaxTestsReached: (callback: () => any) => Promise<any>
+            openPdf: (url: string) => Promise<void>
             onSetIp: (
                 callback: (settings: IUserSettings) => any
             ) => Promise<any>
@@ -253,6 +265,12 @@ declare global {
         LoopTestScreenComponent,
         TranslatePipe,
         SocialButtonsComponent,
+        CertifiedScreenComponent,
+        CertifiedInfoComponent,
+        CertifiedDataFormComponent,
+        CertifiedEnvFormComponent,
+        CertifiedResultScreenComponent,
+        SettingsCommitComponent,
     ],
     imports: [
         AppRoutingModule,
@@ -263,12 +281,14 @@ declare global {
         HttpClientModule,
         MarkdownModule.forRoot(),
         MatButtonModule,
+        MatCheckboxModule,
         MatDialogModule,
         MatIconModule,
         MatInputModule,
         MatPaginatorModule,
         MatProgressBarModule,
         MatProgressSpinnerModule,
+        MatRadioModule,
         MatSnackBarModule,
         MatTableModule,
         MatSortModule,

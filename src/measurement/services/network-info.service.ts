@@ -23,7 +23,6 @@ export class NetworkInfoService {
         request: IUserSettingsRequest
     ): Promise<IPInfo> {
         let publicV4 = ""
-        let privateV4 = ""
 
         Logger.I.info(
             ELoggerMessage.POST_REQUEST,
@@ -33,11 +32,13 @@ export class NetworkInfoService {
         try {
             publicV4 = (
                 await axios.post(settings.urls.url_ipv4_check, request, {
-                    signal: AbortSignal.timeout(connectionTimeout),
+                    timeout: connectionTimeout,
                 })
             ).data.ip
         } catch (e) {}
 
+        let privateV4 = ""
+        let anyV4 = ""
         const interfaces: any[] = []
         for (const iface of Object.values(os.networkInterfaces())) {
             if (!iface) {
@@ -53,13 +54,16 @@ export class NetworkInfoService {
                 }
                 interfaces.push(alias)
                 if (alias.family === "IPv4") {
-                    privateV4 = alias.address
+                    anyV4 = alias.address
+                    if (alias.address === publicV4) {
+                        privateV4 = alias.address
+                    }
                 }
             }
         }
         const IPInfo: IPInfo = {
             publicV4,
-            privateV4,
+            privateV4: privateV4 || anyV4,
             publicV6: "",
             privateV6: "",
         }
@@ -69,7 +73,6 @@ export class NetworkInfoService {
 
     async getIpV6Info(settings: IUserSettings, request: IUserSettingsRequest) {
         let publicV6 = ""
-        let privateV6 = ""
 
         Logger.I.info(
             ELoggerMessage.POST_REQUEST,
@@ -79,11 +82,13 @@ export class NetworkInfoService {
         try {
             publicV6 = (
                 await axios.post(settings.urls.url_ipv6_check, request, {
-                    signal: AbortSignal.timeout(connectionTimeout),
+                    timeout: connectionTimeout,
                 })
             ).data.ip
         } catch (e) {}
 
+        let privateV6 = ""
+        let anyV6 = ""
         const interfaces: any[] = []
         for (const iface of Object.values(os.networkInterfaces())) {
             if (!iface) {
@@ -99,13 +104,16 @@ export class NetworkInfoService {
                 }
                 interfaces.push(alias)
                 if (alias.family === "IPv6") {
-                    privateV6 = alias.address
+                    anyV6 = alias.address
+                    if (alias.address === publicV6) {
+                        privateV6 = alias.address
+                    }
                 }
             }
         }
         const IPInfo: IPInfo = {
             publicV6,
-            privateV6,
+            privateV6: privateV6 || anyV6,
             publicV4: "",
             privateV4: "",
         }

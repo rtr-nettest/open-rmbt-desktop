@@ -1,0 +1,65 @@
+<ng-container *transloco="let t">
+    <h1>{{ t("Certified measurement") }}</h1>
+    <h2>{{ t("Basic information on the certified measurement") }}</h2>
+    <div *ngIf="form">
+        <form [formGroup]="form">
+            <mat-form-field appearance="outline">
+                <mat-label>{{ t("Title") }}</mat-label>
+                <input
+                    matInput
+                    type="text"
+                    formControlName="titlePrepend"
+                    name="titlePrepend"
+                />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>{{ t("First name") }}</mat-label>
+                <input
+                    matInput
+                    type="text"
+                    formControlName="firstName"
+                    name="firstName"
+                    required
+                />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>{{ t("Last name") }}</mat-label>
+                <input
+                    matInput
+                    type="text"
+                    formControlName="lastName"
+                    name="lastName"
+                    required
+                />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>{{ t("Academic degree") }}</mat-label>
+                <input
+                    matInput
+                    type="text"
+                    formControlName="titleAppend"
+                    name="titleAppend"
+                />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>{{ t("Location of the measurements") }}</mat-label>
+                <textarea
+                    matInput
+                    type="text"
+                    formControlName="address"
+                    name="address"
+                    required
+                ></textarea>
+            </mat-form-field>
+            <h4>{{ t("Is it the first measurement cycle?") }}<sup>*</sup></h4>
+            <mat-radio-group formControlName="isFirstCycle" name="isFirstCycle">
+                <mat-radio-button [value]="true">{{
+                    t("Yes, first cycle")
+                }}</mat-radio-button>
+                <mat-radio-button [value]="false">{{
+                    t("No, follow-up cycle")
+                }}</mat-radio-button>
+            </mat-radio-group>
+        </form>
+    </div>
+</ng-container>

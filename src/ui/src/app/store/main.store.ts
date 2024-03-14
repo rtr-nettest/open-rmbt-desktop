@@ -20,6 +20,7 @@ import { Translation, TranslocoService } from "@ngneat/transloco"
 import { TranslocoHttpLoader } from "../transloco-root.module"
 import { IMainPage } from "../interfaces/main-page.interface"
 import { IJitterInfo } from "../../../../measurement/interfaces/jitter-info.interface"
+import { IPInfo } from "../../../../measurement/interfaces/ip-info.interface"
 
 @Injectable({
     providedIn: "root",
@@ -39,6 +40,7 @@ export class MainStore {
         ping: 1,
     })
     project$ = new BehaviorSubject<IMainProject | null>(null)
+    ipInfo$ = new BehaviorSubject<IPInfo | null>(null)
     settings$ = new BehaviorSubject<IUserSettings | null>(null)
     error$ = new BehaviorSubject<Error | null>(null)
     news$ = new BehaviorSubject<INewsItem[] | null>(null)
@@ -58,13 +60,6 @@ export class MainStore {
         window.electronAPI.onOpenScreen((route) => {
             this.router.navigate(["/", route])
         })
-        window.addEventListener("online", this.setIsOnline.bind(this))
-        window.addEventListener("offline", this.setIsOnline.bind(this))
-    }
-
-    setIsOnline() {
-        this.isOnline$.next(navigator.onLine)
-        setTimeout(() => this.registerClient(navigator.onLine))
     }
 
     setEnv() {
@@ -72,9 +67,7 @@ export class MainStore {
             return this.env$
         }
         return from(window.electronAPI.getEnv()).pipe(
-            tap((env) => {
-                this.env$.next(env)
-            })
+            tap((env) => this.env$.next(env))
         )
     }
 
@@ -97,10 +90,15 @@ export class MainStore {
         return of(0)
     }
 
-    registerClient(isOnline: boolean) {
-        window.electronAPI.onSetIp((settings) => this.settings$.next(settings))
+    registerClient() {
+        window.electronAPI.onSetIp((settings) => {
+            this.isOnline$.next(
+                !!(settings.ipInfo?.publicV4 || settings.ipInfo?.publicV6)
+            )
+            this.ipInfo$.next(settings.ipInfo ?? null)
+        })
         window.electronAPI
-            .registerClient(isOnline)
+            .registerClient()
             .then((settings) => this.settings$.next(settings))
     }
 

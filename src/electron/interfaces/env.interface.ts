@@ -1,6 +1,9 @@
 export interface IEnv {
     ACTIVE_LANGUAGE: string | null
     APP_VERSION: string
+    CERTIFIED_TEST_INTERVAL: number
+    CERTIFIED_TEST_COUNT: number
+    CHECK_IP_INTERVAL_MS: number
     CMS_URL: string
     CPU_WARNING_PERCENT: number | undefined
     CROWDIN_UPDATE_AT_RUNTIME: string
@@ -11,6 +14,7 @@ export interface IEnv {
     FULL_HISTORY_RESULT_URL: string | undefined
     FULL_STATISTICS_URL: string | undefined
     FULL_MAP_URL: string | undefined
+    GIT_INFO: string | undefined
     HISTORY_EXPORT_URL: string | undefined
     HISTORY_RESULTS_LIMIT: number | undefined
     HISTORY_SEARCH_URL: string | undefined

@@ -13,9 +13,9 @@ import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { ClassificationService } from "src/app/services/classification.service"
 import { ConversionService } from "src/app/services/conversion.service"
-import { HistoryStore } from "src/app/store/history.store"
 import { UNKNOWN } from "src/app/constants/strings"
 import { I18nService } from "src/app/services/i18n.service"
+import { HistoryExportService } from "src/app/services/history-export.service"
 
 @Component({
     selector: "app-result-screen",
@@ -60,7 +60,7 @@ export class ResultScreenComponent implements OnDestroy {
             translations: [],
             icon: "filetype-pdf",
             action: () =>
-                this.historyStore.exportAsPdf([
+                this.exporter.exportAsPdf([
                     this.store.simpleHistoryResult$.value!,
                 ]),
         },
@@ -70,7 +70,7 @@ export class ResultScreenComponent implements OnDestroy {
     constructor(
         private classification: ClassificationService,
         private conversion: ConversionService,
-        private historyStore: HistoryStore,
+        private exporter: HistoryExportService,
         private i18n: I18nService,
         private mainStore: MainStore,
         private store: TestStore,

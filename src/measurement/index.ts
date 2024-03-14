@@ -21,6 +21,9 @@ import { EMeasurementFinalStatus } from "./enums/measurement-final-status"
 import { AutoUpdater } from "./services/auto-updater.service"
 import { ACTIVE_SERVER, Store } from "./services/store.service"
 import { ILoopModeInfo } from "./interfaces/measurement-registration-request.interface"
+import { LoopService } from "./services/loop.service"
+import { Events } from "../electron/enums/events.enum"
+import { BrowserWindow } from "electron"
 
 config({
     path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
@@ -38,6 +41,8 @@ export class MeasurementRunner {
         return this.instance
     }
 
+    public settings?: IUserSettings
+
     private measurementServer?: IMeasurementServerResponse
     private registrationRequest?: MeasurementRegistrationRequest
     private rmbtClient?: RMBTClient
@@ -45,13 +50,40 @@ export class MeasurementRunner {
     private cpuInfoList: number[] = []
     private cpuInfo?: ICPU
     private settingsRequest?: UserSettingsRequest
-    private settings?: IUserSettings
     private startTimeMs = 0
     private endTimeMs = 0
+
+    get isMeasurementInProgress() {
+        return ![
+            EMeasurementStatus.ABORTED,
+            EMeasurementStatus.END,
+            EMeasurementStatus.ERROR,
+            EMeasurementStatus.NOT_STARTED,
+        ].includes(this.getCurrentPhaseState().phase)
+    }
 
     private constructor() {
         Logger.init()
         DBService.I.init()
+    }
+
+    updateStartTime() {
+        this.startTimeMs = this.endTimeMs || this.startTimeMs
+        this.endTimeMs = Date.now()
+    }
+
+    resumeMeasurement(event: { sender: BrowserWindow }) {
+        this.rmbtClient = undefined
+        if (this.registrationRequest?.loopmode_info?.max_tests) {
+            const { max_delay, test_counter } =
+                this.registrationRequest.loopmode_info
+            const loopInterval = max_delay * 60 * 1000
+            const loopModeInfo: ILoopModeInfo = {
+                ...this.registrationRequest?.loopmode_info,
+                test_counter: test_counter + 1,
+            }
+            this.onScheduleLoop(event, loopInterval, loopModeInfo)
+        }
     }
 
     async registerClient(options?: MeasurementOptions): Promise<IUserSettings> {
@@ -71,8 +103,8 @@ export class MeasurementRunner {
         }
     }
 
-    async getIpV4Info(settings: IUserSettings) {
-        if (!this.settingsRequest) {
+    async getIpV4Info(settings?: IUserSettings) {
+        if (!this.settingsRequest || !settings) {
             return undefined
         }
         const ipInfo = await NetworkInfoService.I.getIpV4Info(
@@ -82,8 +114,8 @@ export class MeasurementRunner {
         return ipInfo
     }
 
-    async getIpV6Info(settings: IUserSettings) {
-        if (!this.settingsRequest) {
+    async getIpV6Info(settings?: IUserSettings) {
+        if (!this.settingsRequest || !settings) {
             return undefined
         }
         const ipInfo = await NetworkInfoService.I.getIpV6Info(
@@ -132,6 +164,7 @@ export class MeasurementRunner {
             return this.rmbtClient!.measurementStatus
         } catch (e: any) {
             if (e) {
+                this.rmbtClient!.measurementStatus = EMeasurementStatus.ERROR
                 Logger.I.error(e)
                 try {
                     await ControlServer.I.submitMeasurement(
@@ -211,6 +244,50 @@ export class MeasurementRunner {
 
     getCPUUsage(): ICPU | undefined {
         return this.cpuInfo
+    }
+
+    onRunMeasurement = async (event, loopModeInfo?: ILoopModeInfo) => {
+        const webContents = event.sender
+        try {
+            const status = await MeasurementRunner.I.runMeasurement({
+                loopModeInfo,
+            })
+            if (status === EMeasurementStatus.ABORTED) {
+                webContents.send(Events.MEASUREMENT_ABORTED)
+            }
+        } catch (e) {
+            webContents.send(Events.ERROR, e)
+        } finally {
+            if (loopModeInfo) {
+                const { test_counter: counter, max_tests: maxTests } =
+                    loopModeInfo
+                if (counter >= (maxTests || Infinity)) {
+                    webContents.send(Events.MAX_TESTS_REACHED)
+                    LoopService.I.resetTimeout()
+                }
+            }
+        }
+    }
+
+    onScheduleLoop = (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
+        const webContents = event.sender
+        this.onRunMeasurement(event, loopModeInfo)
+        if (loopModeInfo.test_counter < (loopModeInfo.max_tests || Infinity)) {
+            LoopService.I.scheduleLoop({
+                interval: loopInterval,
+                loopModeInfo,
+                onTime: (counter) => {
+                    webContents.send(Events.RESTART_MEASUREMENT, counter)
+                    this.onScheduleLoop(event, loopInterval, {
+                        ...loopModeInfo,
+                        test_counter: counter,
+                    })
+                },
+                onExpire: () => {
+                    webContents.send(Events.LOOP_MODE_EXPIRED)
+                },
+            })
+        }
     }
 
     private setCPUUsage() {

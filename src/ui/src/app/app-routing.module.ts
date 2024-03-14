@@ -18,8 +18,16 @@ import { LoopStartScreenComponent } from "./screens/loop-start-screen/loop-start
 import { LoopResultScreenComponent } from "./screens/loop-result-screen/loop-result-screen.component"
 import { MeasurementResolver } from "./resolvers/measurement.resolver"
 import { LoopTestScreenComponent } from "./screens/loop-test-screen/loop-test-screen.component"
+import { CertifiedScreenComponent } from "./screens/certified-screen/certified-screen.component"
 
 const routes: Routes = [
+    {
+        path: ERoutes.CERTIFIED,
+        component: CertifiedScreenComponent,
+        resolve: {
+            measurementAborted: () => inject(MeasurementResolver).resolve(),
+        },
+    },
     {
         path: ERoutes.TERMS_CONDITIONS,
         component: TermsConditionsScreenComponent,

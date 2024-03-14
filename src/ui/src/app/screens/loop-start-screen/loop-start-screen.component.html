@@ -13,7 +13,7 @@
             <form *ngIf="form" [formGroup]="form" (ngSubmit)="onSubmit()">
                 <div>
                     <span>{{ t("Interval between tests") }}</span>
-                    <mat-form-field style="width: 88px">
+                    <mat-form-field style="width: 88px" appearance="outline">
                         <input
                             type="number"
                             formControlName="interval"

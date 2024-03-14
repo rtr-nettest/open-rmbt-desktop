@@ -1,20 +1,8 @@
-import {
-    app,
-    BrowserWindow,
-    dialog,
-    ipcMain,
-    Menu,
-    powerMonitor,
-    protocol,
-    shell,
-} from "electron"
+import { app, BrowserWindow, ipcMain, protocol } from "electron"
 if (require("electron-squirrel-startup")) app.quit()
-import path from "path"
-import { I18nService, t } from "../measurement/services/i18n.service"
 import { MeasurementRunner } from "../measurement"
 import { Events } from "./enums/events.enum"
-import { IEnv } from "./interfaces/env.interface"
-import Protocol from "./protocol"
+import Protocol from "./lib/protocol"
 import {
     ACTIVE_CLIENT,
     ACTIVE_LANGUAGE,
@@ -26,106 +14,16 @@ import {
 } from "../measurement/services/store.service"
 import { CrowdinService } from "../measurement/services/crowdin.service"
 import { ControlServer } from "../measurement/services/control-server.service"
-import pack from "../../package.json"
 import { EIPVersion } from "../measurement/enums/ip-version.enum"
-import { buildMenu } from "./menu"
 import { UserSettingsRequest } from "../measurement/dto/user-settings-request.dto"
 import { IMeasurementServerResponse } from "../measurement/interfaces/measurement-server-response.interface"
 import { LoopService } from "../measurement/services/loop.service"
 import { ILoopModeInfo } from "../measurement/interfaces/measurement-registration-request.interface"
-import { EMeasurementStatus } from "../measurement/enums/measurement-status.enum"
 import { ERoutes } from "../ui/src/app/enums/routes.enum"
-
-const createWindow = () => {
-    if (process.env.DEV !== "true") {
-        // Needs to happen before creating/loading the browser window;
-        // protocol is only used in prod
-        protocol.registerBufferProtocol(
-            Protocol.scheme,
-            Protocol.requestHandler
-        )
-    }
-
-    const { screen } = require("electron")
-    const primaryDisplay = screen.getPrimaryDisplay()
-    const { width, height } = primaryDisplay.workAreaSize
-
-    const win = new BrowserWindow({
-        width: 1280,
-        height: 800,
-        minWidth: Math.min(800, width),
-        minHeight: Math.min(600, height),
-        webPreferences: {
-            preload: path.join(__dirname, "preload.js"),
-            nodeIntegration: true,
-        },
-        icon: path.join(__dirname, "assets", "images", "icon-linux.png"),
-    })
-
-    win.webContents.setWindowOpenHandler(({ url }) => {
-        shell.openExternal(url)
-        return { action: "deny" }
-    })
-
-    Menu.setApplicationMenu(buildMenu())
-
-    if (process.env.DEV === "true") {
-        win.loadURL("http://localhost:4200/")
-        setTimeout(() => {
-            win.webContents.openDevTools()
-        }, 300)
-    } else {
-        win.loadURL(`${Protocol.scheme}://index.html`)
-    }
-
-    win.on("close", async (event) => {
-        if (
-            [
-                EMeasurementStatus.END,
-                EMeasurementStatus.ABORTED,
-                EMeasurementStatus.NOT_STARTED,
-            ].includes(MeasurementRunner.I.getCurrentPhaseState().phase) &&
-            !LoopService.I.loopTimeout
-        ) {
-            return
-        }
-        const dialogOpts = {
-            type: "warning" as const,
-            buttons: [t("Ok"), t("Cancel")],
-            title: t("Close app"),
-            message: t("The currently running measurement will be aborted"),
-        }
-        const response = await dialog.showMessageBox(dialogOpts)
-        if (response.response !== 0) {
-            event.preventDefault()
-        }
-    })
-
-    powerMonitor.on("suspend", async (event) => {
-        if (
-            [
-                EMeasurementStatus.END,
-                EMeasurementStatus.ABORTED,
-                EMeasurementStatus.NOT_STARTED,
-            ].includes(MeasurementRunner.I.getCurrentPhaseState().phase) &&
-            !LoopService.I.loopTimeout
-        ) {
-            return
-        }
-        const dialogOpts = {
-            type: "warning" as const,
-            buttons: [t("Ok")],
-            title: t("App was suspended"),
-            message: t(
-                "The app was suspended. The last running measurement was aborted"
-            ),
-        }
-        const response = await dialog.showMessageBox(dialogOpts)
-        if (response.response === 0) {
-            app.exit(0)
-        }
-    })
-}
+import { IPInfo } from "../measurement/interfaces/ip-info.interface"
+import { WindowManager } from "./lib/window-manager"
+import { getEnv } from "./lib/get-env"
+import { IUserSettings } from "../measurement/interfaces/user-settings-response.interface"
 
 // Needs to be called before app is ready;
 // gives our scheme access to load relative files,
@@ -146,10 +44,12 @@ app.on("window-all-closed", () => {
 })
 
 app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0)
+        WindowManager.I.createWindow()
 })
 
 ipcMain.on(Events.QUIT, () => {
+    WindowManager.I.onQuit()
     app.quit()
 })
 
@@ -167,18 +67,45 @@ ipcMain.on(Events.ACCEPT_TERMS, (event, terms: number) => {
 
 ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
     const webContents = event.sender
-    try {
-        const settings = await MeasurementRunner.I.registerClient()
-        if (settings.shouldAcceptTerms) {
-            webContents.send(Events.OPEN_SCREEN, ERoutes.TERMS_CONDITIONS)
-        }
-        MeasurementRunner.I.getIpInfo(settings).then((settingsWithIp) => {
-            webContents.send(Events.SET_IP, settingsWithIp)
-        })
-        return settings
-    } catch (e) {
-        webContents.send(Events.ERROR, e)
+    let settings = MeasurementRunner.I.settings
+    if (!settings?.uuid || !settings?.urls) {
+        try {
+            settings = await MeasurementRunner.I.registerClient()
+            if (settings.shouldAcceptTerms) {
+                webContents.send(Events.OPEN_SCREEN, ERoutes.TERMS_CONDITIONS)
+            }
+        } catch (_) {}
     }
+    const unknown = "UNKNOWN"
+    MeasurementRunner.I.getIpV4Info(settings).then((ipV4Info) => {
+        MeasurementRunner.I.settings = {
+            ...settings,
+            ipInfo: {
+                publicV6:
+                    MeasurementRunner.I.settings?.ipInfo?.publicV6 ?? unknown,
+                privateV6:
+                    MeasurementRunner.I.settings?.ipInfo?.privateV6 ?? unknown,
+                privateV4: ipV4Info?.privateV4 ?? "",
+                publicV4: ipV4Info?.publicV4 ?? "",
+            },
+        } as IUserSettings
+        webContents.send(Events.SET_IP, MeasurementRunner.I.settings)
+    })
+    MeasurementRunner.I.getIpV6Info(settings).then((ipV6Info) => {
+        MeasurementRunner.I.settings = {
+            ...settings,
+            ipInfo: {
+                publicV4:
+                    MeasurementRunner.I.settings?.ipInfo?.publicV4 ?? unknown,
+                privateV4:
+                    MeasurementRunner.I.settings?.ipInfo?.privateV4 ?? unknown,
+                privateV6: ipV6Info?.privateV6 ?? "",
+                publicV6: ipV6Info?.publicV6 ?? "",
+            },
+        } as IUserSettings
+        webContents.send(Events.SET_IP, MeasurementRunner.I.settings)
+    })
+    return settings
 })
 
 ipcMain.on(Events.SET_IP_VERSION, (event, ipv: EIPVersion | null) => {
@@ -204,56 +131,26 @@ ipcMain.on(
     }
 )
 
-const onRunMeasurement = async (event, loopModeInfo?: ILoopModeInfo) => {
-    const webContents = event.sender
-    try {
-        const status = await MeasurementRunner.I.runMeasurement({
-            loopModeInfo,
-        })
-        if (status === EMeasurementStatus.ABORTED) {
-            webContents.send(Events.MEASUREMENT_ABORTED)
-        }
-    } catch (e) {
-        webContents.send(Events.ERROR, e)
-    }
-}
+ipcMain.on(Events.RUN_MEASUREMENT, (event, loopModeInfo) =>
+    MeasurementRunner.I.onRunMeasurement(event, loopModeInfo)
+)
 
-ipcMain.on(Events.RUN_MEASUREMENT, onRunMeasurement)
-
-ipcMain.on(Events.ABORT_MEASUREMENT, (event) => {
-    const webContents = event.sender
-    LoopService.I.resetCounter()
-    let aborted = MeasurementRunner.I.abortMeasurement()
-    if (aborted) {
-        webContents.send(Events.MEASUREMENT_ABORTED)
-    }
+ipcMain.on(Events.ABORT_MEASUREMENT, () => {
+    LoopService.I.resetTimeout()
+    MeasurementRunner.I.abortMeasurement()
 })
-
-const onScheduleLoop = (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
-    const webContents = event.sender
-    onRunMeasurement(event, loopModeInfo)
-    LoopService.I.scheduleLoop({
-        interval: loopInterval,
-        loopModeInfo,
-        onTime: (counter) => {
-            webContents.send(Events.RESTART_MEASUREMENT, counter)
-            onScheduleLoop(event, loopInterval, {
-                ...loopModeInfo,
-                test_counter: counter,
-            })
-        },
-        onExpire: () => {
-            webContents.send(Events.LOOP_MODE_EXPIRED)
-        },
-    })
-}
 
 ipcMain.on(
     Events.SCHEDULE_LOOP,
     (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
         const timeFromWholeSecond = Date.now() % 1000
         setTimeout(
-            () => onScheduleLoop(event, loopInterval, loopModeInfo),
+            () =>
+                MeasurementRunner.I.onScheduleLoop(
+                    event,
+                    loopInterval,
+                    loopModeInfo
+                ),
             1000 - timeFromWholeSecond
         )
     }
@@ -263,57 +160,7 @@ ipcMain.on(Events.DELETE_LOCAL_DATA, () => {
     Store.wipeDataAndQuit()
 })
 
-ipcMain.handle(Events.GET_ENV, (): IEnv => {
-    return {
-        ACTIVE_LANGUAGE: I18nService.I.getActiveLanguage(),
-        APP_VERSION: pack.version,
-        CMS_URL: process.env.CMS_URL || "",
-        CPU_WARNING_PERCENT: process.env.CPU_WARNING_PERCENT
-            ? parseFloat(process.env.CPU_WARNING_PERCENT)
-            : undefined,
-        CROWDIN_UPDATE_AT_RUNTIME: process.env.CROWDIN_UPDATE_AT_RUNTIME || "",
-        ENABLE_LANGUAGE_SWITCH: process.env.ENABLE_LANGUAGE_SWITCH || "",
-        ENABLE_HOME_SCREEN_JITTER_BOX:
-            process.env.ENABLE_HOME_SCREEN_JITTER_BOX === "true",
-        ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",
-        FLAVOR: process.env.FLAVOR || "rtr",
-        WEBSITE_HOST: new URL(process.env.FULL_HISTORY_RESULT_URL ?? "").origin,
-        FULL_HISTORY_RESULT_URL: process.env.FULL_HISTORY_RESULT_URL,
-        FULL_STATISTICS_URL: process.env.FULL_STATISTICS_URL,
-        FULL_MAP_URL: process.env.FULL_MAP_URL,
-        HISTORY_EXPORT_URL: process.env.HISTORY_EXPORT_URL,
-        HISTORY_RESULTS_LIMIT: process.env.HISTORY_RESULTS_LIMIT
-            ? parseInt(process.env.HISTORY_RESULTS_LIMIT)
-            : undefined,
-        HISTORY_SEARCH_URL: process.env.HISTORY_SEARCH_URL,
-        IP_VERSION: (Store.get(IP_VERSION) as string) || "",
-        LOOP_MODE_MIN_INTERVAL: process.env.LOOP_MODE_MIN_INTERVAL
-            ? parseInt(process.env.LOOP_MODE_MIN_INTERVAL)
-            : 5,
-        LOOP_MODE_MAX_INTERVAL: process.env.LOOP_MODE_MAX_INTERVAL
-            ? parseInt(process.env.LOOP_MODE_MAX_INTERVAL)
-            : 120,
-        LOOP_MODE_DEFAULT_INTERVAL: process.env.LOOP_MODE_DEFAULT_INTERVAL
-            ? parseInt(process.env.LOOP_MODE_DEFAULT_INTERVAL)
-            : 10,
-        LOOP_MODE_MAX_DURATION: process.env.LOOP_MODE_MAX_DURATION
-            ? parseInt(process.env.LOOP_MODE_MAX_DURATION)
-            : 2880,
-        OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
-        REPO_URL: pack.repository,
-        TERMS_ACCEPTED_VERSION: Store.get(TERMS_ACCEPTED_VERSION) as number,
-        X_NETTEST_CLIENT: (Store.get(ACTIVE_CLIENT) as string) || "",
-        USER_DATA: app.getPath("temp"),
-        MEASUREMENT_SERVERS_PATH: process.env.MEASUREMENT_SERVERS_PATH || "",
-        CONTROL_SERVER_URL: process.env.CONTROL_SERVER_URL || "",
-        OS:
-            process.platform === "win32"
-                ? "windows"
-                : process.platform === "darwin"
-                ? "macos"
-                : process.platform,
-    }
-})
+ipcMain.handle(Events.GET_ENV, getEnv)
 
 ipcMain.handle(Events.GET_CPU_USAGE, () => {
     return MeasurementRunner.I.getCPUUsage()
@@ -356,5 +203,7 @@ ipcMain.handle(Events.GET_SERVERS, async (event) => {
     }
 })
 
-app.whenReady().then(() => createWindow())
+ipcMain.on(Events.OPEN_PDF, (_, url) => WindowManager.I.openPdf(url))
+
+app.whenReady().then(() => WindowManager.I.createWindow())
 app.disableHardwareAcceleration()

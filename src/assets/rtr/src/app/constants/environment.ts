@@ -23,13 +23,13 @@ export const environment: {
             route: ERoutes.LOOP_MODE,
             translations: [],
         },
-        {
-            label: "Certified",
-            icon: "certified",
-            route: ERoutes.CERTIFIED,
-            translations: [],
-            hidden: true,
-        },
+        // TODO: Enable when ready
+        // {
+        //     label: "Certified",
+        //     icon: "certified",
+        //     route: ERoutes.CERTIFIED,
+        //     translations: [],
+        // },
         {
             label: "Map",
             icon: "map",

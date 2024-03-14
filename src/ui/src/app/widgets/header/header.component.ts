@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input } from "@angular/core"
 import { ActivatedRoute, Router } from "@angular/router"
 import { TranslocoService } from "@ngneat/transloco"
-import { concatMap, map, of } from "rxjs"
+import { combineLatest, concatMap, map, of } from "rxjs"
 import { THIS_INTERRUPTS_ACTION } from "src/app/constants/strings"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { CMSService } from "src/app/services/cms.service"
@@ -19,11 +19,15 @@ export class HeaderComponent {
     @Input() fixed = false
     @Input() hideMenu = false
     private noGo = "javascript:;"
-    link$ = this.activeRoute.url.pipe(
-        map((segments) => {
+    link$ = combineLatest([
+        this.activeRoute.url,
+        this.testStore.isCertifiedMeasurement$,
+    ]).pipe(
+        map(([segments, isCertifiedMeasurement]) => {
             if (
                 segments.join("/") === ERoutes.TEST ||
-                segments.join("/") === ERoutes.LOOP_TEST
+                segments.join("/") === ERoutes.LOOP_TEST ||
+                isCertifiedMeasurement
             ) {
                 return this.noGo
             }
@@ -31,7 +35,14 @@ export class HeaderComponent {
         })
     )
     env$ = this.mainStore.env$
-    isLoopModeTestScreen$ = this.testStore.enableLoopMode$
+    isLoopModeTestScreen$ = combineLatest([
+        this.testStore.enableLoopMode$,
+        this.testStore.isCertifiedMeasurement$,
+    ]).pipe(
+        map(([loopMode, certifiedMeasurement]) => {
+            return !!loopMode && !certifiedMeasurement
+        })
+    )
     ontLogo$ = this.mainStore.env$.pipe(
         concatMap((env) =>
             this.cms.getAssetByName(

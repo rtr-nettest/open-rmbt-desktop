@@ -20,6 +20,7 @@ import { Translation, TranslocoService } from "@ngneat/transloco"
 import { TranslocoHttpLoader } from "../transloco-root.module"
 import { IMainPage } from "../interfaces/main-page.interface"
 import { IJitterInfo } from "../../../../measurement/interfaces/jitter-info.interface"
+import { IPInfo } from "../../../../measurement/interfaces/ip-info.interface"
 
 @Injectable({
     providedIn: "root",
@@ -32,12 +33,14 @@ export class MainStore {
     assets$ = new BehaviorSubject<{ [key: string]: IMainAsset }>({})
     env$ = new BehaviorSubject<IEnv | null>(null)
     inProgress$ = new BehaviorSubject<boolean>(false)
+    isOnline$ = new BehaviorSubject<boolean>(navigator.onLine)
     jitterInfo$ = new BehaviorSubject<IJitterInfo | null>({
         jitter: 1,
         packetLoss: 1,
         ping: 1,
     })
     project$ = new BehaviorSubject<IMainProject | null>(null)
+    ipInfo$ = new BehaviorSubject<IPInfo | null>(null)
     settings$ = new BehaviorSubject<IUserSettings | null>(null)
     error$ = new BehaviorSubject<Error | null>(null)
     news$ = new BehaviorSubject<INewsItem[] | null>(null)
@@ -64,9 +67,7 @@ export class MainStore {
             return this.env$
         }
         return from(window.electronAPI.getEnv()).pipe(
-            tap((env) => {
-                this.env$.next(env)
-            })
+            tap((env) => this.env$.next(env))
         )
     }
 
@@ -90,7 +91,12 @@ export class MainStore {
     }
 
     registerClient() {
-        window.electronAPI.onSetIp((settings) => this.settings$.next(settings))
+        window.electronAPI.onSetIp((settings) => {
+            this.isOnline$.next(
+                !!(settings.ipInfo?.publicV4 || settings.ipInfo?.publicV6)
+            )
+            this.ipInfo$.next(settings.ipInfo ?? null)
+        })
         window.electronAPI
             .registerClient()
             .then((settings) => this.settings$.next(settings))

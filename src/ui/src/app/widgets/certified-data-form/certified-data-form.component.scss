@@ -1,0 +1,23 @@
+@import "../../../assets/styles/core.scss";
+
+h1 {
+    margin-bottom: rem(20);
+}
+
+h2 {
+    margin-bottom: rem(40);
+}
+
+mat-form-field {
+    display: block;
+    margin-bottom: rem(20);
+}
+
+mat-radio-group {
+    display: block;
+    margin-top: rem(10);
+
+    mat-radio-button:not(:first-of-type) {
+        margin-left: rem(20);
+    }
+}

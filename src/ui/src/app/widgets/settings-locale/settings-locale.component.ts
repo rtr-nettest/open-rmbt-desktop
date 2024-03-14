@@ -1,6 +1,11 @@
+import { Input } from "@angular/core"
 import { Component } from "@angular/core"
 import { MatSelectChange } from "@angular/material/select"
 import { TranslocoService } from "@ngneat/transloco"
+import {
+    IDynamicComponent,
+    IDynamicComponentParameters,
+} from "src/app/interfaces/dynamic-component.interface"
 import { ILocale } from "src/app/interfaces/locale.interface"
 import { TranslocoConfigExt } from "src/transloco.config"
 
@@ -9,7 +14,8 @@ import { TranslocoConfigExt } from "src/transloco.config"
     templateUrl: "./settings-locale.component.html",
     styleUrls: ["./settings-locale.component.scss"],
 })
-export class SettingsLocaleComponent {
+export class SettingsLocaleComponent implements IDynamicComponent {
+    @Input() parameters?: IDynamicComponentParameters
     locales = TranslocoConfigExt["availableLocales"]
     selectedLocale = this.locales.find(
         (l: ILocale) => l.iso === this.transloco.getActiveLang()

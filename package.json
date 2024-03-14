@@ -1,7 +1,7 @@
 {
     "name": "open-rmbt-desktop",
     "productName": "RTR-Netztest",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "RTR-Netztest Desktop App",
     "main": "dist/main.js",
     "engines": {

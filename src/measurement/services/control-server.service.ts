@@ -62,7 +62,10 @@ export class ControlServer {
         let retVal = process.env.CONTROL_SERVER_URL!
         if (ipv6Host && ipv === EIPVersion.v6) {
             resolved = (
-                await NetworkInfoService.I.getIPInfo(settings, settingsRequest)
+                await NetworkInfoService.I.getIpV6Info(
+                    settings,
+                    settingsRequest
+                )
             ).publicV6
             if (resolved) {
                 dns.setDefaultResultOrder("verbatim")
@@ -70,7 +73,10 @@ export class ControlServer {
             }
         } else if (ipv4Host && ipv === EIPVersion.v4) {
             resolved = (
-                await NetworkInfoService.I.getIPInfo(settings, settingsRequest)
+                await NetworkInfoService.I.getIpV4Info(
+                    settings,
+                    settingsRequest
+                )
             ).publicV4
             if (resolved) {
                 dns.setDefaultResultOrder("ipv4first")

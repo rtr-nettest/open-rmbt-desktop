@@ -114,6 +114,7 @@ export class TestChartComponent implements OnInit, OnDestroy {
                     case EMeasurementStatus.INIT:
                     case EMeasurementStatus.INIT_DOWN:
                     case EMeasurementStatus.PING:
+                    case EMeasurementStatus.NOT_STARTED:
                         this.chart?.resetData()
                         break
                     case EMeasurementStatus.DOWN:

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core"
-import { lastValueFrom, map } from "rxjs"
+import { lastValueFrom, map, withLatestFrom } from "rxjs"
 import { MainStore } from "src/app/store/main.store"
 import { TestStore } from "src/app/store/test.store"
 
@@ -11,11 +11,12 @@ import { TestStore } from "src/app/store/test.store"
 })
 export class StartTestButtonComponent {
     env$ = this.mainStore.env$
-    disabled$ = this.mainStore.settings$.pipe(
-        map((settings) => !settings?.uuid)
+    disabled$ = this.mainStore.isOnline$.pipe(
+        withLatestFrom(this.mainStore.settings$),
+        map(([isOnline, settings]) => !settings?.uuid || !isOnline)
     )
 
-    constructor(private mainStore: MainStore, private testStore: TestStore) {}
+    constructor(private mainStore: MainStore) {}
 
     async preventNavigation(e: Event) {
         if ((await lastValueFrom(this.disabled$)) === true) {

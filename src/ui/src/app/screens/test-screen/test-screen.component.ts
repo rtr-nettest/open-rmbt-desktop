@@ -1,6 +1,8 @@
 import {
     ChangeDetectionStrategy,
     Component,
+    Input,
+    NgZone,
     OnDestroy,
     OnInit,
 } from "@angular/core"
@@ -34,6 +36,7 @@ import { TranslocoService } from "@ngneat/transloco"
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestScreenComponent implements OnDestroy, OnInit {
+    @Input() hideMenu = false
     enableLoopMode$ = this.store.enableLoopMode$
     loopCount$ = this.store.loopCounter$
     env$ = this.mainStore.env$
@@ -41,23 +44,12 @@ export class TestScreenComponent implements OnDestroy, OnInit {
     visualization$ = this.store.visualization$.pipe(
         withLatestFrom(this.mainStore.error$, this.loopCount$),
         distinctUntilChanged(),
-        tap(([state, error, loopCount]) => {
+        tap(([state, error]) => {
             this.setShowCPUWarning(this.mainStore.env$.value)
             if (error) {
                 this.openErrorDialog(state)
             } else if (state.currentPhaseName === EMeasurementStatus.END) {
                 this.goToResult(state)
-            } else {
-                if (!!this.loopWaiting$.value) {
-                    this.historyStore
-                        .getRecentMeasurementHistory({
-                            offset: 0,
-                            limit: loopCount - 1,
-                        })
-                        .subscribe()
-                    this.waitingProgressMs = 0
-                }
-                this.loopWaiting$.next(false)
             }
         })
     )
@@ -72,15 +64,15 @@ export class TestScreenComponent implements OnDestroy, OnInit {
     progressMode$ = new BehaviorSubject<"determinate" | "indeterminate">(
         "determinate"
     )
-    private waitingProgressMs = 0
 
     constructor(
-        private historyStore: HistoryStore,
-        private store: TestStore,
-        private mainStore: MainStore,
-        private router: Router,
-        private message: MessageService,
-        private transloco: TranslocoService
+        protected historyStore: HistoryStore,
+        protected store: TestStore,
+        protected mainStore: MainStore,
+        protected ngZone: NgZone,
+        protected router: Router,
+        protected message: MessageService,
+        protected transloco: TranslocoService
     ) {}
 
     ngOnInit(): void {
@@ -92,34 +84,22 @@ export class TestScreenComponent implements OnDestroy, OnInit {
         this.stopped$.complete()
     }
 
-    private openErrorDialog(state: ITestVisualizationState) {
+    protected openErrorDialog(state: ITestVisualizationState) {
         this.message.closeAllDialogs()
         let message = ERROR_OCCURED
-        if (this.enableLoopMode$.value === true) {
-            message =
-                this.transloco.translate(ERROR_OCCURED_DURING_LOOP) +
-                " " +
-                this.loopCount$.value
-        } else if (
-            state.currentPhaseName === EMeasurementStatus.SUBMITTING_RESULTS
-        ) {
+        if (state.currentPhaseName === EMeasurementStatus.SUBMITTING_RESULTS) {
             message = ERROR_OCCURED_SENDING_RESULTS
         }
-        if (this.enableLoopMode$.value !== true) {
-            this.stopped$.next()
-            this.message.openConfirmDialog(message, () => {
-                this.mainStore.error$.next(null)
-                state.currentPhaseName === EMeasurementStatus.SUBMITTING_RESULTS
-                    ? this.goToResult(state)
-                    : this.router.navigate(["/"])
-            })
-        } else {
-            this.message.openConfirmDialog(message, () => void 0)
-            this.goToResult(state)
-        }
+        this.stopped$.next()
+        this.message.openConfirmDialog(message, () => {
+            this.mainStore.error$.next(null)
+            state.currentPhaseName === EMeasurementStatus.SUBMITTING_RESULTS
+                ? this.goToResult(state)
+                : this.router.navigate(["/"])
+        })
     }
 
-    private setShowCPUWarning(env: IEnv | null) {
+    protected setShowCPUWarning(env: IEnv | null) {
         if (env?.CPU_WARNING_PERCENT) {
             window.electronAPI.getCPUUsage().then((cpu) => {
                 const cpuLoadMax = cpu && Math.round(cpu.load_max * 100)
@@ -132,30 +112,10 @@ export class TestScreenComponent implements OnDestroy, OnInit {
         }
     }
 
-    private goToResult = (state: ITestVisualizationState) => {
-        if (this.enableLoopMode$.value !== true) {
-            this.router.navigate([
-                "result",
-                state.phases[state.currentPhaseName].testUuid,
-            ])
-        } else {
-            this.loopWaiting$.next(true)
-            this.mainStore.error$.next(null)
-            this.setProgressIndicator(state)
-        }
-    }
-
-    private setProgressIndicator(state: ITestVisualizationState) {
-        this.waitingProgressMs += STATE_UPDATE_TIMEOUT
-        const timeTillEndMs =
-            state.startTimeMs + this.store.fullTestIntervalMs - state.endTimeMs
-        const currentMs = Math.max(0, timeTillEndMs - this.waitingProgressMs)
-        if (currentMs <= 0) {
-            this.progressMode$.next("indeterminate")
-        } else {
-            this.progressMode$.next("determinate")
-            this.ms$.next(currentMs)
-            this.progress$.next((this.waitingProgressMs / timeTillEndMs) * 100)
-        }
+    protected goToResult = (state: ITestVisualizationState) => {
+        this.router.navigate([
+            "result",
+            state.phases[state.currentPhaseName].testUuid,
+        ])
     }
 }

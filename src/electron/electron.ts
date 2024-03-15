@@ -20,7 +20,6 @@ import { IMeasurementServerResponse } from "../measurement/interfaces/measuremen
 import { LoopService } from "../measurement/services/loop.service"
 import { ILoopModeInfo } from "../measurement/interfaces/measurement-registration-request.interface"
 import { ERoutes } from "../ui/src/app/enums/routes.enum"
-import { IPInfo } from "../measurement/interfaces/ip-info.interface"
 import { WindowManager } from "./lib/window-manager"
 import { getEnv } from "./lib/get-env"
 import { IUserSettings } from "../measurement/interfaces/user-settings-response.interface"
@@ -135,9 +134,12 @@ ipcMain.on(Events.RUN_MEASUREMENT, (event, loopModeInfo) =>
     MeasurementRunner.I.onRunMeasurement(event, loopModeInfo)
 )
 
-ipcMain.on(Events.ABORT_MEASUREMENT, () => {
+ipcMain.on(Events.ABORT_MEASUREMENT, (event) => {
     LoopService.I.resetTimeout()
-    MeasurementRunner.I.abortMeasurement()
+    const isRunning = MeasurementRunner.I.abortMeasurement()
+    if (!isRunning) {
+        event.sender.send(Events.MEASUREMENT_ABORTED)
+    }
 })
 
 ipcMain.on(

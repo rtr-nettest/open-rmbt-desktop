@@ -459,7 +459,7 @@ export class ControlServer {
                 const settings = Store.get(SETTINGS) as IUserSettings
                 openTestsResponse = (
                     await axios.get(
-                        `${settings.urls.url_statistic_server}${process.env.HISTORY_RESULT_STATS_PATH}/${response.open_test_uuid}`,
+                        `${settings?.urls?.url_statistic_server}${process.env.HISTORY_RESULT_STATS_PATH}/${response.open_test_uuid}`,
                         { headers: this.headers }
                     )
                 ).data

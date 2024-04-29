@@ -13,6 +13,7 @@ export interface IUserSettings {
         url_ipv4_check: string
         control_ipv6_only: string
         statistics: string
+        url_statistic_server: string
     }
     uuid: string
     qostesttype_desc: [

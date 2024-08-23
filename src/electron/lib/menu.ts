@@ -12,7 +12,7 @@ const template = [
     ...(isMac
         ? [
               {
-                  label: app.name,
+                  label: app?.name,
                   submenu: [
                       { role: "hide", label: t("Hide") },
                       { role: "hideOthers", label: t("Hide others") },

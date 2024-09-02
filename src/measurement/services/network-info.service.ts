@@ -6,6 +6,7 @@ import { ELoggerMessage } from "../enums/logger-message.enum"
 import { NetInterfaceInfoUnixService } from "./net-interface-info-unix.service"
 import { NetInterfaceInfoWindowsService } from "./net-interface-info-windows.service"
 import { IPInfo } from "../interfaces/ip-info.interface"
+import { Agent } from "https"
 
 const axios = require("axios")
 
@@ -16,6 +17,12 @@ export class NetworkInfoService {
 
     static get I() {
         return this.instance
+    }
+
+    private get httpsAgent() {
+        return new Agent({
+            rejectUnauthorized: false,
+        })
     }
 
     async getIpV4Info(
@@ -33,9 +40,12 @@ export class NetworkInfoService {
             publicV4 = (
                 await axios.post(settings.urls.url_ipv4_check, request, {
                     timeout: connectionTimeout,
+                    httpsAgent: this.httpsAgent,
                 })
             ).data.ip
-        } catch (e) {}
+        } catch (e) {
+            console.log(e)
+        }
 
         let privateV4 = ""
         let anyV4 = ""
@@ -83,6 +93,7 @@ export class NetworkInfoService {
             publicV6 = (
                 await axios.post(settings.urls.url_ipv6_check, request, {
                     timeout: connectionTimeout,
+                    httpsAgent: this.httpsAgent,
                 })
             ).data.ip
         } catch (e) {}

@@ -15,18 +15,29 @@
             "prefix": "app",
             "architect": {
                 "build": {
-                    "builder": "@angular-devkit/build-angular:browser",
+                    "builder": "@angular-devkit/build-angular:application",
                     "options": {
-                        "allowedCommonJsDependencies": ["flat"],
-                        "outputPath": "dist/ui",
+                        "allowedCommonJsDependencies": [
+                            "flat",
+                            "dayjs",
+                            "file-saver"
+                        ],
+                        "outputPath": {
+                          "base": "dist/ui"
+                        },
                         "index": "src/index.html",
-                        "main": "src/main.ts",
                         "polyfills": ["zone.js"],
                         "tsConfig": "tsconfig.app.json",
                         "inlineStyleLanguage": "scss",
                         "assets": ["src/favicon.ico", "src/assets"],
                         "styles": ["src/styles.scss"],
-                        "scripts": []
+                        "scripts": [],
+                        "browser": "src/main.ts",
+                        "stylePreprocessorOptions": {
+                          "includePaths": [
+                            "."
+                          ]
+                        }
                     },
                     "configurations": {
                         "production": {
@@ -45,9 +56,7 @@
                             "outputHashing": "all"
                         },
                         "development": {
-                            "buildOptimizer": false,
-                            "optimization": false,
-                            "vendorChunk": true,
+                          "optimization": false,
                             "extractLicenses": false,
                             "sourceMap": true,
                             "namedChunks": true
@@ -59,10 +68,10 @@
                     "builder": "@angular-devkit/build-angular:dev-server",
                     "configurations": {
                         "production": {
-                            "browserTarget": "ui:build:production"
+                          "buildTarget": "ui:build:production"
                         },
                         "development": {
-                            "browserTarget": "ui:build:development"
+                          "buildTarget": "ui:build:development"
                         }
                     },
                     "defaultConfiguration": "development"
@@ -70,7 +79,7 @@
                 "extract-i18n": {
                     "builder": "@angular-devkit/build-angular:extract-i18n",
                     "options": {
-                        "browserTarget": "ui:build"
+                      "buildTarget": "ui:build"
                     }
                 },
                 "test": {

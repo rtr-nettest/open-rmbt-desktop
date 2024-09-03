@@ -27,7 +27,7 @@ export class TranslatePipe implements PipeTransform {
             }
         }
         if (parseMarkdown === "parseMarkdown") {
-            return this.markdown.parse(retVal)
+            return this.markdown.parse(retVal) as string
         }
         return retVal
     }

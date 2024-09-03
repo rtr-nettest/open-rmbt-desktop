@@ -46,13 +46,13 @@ export class TestBarChart extends TestChart {
     }
 
     protected override resetDatasets(): void {
-        super.data.datasets = [
+        this.data.datasets = [
             new TestRTRChartDataset(this.phase, this.barOptions),
         ]
     }
 
     protected override resetLabels(): void {
-        super.data.labels = []
+        this.data.labels = []
     }
 
     protected override getAllData(testItem: ITestPhaseState) {

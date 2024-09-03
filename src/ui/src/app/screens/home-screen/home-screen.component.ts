@@ -90,7 +90,7 @@ export class HomeScreenComponent
             return `${this.env$.value?.WEBSITE_HOST}/${lang}/${path}`
         })
     )
-    private checkIpInterval?: NodeJS.Timeout
+    private checkIpInterval?: any
 
     constructor(
         mainStore: MainStore,

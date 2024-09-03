@@ -26,7 +26,7 @@ import { MatTooltipModule } from "@angular/material/tooltip"
 import { MatSnackBarModule } from "@angular/material/snack-bar"
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
 import { MatProgressBarModule } from "@angular/material/progress-bar"
-import { HttpClientModule } from "@angular/common/http"
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http"
 import { TranslocoRootModule } from "./transloco-root.module"
 import { TestHeaderComponent } from "./widgets/test-header/test-header.component"
 import { TestIndicatorComponent } from "./widgets/test-indicator/test-indicator.component"
@@ -206,8 +206,7 @@ declare global {
     }
 }
 
-@NgModule({
-    declarations: [
+@NgModule({ declarations: [
         AppComponent,
         BodyComponent,
         DistancePipe,
@@ -272,13 +271,11 @@ declare global {
         CertifiedResultScreenComponent,
         SettingsCommitComponent,
     ],
-    imports: [
-        AppRoutingModule,
+    bootstrap: [AppComponent], imports: [AppRoutingModule,
         BrowserAnimationsModule,
         BrowserModule,
         FormsModule,
         ReactiveFormsModule,
-        HttpClientModule,
         MarkdownModule.forRoot(),
         MatButtonModule,
         MatCheckboxModule,
@@ -295,10 +292,7 @@ declare global {
         MatTooltipModule,
         MatSlideToggleModule,
         MatSelectModule,
-        TranslocoRootModule,
-    ],
-    bootstrap: [AppComponent],
-    providers: [
+        TranslocoRootModule], providers: [
         {
             provide: APP_INITIALIZER,
             useFactory: MainStore.factory,
@@ -311,8 +305,8 @@ declare global {
         {
             provide: SprintfPipe,
         },
-    ],
-})
+        provideHttpClient(withInterceptorsFromDi()),
+    ] })
 export class AppModule {
     constructor() {
         ;[

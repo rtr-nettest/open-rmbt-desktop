@@ -5,7 +5,7 @@ import { IOverallResult } from "../../../../measurement/interfaces/overall-resul
 import { ETestStatuses } from "../enums/test-statuses.enum"
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
 import { ConversionService } from "../services/conversion.service"
-import * as dayjs from "dayjs"
+import dayjs from "dayjs"
 import { STATE_UPDATE_TIMEOUT } from "../store/test.store"
 
 export class TestPhaseState implements ITestPhaseState {

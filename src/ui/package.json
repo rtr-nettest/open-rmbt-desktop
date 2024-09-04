@@ -28,7 +28,7 @@
     "chartjs-adapter-dayjs-4": "^1.0.4",
     "dayjs": "^1.11.13",
     "file-saver": "^2.0.5",
-    "marked": "^4.3.0",
+    "marked": "^12.0.2",
     "ngx-markdown": "^18.0.0",
     "rxjs": "~7.8.1",
     "tslib": "^2.7.0",

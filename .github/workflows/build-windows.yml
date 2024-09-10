@@ -29,7 +29,7 @@ jobs:
         cd ..
         cd ..
         npm run make:windows
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: application-zip
         path: out/RTR-Netztest-win32-x64/

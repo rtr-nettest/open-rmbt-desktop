@@ -28,11 +28,11 @@ jobs:
         cd ..
         npm run make:deb
         npm run make:rpm
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: application-rpm
         path: out/make/rpm/x64/*.rpm
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: application-deb
         path: out/make/deb/x64/*.deb

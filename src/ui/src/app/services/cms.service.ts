@@ -40,7 +40,16 @@ export class CMSService {
     constructor(private http: HttpClient, private mainStore: MainStore) {}
 
     getMenu(): Observable<IMainMenuItem[]> {
-        return of(environment.menu)
+        const excludeItems = this.mainStore.env$.value?.EXCLUDE_MENU_ITEMS
+            ?.length
+            ? new Set(this.mainStore.env$.value.EXCLUDE_MENU_ITEMS)
+            : undefined
+        const menu = excludeItems?.size
+            ? environment.menu.filter(
+                  (mi) => mi.label && !excludeItems.has(mi.label)
+              )
+            : environment.menu
+        return of(menu)
     }
 
     getProjects(): Observable<IMainProject[]> {

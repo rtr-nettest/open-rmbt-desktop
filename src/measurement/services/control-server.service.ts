@@ -265,10 +265,6 @@ export class ControlServer {
                     { headers: this.headers }
                 )
             ).data
-            await DBService.I.saveMeasurement({
-                ...result,
-                sent_to_server: true,
-            })
             Logger.I.info("Result is submitted. Response: %o", response)
         } catch (e: any) {
             if (e.response.status != 400) {
@@ -413,8 +409,6 @@ export class ControlServer {
     }
 
     private async getRTRMeasurementResult(uuid: string) {
-        let response: any
-        let retVal: ISimpleHistoryResult | undefined = undefined
         const body = {
             test_uuid: uuid,
             timezone: dayjs.tz.guess(),
@@ -425,7 +419,7 @@ export class ControlServer {
             process.env.HISTORY_RESULT_PATH,
             body
         )
-        response = (
+        let response = (
             await axios.post(
                 `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}`,
                 body,
@@ -435,47 +429,51 @@ export class ControlServer {
         Logger.I.info(ELoggerMessage.RESPONSE, response)
         if (response?.testresult?.length) {
             response = response.testresult[0]
-            let testResultDetail: any
-            let openTestsResponse: any
-            if (
-                response.open_test_uuid &&
-                process.env.HISTORY_RESULT_DETAILS_PATH
-            ) {
-                testResultDetail = (
-                    await axios.post(
-                        `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_DETAILS_PATH}`,
-                        {
-                            ...body,
-                            language: I18nService.I.getActiveLanguage(),
-                        },
+        }
+
+        // Test metadata
+
+        let testResultDetail: any
+        if (process.env.HISTORY_RESULT_DETAILS_PATH) {
+            testResultDetail = (
+                await axios.post(
+                    `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_DETAILS_PATH}`,
+                    {
+                        ...body,
+                        language: I18nService.I.getActiveLanguage(),
+                    },
+                    { headers: this.headers }
+                )
+            ).data
+            Logger.I.info("Test result detail is: %o", testResultDetail)
+        }
+
+        // Graphs
+
+        let openTestsResponse: any
+        if (
+            process.env.HISTORY_RESULT_STATS_PATH &&
+            response &&
+            response.status != "error"
+        ) {
+            const settings = Store.get(SETTINGS) as IUserSettings
+            if (settings?.urls?.url_statistic_server) {
+                openTestsResponse = (
+                    await axios.get(
+                        `${settings?.urls?.url_statistic_server}${process.env.HISTORY_RESULT_STATS_PATH}/${response.open_test_uuid}`,
                         { headers: this.headers }
                     )
                 ).data
             }
-            Logger.I.info("Test result detail is: %o", testResultDetail)
-            if (
-                response.open_test_uuid &&
-                process.env.HISTORY_RESULT_STATS_PATH
-            ) {
-                const settings = Store.get(SETTINGS) as IUserSettings
-                if (settings?.urls?.url_statistic_server) {
-                    openTestsResponse = (
-                        await axios.get(
-                            `${settings?.urls?.url_statistic_server}${process.env.HISTORY_RESULT_STATS_PATH}/${response.open_test_uuid}`,
-                            { headers: this.headers }
-                        )
-                    ).data
-                }
-            }
             Logger.I.info("Open test response is: %o", openTestsResponse)
-            retVal = SimpleHistoryResult.fromRTRMeasurementResult(
-                uuid,
-                response,
-                openTestsResponse,
-                testResultDetail
-            )
         }
-        return retVal
+
+        return SimpleHistoryResult.fromRTRMeasurementResult(
+            uuid,
+            response,
+            openTestsResponse,
+            testResultDetail
+        )
     }
 
     private async getONTMeasurementResult(uuid: string) {

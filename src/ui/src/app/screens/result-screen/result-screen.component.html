@@ -32,12 +32,15 @@
                     >
                         <i class="app-icon app-icon--chevron-left"></i>
                     </button>
-                    <h1 aria-live="polite">
+                    <h1 *ngIf="result.measurementDate" aria-live="polite">
                         {{ t("Measurement result from") }}
                         {{
                             result.measurementDate
                                 | date : "medium" : undefined : locale
                         }}
+                    </h1>
+                    <h1 *ngIf="!result.measurementDate" aria-live="polite">
+                        {{ t("Measurement result") }}
                     </h1>
                     <app-action-buttons
                         [items]="actionButtons"

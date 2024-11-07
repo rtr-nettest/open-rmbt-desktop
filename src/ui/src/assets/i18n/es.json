@@ -151,5 +151,6 @@
     "NAT": "NAT",
     "Public IP": "Public IP",
     "Test progress": "Test progress",
-    "Commit hash": "Commit hash"
+    "Commit hash": "Commit hash",
+    "Measurement result": "Measurement result"
 }

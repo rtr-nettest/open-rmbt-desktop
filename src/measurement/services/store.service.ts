@@ -29,7 +29,7 @@ export class Store {
     private filePath: string
 
     private constructor(fileName: string = "config.json") {
-        const userDataPath = app ? app.getPath("userData") : "../"
+        const userDataPath = app ? app.getPath("userData") : "./"
         this.filePath = path.resolve(userDataPath, fileName)
 
         try {

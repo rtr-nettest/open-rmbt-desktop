@@ -15,6 +15,7 @@ async function main() {
         }
     } else {
         await MeasurementRunner.I.runMeasurement(options)
+        process.exit()
     }
 }
 

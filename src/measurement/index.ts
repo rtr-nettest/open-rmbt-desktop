@@ -24,15 +24,11 @@ import { ILoopModeInfo } from "./interfaces/measurement-registration-request.int
 import { LoopService } from "./services/loop.service"
 import { Events } from "../electron/enums/events.enum"
 import { BrowserWindow } from "electron"
+import { MeasurementOptions } from "./interfaces/measurement-options.interface"
 
 config({
     path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
 })
-
-export interface MeasurementOptions {
-    platform?: string
-    loopModeInfo?: ILoopModeInfo
-}
 
 export class MeasurementRunner {
     private static instance = new MeasurementRunner()
@@ -89,7 +85,7 @@ export class MeasurementRunner {
     async registerClient(options?: MeasurementOptions): Promise<IUserSettings> {
         try {
             AutoUpdater.I.checkForNewRelease()
-            this.settingsRequest = new UserSettingsRequest(options?.platform)
+            this.settingsRequest = new UserSettingsRequest(options)
             this.settings = await ControlServer.I.getUserSettings(
                 this.settingsRequest
             )
@@ -164,8 +160,8 @@ export class MeasurementRunner {
             return this.rmbtClient!.measurementStatus
         } catch (e: any) {
             if (e) {
-                this.rmbtClient!.measurementStatus = EMeasurementStatus.ERROR
                 Logger.I.error(e)
+                this.rmbtClient!.measurementStatus = EMeasurementStatus.ERROR
                 try {
                     await ControlServer.I.submitMeasurement(
                         new MeasurementResult(

@@ -9,7 +9,7 @@ export class Logger {
 
     private constructor() {}
 
-    static get I(): pino.Logger {
+    static get I() {
         return this.instance ?? console
     }
 

@@ -29,8 +29,8 @@ export class Store {
     private filePath: string
 
     private constructor(fileName: string = "config.json") {
-        const userDataPath = app ? app.getPath("userData") : "."
-        this.filePath = path.join(userDataPath, fileName)
+        const userDataPath = app ? app.getPath("userData") : "../"
+        this.filePath = path.resolve(userDataPath, fileName)
 
         try {
             // Try to read the file and parse it as JSON
@@ -88,6 +88,6 @@ export class Store {
 
     // Save the current state to disk
     private save(): void {
-        fs.writeFileSync(this.filePath, JSON.stringify(this.data))
+        fs.writeFileSync(this.filePath, JSON.stringify(this.data, null, 2))
     }
 }

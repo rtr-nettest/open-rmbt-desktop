@@ -23,9 +23,9 @@ export class I18nService {
     }
 
     getActiveLanguage() {
-        let language = Store.get(ACTIVE_LANGUAGE) as string
+        let language = Store.I.get(ACTIVE_LANGUAGE) as string
         if (!language) {
-            language = Store.get(DEFAULT_LANGUAGE) as string
+            language = Store.I.get(DEFAULT_LANGUAGE) as string
         }
         if (!language) {
             language = Intl.DateTimeFormat().resolvedOptions().locale

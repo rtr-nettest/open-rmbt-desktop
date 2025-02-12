@@ -1,9 +1,10 @@
-import ElectronStore from "electron-store"
 import { Logger } from "./logger.service"
 import { t } from "./i18n.service"
 import { app, dialog } from "electron"
+import fs from "fs"
 import fsp from "fs/promises"
 import cp from "child_process"
+import path from "path"
 
 export const CLIENT_UUID = "clienUuid"
 export const TERMS_ACCEPTED_VERSION = "termsAcceptedVersion"
@@ -16,24 +17,48 @@ export const ACTIVE_SERVER = "activeServer"
 export const ACTIVE_CLIENT = "activeClient"
 
 export class Store {
-    private static instance = new ElectronStore()
-
+    private static instance: Store
     static get I() {
+        if (!this.instance) {
+            this.instance = new Store()
+        }
         return this.instance
     }
 
-    static set(key: string, value: any) {
-        Logger.I.info(`Setting ${key} => ${value}`)
-        this.I.set(key, value)
+    private data: Record<string, any>
+    private filePath: string
+
+    private constructor(fileName: string = "config.json") {
+        const userDataPath = app ? app.getPath("userData") : "."
+        this.filePath = path.join(userDataPath, fileName)
+
+        try {
+            // Try to read the file and parse it as JSON
+            this.data = JSON.parse(fs.readFileSync(this.filePath, "utf-8"))
+        } catch (error) {
+            // If file read or parse fails, start with an empty object
+            this.data = {}
+        }
     }
 
-    static get(key: string) {
-        const value = this.I.get(key)
-        // Logger.I.info(`Getting ${key} <= ${value}`)
-        return value
+    // Get a value from the store
+    get(key: string): any {
+        return this.data[key]
     }
 
-    static async wipeDataAndQuit() {
+    // Set a value in the store
+    set(key: string, value: any): void {
+        this.data[key] = value
+        this.save()
+    }
+
+    // Delete a value from the store
+    delete(key: string): void {
+        delete this.data[key]
+        this.save()
+    }
+
+    async wipeDataAndQuit() {
         const dialogOpts = {
             type: "warning" as const,
             buttons: [t("Ok"), t("Cancel")],
@@ -61,5 +86,8 @@ export class Store {
         }
     }
 
-    private constructor() {}
+    // Save the current state to disk
+    private save(): void {
+        fs.writeFileSync(this.filePath, JSON.stringify(this.data))
+    }
 }

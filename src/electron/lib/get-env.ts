@@ -12,7 +12,7 @@ import pack from "../../../package.json"
 import { IUserSettings } from "../../measurement/interfaces/user-settings-response.interface"
 
 export const getEnv = () => {
-    const settings = Store.get(SETTINGS) as IUserSettings
+    const settings = Store.I.get(SETTINGS) as IUserSettings
     return {
         ACTIVE_LANGUAGE: I18nService.I.getActiveLanguage(),
         APP_VERSION: pack.version,
@@ -44,7 +44,7 @@ export const getEnv = () => {
             ? parseInt(process.env.HISTORY_RESULTS_LIMIT)
             : undefined,
         HISTORY_SEARCH_URL: `${settings?.urls?.url_statistic_server}${process.env.HISTORY_SEARCH_PATH}`,
-        IP_VERSION: (Store.get(IP_VERSION) as string) || "",
+        IP_VERSION: (Store.I.get(IP_VERSION) as string) || "",
         LOOP_MODE_MIN_INTERVAL: process.env.LOOP_MODE_MIN_INTERVAL
             ? parseInt(process.env.LOOP_MODE_MIN_INTERVAL)
             : 5,
@@ -59,8 +59,8 @@ export const getEnv = () => {
             : 2880,
         OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
         REPO_URL: pack.repository,
-        TERMS_ACCEPTED_VERSION: Store.get(TERMS_ACCEPTED_VERSION) as number,
-        X_NETTEST_CLIENT: (Store.get(ACTIVE_CLIENT) as string) || "",
+        TERMS_ACCEPTED_VERSION: Store.I.get(TERMS_ACCEPTED_VERSION) as number,
+        X_NETTEST_CLIENT: (Store.I.get(ACTIVE_CLIENT) as string) || "",
         USER_DATA: app.getPath("temp"),
         MEASUREMENT_SERVERS_PATH: process.env.MEASUREMENT_SERVERS_PATH || "",
         CONTROL_SERVER_URL: process.env.CONTROL_SERVER_URL || "",

@@ -1,4 +1,4 @@
-import { Store } from "./store.service"
+import { app } from "electron"
 import { Logger } from "./logger.service"
 import {
     IMeasurementResult,
@@ -12,26 +12,29 @@ import initSqlJs, { Database } from "sql.js"
 import path from "path"
 
 export class DBService {
-    private static dbFilePath = Store.I.path.replace(
-        "config.json",
-        "ord-db.sqlite"
-    )
-    private static instance = new DBService()
+    private static instance: DBService
 
     static get I() {
+        if (!this.instance) {
+            this.instance = new DBService()
+        }
         return this.instance
     }
 
     private db?: Database
+    private dbFilePath = path.join(
+        app?.getPath("userData") ?? ".",
+        "ord-db.sqlite"
+    )
 
     private constructor() {}
 
     async init() {
         try {
-            if (!fs.existsSync(DBService.dbFilePath)) {
-                await fsp.writeFile(DBService.dbFilePath, "")
+            if (!fs.existsSync(this.dbFilePath)) {
+                await fsp.writeFile(this.dbFilePath, "")
             }
-            const dbFile = await fsp.readFile(DBService.dbFilePath)
+            const dbFile = await fsp.readFile(this.dbFilePath)
             const SQL = await initSqlJs()
             this.db = new SQL.Database(dbFile)
             await this.runMigrations()
@@ -44,7 +47,7 @@ export class DBService {
         try {
             const data = this.db?.export()
             if (data) {
-                await fsp.writeFile(DBService.dbFilePath, data)
+                await fsp.writeFile(this.dbFilePath, data)
             }
         } catch (e) {
             Logger.I.warn("Persist error: %o", e)

@@ -53,8 +53,8 @@ export class ControlServer {
     private constructor() {}
 
     private async getHost() {
-        const ipv = Store.get(IP_VERSION) as EIPVersion
-        const settings = Store.get(SETTINGS) as IUserSettings
+        const ipv = Store.I.get(IP_VERSION) as EIPVersion
+        const settings = Store.I.get(SETTINGS) as IUserSettings
         const settingsRequest = new UserSettingsRequest()
         const ipv6Host = settings.urls.control_ipv6_only
         const ipv4Host = settings.urls.control_ipv4_only
@@ -105,7 +105,7 @@ export class ControlServer {
         if (!process.env.NEWS_PATH || process.env.FLAVOR === "ont") {
             return null
         }
-        const lastNewsUid = Store.get(LAST_NEWS_UID) as number
+        const lastNewsUid = Store.I.get(LAST_NEWS_UID) as number
         const settings = new UserSettingsRequest()
         const newsRequest: INewsRequest = {
             language: I18nService.I.getActiveLanguage(),
@@ -131,7 +131,7 @@ export class ControlServer {
                 throw response.error
             }
             if (response.news?.[0]?.uid) {
-                Store.set(LAST_NEWS_UID, response.news[0].uid)
+                Store.I.set(LAST_NEWS_UID, response.news[0].uid)
             }
             Logger.I.info("News are %o", response.news)
             return response.news ?? null
@@ -199,8 +199,8 @@ export class ControlServer {
                     ? { ...response.settings[0], uuid: request.uuid }
                     : response.settings[0]
             Logger.I.info("Using settings: %o", settings)
-            Store.set(CLIENT_UUID, settings.uuid)
-            Store.set(SETTINGS, settings)
+            Store.I.set(CLIENT_UUID, settings.uuid)
+            Store.I.set(SETTINGS, settings)
             if (
                 process.env.FLAVOR !== "ont" &&
                 Store.I.get(TERMS_ACCEPTED_VERSION) !==
@@ -315,7 +315,7 @@ export class ControlServer {
     }
 
     async getONTHistory(paginator?: IPaginator, sort?: ISort) {
-        let params = `uuid=${Store.get(CLIENT_UUID) as string}`
+        let params = `uuid=${Store.I.get(CLIENT_UUID) as string}`
         if (paginator) {
             const { offset, limit } = paginator
             if (limit) {
@@ -354,7 +354,7 @@ export class ControlServer {
         const body: { [key: string]: any } = {
             language: I18nService.I.getActiveLanguage(),
             timezone: dayjs.tz.guess(),
-            uuid: Store.get(CLIENT_UUID) as string,
+            uuid: Store.I.get(CLIENT_UUID) as string,
             result_offset: paginator?.offset,
             include_failed_tests: true,
         }
@@ -456,7 +456,7 @@ export class ControlServer {
             response &&
             response.status != "error"
         ) {
-            const settings = Store.get(SETTINGS) as IUserSettings
+            const settings = Store.I.get(SETTINGS) as IUserSettings
             if (settings?.urls?.url_statistic_server) {
                 openTestsResponse = (
                     await axios.get(

@@ -43,7 +43,7 @@ const template = [
             {
                 label: t("Delete local data"),
                 click: async () => {
-                    await Store.wipeDataAndQuit()
+                    await Store.I.wipeDataAndQuit()
                 },
             },
         ],

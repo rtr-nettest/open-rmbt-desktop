@@ -8,7 +8,7 @@ jobs:
     runs-on: windows-2022
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Get .env
       shell: cmd
       env:
@@ -29,11 +29,11 @@ jobs:
         cd ..
         cd ..
         npm run make:windows
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: application-zip
         path: out/RTR-Netztest-win32-x64/
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: application-setup
         path: out/make/squirrel.windows/x64/*.exe

@@ -45,7 +45,7 @@ export const environment: {
         {
             label: "Help",
             icon: "help",
-            url: "https://www.rtr.at/$lang/tk/netztesthilfe",
+            url: "https://akostest.net/$lang/Help",
             translations: [],
         },
     ],

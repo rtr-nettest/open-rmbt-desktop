@@ -8,12 +8,7 @@ const packJson = require("../package.json")
 
 let appsToSign = []
 
-const outApp = path.resolve(
-    __dirname,
-    "..",
-    "out",
-    `${packJson.productName}-mas-x64`
-)
+var outApp = ""
 
 const outEntitlements = path.resolve(__dirname, "..", "out", "entitlements.xml")
 const outChildEntitlements = path.resolve(
@@ -23,8 +18,18 @@ const outChildEntitlements = path.resolve(
     "entitlements.child.xml"
 )
 
-async function codeSignApp(entitlementsPath, provisionPath) {
-    const plistUpdated = await updatePlist()
+async function outAppFolderName(arch) {
+    outApp = path.resolve(
+        __dirname,
+        "..",
+        "out",
+        `${packJson.productName}-mas-${arch}`
+    )
+}
+
+async function codeSignApp(entitlementsPath, provisionPath, arch) {
+    await outAppFolderName(arch)
+    const plistUpdated = await updatePlist(arch)
     if (!plistUpdated) {
         return
     }
@@ -38,14 +43,14 @@ async function codeSignApp(entitlementsPath, provisionPath) {
     for (let i = 0; i < appsToSign.length; i++) {
         const app = appsToSign[i]
         if (i === appsToSign.length - 1) {
-            await sign(app, true)
+            await sign(app, arch, true)
         } else {
-            await sign(app)
+            await sign(app, arch)
         }
     }
 }
 
-async function updatePlist() {
+async function updatePlist(arch) {
     const filePath = path.resolve(
         outApp,
         `${packJson.productName}.app`,
@@ -60,6 +65,9 @@ async function updatePlist() {
     console.log("parsedPlist", parsedPlist)
     parsedPlist["ElectronTeamID"] = process.env.APPLE_TEAM_ID
     parsedPlist["ITSAppUsesNonExemptEncryption"] = false
+    if (arch === "arm64") {
+        parsedPlist["LSMinimumSystemVersion"] = "12.0"
+    }
     await fsp.writeFile(filePath, plist.build(parsedPlist))
     return true
 }
@@ -100,10 +108,31 @@ async function collectAppsToSign(filePath) {
     const dir = await fsp.readdir(filePath)
     for (const file of dir) {
         const fullPathToFile = path.resolve(filePath, file)
+
+        // we need to sign some file manually
+        if (fullPathToFile.includes("jspawnhelper")) {
+            console.log("AKOSTEST CLI manual sign - ", fullPathToFile)
+            appsToSign.push(fullPathToFile)
+        }
+        if (fullPathToFile.endsWith("runtime")) {
+            console.log("AKOSTEST CLI manual sign - ", fullPathToFile)
+            appsToSign.push(fullPathToFile)
+        }
+
         const isAppOrFramework = /\.(app|framework|dylib)$/.test(file)
         const isDirectory = (await fsp.stat(fullPathToFile)).isDirectory()
         if (isAppOrFramework) {
-            appsToSign.push(fullPathToFile)
+            // appsToSign.push(fullPathToFile)
+            // sign CLI binaries and libraries
+            if (fullPathToFile.includes("AKOSTestNET.app")) {
+                    console.log("AKOSTEST CLI sign - ", fullPathToFile)
+                    appsToSign.push(fullPathToFile)
+            }
+            // sign app
+            else {
+                appsToSign.push(fullPathToFile)
+                console.log("AKOSTEST UI sign - ", fullPathToFile)
+            }
         }
         if (isDirectory) {
             await collectAppsToSign(fullPathToFile)
@@ -111,14 +140,24 @@ async function collectAppsToSign(filePath) {
     }
 }
 
-async function sign(path, isRoot) {
+async function sign(path, arch, isRoot) {
     const promiseExec = promisify(exec)
     try {
-        await promiseExec(
-            `codesign -a x86_64 -f --entitlements "${
-                isRoot ? outEntitlements : outChildEntitlements
-            }" -s "${process.env.APPLE_CODESIGN_IDENTITY}" "${path}" `
-        )
+        if (arch === "x64") {
+            await promiseExec(
+                `codesign -a x86_64 -f --entitlements "${
+                    isRoot ? outEntitlements : outChildEntitlements
+                }" -s "${process.env.APPLE_CODESIGN_IDENTITY}" "${path}" `
+            )
+        }
+        else {
+            await promiseExec(
+                `codesign -f --entitlements "${
+                    isRoot ? outEntitlements : outChildEntitlements
+                }" -s "${process.env.APPLE_CODESIGN_IDENTITY}" "${path}" `
+            )
+        }
+        console.log("signing for " + arch + " , entitlements path " + `${isRoot ? outEntitlements : outChildEntitlements}` + ", file " + path)
     } catch (e) {
         console.warn(e)
     }

@@ -96,7 +96,7 @@ const template = [
                 click: async () => {
                     const { shell } = require("electron")
                     await shell.openExternal(
-                        `https://www.rtr.at/${I18nService.I.getActiveLanguage()}/tk/netztesthilfe`
+                        `https://akostest.net/${I18nService.I.getActiveLanguage()}/Help`
                     )
                 },
             },

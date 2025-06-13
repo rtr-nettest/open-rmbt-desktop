@@ -64,6 +64,7 @@ export class HistoryStore {
                 if (!history.length) {
                     return { content: [], totalElements: 0 }
                 }
+                // console.log("HistoryStore get loop resuls")
                 const loopHistory = this.getLoopResults(
                     history,
                     options?.loopUuid
@@ -183,9 +184,25 @@ export class HistoryStore {
 
     getLoopResults(history: ISimpleHistoryResult[], loopUuid?: string | null) {
         if (!loopUuid) {
+            // console.log(" getLoopResults no loop uuid")
             return history
         }
-        return history.filter((hi) => hi.loopUuid === "L" + loopUuid)
+        // console.log(" getLoopResultsloop uuid " + loopUuid)
+
+        // inin workaround
+        // console.log(history.filter((hi) => hi.loopUuid === "L" + loopUuid))
+        // console.log("remove duplicates")
+        var noDuplicates = new Array();
+        noDuplicates = history.filter((hi) => hi.loopUuid === "L" + loopUuid)
+        noDuplicates = noDuplicates.filter((value, index, self) =>
+            index === self.findIndex((t) => (
+              t.measurementDate === value.measurementDate
+            ))
+          )
+        // console.log(noDuplicates)
+
+        // return history.filter((hi) => hi.loopUuid === "L" + loopUuid)
+        return noDuplicates
     }
 
     private countResults(

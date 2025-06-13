@@ -6,18 +6,18 @@ $color-border: rgba(0, 0, 0, 0.1);
     mat-row {
         min-height: rem(50);
         &:nth-child(odd) {
-            background-color: #f9fbf7;
+            background-color: #f7f7f7;
         }
         &:nth-child(even) {
             background-color: white;
         }
         &.mat-row--group-header {
-            background-color: #ecf3e5;
+            background-color: #acc3e6;
         }
     }
 
     mat-header-row {
-        background-color: #dceace;
+        background-color: #0b71ce;
         min-height: rem(50);
         z-index: 1 !important;
     }

@@ -11,11 +11,16 @@ import { TestStore } from "src/app/store/test.store"
 export class StopLoopButtonComponent {
     constructor(private testStore: TestStore, private router: Router) {}
 
+    // ININ: LOOP RESULT
     abortTest() {
+
         this.router.navigate([
             "/",
             ERoutes.LOOP_RESULT.split("/")[0],
             this.testStore.loopUuid$.value,
         ])
+
+        // this.router.navigate(["/", ERoutes.HISTORY])
+
     }
 }

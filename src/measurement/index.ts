@@ -6,7 +6,7 @@ import { IBasicNetworkInfo } from "./interfaces/basic-network-info.interface"
 import { IMeasurementPhaseState } from "./interfaces/measurement-phase-state.interface"
 import { ControlServer } from "./services/control-server.service"
 import { Logger } from "./services/logger.service"
-import { RMBTClient } from "./services/rmbt-client.service"
+import { RMBTClient } from "./services/rmbt-client-java.service"
 import osu from "node-os-utils"
 import os from "os"
 import { ICPU } from "./interfaces/cpu.interface"
@@ -129,15 +129,16 @@ export class MeasurementRunner {
         this.rmbtClient = undefined
         this.startTimeMs = Date.now()
         try {
-            this.setCPUInfoInterval()
-            if (!this.settings) {
-                await this.registerClient(options)
-            }
-            await this.setMeasurementServer()
-            await this.registerMeasurement(options)
+            //this.setCPUInfoInterval()
+            //if (!this.settings) {
+            //    await this.registerClient(options)
+            //}
+            //await this.setMeasurementServer()
+            //await this.registerMeasurement(options)
 
-            const threadResults = await this.rmbtClient!.scheduleMeasurement()
-            this.setCPUUsage()
+            this.rmbtClient = new RMBTClient("")
+            const threadResults = await this.rmbtClient!.scheduleMeasurement(options)
+            //this.setCPUUsage()
             this.registrationRequest = {
                 ...this.registrationRequest!,
                 networkType: await NetworkInfoService.I.getNetworkType(),
@@ -145,7 +146,7 @@ export class MeasurementRunner {
             const result = new MeasurementResult(
                 this.registrationRequest!,
                 this.rmbtClient!.params!,
-                threadResults,
+                [], //threadResults,
                 this.rmbtClient!.finalResultDown,
                 this.rmbtClient!.finalResultUp,
                 this.cpuInfo,
@@ -154,7 +155,7 @@ export class MeasurementRunner {
                     ? EMeasurementFinalStatus.ABORTED
                     : EMeasurementFinalStatus.SUCCESS
             )
-            await ControlServer.I.submitMeasurement(result)
+            //await ControlServer.I.submitMeasurement(result)
             if (
                 this.rmbtClient!.measurementStatus !==
                 EMeasurementStatus.ABORTED
@@ -184,7 +185,7 @@ export class MeasurementRunner {
                 }
             }
         } finally {
-            this.setCPUUsage()
+            //this.setCPUUsage()
             clearInterval(this.cpuInfoInterval)
             this.cpuInfoInterval = undefined
             this.endTimeMs = Date.now()
@@ -233,7 +234,8 @@ export class MeasurementRunner {
             up,
             ups: this.rmbtClient?.ups ?? [],
             phase,
-            testUuid: this.rmbtClient?.params?.test_uuid ?? "",
+            //testUuid: this.rmbtClient?.params?.test_uuid ?? "",
+            testUuid: this.rmbtClient?.getTestUuid() ?? "",
             ipAddress: this.rmbtClient?.params.client_remote_ip ?? "-",
             serverName: this.rmbtClient?.params.test_server_name ?? "-",
             providerName: this.rmbtClient?.params.provider ?? "-",
@@ -290,6 +292,7 @@ export class MeasurementRunner {
         }
     }
 
+    /*
     private setCPUUsage() {
         if (!this.cpuInfoInterval) {
             this.cpuInfo = undefined
@@ -353,6 +356,7 @@ export class MeasurementRunner {
             await ControlServer.I.registerMeasurement(this.registrationRequest)
         this.rmbtClient = new RMBTClient(measurementRegistration)
     }
+    */
 
     private rounded = (num: number) => Math.round(num * 1000) / 1000
 }

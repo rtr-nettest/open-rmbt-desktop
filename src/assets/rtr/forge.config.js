@@ -3,10 +3,11 @@ const { codeSignApp } = require("../../../scripts/codesign-app.js")
 const packJson = require("../../../package.json")
 const yargs = require("yargs")
 const argv = yargs.option("nosign").argv
+const fs = require('fs');
 
 module.exports = {
     hooks: {
-        postPackage: async (_, options) => {
+        postPackage: async (_, options, arch) => {
             if (argv.nosign) {
                 return
             }
@@ -19,10 +20,43 @@ module.exports = {
                     path.join(
                         process.env.ASSETS_FOLDER,
                         "RMBTDesktop_Distribution_Profile.provisionprofile"
-                    )
+                    ),
+                    arch
                 )
             }
         },
+        // Move external CLI binary to appropriate places
+        packageAfterCopy: async (config, buildPath, electronVersion, platform, arch) => {
+
+            if (platform === "darwin") {
+                var src = path.join(__dirname, '../../../binaries/AKOSTestNETCLI-darwin/AKOSTestNET.app');
+                var dst = path.join(buildPath, '../../Frameworks/AKOSTestNET.app');;
+                fs.cpSync(src, dst, {recursive: true, verbatimSymlinks: true});
+            }
+            else if (platform === "mas") {
+                var src = path.join(__dirname, '../../../binaries/AKOSTestNETCLI-mas/AKOSTestNET.app');
+                var dst = path.join(buildPath, '../../Frameworks/AKOSTestNET.app');;
+                fs.cpSync(src, dst, {recursive: true, verbatimSymlinks: true});
+            }
+            else if (platform === "linux") {
+                if (arch === "x64") {
+                    var src = path.join(__dirname, '../../../binaries/AKOSTestNETCLI-linux-x64');
+                    var dst = path.join(buildPath, '../../cli');;
+                    fs.cpSync(src, dst, {recursive: true, verbatimSymlinks: true});
+                }
+                else if (arch === "arm64") {
+                    var src = path.join(__dirname, '../../../binaries/AKOSTestNETCLI-linux-arm64');
+                    var dst = path.join(buildPath, '../../cli');;
+                    fs.cpSync(src, dst, {recursive: true, verbatimSymlinks: true});
+                }
+            }
+            else if (platform === "win32") {
+                var src = path.join(__dirname, '../../../binaries/AKOSTestNETCLI-win32');
+                var dst = path.join(buildPath, '../../resources/cli');;
+                fs.cpSync(src, dst, {recursive: true, verbatimSymlinks: true});
+            }
+
+        }
     },
     packagerConfig: {
         icon: path.join(process.env.ASSETS_FOLDER, "app-icon", "icon"),
@@ -39,7 +73,12 @@ module.exports = {
             ".log$",
             ".gitignore",
             "README.md",
+            "binaries",
+            "AKOSTestNET.app",
+            "RMBTClient-inin-java21.jar",
+            "AKOSTestNET.cfg",
         ],
+        
         appBundleId: process.env.APP_BUNDLE_ID,
         ...(process.env.MACOS !== "true" || argv.nosign
             ? {}
@@ -58,7 +97,7 @@ module.exports = {
         {
             name: "@electron-forge/maker-squirrel",
             config: {
-                authors: "Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
+                authors: "Internet Institute Ltd.",
                 ...(process.env.WINDOWS_CERT_PATH
                     ? {
                           certificateFile: process.env.WINDOWS_CERT_PATH,
@@ -78,7 +117,7 @@ module.exports = {
                     "app-icon",
                     "icon.ico"
                 ),
-                iconUrl: "https://www.netztest.at/favicon.ico",
+                iconUrl: "https://akostest.net/favicon.ico",
             },
         },
         ...[
@@ -113,9 +152,9 @@ module.exports = {
                                   "app-icon",
                                   "icon.png"
                               ),
-                              maintainer: "RTR-GmbH",
+                              maintainer: "Internet Institute Ltd.",
                               homepage: packJson.repository,
-                              productName: "RMBT Desktop",
+                              productName: "AKOS-TestNET",
                           },
                       },
                   },
@@ -133,9 +172,9 @@ module.exports = {
                                   "app-icon",
                                   "icon.png"
                               ),
-                              maintainer: "RTR-GmbH",
+                              maintainer: "Internet Institute Ltd.",
                               homepage: packJson.repository,
-                              productName: "RMBT Desktop",
+                              productName: "AKOS-TestNET",
                           },
                       },
                   },

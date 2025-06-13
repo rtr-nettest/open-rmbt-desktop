@@ -14,7 +14,7 @@ export const TranslocoConfigExt: { [key: string]: any } = {
         { iso: "it", name: "Italiano" },
         { iso: "no", name: "Norsk" },
     ],
-    browserLangs: ["en", "de"], // languages supported by the web portal
+    browserLangs: ["en", "de", "sl"], // languages supported by the web portal
     defaultLang: "en",
     defaultBrowserLang: "en",
 }

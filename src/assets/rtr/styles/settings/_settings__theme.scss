@@ -32,26 +32,27 @@ html {
     }
 }
 
-$color-primary: #2f5f00;
+$color-primary: #0b71ce;
 $color-secondary: black;
 $color-pale: mix(#000000, #ffffff, 33%);
-$color-link: #2f5f00;
+$color-link: #0b71ce;
 $color-button-gradient-1: #0958bd;
 $color-button-gradient-2: #00acb1;
-$color-hover: rgb(206, 229, 199);
+//$color-hover: #0b71ce;
+$color-hover: #ffffdd;
 
 // http://mcg.mbitson.com/#!?mcgpalette0=%232f5f00
 $palette-primary: (
-    50: #e6ece0,
-    100: #c1cfb3,
-    200: #97af80,
-    300: #6d8f4d,
-    400: #4e7726,
-    500: #2f5f00,
-    600: #2a5700,
-    700: #234d00,
-    800: #1d4300,
-    900: #123200,
+    50: #A9BFD8,
+    100: #94B0CE,
+    200: #7FA0C5,
+    300: #5480B2,
+    400: #3F70A8,
+    500: #0b71ce,
+    600: #25578F,
+    700: #214D7F,
+    800: #1D436F,
+    900: #193A5F,
     A100: #8cff6a,
     A200: #65ff37,
     A400: #3eff04,

@@ -1,3 +1,4 @@
+import { start } from "repl"
 import { MeasurementThreadResult } from "../dto/measurement-thread-result.dto"
 import {
     IMeasurementThreadResult,
@@ -41,8 +42,10 @@ export class CalcService {
         if (!pings?.length) {
             return []
         }
+        let start_time = pings[0].time_elapsed - 5; // small offset for first bar
+
         return pings.map((p) => ({
-            time_ns: p.time_elapsed * 1e6,
+            time_ns: (p.time_elapsed - start_time) * 1e6,
             value: p.ping_ms * 1e6,
             value_server: p.ping_ms * 1e6,
         }))

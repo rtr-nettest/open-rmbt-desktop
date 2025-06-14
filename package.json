@@ -1,7 +1,7 @@
 {
     "name": "open-rmbt-desktop",
     "productName": "RTR-Netztest",
-    "version": "1.0.7",
+    "version": "2.0.0",
     "description": "RTR-Netztest Desktop App",
     "main": "dist/main.js",
     "engines": {
@@ -21,8 +21,13 @@
         "make": "npm run build:all && electron-forge make",
         "make:windows": "npm run build:all && electron-forge make --platform=win32 --arch=x64",
         "make:macos": "npm run build:all && cross-env MACOS=true electron-forge make --platform=darwin --arch=x64",
+        "make:macosarm": "npm run build:all && cross-env MACOS=true electron-forge make --platform=darwin --arch=arm64",
+        "make:macosuni": "npm run build:all && cross-env MACOS=true electron-forge make --platform=darwin --arch=universal",
         "make:app-store": "npm run build:all && cross-env APP_STORE=true electron-forge make --platform=mas --arch=x64",
+        "make:app-storearm": "npm run build:all && cross-env APP_STORE=true electron-forge make --platform=mas --arch=arm64",
+        "make:app-storeuni": "npm run build:all && cross-env NODE_OPTIONS='--max-old-space-size=8192' APP_STORE=true electron-forge make --platform=mas --arch=universal",
         "make:deb": "npm run build:all && cross-env DEB=true electron-forge make --platform=linux --arch=x64",
+        "make:debarm": "npm run build:all && cross-env DEB=true electron-forge make --platform=linux --arch=arm64",
         "make:rpm": "npm run build:all && cross-env RPM=true electron-forge make --platform=linux --arch=x64",
         "prepare": "husky install"
     },
@@ -69,9 +74,11 @@
         "yargs": "^17.7.2"
     },
     "dependencies": {
+        "@electron/osx-sign": "1.3.0",
         "axios": "^1.4.0",
         "dayjs": "^1.11.8",
         "electron-dl": "^3.5.0",
+        "electron-root-path": "^1.1.0",
         "electron-squirrel-startup": "^1.0.0",
         "electron-store": "^8.1.0",
         "node-os-utils": "^1.3.7",
@@ -80,6 +87,12 @@
         "reflect-metadata": "^0.1.13",
         "sql.js": "^1.8.0",
         "uuidv4": "^6.2.13"
+    },
+    "optionalDependencies": {
+        "appdmg": "^0.6.6"
+    },
+    "overrides": {
+        "@electron/osx-sign": "1.3.0"
     },
     "gitInfo": {}
 }

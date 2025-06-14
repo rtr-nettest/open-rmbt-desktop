@@ -1,5 +1,13 @@
 # Open RMBT Desktop
 
+This version of Open RMBT Desktop uses an Java client as measurement engine
+using [jpackage](https://docs.oracle.com/en/java/javase/21/docs/specs/man/jpackage.html).
+This improvement was developed by the Slovenian Internet Institute d.o.o for
+AKOS.
+
+App images created with jpackage must be put in the appropriate platform folder inside
+the binaries directory.
+
 ## Requirements
 
 The project requires Node.js v18 or later.

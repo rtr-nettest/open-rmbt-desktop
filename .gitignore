@@ -62,3 +62,11 @@ out/
 src/measurement/services/worker.service.js
 coverage/
 *.provisionprofile
+
+# jar 
+src/measurement/java_client/RMBTClient-all.jar
+
+binaries/*/*
+!binaries/*/RTR-Netztest_app_image_goes_here.txt
+
+src/assets/rtr/.entitlements.plist

@@ -3,10 +3,11 @@ const { codeSignApp } = require("../../../scripts/codesign-app.js")
 const packJson = require("../../../package.json")
 const yargs = require("yargs")
 const argv = yargs.option("nosign").argv
+const fs = require('fs');
 
 module.exports = {
     hooks: {
-        postPackage: async (_, options) => {
+        postPackage: async (_, options, arch) => {
             if (argv.nosign) {
                 return
             }
@@ -19,10 +20,43 @@ module.exports = {
                     path.join(
                         process.env.ASSETS_FOLDER,
                         "RMBTDesktop_Distribution_Profile.provisionprofile"
-                    )
+                    ),
+                    arch
                 )
             }
         },
+        // Move external CLI binary to appropriate places
+        packageAfterCopy: async (config, buildPath, electronVersion, platform, arch) => {
+
+            if (platform === "darwin") {
+                var src = path.join(__dirname, '../../../binaries/RTR-NetztestCLI-darwin/RTR-Netztest.app');
+                var dst = path.join(buildPath, '../../Frameworks/RTR-Netztest.app');;
+                fs.cpSync(src, dst, {recursive: true, verbatimSymlinks: true});
+            }
+            else if (platform === "mas") {
+                var src = path.join(__dirname, '../../../binaries/RTR-NetztestCLI-mas/RTR-Netztest.app');
+                var dst = path.join(buildPath, '../../Frameworks/RTR-Netztest.app');;
+                fs.cpSync(src, dst, {recursive: true, verbatimSymlinks: true});
+            }
+            else if (platform === "linux") {
+                if (arch === "x64") {
+                    var src = path.join(__dirname, '../../../binaries/RTR-NetztestCLI-linux-x64');
+                    var dst = path.join(buildPath, '../../cli');;
+                    fs.cpSync(src, dst, {recursive: true, verbatimSymlinks: true});
+                }
+                else if (arch === "arm64") {
+                    var src = path.join(__dirname, '../../../binaries/RTR-NetztestCLI-linux-arm64');
+                    var dst = path.join(buildPath, '../../cli');;
+                    fs.cpSync(src, dst, {recursive: true, verbatimSymlinks: true});
+                }
+            }
+            else if (platform === "win32") {
+                var src = path.join(__dirname, '../../../binaries/RTR-NetztestCLI-win32');
+                var dst = path.join(buildPath, '../../resources/cli');;
+                fs.cpSync(src, dst, {recursive: true, verbatimSymlinks: true});
+            }
+
+        }
     },
     packagerConfig: {
         icon: path.join(process.env.ASSETS_FOLDER, "app-icon", "icon"),
@@ -39,7 +73,12 @@ module.exports = {
             ".log$",
             ".gitignore",
             "README.md",
+            "binaries",
+            "RTR-Netztest.app",
+            "RMBTClient-inin-java21.jar",
+            "RTR-Netztest.cfg",
         ],
+        
         appBundleId: process.env.APP_BUNDLE_ID,
         ...(process.env.MACOS !== "true" || argv.nosign
             ? {}
@@ -58,7 +97,7 @@ module.exports = {
         {
             name: "@electron-forge/maker-squirrel",
             config: {
-                authors: "Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
+                authors: "RTR et al",
                 ...(process.env.WINDOWS_CERT_PATH
                     ? {
                           certificateFile: process.env.WINDOWS_CERT_PATH,
@@ -113,9 +152,9 @@ module.exports = {
                                   "app-icon",
                                   "icon.png"
                               ),
-                              maintainer: "RTR-GmbH",
+                              maintainer: "RTR et al",
                               homepage: packJson.repository,
-                              productName: "RMBT Desktop",
+                              productName: "Open RMBT Desktop",
                           },
                       },
                   },
@@ -133,9 +172,9 @@ module.exports = {
                                   "app-icon",
                                   "icon.png"
                               ),
-                              maintainer: "RTR-GmbH",
+                              maintainer: "RTR et al",
                               homepage: packJson.repository,
-                              productName: "RMBT Desktop",
+                              productName: "Open RMBT Desktop",
                           },
                       },
                   },

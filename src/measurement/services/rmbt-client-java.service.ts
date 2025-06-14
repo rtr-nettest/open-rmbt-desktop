@@ -94,13 +94,13 @@ export class RMBTClient {
         this.params = {
             client_remote_ip: "-",
             test_uuid: "",
-            result_url: "https://akostest.net/RMBTControlServer/result",
+            result_url: "https://c01.netztest.at/RMBTControlServer/result",
             test_duration: 7,
-            test_numthreads: 6,
-            test_server_port: 5232,
-            test_server_name: "AKOS-100G (Ljubljana)",
+            test_numthreads: 3,
+            test_server_port: 443,
+            test_server_name: "ServerName",
             test_wait: 0,
-            test_server_address: "v2ms1ref.akostest.net",
+            test_server_address: "example.com",
             test_server_encryption: true,
             test_token: "",
             test_numpings: 10,
@@ -195,18 +195,18 @@ export class RMBTClient {
             }
             else if(platform == "darwin"){
                 // darwin path
-                binary_path = rootPath + '/Frameworks/AKOSTestNET.app/Contents/MacOS/AKOSTestNET'
+                binary_path = rootPath + '/Frameworks/AKOSTestNET.app/Contents/MacOS/RTR-Netztest'
             } else if (platform == "win32"){
                 // win32 path
                 // use appExePath!!
-                binary_path = appExePath + "\\resources\\cli\\AKOSTestNET.exe"
+                binary_path = appExePath + "\\resources\\cli\\RTR-Netztest.exe"
             } else if (platform == "linux"){
                 // linux path
-                binary_path = rootPath + '/cli/bin/AKOSTestNET'
+                binary_path = rootPath + '/cli/bin/RTR-Netztest'
             }
 
             let bin_options = [
-                '-h', 'akostest.net', 
+                '-h', 'c01.netztest.at',  // TODO - this shall not be hardcoded
                 '-p', '443',
                 '--platform', settingsRequest.platform || "",          // Darwin
                 '--os', settingsRequest.operating_system || "",        // Darwin, 24.1.0

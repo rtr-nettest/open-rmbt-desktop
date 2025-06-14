@@ -454,11 +454,11 @@ export class ControlServer {
             Logger.I.info("Test result detail is: %o", testResultDetail)
             if (
                 response.open_test_uuid &&
-                process.env.HISTORY_RESULT_STATS_PATH
+                process.env.HISTORY_RESULT_STATS_URL
             ) {
                 openTestsResponse = (
-                    await axios.get(
-                        `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_STATS_PATH}/${response.open_test_uuid}`,
+                    await axios.get( // request to StatisticServer (not ControlServer)
+                        `${process.env.HISTORY_RESULT_STATS_URL}/${response.open_test_uuid}`,
                         { headers: this.headers }
                     )
                 ).data

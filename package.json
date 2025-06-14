@@ -1,13 +1,13 @@
 {
-    "name": "akostestnet",
-    "productName": "AKOS-TestNet",
+    "name": "open-rmbt-desktop",
+    "productName": "RTR-Netztest",
     "version": "1.0.25",
-    "description": "The AKOS Test Net informs users about the current service quality (including upload, download, ping, signal strength) of their Internet connection. In addition, a map view and statistics of previous tests can be accessed.",
+    "description": "RTR-Netztest Desktop App",
     "main": "dist/main.js",
     "engines": {
         "node": ">=18"
     },
-    "repository": "https://github.com/Internet-Institute/akostestnet-openrmbt-desktop",
+    "repository": "https://github.com/rtr-nettest/open-rmbt-desktop",
     "scripts": {
         "prepare:translations": "npx ts-node scripts/download-translations.ts",
         "build:all": "node scripts/set-package-name.js && webpack --mode production && cd src/ui && npm run build-for-packaging && shx cp -rf dist/ui/* ../../dist",
@@ -31,7 +31,7 @@
         "make:rpm": "npm run build:all && cross-env RPM=true electron-forge make --platform=linux --arch=x64",
         "prepare": "husky install"
     },
-    "author": "Internet Institute Ltd.",
+    "author": "RTR-Netztest",
     "license": "Apache-2.0",
     "devDependencies": {
         "@electron-forge/cli": "^6.2.1",

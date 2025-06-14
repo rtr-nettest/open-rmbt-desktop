@@ -1,7 +1,12 @@
-# AKOS Test Net Desktop
+# Open RMBT Desktop
 
-This is a fork from [Open RMBT Desktop](https://github.com/rtr-nettest/open-rmbt-desktop). In contrast to original version, this version uses Java client as a measurement engine. Java client should be build with Java21 and then packaged for different platform using 
-[jpackage](https://docs.oracle.com/en/java/javase/21/docs/specs/man/jpackage.html). App images provided by jpackage must be put in the appropriate platform folder inside binaries. The client code is available at [Open RMBT](https://github.com/Internet-Institute/open-rmbt).
+This version of Open RMBT Desktop uses an Java client as measurement engine
+using [jpackage](https://docs.oracle.com/en/java/javase/21/docs/specs/man/jpackage.html).
+This improvement was developed by the Slovenian Internet Institute d.o.o for
+AKOS.
+
+App images created with jpackage must be put in the appropriate platform folder inside
+the binaries directory.
 
 ## Requirements
 

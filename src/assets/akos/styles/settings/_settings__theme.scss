@@ -1,0 +1,140 @@
+$font-size-3xl: 36;
+$font-size-xxl: 24;
+$font-size-xl: 20;
+$font-size-l: 18;
+$font-size-m: 16;
+$font-size-sm: 14;
+$font-size-xs: 12;
+
+$screen-xs: 768px;
+$screen-sm: 1024px;
+$screen-md: 1280px;
+$screen-lg: 1920px;
+$screen-xl: 2560px;
+
+$base-font-family: "Open Sans", sans-serif;
+$base-font-size: $font-size-m;
+$base-line-height: 1.4;
+
+html {
+    --base-font-size: #{$font-size-sm}px;
+
+    @media screen and (min-width: $screen-md) {
+        --base-font-size: #{$font-size-m}px;
+    }
+
+    @media screen and (min-width: $screen-lg) {
+        --base-font-size: #{$font-size-l}px;
+    }
+
+    @media screen and (min-width: $screen-xl) {
+        --base-font-size: #{$font-size-xl}px;
+    }
+}
+
+$color-primary: #0b71ce;
+$color-secondary: black;
+$color-pale: mix(#000000, #ffffff, 33%);
+$color-link: #0b71ce;
+$color-button-gradient-1: #0958bd;
+$color-button-gradient-2: #00acb1;
+//$color-hover: #0b71ce;
+$color-hover: #ffffdd;
+
+// http://mcg.mbitson.com/#!?mcgpalette0=%232f5f00
+$palette-primary: (
+    50: #A9BFD8,
+    100: #94B0CE,
+    200: #7FA0C5,
+    300: #5480B2,
+    400: #3F70A8,
+    500: #0b71ce,
+    600: #25578F,
+    700: #214D7F,
+    800: #1D436F,
+    900: #193A5F,
+    A100: #8cff6a,
+    A200: #65ff37,
+    A400: #3eff04,
+    A700: #35ea00,
+    contrast: (
+        50: #000000,
+        100: #000000,
+        200: #000000,
+        300: #ffffff,
+        400: #ffffff,
+        500: #ffffff,
+        600: #ffffff,
+        700: #ffffff,
+        800: #ffffff,
+        900: #ffffff,
+        A100: #000000,
+        A200: #000000,
+        A400: #000000,
+        A700: #000000,
+    ),
+);
+$palette-accent: (
+    50: #aaa,
+    100: #999,
+    200: #777,
+    300: #666,
+    400: #555,
+    500: #000,
+    600: #333,
+    700: #222,
+    800: #111,
+    900: #000,
+    A100: #ffffff,
+    A200: #ffffff,
+    A400: #cfdaff,
+    A700: #b6c6ff,
+    contrast: (
+        50: rgba(black, 0.87),
+        100: rgba(black, 0.87),
+        200: rgba(black, 0.87),
+        300: rgba(black, 0.87),
+        400: rgba(black, 0.87),
+        500: white,
+        600: white,
+        700: white,
+        800: rgba(white, 0.87),
+        900: rgba(white, 0.87),
+        A100: rgba(black, 0.87),
+        A200: white,
+        A400: white,
+        A700: white,
+    ),
+);
+$palette-warn: (
+    50: #ffe5e8,
+    100: #febec6,
+    200: #fe93a0,
+    300: #fd677a,
+    400: #fc475e,
+    500: #fc2641,
+    600: #fc223b,
+    700: #fb1c32,
+    800: #fb172a,
+    900: #fa0d1c,
+    A100: #ffffff,
+    A200: #fff1f2,
+    A400: #ffbec1,
+    A700: #ffa5a9,
+    contrast: (
+        50: #000000,
+        100: #000000,
+        200: #000000,
+        300: #000000,
+        400: #ffffff,
+        500: #ffffff,
+        600: #ffffff,
+        700: #ffffff,
+        800: #ffffff,
+        900: #ffffff,
+        A100: #000000,
+        A200: #000000,
+        A400: #000000,
+        A700: #000000,
+    ),
+);

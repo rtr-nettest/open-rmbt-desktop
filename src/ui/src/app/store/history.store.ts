@@ -244,45 +244,37 @@ export class HistoryStore {
                     id: hi.loopUuid!,
                     measurementDate,
                     groupHeader: hi.groupHeader,
-                    details: ExpandArrowComponent,
-                    componentField: "details",
-                    parameters: {
-                        expanded: openLoops.includes(hi.loopUuid!),
-                    },
                 }
             }
             return {
                 id: hi.testUuid!,
                 count: hi.count,
                 measurementDate,
+                downloadClass: this.classification.getPhaseCSSClass(
+                    "down",
+                    hi.downloadClass
+                ),
                 download:
-                    this.classification.getPhaseIconByClass(
-                        "down",
-                        hi.downloadClass
-                    ) +
                     this.conversion
                         .getSignificantDigits(hi.downloadKbit / 1e3)
                         .toLocaleString(locale) +
                     " " +
                     t["Mbps"],
+                uploadClass: this.classification.getPhaseCSSClass(
+                    "up",
+                    hi.uploadClass
+                ),
                 upload:
-                    this.classification.getPhaseIconByClass(
-                        "up",
-                        hi.uploadClass
-                    ) +
                     this.conversion
                         .getSignificantDigits(hi.uploadKbit / 1e3)
                         .toLocaleString(locale) +
                     " " +
                     t["Mbps"],
-                ping:
-                    this.classification.getPhaseIconByClass(
-                        "ping",
-                        hi.pingClass
-                    ) +
-                    hi.ping.toLocaleString(locale) +
-                    " " +
-                    t["ms"],
+                pingClass: this.classification.getPhaseCSSClass(
+                    "ping",
+                    hi.pingClass
+                ),
+                ping: hi.ping.toLocaleString(locale) + " " + t["ms"],
                 loopUuid: hi.loopUuid,
                 hidden: hi.hidden,
             }

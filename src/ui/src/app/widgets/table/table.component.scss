@@ -87,7 +87,8 @@ $color-border: rgba(0, 0, 0, 0.1);
             flex-wrap: wrap;
         }
 
-        &-details {
+        &-details,
+        &-groupArrowIndicator {
             flex: 0 0 10%;
         }
     }

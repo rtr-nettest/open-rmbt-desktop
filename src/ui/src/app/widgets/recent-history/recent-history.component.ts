@@ -92,24 +92,23 @@ export class RecentHistoryComponent implements OnChanges {
                         {
                             columnDef: "download",
                             header: "Download",
-                            isHtml: true,
+                            getNgClass: (value) => value.downloadClass,
                         },
                         {
                             columnDef: "upload",
                             header: "Upload",
-                            isHtml: true,
+                            getNgClass: (value) => value.uploadClass,
                         },
                         {
                             columnDef: "ping",
                             header: "Ping",
-                            isHtml: true,
+                            getNgClass: (value) => value.pingClass,
                         },
                         {
-                            columnDef: "details",
+                            columnDef: "groupArrowIndicator",
                             header: "",
-                            isComponent: true,
                         },
-                    ]
+                    ] as ITableColumn<IHistoryRowRTR>[]
                 }
                 return cols.filter(
                     (c) => !this.excludeColumns?.includes(c.columnDef)
@@ -128,6 +127,10 @@ export class RecentHistoryComponent implements OnChanges {
     sort$ = this.store.historySort$
     tableClassNames?: string[]
     freshlyLoaded = true
+
+    get expandedElements() {
+        return this.store.openLoops$.value
+    }
 
     constructor(
         private mainStore: MainStore,

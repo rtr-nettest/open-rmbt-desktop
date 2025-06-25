@@ -1,4 +1,7 @@
 export interface IHistoryRowRTR extends IHistoryGroupItem {
+    downloadClass?: string
+    uploadClass?: string
+    pingClass?: string
     download?: string
     upload?: string
     ping?: string

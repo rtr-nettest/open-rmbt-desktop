@@ -28,17 +28,16 @@ jobs:
         unzip -q RTR-NetztestCLI-linux-x64.zip
         mv RTR-Netztest/* RTR-NetztestCLI-linux-x64
         ls -l
-        # return to home directory
-        cd
-        # check directory
+        # return to repository root directory
+        cd ..
+        # check directory again
         pwd
         sudo apt-get install -y rpm
         npm install
-        cd src
-        cd ui
+        cd src/ui
         npm install
-        cd ..
-        cd ..
+        # again return to repository root directory
+        cd ../..
         npm run make:deb
         npm run make:rpm
     - uses: actions/upload-artifact@v4

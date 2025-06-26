@@ -29,8 +29,9 @@ jobs:
         wget -q https://github.com/rtr-nettest/open-rmbt/releases/download/v0.9/RTR-NetztestCLI-win32.zip
         # unpack
         unzip -q RTR-NetztestCLI-linux-x64.zip
+        Expand-Archive -Path RTR-NetztestCLI-win32.zip -DestinationPath .
         move RTR-Netztest\* RTR-NetztestCLI-linux-x64
-        ls -l
+        dir
         # return to repository root directory
         cd ..
         # check directory again
@@ -55,10 +56,10 @@ jobs:
     - name: Intermediate file check
       run: |
         cd  out\make
-        ls -l *
+        dir *
     - name: Release
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
       with:
         files: |
-          out\make/deb/x64/open-rmbt-desktop_2.0.0_amd64.deb
+          out\make

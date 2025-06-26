@@ -29,9 +29,11 @@ jobs:
         # get release of Java engine
         curl -LO https://github.com/rtr-nettest/open-rmbt/releases/download/v0.9/RTR-NetztestCLI-win32.zip
         # unpack
-        unzip RTR-NetztestCLI-win32.zip
+        unzip -q RTR-NetztestCLI-win32.zip
         mv RTR-Netztest/* RTR-NetztestCLI-win32
+        cd RTR-NetztestCLI-win32
         ls -l
+        cd ..
         # return to repository root directory
         cd ..
         # check directory again

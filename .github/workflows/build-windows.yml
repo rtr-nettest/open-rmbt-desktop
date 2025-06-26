@@ -27,7 +27,7 @@ jobs:
         ls -l
         cd binaries
         # get release of Java engine
-        wget -q https://github.com/rtr-nettest/open-rmbt/releases/download/v0.9/RTR-NetztestCLI-win32.zip
+        curl -LO https://github.com/rtr-nettest/open-rmbt/releases/download/v0.9/RTR-NetztestCLI-win32.zip
         # unpack
         unzip RTR-NetztestCLI-win32.zip
         move RTR-Netztest\* RTR-NetztestCLI-linux-x64

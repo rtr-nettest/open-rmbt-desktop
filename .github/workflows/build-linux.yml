@@ -19,6 +19,8 @@ jobs:
         node-version: 18.x
     - name: Build
       run: |
+        pwd
+        ls -l
         cd binaries
         wget https://github.com/rtr-nettest/open-rmbt/releases/download/v0.9/RTR-NetztestCLI-linux-x64.zip
         unzip RTR-NetztestCLI-linux-x64.zip

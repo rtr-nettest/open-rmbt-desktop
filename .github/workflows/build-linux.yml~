@@ -59,4 +59,4 @@ jobs:
       with:
         files: |
           out/make/deb/x64/open-rmbt-desktop_2.0.0_amd64.deb
-          out/make/rpm/x64/open-rmbt-desktop-2.0.0_x86_64.rpm
+          out/make/rpm/x64/open-rmbt-desktop-2.0.0-1_x86_64.rpm

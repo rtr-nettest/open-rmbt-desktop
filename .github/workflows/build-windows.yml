@@ -20,7 +20,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 18.x
-    - name: Build
+    - name: Prepare build
       shell: bash
       run: |
         pwd
@@ -38,11 +38,13 @@ jobs:
         cd ..
         # check directory again
         pwd
-
+    - name: Build
+      shell: cmd
+      run: |
         npm install
-        cd src/ui
+        cd src\ui
         npm install
-        cd ../..
+        cd ..\..
         npm run make:windows
     - uses: actions/upload-artifact@v4
       with:

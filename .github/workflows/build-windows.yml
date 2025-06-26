@@ -5,17 +5,17 @@ on:
     
 jobs:
   build:
-    runs-on: windows-2022
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v4
     - name: Get .env
-      shell: cmd
+      shell: bash
       env:
         REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
       run: |
         curl -H "Authorization: token %REPO_TOKEN%" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.windows-ci
-        dir
+        ls -l
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
@@ -23,25 +23,23 @@ jobs:
     - name: Build
       run: |
         pwd
-        dir
+        ls -l
         cd binaries
         # get release of Java engine
         wget -q https://github.com/rtr-nettest/open-rmbt/releases/download/v0.9/RTR-NetztestCLI-win32.zip
         # unpack
-        Expand-Archive -Path RTR-NetztestCLI-win32.zip -DestinationPath .
+        unzip RTR-NetztestCLI-win32.zip
         move RTR-Netztest\* RTR-NetztestCLI-linux-x64
-        dir
+        ls -l
         # return to repository root directory
         cd ..
         # check directory again
         pwd
 
         npm install
-        cd src
-        cd ui
+        cd src/ui
         npm install
-        cd ..
-        cd ..
+        cd ../..
         npm run make:windows
     - uses: actions/upload-artifact@v4
       with:
@@ -54,11 +52,12 @@ jobs:
         
     - name: Intermediate file check
       run: |
-        cd  out\make
-        dir
+        cd  out/make
+        ls -l
     - name: Release
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
       with:
         files: |
-          out\make
+          out/make
+

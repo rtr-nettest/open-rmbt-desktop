@@ -30,7 +30,7 @@ jobs:
         curl -LO https://github.com/rtr-nettest/open-rmbt/releases/download/v0.9/RTR-NetztestCLI-win32.zip
         # unpack
         unzip RTR-NetztestCLI-win32.zip
-        mv RTR-Netztest/* RTR-NetztestCLI-linux-x64
+        mv RTR-Netztest/* RTR-NetztestCLI-win32
         ls -l
         # return to repository root directory
         cd ..

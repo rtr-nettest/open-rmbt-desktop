@@ -23,7 +23,7 @@ jobs:
     - name: Build
       run: |
         pwd
-        ls -l
+        dir
         cd binaries
         # get release of Java engine
         wget -q https://github.com/rtr-nettest/open-rmbt/releases/download/v0.9/RTR-NetztestCLI-win32.zip
@@ -55,7 +55,7 @@ jobs:
     - name: Intermediate file check
       run: |
         cd  out\make
-        dir *
+        dir
     - name: Release
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'

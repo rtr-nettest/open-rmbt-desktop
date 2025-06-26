@@ -56,6 +56,7 @@ jobs:
         path: out/make/squirrel.windows/x64/*.exe
         
     - name: Intermediate file check
+      shell: bash
       run: |
         cd  out/make
         ls -l

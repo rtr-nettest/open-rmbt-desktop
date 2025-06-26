@@ -38,14 +38,20 @@ jobs:
         cd ..
         # check directory again
         pwd
-    - name: Build
+    - name: Build install root
       shell: cmd
       run: |
         pwd
         npm install
+    - name: Build install ui
+      shell: cmd
+      run: |
         cd src\ui
         pwd
         npm install
+    - name: Build windows
+      shell: cmd
+      run: |
         cd ..\..
         pwd
         npm run make:windows

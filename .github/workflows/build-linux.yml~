@@ -28,17 +28,16 @@ jobs:
         unzip -q RTR-NetztestCLI-linux-x64.zip
         mv RTR-Netztest/* RTR-NetztestCLI-linux-x64
         ls -l
-        # return to home directory
-        cd
-        # check directory
+        # return to repository root directory
+        cd ..
+        # check directory again
         pwd
         sudo apt-get install -y rpm
         npm install
-        cd src
-        cd ui
+        cd src/ui
         npm install
-        cd ..
-        cd ..
+        # again return to repository root directory
+        cd ../..
         npm run make:deb
         npm run make:rpm
     - uses: actions/upload-artifact@v4
@@ -50,3 +49,14 @@ jobs:
         name: application-deb
         path: out/make/deb/x64/*.deb
         
+    - name: Intermediate file check
+      run: |
+        cd  out/make/rpm/x64/
+        ls -l *
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: github.ref_type == 'tag'
+      with:
+        files: |
+          out/make/rpm/x64/open-rmbt-desktop_2.0.0_amd64.deb
+          out/make/rpm/x64/open-rmbt-desktop_2.0.0_amd64.rpm

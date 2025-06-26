@@ -49,3 +49,14 @@ jobs:
         name: application-deb
         path: out/make/deb/x64/*.deb
         
+    - name: Intermediate file check
+      run: |
+        cd  out/make/rpm/x64/
+        ls -l *
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: github.ref_type == 'tag'
+      with:
+        files: |
+          out/make/deb/x64/open-rmbt-desktop_2.0.0_amd64.deb
+          out/make/rpm/x64/open-rmbt-desktop-2.0.0_x86_64.rpm

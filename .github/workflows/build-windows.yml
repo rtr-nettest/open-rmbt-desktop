@@ -50,13 +50,11 @@ jobs:
         cd src\ui
         pwd
         npm install
-    - name: Build windows
+    - name: Build make windows
       shell: cmd
       run: |
-        cd ..\..
         pwd
         npm run make:windows
-        pwd
     - uses: actions/upload-artifact@v4
       with:
         name: application-zip

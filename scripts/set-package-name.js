@@ -1,4 +1,6 @@
-require("dotenv").config(process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env")
+require("dotenv").config({
+    path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env"
+})
 const fs = require("fs")
 const pack = require("../package.json")
 const { execSync } = require("child_process")

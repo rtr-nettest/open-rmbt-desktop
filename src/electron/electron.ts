@@ -61,7 +61,7 @@ ipcMain.handle(Events.GET_NEWS, async () => {
 })
 
 ipcMain.on(Events.ACCEPT_TERMS, (event, terms: number) => {
-    Store.set(TERMS_ACCEPTED_VERSION, terms)
+    Store.I.set(TERMS_ACCEPTED_VERSION, terms)
 })
 
 ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
@@ -108,25 +108,25 @@ ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
 })
 
 ipcMain.on(Events.SET_IP_VERSION, (event, ipv: EIPVersion | null) => {
-    Store.set(IP_VERSION, ipv)
+    Store.I.set(IP_VERSION, ipv)
 })
 
 ipcMain.on(Events.SET_ACTIVE_CLIENT, (event, client: string) => {
-    Store.set(ACTIVE_CLIENT, client)
+    Store.I.set(ACTIVE_CLIENT, client)
 })
 
 ipcMain.on(Events.SET_ACTIVE_LANGUAGE, (event, language: string) => {
-    Store.set(ACTIVE_LANGUAGE, language)
+    Store.I.set(ACTIVE_LANGUAGE, language)
 })
 
 ipcMain.on(Events.SET_DEFAULT_LANGUAGE, (event, language: string) => {
-    Store.set(DEFAULT_LANGUAGE, language)
+    Store.I.set(DEFAULT_LANGUAGE, language)
 })
 
 ipcMain.on(
     Events.SET_ACTIVE_SERVER,
     (event, server: IMeasurementServerResponse | null) => {
-        Store.set(ACTIVE_SERVER, server)
+        Store.I.set(ACTIVE_SERVER, server)
     }
 )
 
@@ -159,7 +159,7 @@ ipcMain.on(
 )
 
 ipcMain.on(Events.DELETE_LOCAL_DATA, () => {
-    Store.wipeDataAndQuit()
+    Store.I.wipeDataAndQuit()
 })
 
 ipcMain.handle(Events.GET_ENV, getEnv)

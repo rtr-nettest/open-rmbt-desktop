@@ -53,8 +53,8 @@ export class ControlServer {
     private constructor() {}
 
     private async getHost() {
-        const ipv = Store.get(IP_VERSION) as EIPVersion
-        const settings = Store.get(SETTINGS) as IUserSettings
+        const ipv = Store.I.get(IP_VERSION) as EIPVersion
+        const settings = Store.I.get(SETTINGS) as IUserSettings
         const settingsRequest = new UserSettingsRequest()
         const ipv6Host = settings.urls.control_ipv6_only
         const ipv4Host = settings.urls.control_ipv4_only
@@ -105,7 +105,7 @@ export class ControlServer {
         if (!process.env.NEWS_PATH || process.env.FLAVOR === "ont") {
             return null
         }
-        const lastNewsUid = Store.get(LAST_NEWS_UID) as number
+        const lastNewsUid = Store.I.get(LAST_NEWS_UID) as number
         const settings = new UserSettingsRequest()
         const newsRequest: INewsRequest = {
             language: I18nService.I.getActiveLanguage(),
@@ -131,7 +131,7 @@ export class ControlServer {
                 throw response.error
             }
             if (response.news?.[0]?.uid) {
-                Store.set(LAST_NEWS_UID, response.news[0].uid)
+                Store.I.set(LAST_NEWS_UID, response.news[0].uid)
             }
             Logger.I.info("News are %o", response.news)
             return response.news ?? null
@@ -199,8 +199,8 @@ export class ControlServer {
                     ? { ...response.settings[0], uuid: request.uuid }
                     : response.settings[0]
             Logger.I.info("Using settings: %o", settings)
-            Store.set(CLIENT_UUID, settings.uuid)
-            Store.set(SETTINGS, settings)
+            Store.I.set(CLIENT_UUID, settings.uuid)
+            Store.I.set(SETTINGS, settings)
             if (
                 process.env.FLAVOR !== "ont" &&
                 Store.I.get(TERMS_ACCEPTED_VERSION) !==
@@ -265,10 +265,6 @@ export class ControlServer {
                     { headers: this.headers }
                 )
             ).data
-            await DBService.I.saveMeasurement({
-                ...result,
-                sent_to_server: true,
-            })
             Logger.I.info("Result is submitted. Response: %o", response)
         } catch (e: any) {
             if (e.response.status != 400) {
@@ -319,7 +315,7 @@ export class ControlServer {
     }
 
     async getONTHistory(paginator?: IPaginator, sort?: ISort) {
-        let params = `uuid=${Store.get(CLIENT_UUID) as string}`
+        let params = `uuid=${Store.I.get(CLIENT_UUID) as string}`
         if (paginator) {
             const { offset, limit } = paginator
             if (limit) {
@@ -358,8 +354,9 @@ export class ControlServer {
         const body: { [key: string]: any } = {
             language: I18nService.I.getActiveLanguage(),
             timezone: dayjs.tz.guess(),
-            uuid: Store.get(CLIENT_UUID) as string,
+            uuid: Store.I.get(CLIENT_UUID) as string,
             result_offset: paginator?.offset,
+            include_failed_tests: true,
         }
         if (paginator?.limit) {
             body.result_limit = paginator.limit
@@ -412,8 +409,6 @@ export class ControlServer {
     }
 
     private async getRTRMeasurementResult(uuid: string) {
-        let response: any
-        let retVal: ISimpleHistoryResult | undefined = undefined
         const body = {
             test_uuid: uuid,
             timezone: dayjs.tz.guess(),
@@ -424,7 +419,7 @@ export class ControlServer {
             process.env.HISTORY_RESULT_PATH,
             body
         )
-        response = (
+        let response = (
             await axios.post(
                 `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}`,
                 body,
@@ -434,44 +429,51 @@ export class ControlServer {
         Logger.I.info(ELoggerMessage.RESPONSE, response)
         if (response?.testresult?.length) {
             response = response.testresult[0]
-            let testResultDetail: any
-            let openTestsResponse: any
-            if (
-                response.open_test_uuid &&
-                process.env.HISTORY_RESULT_DETAILS_PATH
-            ) {
-                testResultDetail = (
-                    await axios.post(
-                        `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_DETAILS_PATH}`,
-                        {
-                            ...body,
-                            language: I18nService.I.getActiveLanguage(),
-                        },
-                        { headers: this.headers }
-                    )
-                ).data
-            }
+        }
+
+        // Test metadata
+
+        let testResultDetail: any
+        if (process.env.HISTORY_RESULT_DETAILS_PATH) {
+            testResultDetail = (
+                await axios.post(
+                    `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_DETAILS_PATH}`,
+                    {
+                        ...body,
+                        language: I18nService.I.getActiveLanguage(),
+                    },
+                    { headers: this.headers }
+                )
+            ).data
             Logger.I.info("Test result detail is: %o", testResultDetail)
-            if (
-                response.open_test_uuid &&
-                process.env.HISTORY_RESULT_STATS_PATH
-            ) {
+        }
+
+        // Graphs
+
+        let openTestsResponse: any
+        if (
+            process.env.HISTORY_RESULT_STATS_PATH &&
+            response &&
+            response.status != "error"
+        ) {
+            const settings = Store.I.get(SETTINGS) as IUserSettings
+            if (settings?.urls?.url_statistic_server) {
                 openTestsResponse = (
                     await axios.get(
-                        `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_STATS_PATH}/${response.open_test_uuid}`,
+                        `${settings?.urls?.url_statistic_server}${process.env.HISTORY_RESULT_STATS_PATH}/${response.open_test_uuid}`,
                         { headers: this.headers }
                     )
                 ).data
             }
             Logger.I.info("Open test response is: %o", openTestsResponse)
-            retVal = SimpleHistoryResult.fromRTRMeasurementResult(
-                uuid,
-                response,
-                openTestsResponse,
-                testResultDetail
-            )
         }
-        return retVal
+
+        return SimpleHistoryResult.fromRTRMeasurementResult(
+            uuid,
+            response,
+            openTestsResponse,
+            testResultDetail
+        )
     }
 
     private async getONTMeasurementResult(uuid: string) {

@@ -4,7 +4,6 @@ import { app, dialog, BrowserWindow } from "electron"
 import { Logger } from "./logger.service"
 import semverGt from "semver/functions/gt"
 import * as pack from "../../../package.json"
-import { download } from "electron-dl"
 import * as fs from "fs"
 import { t } from "./i18n.service"
 
@@ -92,7 +91,9 @@ export class AutoUpdater {
         if (!focusedWindow) {
             return
         }
-        await download(focusedWindow, file.browser_download_url, {
+        await (
+            await import("electron-dl")
+        ).download(focusedWindow, file.browser_download_url, {
             directory: app.getPath("temp"),
         })
         const dialogOpts = {

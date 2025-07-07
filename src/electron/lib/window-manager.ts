@@ -14,7 +14,6 @@ import { EMeasurementStatus } from "../../measurement/enums/measurement-status.e
 import { MeasurementRunner } from "../../measurement"
 import { LoopService } from "../../measurement/services/loop.service"
 import { t } from "../../measurement/services/i18n.service"
-import { download } from "electron-dl"
 import { Logger } from "../../measurement/services/logger.service"
 import fs from "fs"
 import nodeUrl from "url"
@@ -143,7 +142,9 @@ export class WindowManager {
                 const filename =
                     new Date().toISOString().replaceAll(":", ".") + ".pdf"
                 const directory = app.getPath("temp")
-                const downItem = await download(pdfWindow, url, {
+                const downItem = await (
+                    await import("electron-dl")
+                ).download(pdfWindow, url, {
                     directory,
                     filename,
                 })

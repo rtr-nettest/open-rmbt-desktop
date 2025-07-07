@@ -12,6 +12,7 @@ import {
 import { I18nService } from "../services/i18n.service"
 import { v4 } from "uuid"
 import * as packJson from "../../../package.json"
+import { MeasurementOptions } from "../interfaces/measurement-options.interface"
 
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -35,18 +36,25 @@ export class UserSettingsRequest implements IUserSettingsRequest {
     model?: string | undefined
     os_version?: string | undefined
     type = "DESKTOP"
+    platform?: string | undefined
     plattform?: string | undefined
 
-    constructor(public platform = "DESKTOP") {
-        const termsAccepted = Store.get(TERMS_ACCEPTED_VERSION) as number
+    constructor(
+        options: MeasurementOptions = {
+            platform: "DESKTOP",
+        }
+    ) {
+        const termsAccepted =
+            (Store.I.get(TERMS_ACCEPTED_VERSION) as number) ??
+            options.termsAccepted
         if (termsAccepted) {
             this.terms_and_conditions_accepted = true
             this.terms_and_conditions_accepted_version = termsAccepted
         }
         if (process.env.FLAVOR === "ont") {
-            this.uuid = (Store.get(CLIENT_UUID) as string) ?? v4()
+            this.uuid = (Store.I.get(CLIENT_UUID) as string) ?? v4()
         } else {
-            this.uuid = Store.get(CLIENT_UUID) as string
+            this.uuid = Store.I.get(CLIENT_UUID) as string
             const [platform, os_version] = this.operating_system.split(", ")
             this.os_version = os_version
             this.platform = platform

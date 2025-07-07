@@ -1,13 +1,19 @@
 import { I18nService } from "../../measurement/services/i18n.service"
 import { IEnv } from "../interfaces/env.interface"
-import { IP_VERSION, Store } from "../../measurement/services/store.service"
+import {
+    IP_VERSION,
+    SETTINGS,
+    Store,
+} from "../../measurement/services/store.service"
 import { TERMS_ACCEPTED_VERSION } from "../../measurement/services/store.service"
 import { ACTIVE_CLIENT } from "../../measurement/services/store.service"
 import { app } from "electron"
 import pack from "../../../package.json"
+import { IUserSettings } from "../../measurement/interfaces/user-settings-response.interface"
 
-export const getEnv = () =>
-    ({
+export const getEnv = () => {
+    const settings = Store.I.get(SETTINGS) as IUserSettings
+    return {
         ACTIVE_LANGUAGE: I18nService.I.getActiveLanguage(),
         APP_VERSION: pack.version,
         CERTIFIED_TEST_INTERVAL: process.env.CERTIFIED_TEST_INTERVAL
@@ -25,17 +31,20 @@ export const getEnv = () =>
         ENABLE_HOME_SCREEN_JITTER_BOX:
             process.env.ENABLE_HOME_SCREEN_JITTER_BOX === "true",
         ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",
+        EXCLUDE_MENU_ITEMS: process.env.EXCLUDE_MENU_ITEMS
+            ? process.env.EXCLUDE_MENU_ITEMS.split(",")
+            : undefined,
         FLAVOR: process.env.FLAVOR || "rtr",
         WEBSITE_HOST: new URL(process.env.FULL_HISTORY_RESULT_URL ?? "").origin,
         FULL_HISTORY_RESULT_URL: process.env.FULL_HISTORY_RESULT_URL,
         FULL_STATISTICS_URL: process.env.FULL_STATISTICS_URL,
         FULL_MAP_URL: process.env.FULL_MAP_URL,
-        HISTORY_EXPORT_URL: process.env.HISTORY_EXPORT_URL,
+        HISTORY_EXPORT_URL: `${settings?.urls?.url_statistic_server}${process.env.HISTORY_EXPORT_PATH}`,
         HISTORY_RESULTS_LIMIT: process.env.HISTORY_RESULTS_LIMIT
             ? parseInt(process.env.HISTORY_RESULTS_LIMIT)
             : undefined,
-        HISTORY_SEARCH_URL: process.env.HISTORY_SEARCH_URL,
-        IP_VERSION: (Store.get(IP_VERSION) as string) || "",
+        HISTORY_SEARCH_URL: `${settings?.urls?.url_statistic_server}${process.env.HISTORY_SEARCH_PATH}`,
+        IP_VERSION: (Store.I.get(IP_VERSION) as string) || "",
         LOOP_MODE_MIN_INTERVAL: process.env.LOOP_MODE_MIN_INTERVAL
             ? parseInt(process.env.LOOP_MODE_MIN_INTERVAL)
             : 5,
@@ -50,8 +59,8 @@ export const getEnv = () =>
             : 2880,
         OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
         REPO_URL: pack.repository,
-        TERMS_ACCEPTED_VERSION: Store.get(TERMS_ACCEPTED_VERSION) as number,
-        X_NETTEST_CLIENT: (Store.get(ACTIVE_CLIENT) as string) || "",
+        TERMS_ACCEPTED_VERSION: Store.I.get(TERMS_ACCEPTED_VERSION) as number,
+        X_NETTEST_CLIENT: (Store.I.get(ACTIVE_CLIENT) as string) || "",
         USER_DATA: app.getPath("temp"),
         MEASUREMENT_SERVERS_PATH: process.env.MEASUREMENT_SERVERS_PATH || "",
         CONTROL_SERVER_URL: process.env.CONTROL_SERVER_URL || "",
@@ -68,4 +77,5 @@ export const getEnv = () =>
             0,
             8
         )}`,
-    } as IEnv)
+    } as IEnv
+}

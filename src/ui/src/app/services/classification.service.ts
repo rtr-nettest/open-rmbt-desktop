@@ -23,4 +23,19 @@ export class ClassificationService {
                 return `<i class="app-icon--phase app-icon--phase-${phase}"`
         }
     }
+
+    getPhaseCSSClass(phase: "down" | "up" | "ping", classification?: number) {
+        switch (classification) {
+            case 1:
+                return `app-phase app-phase-${phase}-red`
+            case 2:
+                return `app-phase app-phase-${phase}-yellow`
+            case 3:
+                return `app-phase app-phase-${phase}-green`
+            case 4:
+                return `app-phase app-phase-${phase}-greenest`
+            default:
+                return `app-phase app-phase-${phase}"`
+        }
+    }
 }

@@ -141,15 +141,17 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         testResultDetail: any
     ) {
         return new SimpleHistoryResult(
-            dayjs(response.time).format(RESULT_DATE_FORMAT),
+            response?.time
+                ? dayjs(response.time).format(RESULT_DATE_FORMAT)
+                : "",
             openTestsResponse?.server_name,
-            response.measurement_result?.download_kbit,
-            response.measurement_result?.upload_kbit,
-            response.measurement_result?.ping_ms,
+            response?.measurement_result?.download_kbit || 0,
+            response?.measurement_result?.upload_kbit || 0,
+            response?.measurement_result?.ping_ms || 0,
             openTestsResponse?.public_ip_as_name,
             openTestsResponse?.ip_anonym,
             uuid,
-            response.loop_uuid,
+            response?.loop_uuid,
             false,
             CalcService.I.getOverallResultsFromSpeedCurve(
                 openTestsResponse?.speed_curve.download
@@ -158,21 +160,21 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
                 openTestsResponse?.speed_curve.upload
             ),
             CalcService.I.getOverallPings(openTestsResponse?.speed_curve.ping),
-            response.measurement_result?.download_classification ??
+            response?.measurement_result?.download_classification ??
                 ClassificationService.I.classify(
-                    response.measurement_result?.download_kbit,
+                    response?.measurement_result?.download_kbit,
                     THRESHOLD_DOWNLOAD,
                     "biggerBetter"
                 ),
-            response.measurement_result?.upload_classification ??
+            response?.measurement_result?.upload_classification ??
                 ClassificationService.I.classify(
-                    response.measurement_result?.upload_kbit,
+                    response?.measurement_result?.upload_kbit,
                     THRESHOLD_UPLOAD,
                     "biggerBetter"
                 ),
-            response.measurement_result?.ping_classification ??
+            response?.measurement_result?.ping_classification ??
                 ClassificationService.I.classify(
-                    response.measurement_result?.ping_ms * 1e6,
+                    response?.measurement_result?.ping_ms * 1e6,
                     THRESHOLD_PING,
                     "smallerBetter"
                 ),

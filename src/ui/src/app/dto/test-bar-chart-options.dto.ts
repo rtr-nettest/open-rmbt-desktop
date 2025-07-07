@@ -1,5 +1,5 @@
 import { TranslocoService } from "@ngneat/transloco"
-import * as dayjs from "dayjs"
+import dayjs from "dayjs"
 import { EColors } from "src/app/enums/colors.enum"
 
 export class TestBarChartOptions {

@@ -19,7 +19,6 @@ export class TermsConditionsScreenComponent implements OnInit {
     )
     isRead = false
     termsText = ""
-    timeSinceLoad = 0
 
     constructor(
         private router: Router,
@@ -28,36 +27,25 @@ export class TermsConditionsScreenComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.waitForFullLoad().then(this.watchForScroll)
+        this.watchForScroll()
     }
 
-    waitForFullLoad(): Promise<Element> {
-        return new Promise((resolve) => {
-            let body: Element | null
-            const interval = setInterval(() => {
-                this.timeSinceLoad += 300
-                body = document.querySelector(".app-article>p:last-of-type")
-                if (body || this.timeSinceLoad >= 2400) {
-                    clearInterval(interval)
-                    resolve(body || document.querySelector(".app-article")!)
-                }
-            }, 300)
-        })
-    }
-
-    watchForScroll = (body: Element) => {
-        const options = {
-            root: document.querySelector(".app-wrapper"),
-            rootMargin: "24px 20px",
-        }
-        const observer = new IntersectionObserver((entries, observer) => {
-            entries.forEach((e) => {
-                if (e.isIntersecting) {
-                    this.isRead = true
-                }
-            })
-        }, options)
-        observer.observe(body)
+    watchForScroll = () => {
+        const interval = setInterval(() => {
+            const viewportHeight =
+                document.querySelector(".app-wrapper")?.getBoundingClientRect()
+                    .height || 0
+            const articleHeight =
+                (document.querySelector(".app-article")?.getBoundingClientRect()
+                    .height || 0) - viewportHeight
+            const articleY =
+                document.querySelector(".app-article")?.getBoundingClientRect()
+                    .y || 0
+            if (Math.abs(articleY) > articleHeight) {
+                this.isRead = true
+                clearInterval(interval)
+            }
+        }, 300)
     }
 
     cancel() {

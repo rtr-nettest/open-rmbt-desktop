@@ -26,15 +26,15 @@ export class TestLogChart extends TestChart {
 
     override setData(data: ITestPhaseState) {
         this.resetDatasets()
-        super.data.datasets[0].data = this.getAllData(data)
+        this.data.datasets[0].data = this.getAllData(data)
         const lastIndex = Math.ceil(
             (
-                super.data.datasets[0].data[
-                    super.data.datasets[0].data.length - 1
+                this.data.datasets[0].data[
+                    this.data.datasets[0].data.length - 1
                 ] as Point
             ).x
         )
-        const { labels } = super.data
+        const { labels } = this.data
         if (labels && labels.length <= lastIndex) {
             while (labels!.length <= lastIndex) {
                 labels.push(lastIndex)
@@ -49,18 +49,18 @@ export class TestLogChart extends TestChart {
             return
         }
         const lastIndex = Math.ceil(lastData.x)
-        super.data.datasets[0].data.push(lastData)
-        if (super.data.labels && super.data.labels.length <= lastIndex)
-            super.data.labels.push(lastIndex)
+        this.data.datasets[0].data.push(lastData)
+        if (this.data.labels && this.data.labels.length <= lastIndex)
+            this.data.labels.push(lastIndex)
         super.update()
     }
 
     protected override resetDatasets(): void {
-        super.data.datasets = [new TestRTRChartDataset(this.phase)]
+        this.data.datasets = [new TestRTRChartDataset(this.phase)]
     }
 
     protected override resetLabels(): void {
-        super.data.labels = generateIndexesOfLength(8)
+        this.data.labels = generateIndexesOfLength(8)
     }
 
     protected override getAllData(testItem: ITestPhaseState) {

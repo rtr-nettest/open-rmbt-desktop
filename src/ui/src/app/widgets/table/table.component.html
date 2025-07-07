@@ -63,6 +63,24 @@
                 </mat-cell>
             </ng-container>
 
+            <ng-container *ngIf="column.columnDef == 'groupArrowIndicator'">
+                <mat-cell *matCellDef="let element; let i = dataIndex">
+                    @if (element.groupHeader) {
+                    <span class="app-table__arrow-indicator">
+                        <mat-icon
+                            [@arrowRotate]="
+                                isElementExpanded(element.id)
+                                    ? 'expanded'
+                                    : 'collapsed'
+                            "
+                        >
+                            keyboard_arrow_down
+                        </mat-icon></span
+                    >
+                    }
+                </mat-cell>
+            </ng-container>
+
             <ng-template #defaultCell>
                 <mat-cell
                     *matCellDef="let element; let i = dataIndex"

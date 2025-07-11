@@ -1,0 +1,173 @@
+name: Build apps
+
+on:
+  push:
+    
+jobs:
+
+  build-linux:
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Get .env
+      env:
+        REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+      run: |
+        curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.windows-ci
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+    - name: Build
+      run: |
+        sudo apt-get install -y rpm
+        npm install
+        cd src
+        cd ui
+        npm install
+        cd ..
+        cd ..
+        npm run make:deb
+        npm run make:rpm
+    - uses: actions/upload-artifact@v4
+      with:
+        name: application-rpm
+        path: out/make/rpm/x64/*.rpm
+    - uses: actions/upload-artifact@v4
+      with:
+        name: application-deb
+        path: out/make/deb/x64/*.deb
+        
+    
+  build-macos:
+
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Get .env
+      env:
+        REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+      run: |
+        curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.windows-ci
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+    - name: Build
+      run: |
+        npm install
+        cd src
+        cd ui
+        npm install
+        cd ..
+        cd ..
+        npm run package
+    - uses: actions/upload-artifact@v4
+      with:
+        name: application-dmg
+        path: out/**
+    
+  build-windows:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Get .env
+      shell: cmd
+      env:
+        REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+      run: |
+        curl -H "Authorization: token %REPO_TOKEN%" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.windows-ci
+        dir
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+    - name: Build
+      run: |
+        npm install
+        cd src
+        cd ui
+        npm install
+        cd ..
+        cd ..
+        npm run make:windows
+    - uses: actions/upload-artifact@v4
+      with:
+        name: application-windows-zip
+        path: out/RTR-Netztest-win32-x64/
+    - uses: actions/upload-artifact@v4
+      with:
+        name: application-windows-setup
+        path: out/make/squirrel.windows/x64/*.exe
+
+create_release:
+    runs-on: ubuntu-latest
+    needs: [build-win, build-linux, build-macos]
+    steps:
+      - name: Download Windows Artifacts-ZIP
+        uses: actions/download-artifact@v4
+        with:
+          name: application-windows-zip
+          path: windows-zip
+
+      - name: Download Windows Artifacts-Setup
+        uses: actions/download-artifact@v4
+        with:
+          name: application-windows-setup
+          path: windows-setup
+
+      - name: Download Linux Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: application-rpm
+          path: linux
+
+      - name: Download Linux Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: application-deb
+          path: linux
+
+      - name: Download macos Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: application-dmg
+          path: macos
+
+      - name: Prepare files
+        run: |
+          echo "Listing files in linux"
+          ls -R linux
+          cd linux
+          mv *.deb ../RTR-Netztest-linux-x86.deb
+          mv *.rpm ../RTR-Netztest-linux-x86.rpm
+          echo "Listing files in windows-setup"
+          cd ..
+          ls -R windows-setup
+          cd windows-setup
+          mv *.exe ../RTR-Netztest-windows-x86-Setup.exe
+          cd ..
+          echo "Listing files in windows-zip"
+          ls windows-zip
+          zip RTR-Netztest-windows-x86.zip windows-zip
+          echo "Listing files in macos"        
+          ls -R macos
+          cd macos
+          mv *.dmg ../RTR-Netztest-macos.dmg
+          cd ..
+          ls -l
+          
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          files: |
+            RTR-Netztest-linux-x86.deb
+            RTR-Netztest-linux-x86.rpm            
+            RTR-Netztest-macos.dmg
+            RTR-Netztest-windows-x86-Setup.exe
+          token: ${{ secrets.GITHUB_TOKEN }}
+          

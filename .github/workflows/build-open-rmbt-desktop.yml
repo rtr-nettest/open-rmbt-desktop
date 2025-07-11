@@ -68,7 +68,7 @@ jobs:
         name: application-dmg
         path: out/**
     
-  build-windows:
+  build-win:
 
     runs-on: windows-latest
 
@@ -103,7 +103,7 @@ jobs:
         name: application-windows-setup
         path: out/make/squirrel.windows/x64/*.exe
 
-create_release:
+  create_release:
     runs-on: ubuntu-latest
     needs: [build-win, build-linux, build-macos]
     steps:

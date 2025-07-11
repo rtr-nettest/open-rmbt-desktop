@@ -24,6 +24,12 @@ SHASUMS256.txt
 compile_commands.json
 .envrc
 
+# version 2 java
+binaries/
+src/measurement/java_client/
+
+
+
 # npm package
 /npm/dist
 /npm/path.txt

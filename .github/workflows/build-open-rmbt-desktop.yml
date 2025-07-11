@@ -1,0 +1,246 @@
+name: Build Open-RMBT-Desktop apps
+
+on: [push]
+    
+jobs:
+
+  build-linux:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Get .env
+      env:
+        REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+      run: |
+        curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.windows-ci
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18.x
+    - name: Build
+      run: |
+        pwd
+        ls -l
+        cd binaries
+        # get release of Java engine
+        wget -q https://github.com/rtr-nettest/open-rmbt/releases/download/v0.9.3/RTR-NetztestCLI-linux-x64.zip
+        # unpack
+        cd RTR-NetztestCLI-linux-x64      
+        unzip -q ../RTR-NetztestCLI-linux-x64.zip
+        ls -l
+        cd ..
+        # return to repository root directory
+        cd ..
+        # check directory again
+        pwd
+        sudo apt-get install -y rpm
+        npm install
+        cd src/ui
+        npm install
+        # again return to repository root directory
+        cd ../..
+        npm run make:deb
+        npm run make:rpm
+    - uses: actions/upload-artifact@v4
+      with:
+        name: application-rpm
+        path: out/make/rpm/x64/*.rpm
+    - uses: actions/upload-artifact@v4
+      with:
+        name: application-deb
+        path: out/make/deb/x64/*.deb
+        
+    - name: Intermediate file check
+      run: |
+        cd  out/make/rpm/x64/
+        ls -l *
+
+
+  build-macos:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Get .env
+      env:
+        REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+      run: |
+        curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.windows-ci
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18.x
+    - name: Build
+      run: |
+        pwd
+        ls -l
+        cd binaries
+        # get release of Java engine
+        wget -q https://github.com/rtr-nettest/open-rmbt/releases/download/v0.9.3/RTR-NetztestCLI-macos.zip
+        # unpack
+        cd RTR-NetztestCLI-darwin
+        mkdir RTR-Netztest.app
+        cd RTR-Netztest.app
+        unzip -q ../../RTR-NetztestCLI-macos.zip
+        ls -l
+        cd ../..
+        # return to repository root directory
+        cd ..
+        # check directory again
+        pwd
+        npm install
+        cd src/ui
+        npm install
+        # again return to repository root directory
+        cd ../..
+        npm run make:macos -- --nosign
+    - uses: actions/upload-artifact@v4
+      with:
+        name: application-dmg
+        path: out/make/*.dmg
+        
+    - name: Intermediate file check
+      run: |
+        cd  out/make
+        ls -l *
+
+
+  build-win:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Get .env
+      shell: bash
+      env:
+        REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+      run: |
+        curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.c01-version2
+        cat .env
+        ls -l
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18.x
+    - name: Prepare build
+      shell: bash
+      run: |
+        pwd
+        ls -l
+        cd binaries
+        # get release of Java engine
+        curl -LO https://github.com/rtr-nettest/open-rmbt/releases/download/v0.9.3/RTR-NetztestCLI-win32.zip
+        # unpack
+        cd RTR-NetztestCLI-win32
+        unzip -q ../RTR-NetztestCLI-win32.zip
+        ls -l
+        cd ..
+        cd ..
+        # return to repository root directory
+        cd ..
+        # check directory again
+        pwd
+    - name: Build install root
+      shell: cmd
+      run: |
+        pwd
+        npm install
+    - name: Build install ui
+      shell: cmd
+      run: |
+        cd src\ui
+        pwd
+        npm install
+    - name: Build make windows
+      shell: cmd
+      run: |
+        pwd
+        npm run make:windows
+    - uses: actions/upload-artifact@v4
+      with:
+        name: application-windows-zip
+        path: out/RTR-Netztest-win32-x64/
+    - uses: actions/upload-artifact@v4
+      with:
+        name: application-windows-setup
+        path: out/make/squirrel.windows/x64/*.exe
+        
+    - name: Intermediate file check
+      shell: bash
+      run: |
+        cd  out/make
+        ls -l
+
+
+  create_release:
+    runs-on: ubuntu-latest
+    needs: [build-win, build-linux, build-macos]
+    steps:
+      - name: Download Windows Artifacts-ZIP
+        uses: actions/download-artifact@v4
+        with:
+          name: application-windows-zip
+          path: windows-zip
+
+      - name: Download Windows Artifacts-Setup
+        uses: actions/download-artifact@v4
+        with:
+          name: application-windows-setup
+          path: windows-setup
+
+      - name: Download Linux Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: application-rpm
+          path: linux
+
+      - name: Download Linux Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: application-deb
+          path: linux
+
+      - name: Download macos Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: application-dmg
+          path: macos
+
+      - name: Prepare files
+        run: |
+          echo "Listing files in linux"
+          ls -R linux
+          cd linux
+          mv *.deb ../RTR-Netztest-linux-x86.deb
+          mv *.rpm ../RTR-Netztest-linux-x86.rpm
+          echo "Listing files in windows-setup"
+          cd ..
+          ls -R windows-setup
+          cd windows-setup
+          mv *.exe ../RTR-Netztest-windows-x86-Setup.exe
+          cd ..
+          echo "Listing files in windows-zip"
+          ls windows-zip
+          zip RTR-Netztest-windows-x86.zip windows-zip
+          echo "Listing files in macos"        
+          ls -R macos
+          cd macos
+          mv *.dmg ../RTR-Netztest-macos.dmg
+          cd ..
+          ls -l
+          
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          files: |
+            RTR-Netztest-linux-x86.deb
+            RTR-Netztest-linux-x86.rpm            
+            RTR-Netztest-macos.dmg
+            RTR-Netztest-windows-x86-Setup.exe
+          token: ${{ secrets.GITHUB_TOKEN }}
+          

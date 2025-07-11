@@ -67,6 +67,6 @@ coverage/
 src/measurement/java_client/RMBTClient-all.jar
 
 binaries/*/*
-!binaries/*/RTR-Netztest_app_image_goes_here.txt
+!binaries/*/RTR-Netztest-app_image_goes_here.txt
 
 src/assets/rtr/.entitlements.plist

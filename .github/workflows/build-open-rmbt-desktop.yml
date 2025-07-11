@@ -155,9 +155,10 @@ jobs:
           zip RTR-Netztest-windows-x86.zip windows-zip
           echo "Listing files in macos"        
           ls -R macos
-          cd macos
-          mv *.dmg ../RTR-Netztest-macos.dmg
-          cd ..
+          # macos/RTR-Netztest-darwin-arm64/RTR-Netztest.app
+          cd macos/RTR-Netztest-darwin-arm64          
+          zip ../../RTR-Netztest-macos.zip RTR-Netztest.app
+          cd ../..
           ls -l
           
       - name: Create GitHub Release
@@ -167,7 +168,7 @@ jobs:
           files: |
             RTR-Netztest-linux-x86.deb
             RTR-Netztest-linux-x86.rpm            
-            RTR-Netztest-macos.dmg
+            RTR-Netztest-macos.zip
             RTR-Netztest-windows-x86-Setup.exe
           token: ${{ secrets.GITHUB_TOKEN }}
           

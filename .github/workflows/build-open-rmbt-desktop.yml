@@ -152,12 +152,12 @@ jobs:
           cd ..
           echo "Listing files in windows-zip"
           ls windows-zip
-          zip RTR-Netztest-windows-x86.zip windows-zip
+          zip -r RTR-Netztest-windows-x86.zip windows-zip
           echo "Listing files in macos"        
           ls -R macos
           # macos/RTR-Netztest-darwin-arm64/RTR-Netztest.app
           cd macos/RTR-Netztest-darwin-arm64          
-          zip ../../RTR-Netztest-macos.zip RTR-Netztest.app
+          zip -r ../../RTR-Netztest-macos.zip RTR-Netztest.app
           cd ../..
           ls -l
           
@@ -170,5 +170,6 @@ jobs:
             RTR-Netztest-linux-x86.rpm            
             RTR-Netztest-macos.zip
             RTR-Netztest-windows-x86-Setup.exe
+            RTR-Netztest-windows-x86.zip
           token: ${{ secrets.GITHUB_TOKEN }}
           

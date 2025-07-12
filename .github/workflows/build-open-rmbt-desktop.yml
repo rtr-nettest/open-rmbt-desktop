@@ -224,7 +224,7 @@ jobs:
           cd ..
           echo "Listing files in windows-zip"
           ls windows-zip
-          zip RTR-Netztest-windows-x86.zip windows-zip
+          zip -r RTR-Netztest-windows-x86.zip windows-zip
           echo "Listing files in macos"        
           ls -R macos
           cd macos

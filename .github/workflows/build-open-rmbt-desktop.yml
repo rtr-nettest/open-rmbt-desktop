@@ -14,7 +14,7 @@ jobs:
       env:
         REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
       run: |
-        curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.windows-ci
+        curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.c01-version2
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
@@ -68,7 +68,7 @@ jobs:
       env:
         REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
       run: |
-        curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.windows-ci
+        curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.c01-version2
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
@@ -219,7 +219,6 @@ jobs:
           mv *.rpm ../RTR-Netztest-linux-x86.rpm
           echo "Listing files in windows-setup"
           cd ..
-          ls -R windows-setup
           cd windows-setup
           mv *.exe ../RTR-Netztest-windows-x86-Setup.exe
           cd ..
@@ -242,5 +241,6 @@ jobs:
             RTR-Netztest-linux-x86.rpm            
             RTR-Netztest-macos.dmg
             RTR-Netztest-windows-x86-Setup.exe
+            RTR-Netztest-windows-x86.zip
           token: ${{ secrets.GITHUB_TOKEN }}
           

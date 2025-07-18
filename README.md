@@ -96,6 +96,8 @@ $ npm run make:windows
 
 A setup `*.exe` will be placed in the `out/make` folder at the root of the project.
 
+For information on Windows app code signing for publication in Microsoft Store see [Windows_code_singing.md](Windows_code_signing.md).
+
 ### Linux
 
 To build a `*.deb` package, you will need a Linux or a macOS machine with `fakeroot` and `dpkg` installed. Run:

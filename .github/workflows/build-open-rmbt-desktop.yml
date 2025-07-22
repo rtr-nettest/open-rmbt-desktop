@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history and tags
     - name: Get .env
       env:
         REPO_TOKEN: ${{ secrets.REPO_TOKEN }}

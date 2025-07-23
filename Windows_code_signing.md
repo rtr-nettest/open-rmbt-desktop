@@ -91,7 +91,7 @@ Entering the smartcard PIN code once is necessary during the signing operation.
     - Save all, _wait_, Next
     - Submit
 - Success status is "_update in review_"
-- Wait for up to 3 business days :-) for publication in [Microsoft Store](​https://apps.microsoft.com/store/detail/XP9K0TF8QNZSPV) 
+- Wait for up to 3 business days :-) for publication in Microsoft Store (e.g. [RTR-Netztest App](​https://apps.microsoft.com/store/detail/XP9K0TF8QNZSPV))
 
 ## Appendix
 
@@ -104,7 +104,7 @@ Entering the smartcard PIN code once is necessary during the signing operation.
 
 ### Windows app/binary code signatures resp. Microsoft `SignTool`
 
-- [Manage code signing certificates](​https://learn.microsoft.com/en-us/windows-hardware/drivers/dashboard/code-signing-cert-manage#get-or-renew-a-code-signing-certificate)
-- [Sign your app for Smart App Control compliance](​https://learn.microsoft.com/en-us/windows/apps/develop/smart-app-control/code-signing-for-smart-app-control)
-- [`SignTool`](​https://learn.microsoft.com/en-us/windows/win32/seccrypto/signtool)
-- [How to sign an app package using SignTool](​https://learn.microsoft.com/en-us/windows/win32/appxpkg/how-to-sign-a-package-using-signtool)
+- [Manage code signing certificates](https://learn.microsoft.com/en-us/windows-hardware/drivers/dashboard/code-signing-cert-manage#get-or-renew-a-code-signing-certificate)
+- [Sign your app for Smart App Control compliance](https://learn.microsoft.com/en-us/windows/apps/develop/smart-app-control/code-signing-for-smart-app-control)
+- [`SignTool`](https://learn.microsoft.com/en-us/windows/win32/seccrypto/signtool)
+- [How to sign an app package using SignTool](https://learn.microsoft.com/en-us/windows/win32/appxpkg/how-to-sign-a-package-using-signtool)

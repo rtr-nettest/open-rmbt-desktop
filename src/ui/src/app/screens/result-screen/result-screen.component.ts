@@ -16,6 +16,7 @@ import { ConversionService } from "src/app/services/conversion.service"
 import { UNKNOWN } from "src/app/constants/strings"
 import { I18nService } from "src/app/services/i18n.service"
 import { HistoryExportService } from "src/app/services/history-export.service"
+import { MessageService } from "src/app/services/message.service"
 
 @Component({
     selector: "app-result-screen",
@@ -47,9 +48,20 @@ export class ResultScreenComponent implements OnDestroy {
     error$ = this.mainStore.error$
     openResultBaseURL = ""
     openResultURL = ""
-    result$ = this.store.getMeasurementResult(
-        this.route.snapshot.paramMap.get("testUuid")
-    )
+    result$ = this.store
+        .getMeasurementResult(this.route.snapshot.paramMap.get("testUuid"))
+        .pipe(
+            tap((result) => {
+                if (
+                    result?.downloadKbit ||
+                    result?.uploadKbit ||
+                    result?.ping
+                ) {
+                    // Measurement successful, close confusing dialogs
+                    this.message.closeAllDialogs()
+                }
+            })
+        )
     sort: ISort = {
         active: "",
         direction: "",
@@ -73,6 +85,7 @@ export class ResultScreenComponent implements OnDestroy {
         private exporter: HistoryExportService,
         private i18n: I18nService,
         private mainStore: MainStore,
+        private message: MessageService,
         private store: TestStore,
         private route: ActivatedRoute,
         private router: Router,

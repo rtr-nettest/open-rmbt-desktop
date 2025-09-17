@@ -57,7 +57,10 @@
                         [title]="t('Back to Startpage')"
                 /></a>
                 <div
-                    *ngIf="(isLoopModeTestScreen$ | async) === true"
+                    *ngIf="
+                        (isLoopModeTestScreen$ | async) === true &&
+                        hideLoopModeAlert === false
+                    "
                     style="display: flex; justify-content: center; flex: 1"
                 >
                     <app-alert

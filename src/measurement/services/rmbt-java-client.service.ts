@@ -13,6 +13,8 @@ import { MeasurementRunner } from ".."
 import { UserSettingsRequest } from "../dto/user-settings-request.dto"
 import { MeasurementOptions } from "../interfaces/measurement-options.interface"
 import { IRMBTClient } from "../interfaces/rmbt-client.interface"
+import path from "path"
+
 const packJson = require("../../../package.json")
 
 export type TransferDirection = "down" | "up"
@@ -57,8 +59,6 @@ export class RMBTJavaClient implements IRMBTClient {
     private _interimDownMbps = 0
     private _interimUpMbps = 0
     private _testUuid = ""
-    private downThreadResults: IMeasurementThreadResult[] = []
-    private upThreadResults: IMeasurementThreadResult[] = []
 
     get interimDownMbps() {
         return this._interimDownMbps
@@ -180,33 +180,21 @@ export class RMBTJavaClient implements IRMBTClient {
             // spawn process =========================================================================
             Logger.I.info("Spawning external process...")
 
-            const appExePath = require("path").dirname(
-                require("electron").app.getPath("exe"),
-            )
-            Logger.I.info("appExePath: " + appExePath)
-            const appPath = require("path").dirname(
-                require("electron").app.getAppPath(),
-            )
-            Logger.I.info("appPath: " + appPath)
-
             // platform selector
             let binary_path = ""
             if (process.env.DEV === "true") {
-                binary_path = "src/measurement/java_client/RMBTClient-all.jar"
-            } else if (platform == "darwin") {
-                // darwin path
-                // TODO: correct rootPath
-                // binary_path =
-                //     rootPath +
-                //     "/Frameworks/RTR-Netztest.app/Contents/MacOS/RTR-Netztest"
-            } else if (platform == "win32") {
-                // win32 path
-                // use appExePath!!
-                binary_path = appExePath + "\\resources\\cli\\RTR-Netztest.exe"
-            } else if (platform == "linux") {
-                // linux path
-                // TODO: correct rootPath
-                // binary_path = rootPath + "/cli/bin/RTR-Netztest"
+                binary_path = path.join(
+                    "src",
+                    "measurement",
+                    "java_client",
+                    "RMBTClient-all.jar",
+                )
+            } else {
+                binary_path = path.join(
+                    __dirname,
+                    "java_client",
+                    "RMBTClient-all.jar",
+                )
             }
 
             let bin_options = [
@@ -262,16 +250,10 @@ export class RMBTJavaClient implements IRMBTClient {
 
             var child
             // spawn java
-            if (process.env.DEV === "true") {
-                // add java options
-                let java_options = ["-jar", binary_path]
-                java_options = java_options.concat(bin_options)
-                Logger.I.info(java_options)
-                child = spawn("java", java_options)
-            } else {
-                Logger.I.info(bin_options)
-                child = spawn(binary_path, bin_options)
-            }
+            let java_options = ["-jar", binary_path]
+            java_options = java_options.concat(bin_options)
+            Logger.I.info(java_options)
+            child = spawn("java", java_options)
             child.stdout.setEncoding("utf8")
 
             // assemble outpu data chunks and split them on newlines

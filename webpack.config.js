@@ -39,6 +39,10 @@ const baseConfig = {
                     from: "src/measurement/services/migrations",
                     to: "migrations",
                 },
+                {
+                    from: "src/measurement/java_client",
+                    to: "java_client",
+                },
             ],
         }),
     ],

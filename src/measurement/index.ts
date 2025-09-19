@@ -232,8 +232,10 @@ export class MeasurementRunner {
 
     private async setRMBTClient(options?: MeasurementOptions) {
         if (Store.I.get(MEASUREMENT_ENGINE) === "java") {
+            Logger.I.info("Using Java measurement engine")
             this.rmbtClient = new RMBTJavaClient()
         } else {
+            Logger.I.info("Using NodeJS measurement engine")
             if (!this.settings) {
                 await this.registerClient(options)
             }

@@ -51,7 +51,7 @@ export class MainStore {
     constructor(
         private router: Router,
         private transloco: TranslocoService,
-        private transLoader: TranslocoHttpLoader
+        private transLoader: TranslocoHttpLoader,
     ) {
         window.electronAPI.onError((error) => {
             console.error(error)
@@ -67,7 +67,7 @@ export class MainStore {
             return this.env$
         }
         return from(window.electronAPI.getEnv()).pipe(
-            tap((env) => this.env$.next(env))
+            tap((env) => this.env$.next(env)),
         )
     }
 
@@ -84,7 +84,7 @@ export class MainStore {
                         packetLoss: newValue,
                         ping: newValue,
                     })
-                })
+                }),
             )
         }
         return of(0)
@@ -93,7 +93,7 @@ export class MainStore {
     registerClient() {
         window.electronAPI.onSetIp((settings) => {
             this.isOnline$.next(
-                !!(settings.ipInfo?.publicV4 || settings.ipInfo?.publicV6)
+                !!(settings.ipInfo?.publicV4 || settings.ipInfo?.publicV6),
             )
             this.ipInfo$.next(settings.ipInfo ?? null)
         })
@@ -122,7 +122,7 @@ export class MainStore {
         this.env$.next(newEnv)
         this.project$.next(null)
         const loader$ = this.transLoader.getTranslation(
-            this.transloco.getActiveLang()
+            this.transloco.getActiveLang(),
         ) as Observable<Translation>
         lastValueFrom(loader$).then((dict) => {
             this.transloco.setTranslation(dict)

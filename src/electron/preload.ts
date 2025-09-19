@@ -26,6 +26,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.send(Events.SET_ACTIVE_SERVER, server),
     setDefaultLanguage: (language: string) =>
         ipcRenderer.send(Events.SET_DEFAULT_LANGUAGE, language),
+    setMeasurementEngine: (engine: string) =>
+        ipcRenderer.send(Events.SET_MEASUREMENT_ENGINE, engine),
     runMeasurement: (loopModeInfo?: ILoopModeInfo) =>
         ipcRenderer.send(Events.RUN_MEASUREMENT, loopModeInfo),
     abortMeasurement: () => ipcRenderer.send(Events.ABORT_MEASUREMENT),
@@ -63,7 +65,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     onRestartMeasurement: (callback: (loopCounter: number) => any) => {
         ipcRenderer.removeAllListeners(Events.RESTART_MEASUREMENT)
         ipcRenderer.on(Events.RESTART_MEASUREMENT, (_, loopCounter) =>
-            callback(loopCounter)
+            callback(loopCounter),
         )
     },
     onLoopModeExpired: (callback: () => any) => {

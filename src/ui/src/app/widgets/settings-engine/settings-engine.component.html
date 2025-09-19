@@ -1,0 +1,14 @@
+<mat-select
+    disableOptionCentering
+    [(ngModel)]="selectedEngine"
+    (selectionChange)="change($event)"
+>
+    <mat-select-trigger>
+        {{ selectedEngine?.name }}
+    </mat-select-trigger>
+    <mat-option *ngFor="let engine of engines" [value]="engine">
+        <div class="app-engine-name">
+            {{ engine.name }}
+        </div>
+    </mat-option>
+</mat-select>

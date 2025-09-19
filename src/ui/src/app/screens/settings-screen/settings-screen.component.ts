@@ -26,6 +26,7 @@ import { CMSService } from "src/app/services/cms.service"
 import { SettingsLocalDataComponent } from "src/app/widgets/settings-local-data/settings-local-data.component"
 import { Router } from "@angular/router"
 import { SettingsCommitComponent } from "src/app/widgets/settings-commit/settings-commit.component"
+import { SettingsEngineComponent } from "src/app/widgets/settings-engine/settings-engine.component"
 
 export interface ISettingsRow {
     title: string
@@ -77,6 +78,10 @@ export class SettingsScreenComponent
                 {
                     title: t["Open source"],
                     component: SettingsRepoLinkComponent,
+                },
+                {
+                    title: t["Measurement engine"],
+                    component: SettingsEngineComponent,
                 },
             ]
             if (settings?.ipInfo?.publicV4) {
@@ -133,7 +138,7 @@ export class SettingsScreenComponent
                 content,
                 totalElements: content.length,
             }
-        })
+        }),
     )
     sort: ISort = {
         active: "",
@@ -147,7 +152,7 @@ export class SettingsScreenComponent
         private router: Router,
         private transloco: TranslocoService,
         private cms: CMSService,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
     ) {
         super(mainStore, message)
     }

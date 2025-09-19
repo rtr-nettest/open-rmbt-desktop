@@ -137,8 +137,9 @@ import { CertifiedScreenComponent } from "./screens/certified-screen/certified-s
 import { CertifiedInfoComponent } from "./widgets/certified-info/certified-info.component"
 import { CertifiedDataFormComponent } from "./widgets/certified-data-form/certified-data-form.component"
 import { CertifiedEnvFormComponent } from "./widgets/certified-env-form/certified-env-form.component"
-import { CertifiedResultScreenComponent } from "./screens/certified-result-screen/certified-result-screen.component";
-import { SettingsCommitComponent } from './widgets/settings-commit/settings-commit.component'
+import { CertifiedResultScreenComponent } from "./screens/certified-result-screen/certified-result-screen.component"
+import { SettingsCommitComponent } from "./widgets/settings-commit/settings-commit.component"
+import { SettingsEngineComponent } from "./widgets/settings-engine/settings-engine.component"
 
 Chart.register(
     BarElement,
@@ -149,7 +150,7 @@ Chart.register(
     CategoryScale,
     LinearScale,
     TimeScale,
-    Filler
+    Filler,
 )
 
 declare global {
@@ -164,9 +165,10 @@ declare global {
             setActiveClient: (client: string) => Promise<void>
             setActiveLanguage: (language: string) => Promise<void>
             setActiveServer: (
-                server: IMeasurementServerResponse | null
+                server: IMeasurementServerResponse | null,
             ) => Promise<void>
             setDefaultLanguage: (language: string) => Promise<void>
+            setMeasurementEngine: (engine: string) => Promise<void>
             runMeasurement: (loopModeInfo?: ILoopModeInfo) => Promise<void>
             abortMeasurement: () => Promise<void>
             getServers: () => Promise<IMeasurementServerResponse[]>
@@ -176,11 +178,11 @@ declare global {
                 IMeasurementPhaseState & IBasicNetworkInfo
             >
             getMeasurementResult: (
-                testUuid: string
+                testUuid: string,
             ) => Promise<ISimpleHistoryResult>
             getMeasurementHistory: (
                 paginator?: IPaginator,
-                sort?: ISort
+                sort?: ISort,
             ) => Promise<ISimpleHistoryResult[]>
             onAppResumed: (callback: () => any) => Promise<any>
             onAppSuspended: (callback: () => any) => Promise<any>
@@ -189,24 +191,25 @@ declare global {
             offMeasurementAborted: () => Promise<any>
             onOpenScreen: (callback: (route: ERoutes) => any) => Promise<any>
             onRestartMeasurement: (
-                callback: (loopCounter: number) => any
+                callback: (loopCounter: number) => any,
             ) => Promise<any>
             onLoopModeExpired: (callback: () => any) => Promise<any>
             onMaxTestsReached: (callback: () => any) => Promise<any>
             openPdf: (url: string) => Promise<void>
             onSetIp: (
-                callback: (settings: IUserSettings) => any
+                callback: (settings: IUserSettings) => any,
             ) => Promise<any>
             deleteLocalData: () => Promise<void>
             scheduleLoop: (
                 loopInterval: number,
-                loopModeInfo: ILoopModeInfo
+                loopModeInfo: ILoopModeInfo,
             ) => Promise<void>
         }
     }
 }
 
-@NgModule({ declarations: [
+@NgModule({
+    declarations: [
         AppComponent,
         BodyComponent,
         DistancePipe,
@@ -270,8 +273,11 @@ declare global {
         CertifiedEnvFormComponent,
         CertifiedResultScreenComponent,
         SettingsCommitComponent,
+        SettingsEngineComponent,
     ],
-    bootstrap: [AppComponent], imports: [AppRoutingModule,
+    bootstrap: [AppComponent],
+    imports: [
+        AppRoutingModule,
         BrowserAnimationsModule,
         BrowserModule,
         FormsModule,
@@ -292,7 +298,9 @@ declare global {
         MatTooltipModule,
         MatSlideToggleModule,
         MatSelectModule,
-        TranslocoRootModule], providers: [
+        TranslocoRootModule,
+    ],
+    providers: [
         {
             provide: APP_INITIALIZER,
             useFactory: MainStore.factory,
@@ -306,7 +314,8 @@ declare global {
             provide: SprintfPipe,
         },
         provideHttpClient(withInterceptorsFromDi()),
-    ] })
+    ],
+})
 export class AppModule {
     constructor() {
         ;[

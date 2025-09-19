@@ -2,6 +2,7 @@ import { I18nService } from "../../measurement/services/i18n.service"
 import { IEnv } from "../interfaces/env.interface"
 import {
     IP_VERSION,
+    MEASUREMENT_ENGINE,
     SETTINGS,
     Store,
 } from "../../measurement/services/store.service"
@@ -57,6 +58,8 @@ export const getEnv = () => {
         LOOP_MODE_MAX_DURATION: process.env.LOOP_MODE_MAX_DURATION
             ? parseInt(process.env.LOOP_MODE_MAX_DURATION)
             : 2880,
+        MEASUREMENT_ENGINE:
+            (Store.I.get(MEASUREMENT_ENGINE) as string) || "node",
         OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
         REPO_URL: pack.repository,
         TERMS_ACCEPTED_VERSION: Store.I.get(TERMS_ACCEPTED_VERSION) as number,
@@ -68,14 +71,14 @@ export const getEnv = () => {
             process.platform === "win32"
                 ? "windows"
                 : process.platform === "darwin"
-                ? "macos"
-                : process.platform,
+                  ? "macos"
+                  : process.platform,
         CHECK_IP_INTERVAL_MS: process.env.CHECK_IP_INTERVAL_MS
             ? parseInt(process.env.CHECK_IP_INTERVAL_MS)
             : 10000,
         GIT_INFO: `${pack.gitInfo["branch"]}-${pack.gitInfo["hash"].slice(
             0,
-            8
+            8,
         )}`,
     } as IEnv
 }

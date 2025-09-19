@@ -31,6 +31,7 @@ import { BrowserWindow } from "electron"
 import { MeasurementOptions } from "./interfaces/measurement-options.interface"
 import { RMBTJavaClient } from "./services/rmbt-java-client.service"
 import { IRMBTClient } from "./interfaces/rmbt-client.interface"
+import { IMeasurementThreadResult } from "./interfaces/measurement-result.interface"
 
 config({
     path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
@@ -132,82 +133,15 @@ export class MeasurementRunner {
         this.startTimeMs = Date.now()
         try {
             this.setCPUInfoInterval()
-            if (Store.I.get(MEASUREMENT_ENGINE) === "java") {
-                this.rmbtClient = new RMBTJavaClient()
-            } else {
-                if (!this.settings) {
-                    await this.registerClient(options)
-                }
-                await this.setMeasurementServer()
-                await this.registerMeasurement(options)
-            }
-
+            await this.setRMBTClient(options)
             const threadResults = await this.rmbtClient!.scheduleMeasurement()
             this.setCPUUsage()
-            this.registrationRequest = {
-                ...this.registrationRequest!,
-                networkType: await NetworkInfoService.I.getNetworkType(),
-            }
-            const result = new MeasurementResult(
-                this.registrationRequest!,
-                this.rmbtClient!.params!,
-                threadResults,
-                this.rmbtClient!.finalResultDown,
-                this.rmbtClient!.finalResultUp,
-                this.cpuInfo,
-                this.rmbtClient!.measurementStatus ===
-                EMeasurementStatus.ABORTED
-                    ? EMeasurementFinalStatus.ABORTED
-                    : EMeasurementFinalStatus.SUCCESS,
-            )
-            await (this.rmbtClient as any).submitMeasurement(result)
-            if (
-                this.rmbtClient!.measurementStatus !==
-                EMeasurementStatus.ABORTED
-            ) {
-                this.rmbtClient!.measurementStatus = EMeasurementStatus.END
-            }
+            await this.finalizeMeasurement(threadResults)
             return this.rmbtClient!.measurementStatus
         } catch (e: any) {
-            if (e) {
-                Logger.I.error(e)
-                this.rmbtClient!.measurementStatus = EMeasurementStatus.ERROR
-                try {
-                    await ControlServer.I.submitMeasurement(
-                        new MeasurementResult(
-                            this.registrationRequest!,
-                            this.rmbtClient!.params!,
-                            [],
-                            this.rmbtClient!.finalResultDown,
-                            this.rmbtClient!.finalResultUp,
-                            this.cpuInfo,
-                            EMeasurementFinalStatus.ERROR,
-                            e.message,
-                        ),
-                    )
-                } finally {
-                    throw e.message
-                }
-            }
+            await this.trySubmitError(e)
         } finally {
-            this.setCPUUsage()
-            clearInterval(this.cpuInfoInterval)
-            this.cpuInfoInterval = undefined
-            this.endTimeMs = Date.now()
-            if (this.cpuInfo) {
-                Logger.I.info(
-                    ELoggerMessage.CPU_USAGE_MIN,
-                    this.rounded(this.cpuInfo.load_min * 100),
-                )
-                Logger.I.info(
-                    ELoggerMessage.CPU_USAGE_MAX,
-                    this.rounded(this.cpuInfo.load_max * 100),
-                )
-                Logger.I.info(
-                    ELoggerMessage.CPU_USAGE_AVG,
-                    this.rounded(this.cpuInfo.load_avg * 100),
-                )
-            }
+            this.cleanUp()
         }
     }
 
@@ -296,6 +230,89 @@ export class MeasurementRunner {
         }
     }
 
+    private async setRMBTClient(options?: MeasurementOptions) {
+        if (Store.I.get(MEASUREMENT_ENGINE) === "java") {
+            this.rmbtClient = new RMBTJavaClient()
+        } else {
+            if (!this.settings) {
+                await this.registerClient(options)
+            }
+            await this.setMeasurementServer()
+            this.rmbtClient = await this.registerMeasurement(options)
+        }
+    }
+
+    private async finalizeMeasurement(
+        threadResults: IMeasurementThreadResult[],
+    ) {
+        if (Store.I.get(MEASUREMENT_ENGINE) !== "java") {
+            this.registrationRequest = {
+                ...this.registrationRequest!,
+                networkType: await NetworkInfoService.I.getNetworkType(),
+            }
+            const result = new MeasurementResult(
+                this.registrationRequest!,
+                this.rmbtClient!.params!,
+                threadResults,
+                this.rmbtClient!.finalResultDown,
+                this.rmbtClient!.finalResultUp,
+                this.cpuInfo,
+                this.rmbtClient!.measurementStatus ===
+                EMeasurementStatus.ABORTED
+                    ? EMeasurementFinalStatus.ABORTED
+                    : EMeasurementFinalStatus.SUCCESS,
+            )
+            await ControlServer.I.submitMeasurement(result)
+        }
+        if (this.rmbtClient!.measurementStatus !== EMeasurementStatus.ABORTED) {
+            this.rmbtClient!.measurementStatus = EMeasurementStatus.END
+        }
+    }
+
+    private async trySubmitError(e: any) {
+        if (e) {
+            Logger.I.error(e)
+            this.rmbtClient!.measurementStatus = EMeasurementStatus.ERROR
+            try {
+                await ControlServer.I.submitMeasurement(
+                    new MeasurementResult(
+                        this.registrationRequest!,
+                        this.rmbtClient!.params!,
+                        [],
+                        this.rmbtClient!.finalResultDown,
+                        this.rmbtClient!.finalResultUp,
+                        this.cpuInfo,
+                        EMeasurementFinalStatus.ERROR,
+                        e.message,
+                    ),
+                )
+            } finally {
+                throw e.message
+            }
+        }
+    }
+
+    private cleanUp() {
+        this.setCPUUsage()
+        clearInterval(this.cpuInfoInterval)
+        this.cpuInfoInterval = undefined
+        this.endTimeMs = Date.now()
+        if (this.cpuInfo) {
+            Logger.I.info(
+                ELoggerMessage.CPU_USAGE_MIN,
+                this.rounded(this.cpuInfo.load_min * 100),
+            )
+            Logger.I.info(
+                ELoggerMessage.CPU_USAGE_MAX,
+                this.rounded(this.cpuInfo.load_max * 100),
+            )
+            Logger.I.info(
+                ELoggerMessage.CPU_USAGE_AVG,
+                this.rounded(this.cpuInfo.load_avg * 100),
+            )
+        }
+    }
+
     private setCPUUsage() {
         if (!this.cpuInfoInterval) {
             this.cpuInfo = undefined
@@ -357,7 +374,7 @@ export class MeasurementRunner {
         }
         const measurementRegistration =
             await ControlServer.I.registerMeasurement(this.registrationRequest)
-        this.rmbtClient = new RMBTClient(measurementRegistration)
+        return new RMBTClient(measurementRegistration)
     }
 
     private rounded = (num: number) => Math.round(num * 1000) / 1000

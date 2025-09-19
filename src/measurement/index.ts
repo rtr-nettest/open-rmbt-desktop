@@ -19,12 +19,18 @@ import { DBService } from "./services/db.service"
 import "reflect-metadata"
 import { EMeasurementFinalStatus } from "./enums/measurement-final-status"
 import { AutoUpdater } from "./services/auto-updater.service"
-import { ACTIVE_SERVER, Store } from "./services/store.service"
+import {
+    ACTIVE_SERVER,
+    MEASUREMENT_ENGINE,
+    Store,
+} from "./services/store.service"
 import { ILoopModeInfo } from "./interfaces/measurement-registration-request.interface"
 import { LoopService } from "./services/loop.service"
 import { Events } from "../electron/enums/events.enum"
 import { BrowserWindow } from "electron"
 import { MeasurementOptions } from "./interfaces/measurement-options.interface"
+import { RMBTJavaClient } from "./services/rmbt-java-client.service"
+import { IRMBTClient } from "./interfaces/rmbt-client.interface"
 
 config({
     path: process.env.RMBT_DESKTOP_DOTENV_CONFIG_PATH || ".env",
@@ -41,7 +47,7 @@ export class MeasurementRunner {
 
     private measurementServer?: IMeasurementServerResponse
     private registrationRequest?: MeasurementRegistrationRequest
-    private rmbtClient?: RMBTClient
+    private rmbtClient?: IRMBTClient
     private cpuInfoInterval?: NodeJS.Timeout
     private cpuInfoList: number[] = []
     private cpuInfo?: ICPU
@@ -87,7 +93,7 @@ export class MeasurementRunner {
             AutoUpdater.I.checkForNewRelease()
             this.settingsRequest = new UserSettingsRequest(options)
             this.settings = await ControlServer.I.getUserSettings(
-                this.settingsRequest
+                this.settingsRequest,
             )
             if (this.settings.shouldAcceptTerms) {
                 return this.settings
@@ -105,7 +111,7 @@ export class MeasurementRunner {
         }
         const ipInfo = await NetworkInfoService.I.getIpV4Info(
             settings,
-            this.settingsRequest
+            this.settingsRequest,
         )
         return ipInfo
     }
@@ -116,7 +122,7 @@ export class MeasurementRunner {
         }
         const ipInfo = await NetworkInfoService.I.getIpV6Info(
             settings,
-            this.settingsRequest
+            this.settingsRequest,
         )
         return ipInfo
     }
@@ -126,11 +132,15 @@ export class MeasurementRunner {
         this.startTimeMs = Date.now()
         try {
             this.setCPUInfoInterval()
-            if (!this.settings) {
-                await this.registerClient(options)
+            if (Store.I.get(MEASUREMENT_ENGINE) === "java") {
+                this.rmbtClient = new RMBTJavaClient()
+            } else {
+                if (!this.settings) {
+                    await this.registerClient(options)
+                }
+                await this.setMeasurementServer()
+                await this.registerMeasurement(options)
             }
-            await this.setMeasurementServer()
-            await this.registerMeasurement(options)
 
             const threadResults = await this.rmbtClient!.scheduleMeasurement()
             this.setCPUUsage()
@@ -148,9 +158,9 @@ export class MeasurementRunner {
                 this.rmbtClient!.measurementStatus ===
                 EMeasurementStatus.ABORTED
                     ? EMeasurementFinalStatus.ABORTED
-                    : EMeasurementFinalStatus.SUCCESS
+                    : EMeasurementFinalStatus.SUCCESS,
             )
-            await ControlServer.I.submitMeasurement(result)
+            await (this.rmbtClient as any).submitMeasurement(result)
             if (
                 this.rmbtClient!.measurementStatus !==
                 EMeasurementStatus.ABORTED
@@ -172,8 +182,8 @@ export class MeasurementRunner {
                             this.rmbtClient!.finalResultUp,
                             this.cpuInfo,
                             EMeasurementFinalStatus.ERROR,
-                            e.message
-                        )
+                            e.message,
+                        ),
                     )
                 } finally {
                     throw e.message
@@ -187,15 +197,15 @@ export class MeasurementRunner {
             if (this.cpuInfo) {
                 Logger.I.info(
                     ELoggerMessage.CPU_USAGE_MIN,
-                    this.rounded(this.cpuInfo.load_min * 100)
+                    this.rounded(this.cpuInfo.load_min * 100),
                 )
                 Logger.I.info(
                     ELoggerMessage.CPU_USAGE_MAX,
-                    this.rounded(this.cpuInfo.load_max * 100)
+                    this.rounded(this.cpuInfo.load_max * 100),
                 )
                 Logger.I.info(
                     ELoggerMessage.CPU_USAGE_AVG,
-                    this.rounded(this.cpuInfo.load_avg * 100)
+                    this.rounded(this.cpuInfo.load_avg * 100),
                 )
             }
         }
@@ -229,7 +239,7 @@ export class MeasurementRunner {
             up,
             ups: this.rmbtClient?.ups ?? [],
             phase,
-            testUuid: this.rmbtClient?.params?.test_uuid ?? "",
+            testUuid: this.rmbtClient?.getTestUuid() ?? "",
             ipAddress: this.rmbtClient?.params.client_remote_ip ?? "-",
             serverName: this.rmbtClient?.params.test_server_name ?? "-",
             providerName: this.rmbtClient?.params.provider ?? "-",
@@ -297,7 +307,7 @@ export class MeasurementRunner {
             load_avg: this.rounded(
                 this.cpuInfoList.reduce((acc, stat) => acc + stat, 0) /
                     this.cpuInfoList.length /
-                    100
+                    100,
             ),
             model: osu.cpu.model(),
             cores: osu.cpu.count(),
@@ -321,12 +331,12 @@ export class MeasurementRunner {
 
     private async setMeasurementServer() {
         this.measurementServer = Store.I.get(
-            ACTIVE_SERVER
+            ACTIVE_SERVER,
         ) as IMeasurementServerResponse
         if (!this.measurementServer) {
             const measurementServers =
                 await ControlServer.I.getMeasurementServersFromApi(
-                    this.settingsRequest!
+                    this.settingsRequest!,
                 )
             this.measurementServer = measurementServers[0]
         }
@@ -337,12 +347,12 @@ export class MeasurementRunner {
             this.settings!.uuid,
             this.measurementServer?.id,
             this.settingsRequest,
-            options?.loopModeInfo
+            options?.loopModeInfo,
         )
         if (options?.loopModeInfo) {
             Logger.I.info(
                 "Registering test %d",
-                options?.loopModeInfo.test_counter
+                options?.loopModeInfo.test_counter,
             )
         }
         const measurementRegistration =

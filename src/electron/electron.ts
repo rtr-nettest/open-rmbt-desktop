@@ -1,6 +1,5 @@
 import { app, BrowserWindow, ipcMain, protocol } from "electron"
 if (require("electron-squirrel-startup")) app.quit()
-import { MeasurementRunner } from "../measurement"
 import { Events } from "./enums/events.enum"
 import Protocol from "./lib/protocol"
 import {
@@ -9,6 +8,7 @@ import {
     ACTIVE_SERVER,
     DEFAULT_LANGUAGE,
     IP_VERSION,
+    MEASUREMENT_ENGINE,
     Store,
     TERMS_ACCEPTED_VERSION,
 } from "../measurement/services/store.service"
@@ -23,6 +23,7 @@ import { ERoutes } from "../ui/src/app/enums/routes.enum"
 import { WindowManager } from "./lib/window-manager"
 import { getEnv } from "./lib/get-env"
 import { IUserSettings } from "../measurement/interfaces/user-settings-response.interface"
+import { MeasurementRunner } from "../measurement"
 
 // Needs to be called before app is ready;
 // gives our scheme access to load relative files,
@@ -62,6 +63,10 @@ ipcMain.handle(Events.GET_NEWS, async () => {
 
 ipcMain.on(Events.ACCEPT_TERMS, (event, terms: number) => {
     Store.I.set(TERMS_ACCEPTED_VERSION, terms)
+})
+
+ipcMain.on(Events.SET_MEASUREMENT_ENGINE, (event, engine: string) => {
+    Store.I.set(MEASUREMENT_ENGINE, engine)
 })
 
 ipcMain.handle(Events.REGISTER_CLIENT, async (event) => {
@@ -127,11 +132,11 @@ ipcMain.on(
     Events.SET_ACTIVE_SERVER,
     (event, server: IMeasurementServerResponse | null) => {
         Store.I.set(ACTIVE_SERVER, server)
-    }
+    },
 )
 
 ipcMain.on(Events.RUN_MEASUREMENT, (event, loopModeInfo) =>
-    MeasurementRunner.I.onRunMeasurement(event, loopModeInfo)
+    MeasurementRunner.I.onRunMeasurement(event, loopModeInfo),
 )
 
 ipcMain.on(Events.ABORT_MEASUREMENT, (event) => {
@@ -151,11 +156,11 @@ ipcMain.on(
                 MeasurementRunner.I.onScheduleLoop(
                     event,
                     loopInterval,
-                    loopModeInfo
+                    loopModeInfo,
                 ),
-            1000 - timeFromWholeSecond
+            1000 - timeFromWholeSecond,
         )
-    }
+    },
 )
 
 ipcMain.on(Events.DELETE_LOCAL_DATA, () => {
@@ -191,14 +196,14 @@ ipcMain.handle(
         } catch (e) {
             webContents.send(Events.ERROR, e)
         }
-    }
+    },
 )
 
 ipcMain.handle(Events.GET_SERVERS, async (event) => {
     const webContents = event.sender
     try {
         return await ControlServer.I.getMeasurementServersFromApi(
-            new UserSettingsRequest()
+            new UserSettingsRequest(),
         )
     } catch (e) {
         webContents.send(Events.ERROR, e)

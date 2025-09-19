@@ -15,6 +15,7 @@ export const DEFAULT_LANGUAGE = "defaultLanguage"
 export const SETTINGS = "settings"
 export const ACTIVE_SERVER = "activeServer"
 export const ACTIVE_CLIENT = "activeClient"
+export const MEASUREMENT_ENGINE = "measurementEngine"
 
 export class Store {
     private static instance: Store

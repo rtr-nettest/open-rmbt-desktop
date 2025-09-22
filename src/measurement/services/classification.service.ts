@@ -13,10 +13,13 @@ export class ClassificationService {
     private constructor() {}
 
     classify(
-        value: number,
+        value: number | null | undefined,
         threshold: number[],
-        condition: "smallerBetter" | "biggerBetter"
+        condition: "smallerBetter" | "biggerBetter",
     ) {
+        if (value === null || value === undefined || isNaN(value)) {
+            return undefined
+        }
         threshold = threshold.sort((a, b) => b - a)
         let retVal = 1
         for (let i = 0; i < threshold.length; i++) {

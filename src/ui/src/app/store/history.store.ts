@@ -46,7 +46,7 @@ export class HistoryStore {
         private conversion: ConversionService,
         private datePipe: DatePipe,
         private mainStore: MainStore,
-        private transloco: TranslocoService
+        private transloco: TranslocoService,
     ) {}
 
     getFormattedHistory(options?: {
@@ -66,7 +66,7 @@ export class HistoryStore {
                 }
                 const loopHistory = this.getLoopResults(
                     history,
-                    options?.loopUuid
+                    options?.loopUuid,
                 )
                 const countedHistory = this.countResults(loopHistory, paginator)
                 const h =
@@ -85,7 +85,7 @@ export class HistoryStore {
                             ? totalElements
                             : content.length,
                 }
-            })
+            }),
         )
     }
 
@@ -108,14 +108,14 @@ export class HistoryStore {
                             offset: paginator.offset,
                             limit: env.HISTORY_RESULTS_LIMIT,
                         },
-                        sort
+                        sort,
                     )
                 } else {
                     return window.electronAPI.getMeasurementHistory(
                         {
                             offset: paginator.offset,
                         },
-                        sort
+                        sort,
                     )
                 }
             }),
@@ -126,7 +126,7 @@ export class HistoryStore {
                         : history
                     this.history$.next(h)
                 }
-            })
+            }),
         )
     }
 
@@ -160,13 +160,13 @@ export class HistoryStore {
         return from(
             window.electronAPI.getMeasurementHistory(
                 paginator,
-                sort ?? this.historySort$.value
-            )
+                sort ?? this.historySort$.value,
+            ),
         ).pipe(
             take(1),
             tap((history) => {
                 this.history$.next(history)
-            })
+            }),
         )
     }
 
@@ -190,7 +190,7 @@ export class HistoryStore {
 
     private countResults(
         history: ISimpleHistoryResult[],
-        paginator: IPaginator
+        paginator: IPaginator,
     ) {
         return history.map((hi, index) => ({
             ...hi,
@@ -208,23 +208,29 @@ export class HistoryStore {
                     hi.measurementDate,
                     "mediumDate",
                     undefined,
-                    locale
+                    locale,
                 )!,
                 time: this.datePipe.transform(
                     hi.measurementDate,
                     "mediumTime",
                     undefined,
-                    locale
+                    locale,
                 )!,
-                download: this.conversion
-                    .getSignificantDigits(hi.downloadKbit / 1e3)
-                    .toLocaleString(locale),
-                upload: this.conversion
-                    .getSignificantDigits(hi.uploadKbit / 1e3)
-                    .toLocaleString(locale),
-                ping: this.conversion
-                    .getSignificantDigits(hi.ping)
-                    .toLocaleString(locale),
+                download: hi.downloadKbit
+                    ? this.conversion
+                          .getSignificantDigits(hi.downloadKbit / 1e3)
+                          .toLocaleString(locale)
+                    : " ",
+                upload: hi.uploadKbit
+                    ? this.conversion
+                          .getSignificantDigits(hi.uploadKbit / 1e3)
+                          .toLocaleString(locale)
+                    : t["Test failed"],
+                ping: hi.ping
+                    ? this.conversion
+                          .getSignificantDigits(hi.ping)
+                          .toLocaleString(locale)
+                    : " ",
                 providerName: hi.providerName,
             }
         }
@@ -237,13 +243,16 @@ export class HistoryStore {
                 hi.measurementDate,
                 "medium",
                 undefined,
-                locale
+                locale,
             )!
             if (hi.groupHeader) {
                 return {
                     id: hi.loopUuid!,
                     measurementDate,
                     groupHeader: hi.groupHeader,
+                    download: " ",
+                    upload: " ",
+                    ping: " ",
                 }
             }
             return {
@@ -252,29 +261,36 @@ export class HistoryStore {
                 measurementDate,
                 downloadClass: this.classification.getPhaseCSSClass(
                     "down",
-                    hi.downloadClass
+                    hi.downloadClass,
                 ),
                 download:
-                    this.conversion
-                        .getSignificantDigits(hi.downloadKbit / 1e3)
-                        .toLocaleString(locale) +
-                    " " +
-                    t["Mbps"],
+                    hi.downloadKbit != null
+                        ? this.conversion
+                              .getSignificantDigits(hi.downloadKbit / 1e3)
+                              .toLocaleString(locale) +
+                          " " +
+                          t["Mbps"]
+                        : " ",
                 uploadClass: this.classification.getPhaseCSSClass(
                     "up",
-                    hi.uploadClass
+                    hi.uploadClass,
                 ),
                 upload:
-                    this.conversion
-                        .getSignificantDigits(hi.uploadKbit / 1e3)
-                        .toLocaleString(locale) +
-                    " " +
-                    t["Mbps"],
+                    hi.uploadKbit != null
+                        ? this.conversion
+                              .getSignificantDigits(hi.uploadKbit / 1e3)
+                              .toLocaleString(locale) +
+                          " " +
+                          t["Mbps"]
+                        : t["Test failed"],
                 pingClass: this.classification.getPhaseCSSClass(
                     "ping",
-                    hi.pingClass
+                    hi.pingClass,
                 ),
-                ping: hi.ping.toLocaleString(locale) + " " + t["ms"],
+                ping:
+                    hi.ping != null
+                        ? hi.ping.toLocaleString(locale) + " " + t["ms"]
+                        : " ",
                 loopUuid: hi.loopUuid,
                 hidden: hi.hidden,
             }

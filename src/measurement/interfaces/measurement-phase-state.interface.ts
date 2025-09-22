@@ -5,9 +5,9 @@ import { IOverallResult } from "./overall-result.interface"
 export interface IMeasurementPhaseState {
     duration: number
     progress: number
-    down: number
-    up: number
-    ping: number
+    down: number | null
+    up: number | null
+    ping: number | null
     pings: IPing[]
     downs: IOverallResult[]
     ups: IOverallResult[]

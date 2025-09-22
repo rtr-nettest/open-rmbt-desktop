@@ -239,9 +239,15 @@ export class TestStore {
                 this.simpleHistoryResult$.next(result)
                 const newPhase = new TestPhaseState({
                     phase: EMeasurementStatus.SHOWING_RESULTS,
-                    down: result.downloadKbit / 1000,
-                    up: result.uploadKbit / 1000,
-                    ping: result.ping / 1e6,
+                    down:
+                        result.downloadKbit != null
+                            ? result.downloadKbit / 1000
+                            : null,
+                    up:
+                        result.uploadKbit != null
+                            ? result.uploadKbit / 1000
+                            : null,
+                    ping: result.ping != null ? result.ping / 1e6 : null,
                 })
                 const newState = TestVisualizationState.fromHistoryResult(
                     result,

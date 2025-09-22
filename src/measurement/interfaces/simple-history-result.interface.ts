@@ -10,11 +10,11 @@ export interface ISimpleHistoryPaginator {
 export interface ISimpleHistoryResult {
     measurementDate: string
     measurementServerName: string
-    uploadKbit: number
+    uploadKbit: number | null
     uploadOverTime?: IOverallResult[]
-    downloadKbit: number
+    downloadKbit: number | null
     downloadOverTime?: IOverallResult[]
-    ping: number
+    ping: number | null
     pingOverTime?: IPing[]
     providerName: string
     ipAddress: string

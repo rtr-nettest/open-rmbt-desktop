@@ -40,18 +40,18 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             ClassificationService.I.classify(
                 result.test_speed_download,
                 THRESHOLD_DOWNLOAD,
-                "biggerBetter"
+                "biggerBetter",
             ),
             ClassificationService.I.classify(
                 result.test_speed_upload,
                 THRESHOLD_UPLOAD,
-                "biggerBetter"
+                "biggerBetter",
             ),
             ClassificationService.I.classify(
                 result.test_ping_shortest,
                 THRESHOLD_PING,
-                "smallerBetter"
-            )
+                "smallerBetter",
+            ),
         )
     }
 
@@ -75,31 +75,37 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             ClassificationService.I.classify(
                 response.download,
                 THRESHOLD_DOWNLOAD,
-                "biggerBetter"
+                "biggerBetter",
             ),
             ClassificationService.I.classify(
                 response.upload,
                 THRESHOLD_UPLOAD,
-                "biggerBetter"
+                "biggerBetter",
             ),
             ClassificationService.I.classify(
                 response.ping * 1e6,
                 THRESHOLD_PING,
-                "smallerBetter"
-            )
+                "smallerBetter",
+            ),
         )
     }
 
     static fromRTRHistoryResult(response: any) {
-        const downKbit = response.speed_download
-            ? parseFloat(response.speed_download.replace(",", "")) * 1e3
-            : 0
-        const upKbit = response.speed_upload
-            ? parseFloat(response.speed_upload.replace(",", "")) * 1e3
-            : 0
-        const pingMs = response.ping
-            ? parseFloat(response.ping.replace(",", ""))
-            : 0
+        const downKbit =
+            (!response?.speed_download && response?.speed_download != 0) ||
+            response.speed_download.trim() === ""
+                ? null
+                : parseFloat(response.speed_download.replace(",", "")) * 1e3
+        const upKbit =
+            (!response?.speed_upload && response?.speed_upload != 0) ||
+            response.speed_upload.trim() === ""
+                ? null
+                : parseFloat(response.speed_upload.replace(",", "")) * 1e3
+        const pingMs =
+            (!response?.ping && response?.ping != 0) ||
+            response.ping.trim() === ""
+                ? null
+                : parseFloat(response.ping.replace(",", ""))
         return new SimpleHistoryResult(
             dayjs(response?.time)
                 .tz(response.timezone)
@@ -119,18 +125,18 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             ClassificationService.I.classify(
                 downKbit,
                 THRESHOLD_DOWNLOAD,
-                "biggerBetter"
+                "biggerBetter",
             ),
             ClassificationService.I.classify(
                 upKbit,
                 THRESHOLD_UPLOAD,
-                "biggerBetter"
+                "biggerBetter",
             ),
             ClassificationService.I.classify(
-                pingMs * 1e6,
+                pingMs != null ? pingMs * 1e6 : null,
                 THRESHOLD_PING,
-                "smallerBetter"
-            )
+                "smallerBetter",
+            ),
         )
     }
 
@@ -138,7 +144,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         uuid: string,
         response: any,
         openTestsResponse: any,
-        testResultDetail: any
+        testResultDetail: any,
     ) {
         return new SimpleHistoryResult(
             response?.time
@@ -154,31 +160,31 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             response?.loop_uuid,
             false,
             CalcService.I.getOverallResultsFromSpeedCurve(
-                openTestsResponse?.speed_curve.download
+                openTestsResponse?.speed_curve.download,
             ),
             CalcService.I.getOverallResultsFromSpeedCurve(
-                openTestsResponse?.speed_curve.upload
+                openTestsResponse?.speed_curve.upload,
             ),
             CalcService.I.getOverallPings(openTestsResponse?.speed_curve.ping),
             response?.measurement_result?.download_classification ??
                 ClassificationService.I.classify(
                     response?.measurement_result?.download_kbit,
                     THRESHOLD_DOWNLOAD,
-                    "biggerBetter"
+                    "biggerBetter",
                 ),
             response?.measurement_result?.upload_classification ??
                 ClassificationService.I.classify(
                     response?.measurement_result?.upload_kbit,
                     THRESHOLD_UPLOAD,
-                    "biggerBetter"
+                    "biggerBetter",
                 ),
             response?.measurement_result?.ping_classification ??
                 ClassificationService.I.classify(
                     response?.measurement_result?.ping_ms * 1e6,
                     THRESHOLD_PING,
-                    "smallerBetter"
+                    "smallerBetter",
                 ),
-            testResultDetail?.testresultdetail
+            testResultDetail?.testresultdetail,
         )
     }
 
@@ -196,21 +202,21 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             false,
             CalcService.I.getOverallResultsFromSpeedItems(
                 response.speed_detail,
-                "download"
+                "download",
             ),
             CalcService.I.getOverallResultsFromSpeedItems(
                 response.speed_detail,
-                "upload"
-            )
+                "upload",
+            ),
         )
     }
 
     constructor(
         public measurementDate: string,
         public measurementServerName: string,
-        public downloadKbit: number,
-        public uploadKbit: number,
-        public ping: number,
+        public downloadKbit: number | null,
+        public uploadKbit: number | null,
+        public ping: number | null,
         public providerName: string,
         public ipAddress: string,
         public testUuid?: string,
@@ -222,6 +228,6 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         public downloadClass?: number,
         public uploadClass?: number,
         public pingClass?: number,
-        public detailedHistoryResult?: IDetailedHistoryResultItem[]
+        public detailedHistoryResult?: IDetailedHistoryResultItem[],
     ) {}
 }

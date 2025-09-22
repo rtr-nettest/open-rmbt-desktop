@@ -153,5 +153,6 @@
     "Test progress": "Test progress",
     "Commit hash": "Commit hash",
     "Measurement result": "Measurement result",
-    "Measurement engine": "Measurement engine"
+    "Measurement engine": "Measurement engine",
+    "Test failed": "Test fallito"
 }

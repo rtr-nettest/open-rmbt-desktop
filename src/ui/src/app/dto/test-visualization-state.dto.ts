@@ -46,13 +46,13 @@ export class TestVisualizationState implements ITestVisualizationState {
     static from(
         initialState: ITestVisualizationState,
         phaseState: IMeasurementPhaseState,
-        flavor: string
+        flavor: string,
     ) {
         const newState = extend<ITestVisualizationState>(initialState)
         if (newState.phases[phaseState.phase]) {
             const newTestPhaseState = extend<ITestPhaseState>(
                 newState.phases[phaseState.phase],
-                phaseState
+                phaseState,
             )
             newState.flavor = flavor
             newState.phases[phaseState.phase] = newTestPhaseState
@@ -67,12 +67,12 @@ export class TestVisualizationState implements ITestVisualizationState {
         result: ISimpleHistoryResult,
         initialState: ITestVisualizationState,
         phaseState: IMeasurementPhaseState,
-        flavor: string
+        flavor: string,
     ) {
         const newState = TestVisualizationState.from(
             initialState,
             phaseState,
-            flavor
+            flavor,
         )
         if (flavor !== "rtr") {
             newState.phases[
@@ -90,14 +90,14 @@ export class TestVisualizationState implements ITestVisualizationState {
             ].setRTRChartFromOverallSpeed?.(result.uploadOverTime ?? [])
         }
         newState.phases[EMeasurementStatus.PING].setChartFromPings?.(
-            result.pingOverTime ?? []
+            result.pingOverTime ?? [],
         )
         return newState
     }
 
     setCounter(
         newPhaseName: EMeasurementStatus,
-        newTestPhaseState: ITestPhaseState
+        newTestPhaseState: ITestPhaseState,
     ) {
         if (newPhaseName === EMeasurementStatus.DOWN) {
             if (
@@ -105,13 +105,13 @@ export class TestVisualizationState implements ITestVisualizationState {
                 newTestPhaseState.ping
             ) {
                 this.phases[EMeasurementStatus.PING].counter =
-                    newTestPhaseState.ping
+                    newTestPhaseState.ping ?? 0
                 this.phases[EMeasurementStatus.PING].setChartFromPings?.(
-                    newTestPhaseState.pings
+                    newTestPhaseState.pings,
                 )
             }
             this.phases[EMeasurementStatus.DOWN].counter =
-                newTestPhaseState.down
+                newTestPhaseState.down ?? 0
         } else if (
             newPhaseName === EMeasurementStatus.INIT_UP ||
             newPhaseName === EMeasurementStatus.UP ||
@@ -119,10 +119,11 @@ export class TestVisualizationState implements ITestVisualizationState {
             newPhaseName === EMeasurementStatus.SHOWING_RESULTS
         ) {
             this.phases[EMeasurementStatus.PING].counter =
-                newTestPhaseState.ping
+                newTestPhaseState.ping ?? 0
             this.phases[EMeasurementStatus.DOWN].counter =
-                newTestPhaseState.down
-            this.phases[EMeasurementStatus.UP].counter = newTestPhaseState.up
+                newTestPhaseState.down ?? 0
+            this.phases[EMeasurementStatus.UP].counter =
+                newTestPhaseState.up ?? 0
         }
         this.setResultsForEachPhase(newTestPhaseState)
     }

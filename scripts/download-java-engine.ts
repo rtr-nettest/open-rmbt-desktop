@@ -15,14 +15,27 @@ async function downloadJavaEngine() {
     }
 
     const buffer = await response.arrayBuffer()
-    const zipPath = path.join(__dirname, "temp", "RTR-NetztestCLI-win32.zip")
-    fs.mkdirSync(path.join(__dirname, "temp"), { recursive: true })
+    const tempDir = path.join(__dirname, "temp")
+    if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true })
+    }
+    const zipPath = path.join(tempDir, "RTR-NetztestCLI-win32.zip")
     fs.writeFileSync(zipPath, Buffer.from(buffer))
     await extract(zipPath, {
-        dir: path.join(__dirname, "temp"),
+        dir: tempDir,
     })
+    const destDir = path.join(
+        __dirname,
+        "..",
+        "src",
+        "measurement",
+        "java_client",
+    )
+    if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true })
+    }
     fs.copyFileSync(
-        path.join(__dirname, "temp", "app", "RMBTClient-all.jar"),
+        path.join(tempDir, "app", "RMBTClient-all.jar"),
         path.join(
             __dirname,
             "..",
@@ -32,7 +45,7 @@ async function downloadJavaEngine() {
             "RMBTClient-all.jar",
         ),
     )
-    fs.rmSync(path.join(__dirname, "temp"), { recursive: true, force: true })
+    fs.rmSync(tempDir, { recursive: true, force: true })
     console.log("Java engine downloaded and extracted successfully.")
 }
 

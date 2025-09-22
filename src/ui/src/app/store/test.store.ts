@@ -36,18 +36,19 @@ export const STATE_UPDATE_TIMEOUT = 175
 })
 export class TestStore {
     basicNetworkInfo$ = new BehaviorSubject<IBasicNetworkInfo>(
-        new BasicNetworkInfo()
+        new BasicNetworkInfo(),
     )
     visualization$ = new BehaviorSubject<ITestVisualizationState>(
-        new TestVisualizationState()
+        new TestVisualizationState(),
     )
     simpleHistoryResult$ = new BehaviorSubject<ISimpleHistoryResult | null>(
-        null
+        null,
     )
     servers$ = new BehaviorSubject<IMeasurementServerResponse[]>([])
     testIntervalMinutes$ = new BehaviorSubject<number | null>(null)
     enableLoopMode$ = new BehaviorSubject<boolean>(false)
     isCertifiedMeasurement$ = new BehaviorSubject<boolean>(false)
+    lastTestFinishedAt$ = new BehaviorSubject<number>(0)
     loopCounter$ = new BehaviorSubject<number>(1)
     loopUuid$ = new BehaviorSubject<string | null>(null)
     maxTestsReached$ = new BehaviorSubject<boolean>(false)
@@ -65,7 +66,7 @@ export class TestStore {
         private ngZone: NgZone,
         private router: Router,
         private sprintf: SprintfPipe,
-        private transloco: TranslocoService
+        private transloco: TranslocoService,
     ) {
         window.electronAPI.onRestartMeasurement((loopCounter) => {
             this.ngZone.run(() => {
@@ -75,12 +76,12 @@ export class TestStore {
         window.electronAPI.onLoopModeExpired(() => {
             this.ngZone.run(() => {
                 const message = this.transloco.translate(
-                    "The loop measurement has expired"
+                    "The loop measurement has expired",
                 )
                 this.message.openConfirmDialog(
                     this.sprintf.transform(
                         message,
-                        this.mainStore.env$.value!.LOOP_MODE_MAX_DURATION
+                        this.mainStore.env$.value!.LOOP_MODE_MAX_DURATION,
                     ),
                     () => {
                         this.router.navigate([
@@ -88,7 +89,7 @@ export class TestStore {
                             ERoutes.LOOP_RESULT.split("/")[0],
                             this.loopUuid$.value,
                         ])
-                    }
+                    },
                 )
             })
         })
@@ -119,19 +120,26 @@ export class TestStore {
         return interval(STATE_UPDATE_TIMEOUT).pipe(
             concatMap(() => from(window.electronAPI.getMeasurementState())),
             withLatestFrom(this.visualization$),
-            map(([state, vis]) => this.setTestState(state, vis))
+            map(([state, vis]) => this.setTestState(state, vis)),
         )
     }
 
     private setTestState = (
         phaseState: IMeasurementPhaseState & IBasicNetworkInfo,
-        oldVisualization: ITestVisualizationState
+        oldVisualization: ITestVisualizationState,
     ) => {
         const oldPhaseName = oldVisualization.currentPhaseName
         const oldPhaseIsOfFinishType =
             oldPhaseName === EMeasurementStatus.END ||
             oldPhaseName === EMeasurementStatus.ERROR ||
             oldPhaseName === EMeasurementStatus.ABORTED
+        const newPhaseIsOfFinishType =
+            phaseState.phase === EMeasurementStatus.END ||
+            phaseState.phase === EMeasurementStatus.ERROR ||
+            phaseState.phase === EMeasurementStatus.ABORTED
+        if (newPhaseIsOfFinishType && phaseState.phase !== oldPhaseName) {
+            this.lastTestFinishedAt$.next(Date.now())
+        }
         let newState
         if (phaseState.phase !== oldPhaseName && oldPhaseIsOfFinishType) {
             newState = new TestVisualizationState()
@@ -141,7 +149,7 @@ export class TestStore {
         newState = TestVisualizationState.from(
             newState,
             phaseState,
-            this.mainStore.env$.value?.FLAVOR ?? "rtr"
+            this.mainStore.env$.value?.FLAVOR ?? "rtr",
         )
         this.visualization$.next(newState)
         this.basicNetworkInfo$.next(phaseState)
@@ -156,7 +164,7 @@ export class TestStore {
         this.enableLoopMode$.next(true)
         this.isCertifiedMeasurement$.next(true)
         this.testIntervalMinutes$.next(
-            this.mainStore.env$.value!.CERTIFIED_TEST_INTERVAL
+            this.mainStore.env$.value!.CERTIFIED_TEST_INTERVAL,
         )
         const loopModeInfo: ILoopModeInfo | undefined = {
             max_delay: this.testIntervalMinutes$.value ?? 0,
@@ -165,7 +173,7 @@ export class TestStore {
             loop_uuid: loopUuid,
         }
         window.electronAPI.onMaxTestsReached(() =>
-            this.maxTestsReached$.next(true)
+            this.maxTestsReached$.next(true),
         )
         window.electronAPI.scheduleLoop(this.fullTestIntervalMs, loopModeInfo)
         return loopModeInfo
@@ -200,10 +208,10 @@ export class TestStore {
             this.setTestState(state, v)
             v.phases[EMeasurementStatus.DOWN].setChartFromPings?.(state.pings)
             v.phases[EMeasurementStatus.DOWN].setRTRChartFromOverallSpeed?.(
-                state.downs
+                state.downs,
             )
             v.phases[EMeasurementStatus.UP].setRTRChartFromOverallSpeed?.(
-                state.ups
+                state.ups,
             )
             this.visualization$.next(v)
             this.historyStore
@@ -239,7 +247,7 @@ export class TestStore {
                     result,
                     this.visualization$.value,
                     newPhase,
-                    this.mainStore.env$.value?.FLAVOR ?? "rtr"
+                    this.mainStore.env$.value?.FLAVOR ?? "rtr",
                 )
                 this.visualization$.next(newState)
                 this.basicNetworkInfo$.next({
@@ -248,7 +256,7 @@ export class TestStore {
                     providerName: result.providerName,
                 })
                 return result
-            })
+            }),
         )
     }
 
@@ -263,7 +271,7 @@ export class TestStore {
         const updatedServers = this.servers$.value.map((s) =>
             s.webAddress === server?.webAddress
                 ? { ...s, active: true }
-                : { ...s, active: false }
+                : { ...s, active: false },
         )
         this.servers$.next(updatedServers)
     }

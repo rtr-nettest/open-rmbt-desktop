@@ -6,6 +6,8 @@ import { ERROR_OCCURED_DURING_LOOP } from "src/app/constants/strings"
 import {
     BehaviorSubject,
     distinctUntilChanged,
+    filter,
+    takeUntil,
     tap,
     withLatestFrom,
 } from "rxjs"
@@ -18,24 +20,25 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
 })
 export class LoopTestScreenComponent extends TestScreenComponent {
     private waitingProgressMs = 0
-    private shouldGetHistory$ = new BehaviorSubject<boolean>(false)
     private currentTestUuid$ = new BehaviorSubject<string | null>(null)
+
+    protected get lastTestFinishedAt$() {
+        return this.store.lastTestFinishedAt$
+    }
 
     override visualization$ = this.store.visualization$.pipe(
         withLatestFrom(this.mainStore.error$, this.loopCount$),
         distinctUntilChanged(),
-        tap(([state, error, loopCount]) => {
+        tap(([state, error]) => {
             this.setShowCPUWarning(this.mainStore.env$.value)
             this.initNewLoop(state.phases[state.currentPhaseName].testUuid)
             if (error) {
                 this.openErrorDialog(state)
             } else if (state.currentPhaseName === EMeasurementStatus.END) {
                 this.goToResult(state)
-            } else {
-                this.getRecentHistory(loopCount)
             }
             this.setProgressIndicator(state)
-        })
+        }),
     )
 
     override ngOnInit(): void {
@@ -45,6 +48,15 @@ export class LoopTestScreenComponent extends TestScreenComponent {
                 this.getRecentHistory(this.loopCount$.value)
             })
         })
+        this.lastTestFinishedAt$
+            .pipe(
+                filter((v) => v > 0),
+                distinctUntilChanged(),
+                takeUntil(this.stopped$),
+            )
+            .subscribe(() => {
+                this.getRecentHistory(this.loopCount$.value)
+            })
     }
 
     private initNewLoop(testUuid: string) {
@@ -68,21 +80,16 @@ export class LoopTestScreenComponent extends TestScreenComponent {
 
     protected override goToResult = (state: ITestVisualizationState) => {
         this.loopWaiting$.next(true)
-        this.shouldGetHistory$.next(true)
         this.mainStore.error$.next(null)
     }
 
     private getRecentHistory(loopCount: number) {
-        if (!this.shouldGetHistory$.value) {
-            return
-        }
         this.historyStore
             .getRecentMeasurementHistory({
                 offset: 0,
-                limit: loopCount - 1,
+                limit: loopCount,
             })
             .subscribe()
-        this.shouldGetHistory$.next(false)
     }
 
     private setProgressIndicator(state: ITestVisualizationState) {

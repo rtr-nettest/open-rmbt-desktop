@@ -55,8 +55,11 @@ $app-theme: mat.m2-define-light-theme(
     margin-left: rem(4);
 }
 
-app-settings-locale .mat-mdc-select {
-    font-size: 1em;
+app-settings-locale,
+app-settings-engine {
+    .mat-mdc-select {
+        font-size: 1em;
+    }
 }
 
 .app-server-select,

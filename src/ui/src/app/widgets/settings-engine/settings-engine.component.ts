@@ -1,5 +1,6 @@
-import { Component, Input } from "@angular/core"
+import { Component, Input, model } from "@angular/core"
 import { MatSelectChange } from "@angular/material/select"
+import { map, tap } from "rxjs"
 import {
     IDynamicComponent,
     IDynamicComponentParameters,
@@ -17,13 +18,22 @@ export class SettingsEngineComponent implements IDynamicComponent {
         { id: "node", name: "NodeJS" },
         { id: "java", name: "Java" },
     ]
-    selectedEngine = this.engines.find(
-        (l) => l.id === this.mainStore.env$.value?.MEASUREMENT_ENGINE,
+    selectedEngine$ = this.mainStore.env$.pipe(
+        tap((env) => {
+            this.selectedEngine.set(
+                this.engines.find((l) => l.id === env?.MEASUREMENT_ENGINE),
+            )
+        }),
     )
+    selectedEngine = model<any>(null)
 
     constructor(private readonly mainStore: MainStore) {}
 
     change(event: MatSelectChange) {
+        this.mainStore.env$.next({
+            ...this.mainStore.env$.value!,
+            MEASUREMENT_ENGINE: event.value.id,
+        })
         window.electronAPI.setMeasurementEngine(event.value.id)
     }
 }

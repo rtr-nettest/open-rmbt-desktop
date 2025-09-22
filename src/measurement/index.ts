@@ -134,7 +134,8 @@ export class MeasurementRunner {
         try {
             this.setCPUInfoInterval()
             await this.setRMBTClient(options)
-            const threadResults = await this.rmbtClient!.scheduleMeasurement()
+            const threadResults =
+                await this.rmbtClient!.scheduleMeasurement(options)
             this.setCPUUsage()
             await this.finalizeMeasurement(threadResults)
             return this.rmbtClient!.measurementStatus

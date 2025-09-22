@@ -52,7 +52,7 @@ export class ControlServer {
 
     private constructor() {}
 
-    private async getHost() {
+    async getHost() {
         const ipv = Store.I.get(IP_VERSION) as EIPVersion
         const settings = Store.I.get(SETTINGS) as IUserSettings
         const settingsRequest = new UserSettingsRequest()
@@ -64,7 +64,7 @@ export class ControlServer {
             resolved = (
                 await NetworkInfoService.I.getIpV6Info(
                     settings,
-                    settingsRequest
+                    settingsRequest,
                 )
             ).publicV6
             if (resolved) {
@@ -75,7 +75,7 @@ export class ControlServer {
             resolved = (
                 await NetworkInfoService.I.getIpV4Info(
                     settings,
-                    settingsRequest
+                    settingsRequest,
                 )
             ).publicV4
             if (resolved) {
@@ -118,13 +118,13 @@ export class ControlServer {
         Logger.I.info(
             ELoggerMessage.POST_REQUEST,
             process.env.NEWS_PATH,
-            newsRequest
+            newsRequest,
         )
         try {
             const response = (
                 await axios.post(
                     `${process.env.CONTROL_SERVER_URL}${process.env.NEWS_PATH}`,
-                    newsRequest
+                    newsRequest,
                 )
             ).data as INewsResponse
             if (response.error?.length) {
@@ -142,35 +142,35 @@ export class ControlServer {
     }
 
     async getMeasurementServersFromApi(
-        request: IUserSettingsRequest
+        request: IUserSettingsRequest,
     ): Promise<IMeasurementServerResponse[]> {
         if (!process.env.MEASUREMENT_SERVERS_PATH) {
             return []
         }
         Logger.I.info(
             ELoggerMessage.GET_REQUEST,
-            process.env.MEASUREMENT_SERVERS_PATH
+            process.env.MEASUREMENT_SERVERS_PATH,
         )
         const servers = (
             await axios.get(
                 `${process.env.CONTROL_SERVER_URL}${process.env.MEASUREMENT_SERVERS_PATH}`,
-                { headers: this.headers }
+                { headers: this.headers },
             )
         ).data as IMeasurementServerResponse[]
         const activeServer = Store.I.get(
-            ACTIVE_SERVER
+            ACTIVE_SERVER,
         ) as IMeasurementServerResponse
         let filteredServers: IMeasurementServerResponse[] = []
         if (servers?.length) {
             filteredServers = servers.filter((s) =>
                 s.serverTypeDetails.some(
-                    (std) => std.serverType === request.name
-                )
+                    (std) => std.serverType === request.name,
+                ),
             )
             for (const filteredServer of filteredServers) {
                 filteredServer.serverTypeDetails =
                     filteredServer.serverTypeDetails.filter(
-                        (std) => std.serverType === request.name
+                        (std) => std.serverType === request.name,
                     )
                 if (activeServer?.webAddress === filteredServer.webAddress) {
                     filteredServer.active = true
@@ -184,13 +184,13 @@ export class ControlServer {
         Logger.I.info(
             ELoggerMessage.POST_REQUEST,
             process.env.SETTINGS_PATH,
-            request
+            request,
         )
         const response = (
             await axios.post(
                 `${process.env.CONTROL_SERVER_URL}${process.env.SETTINGS_PATH}`,
                 request,
-                { headers: this.headers }
+                { headers: this.headers },
             )
         ).data as IUserSetingsResponse
         if (response?.settings?.length) {
@@ -226,7 +226,7 @@ export class ControlServer {
         Logger.I.info(
             ELoggerMessage.POST_REQUEST,
             process.env.MESUREMENT_REGISTRATION_PATH,
-            request
+            request,
         )
         const hostName = await this.getHost()
         const response = (
@@ -236,7 +236,7 @@ export class ControlServer {
                 {
                     headers: this.headers,
                     httpsAgent: new Agent({ rejectUnauthorized: false }),
-                }
+                },
             )
         ).data as IMeasurementRegistrationResponse
         if (response?.test_token && response?.test_uuid) {
@@ -255,14 +255,14 @@ export class ControlServer {
         Logger.I.info(
             ELoggerMessage.POST_REQUEST,
             process.env.RESULT_SUBMISSION_PATH,
-            result
+            result,
         )
         try {
             const response = (
                 await axios.post(
                     `${process.env.CONTROL_SERVER_URL}${process.env.RESULT_SUBMISSION_PATH}`,
                     result,
-                    { headers: this.headers }
+                    { headers: this.headers },
                 )
             ).data
             Logger.I.info("Result is submitted. Response: %o", response)
@@ -283,7 +283,7 @@ export class ControlServer {
                 return
             }
             const promises = unsent.map((result) =>
-                this.submitMeasurement(result)
+                this.submitMeasurement(result),
             )
             await Promise.allSettled(promises)
         } catch (e: any) {
@@ -310,7 +310,6 @@ export class ControlServer {
                 this.handleError(e)
             }
         }
-        Logger.I.info("The history is: %o", retVal)
         return retVal
     }
 
@@ -364,13 +363,13 @@ export class ControlServer {
         Logger.I.info(
             ELoggerMessage.POST_REQUEST,
             process.env.HISTORY_PATH,
-            body
+            body,
         )
         const resp = (
             await axios.post(
                 `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_PATH}`,
                 body,
-                { headers: this.headers }
+                { headers: this.headers },
             )
         ).data
         Logger.I.warn("Response is %o", resp)
@@ -379,14 +378,14 @@ export class ControlServer {
         }
         if (resp?.history.length) {
             return resp.history.map((hi: any) =>
-                SimpleHistoryResult.fromRTRHistoryResult(hi)
+                SimpleHistoryResult.fromRTRHistoryResult(hi),
             )
         }
         throw new Error("Something unexpected happened.")
     }
 
     async getMeasurementResult(
-        uuid: string
+        uuid: string,
     ): Promise<ISimpleHistoryResult | undefined> {
         Logger.I.info("Receiving measurement result by UUID: %s", uuid)
         let retVal: ISimpleHistoryResult | undefined
@@ -404,7 +403,6 @@ export class ControlServer {
                 this.handleError(e)
             }
         }
-        Logger.I.info("The final result is: %o", retVal)
         return retVal
     }
 
@@ -417,13 +415,13 @@ export class ControlServer {
         Logger.I.info(
             ELoggerMessage.POST_REQUEST,
             process.env.HISTORY_RESULT_PATH,
-            body
+            body,
         )
         let response = (
             await axios.post(
                 `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}`,
                 body,
-                { headers: this.headers }
+                { headers: this.headers },
             )
         ).data
         Logger.I.info(ELoggerMessage.RESPONSE, response)
@@ -442,7 +440,7 @@ export class ControlServer {
                         ...body,
                         language: I18nService.I.getActiveLanguage(),
                     },
-                    { headers: this.headers }
+                    { headers: this.headers },
                 )
             ).data
             Logger.I.info("Test result detail is: %o", testResultDetail)
@@ -461,7 +459,7 @@ export class ControlServer {
                 openTestsResponse = (
                     await axios.get(
                         `${settings?.urls?.url_statistic_server}${process.env.HISTORY_RESULT_STATS_PATH}/${response.open_test_uuid}`,
-                        { headers: this.headers }
+                        { headers: this.headers },
                     )
                 ).data
             }
@@ -472,7 +470,7 @@ export class ControlServer {
             uuid,
             response,
             openTestsResponse,
-            testResultDetail
+            testResultDetail,
         )
     }
 
@@ -482,14 +480,14 @@ export class ControlServer {
         response = (
             await axios.get(
                 `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}/${uuid}`,
-                { headers: this.headers }
+                { headers: this.headers },
             )
         ).data
         Logger.I.info(ELoggerMessage.RESPONSE, response)
         if (response) {
             retVal = SimpleHistoryResult.fromONTMeasurementResult(
                 uuid,
-                response
+                response,
             )
         }
         return retVal

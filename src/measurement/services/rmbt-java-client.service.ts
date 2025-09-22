@@ -14,6 +14,7 @@ import { UserSettingsRequest } from "../dto/user-settings-request.dto"
 import { MeasurementOptions } from "../interfaces/measurement-options.interface"
 import { IRMBTClient } from "../interfaces/rmbt-client.interface"
 import path from "path"
+import { ControlServer } from "./control-server.service"
 
 const packJson = require("../../../package.json")
 
@@ -165,6 +166,10 @@ export class RMBTJavaClient implements IRMBTClient {
         let networkType = await NetworkInfoService.I.getNetworkType()
         Logger.I.info("Network type is: " + networkType.toString)
 
+        const host = await ControlServer.I.getHost()
+
+        Logger.I.info("Control server host is: " + host)
+
         return new Promise((resolve, reject) => {
             let platform = process.platform.toLowerCase()
             let settingsRequest = new UserSettingsRequest({ platform })
@@ -199,7 +204,7 @@ export class RMBTJavaClient implements IRMBTClient {
 
             let bin_options = [
                 "-h",
-                "c01.netztest.at", // TODO - this shall not be hardcoded
+                host.replace("https://", "").replace("http://", ""),
                 "-p",
                 "443",
                 "--platform",

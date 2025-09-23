@@ -36,21 +36,30 @@ export class CalcService {
         pings: {
             ping_ms: number
             time_elapsed: number
-        }[]
+        }[],
     ): IPing[] {
         if (!pings?.length) {
             return []
         }
-        return pings.map((p) => ({
-            time_ns: p.time_elapsed * 1e6,
-            value: p.ping_ms * 1e6,
-            value_server: p.ping_ms * 1e6,
-        }))
+        let startX = 0
+        return pings
+            .map((p) => ({
+                time_ns: p.time_elapsed * 1e6,
+                value: p.ping_ms * 1e6,
+                value_server: p.ping_ms * 1e6,
+            }))
+            .filter((p) => p.time_ns > 0)
+            .reduce((acc, p, i) => {
+                if (i === 0) {
+                    startX = p.time_ns
+                }
+                return [...acc, { ...p, time_ns: p.time_ns - startX }]
+            }, [] as IPing[])
     }
 
     getOverallResultsFromSpeedCurve(
         curve: CurveItem[],
-        stepMs = 175 // value from RTR web
+        stepMs = 175, // value from RTR web
     ): IOverallResult[] {
         if (!curve?.length) {
             return []
@@ -85,7 +94,7 @@ export class CalcService {
             lastBytes: number
             lastMs: number
             stepMs: number
-        }
+        },
     ) {
         const { lastBytes, lastMs, stepMs } = options
         let retVal: IOverallResult | null = null
@@ -95,7 +104,7 @@ export class CalcService {
                 time_elapsed: ci.time_elapsed,
                 speed: this.calcSpeed(
                     ci.bytes_total - lastBytes,
-                    ci.time_elapsed - lastMs
+                    ci.time_elapsed - lastMs,
                 ),
             })
             options.lastBytes = ci.bytes_total
@@ -117,7 +126,7 @@ export class CalcService {
     getOverallResultsFromSpeedItems(
         speedItems: ISpeedItem[],
         direction: "download" | "upload",
-        step = 75
+        step = 75,
     ): IOverallResult[] {
         if (!speedItems) {
             return []
@@ -146,7 +155,7 @@ export class CalcService {
         for (let i = 1; i <= longestThread[key].bytes.length; i++) {
             const threadsSlice = threadResults.map((threadResult) => {
                 const newResult = new MeasurementThreadResult(
-                    threadResult.index
+                    threadResult.index,
                 )
                 newResult[key].nsec = threadResult[key].nsec.slice(0, i)
                 newResult[key].bytes = threadResult[key].bytes.slice(0, i)
@@ -164,7 +173,7 @@ export class CalcService {
 
     getCoarseResult(
         threads: IMeasurementThreadResult[],
-        resultKey: TransferDirection
+        resultKey: TransferDirection,
     ): IOverallResult {
         if (process.env.FLAVOR === "ont") {
             return this.getCoarseResultONT(threads, resultKey)
@@ -175,7 +184,7 @@ export class CalcService {
     // Bytes / nsec for a part of the time of the test
     getCoarseResultRTR(
         threads: IMeasurementThreadResult[],
-        resultKey: TransferDirection
+        resultKey: TransferDirection,
     ): IOverallResult {
         let bytes = 0
         let minNsec = Infinity
@@ -226,7 +235,7 @@ export class CalcService {
     // Total bytes / total nsec transfer at a certain point of the test
     getCoarseResultONT(
         threads: IMeasurementThreadResult[],
-        resultKey: TransferDirection
+        resultKey: TransferDirection,
     ): IOverallResult {
         let bytes = 0
         let minNsec = Infinity
@@ -265,7 +274,7 @@ export class CalcService {
     // From https://github.com/rtr-nettest/rmbtws/blob/master/src/WebsockettestDatastructures.js#L177
     getFineResult(
         threads: IMeasurementThreadResult[],
-        resultKey: TransferDirection
+        resultKey: TransferDirection,
     ): IOverallResult {
         let targetTime = Infinity
 

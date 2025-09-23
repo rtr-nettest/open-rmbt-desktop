@@ -25,10 +25,11 @@
             <div class="app-main" *transloco="let t">
                 <div class="app-title">
                     <button
+                        type="button"
                         mat-icon-button
                         (click)="weHaveToGoBack()"
                         style="margin-right: 1ex"
-                        [title]="t('Go back')"
+                        title="{{ t('Go back') }}"
                     >
                         <i class="app-icon app-icon--chevron-left"></i>
                     </button>
@@ -36,7 +37,7 @@
                         {{ t("Measurement result from") }}
                         {{
                             result.measurementDate
-                                | date : "medium" : undefined : locale
+                                | date: "medium" : undefined : locale
                         }}
                     </h1>
                     <h1 *ngIf="!result.measurementDate" aria-live="polite">

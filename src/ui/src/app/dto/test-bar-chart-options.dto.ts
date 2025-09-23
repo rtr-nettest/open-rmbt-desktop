@@ -19,6 +19,8 @@ export class TestBarChartOptions {
     scales = {
         x: {
             min: this.startTime,
+            minRotation: 0,
+            maxRotation: 0,
             type: "time",
             grid: {
                 offset: false,
@@ -71,7 +73,7 @@ export class TestBarChartOptions {
                 },
                 maxTicksLimit: 6,
                 callback: (value: any) => {
-                    return `${value} ${this.t.translate("ms")}`
+                    return `${value} ${this.t.translate("millis")}`
                 },
             },
         },

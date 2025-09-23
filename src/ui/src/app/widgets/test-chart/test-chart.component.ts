@@ -39,7 +39,7 @@ export class TestChartComponent implements OnInit, OnDestroy {
                     this.handleChanges(s)
                 }
                 return s
-            })
+            }),
         )
     flavor?: string
 
@@ -63,7 +63,7 @@ export class TestChartComponent implements OnInit, OnDestroy {
         private mainStore: MainStore,
         private ngZone: NgZone,
         private store: TestStore,
-        private transloco: TranslocoService
+        private transloco: TranslocoService,
     ) {}
 
     ngOnDestroy(): void {
@@ -92,11 +92,11 @@ export class TestChartComponent implements OnInit, OnDestroy {
                     this.phase === "download" ? "downs" : "ups"
                 if (this.flavor === "ont") {
                     phaseTestState.setONTChartFromOverallSpeed(
-                        state[phaseResultsKey]
+                        state[phaseResultsKey],
                     )
                 } else {
                     phaseTestState.setRTRChartFromOverallSpeed(
-                        state[phaseResultsKey]
+                        state[phaseResultsKey],
                     )
                 }
             }
@@ -151,7 +151,7 @@ export class TestChartComponent implements OnInit, OnDestroy {
     private updateDownload(visualization: ITestVisualizationState) {
         if (this.phase === "download") {
             this.chart?.updateData(
-                visualization.phases[EMeasurementStatus.DOWN]
+                visualization.phases[EMeasurementStatus.DOWN],
             )
         } else if (this.phase === "ping" && !this.chart?.finished) {
             this.chart?.setData(visualization.phases[EMeasurementStatus.PING])
@@ -180,13 +180,13 @@ export class TestChartComponent implements OnInit, OnDestroy {
                     this.chart = new TestBarChart(
                         ctx!,
                         this.transloco,
-                        this.phase
+                        this.phase,
                     )
                 } else {
                     this.chart = new TestLogChart(
                         ctx!,
                         this.transloco,
-                        this.phase
+                        this.phase,
                     )
                 }
             } catch (e) {

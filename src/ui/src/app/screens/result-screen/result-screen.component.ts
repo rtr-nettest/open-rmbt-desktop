@@ -16,6 +16,9 @@ import { ConversionService } from "src/app/services/conversion.service"
 import { UNKNOWN } from "src/app/constants/strings"
 import { I18nService } from "src/app/services/i18n.service"
 import { HistoryExportService } from "src/app/services/history-export.service"
+import { SKIPPED_FIELDS } from "src/app/constants/skipped-details-fields"
+import { SEARCHABLE_FIELDS } from "src/app/constants/searchable-details-fields"
+import { FORMATTED_FIELDS } from "src/app/constants/formatted-details-fields"
 
 @Component({
     selector: "app-result-screen",
@@ -40,15 +43,15 @@ export class ResultScreenComponent implements OnDestroy {
             this.openResultBaseURL =
                 env?.OPEN_HISTORY_RESUlT_URL?.replace(
                     "$lang",
-                    this.i18n.getActiveBrowserLang()
+                    this.i18n.getActiveBrowserLang(),
                 ) ?? ""
-        })
+        }),
     )
     error$ = this.mainStore.error$
     openResultBaseURL = ""
     openResultURL = ""
     result$ = this.store.getMeasurementResult(
-        this.route.snapshot.paramMap.get("testUuid")
+        this.route.snapshot.paramMap.get("testUuid"),
     )
     sort: ISort = {
         active: "",
@@ -76,7 +79,7 @@ export class ResultScreenComponent implements OnDestroy {
         private store: TestStore,
         private route: ActivatedRoute,
         private router: Router,
-        private transloco: TranslocoService
+        private transloco: TranslocoService,
     ) {}
 
     ngOnDestroy(): void {
@@ -104,7 +107,7 @@ export class ResultScreenComponent implements OnDestroy {
     }
 
     getBasicResults(
-        result: ISimpleHistoryResult
+        result: ISimpleHistoryResult,
     ): IBasicResponse<IDetailedHistoryResultItem> {
         const content = Object.entries(result).reduce((acc, [key, value]) => {
             switch (key) {
@@ -116,7 +119,7 @@ export class ResultScreenComponent implements OnDestroy {
                             value:
                                 this.classification.getPhaseIconByClass(
                                     "down",
-                                    result.downloadClass
+                                    result.downloadClass,
                                 ) + this.getSpeedInMbps(value),
                         },
                     ]
@@ -128,7 +131,7 @@ export class ResultScreenComponent implements OnDestroy {
                             value:
                                 this.classification.getPhaseIconByClass(
                                     "up",
-                                    result.uploadClass
+                                    result.uploadClass,
                                 ) + this.getSpeedInMbps(value),
                         },
                     ]
@@ -140,7 +143,7 @@ export class ResultScreenComponent implements OnDestroy {
                             value:
                                 this.classification.getPhaseIconByClass(
                                     "ping",
-                                    result.pingClass
+                                    result.pingClass,
                                 ) + this.getPingInMs(value),
                         },
                     ]
@@ -155,41 +158,55 @@ export class ResultScreenComponent implements OnDestroy {
     }
 
     getDetailedResults(
-        result: ISimpleHistoryResult
+        result: ISimpleHistoryResult,
     ): IBasicResponse<IDetailedHistoryResultItem> | null {
-        if (!result.detailedHistoryResult) {
+        if (!result.openTestResponse) {
             return null
         }
+        let content = [] as IDetailedHistoryResultItem[]
+        Object.entries(result.openTestResponse).forEach(([key, value]) => {
+            if (
+                value?.toString().includes("[object Object]") ||
+                SKIPPED_FIELDS.has(key) ||
+                value === null ||
+                value === undefined ||
+                (key === "implausible" && !value)
+            ) {
+                return
+            }
+            const isOpenResultId = /^O[-0-9a-zA-Z]+$/.test(value)
+            if (
+                this.openResultBaseURL &&
+                isOpenResultId &&
+                !this.openResultURL
+            ) {
+                this.openResultURL = `${this.openResultBaseURL}${value}`
+                this.addOpenResultButton()
+            }
+            if (this.openResultURL && isOpenResultId) {
+                content.push({
+                    title: this.transloco.translate(key),
+                    value: `<a href="${this.openResultURL}" target="_blank">${value}</a>`,
+                })
+                return
+            }
+            if (key == "land_cover") {
+                content = [
+                    ...content,
+                    ...this.formatLandCovers(result.openTestResponse),
+                ]
+                return
+            }
+            if (key.toLowerCase().includes("net") && value === UNKNOWN) {
+                value = "LAN"
+            }
+            content.push(
+                this.formatSearchableItem(result.openTestResponse, key, value),
+            )
+        })
         return {
-            content:
-                result.detailedHistoryResult?.map((item) => {
-                    const isOpenResultId = /^O[-0-9a-zA-Z]+$/.test(item.value)
-                    if (
-                        this.openResultBaseURL &&
-                        isOpenResultId &&
-                        !this.openResultURL
-                    ) {
-                        this.openResultURL = `${this.openResultBaseURL}${item.value}`
-                        this.addOpenResultButton()
-                    }
-                    if (this.openResultURL && isOpenResultId) {
-                        return {
-                            title: item.title,
-                            value: `<a href="${this.openResultURL}" target="_blank">${item.value}</a>`,
-                        }
-                    }
-                    if (
-                        item.title.toLowerCase().includes("net") &&
-                        item.value === UNKNOWN
-                    ) {
-                        return {
-                            title: item.title,
-                            value: "LAN",
-                        }
-                    }
-                    return item
-                }) ?? [],
-            totalElements: result.detailedHistoryResult?.length ?? 0,
+            content,
+            totalElements: content.length ?? 0,
         }
     }
 
@@ -198,15 +215,15 @@ export class ResultScreenComponent implements OnDestroy {
             this.router.navigate(["/", ERoutes.HISTORY])
         } else if (
             this.mainStore.referrer$.value?.includes(
-                ERoutes.LOOP_RESULT.split("/")[0]
+                ERoutes.LOOP_RESULT.split("/")[0],
             )
         ) {
             const parts = this.mainStore.referrer$.value.split("/")
             this.router.navigateByUrl(
                 ERoutes.LOOP_RESULT.replace(
                     ":loopUuid",
-                    parts[parts.length - 1]
-                )
+                    parts[parts.length - 1],
+                ),
             )
         } else {
             this.router.navigate(["/"])
@@ -225,5 +242,58 @@ export class ResultScreenComponent implements OnDestroy {
                 return of(null)
             },
         })
+    }
+
+    private formatLandCovers(openTestResponse: any) {
+        return [
+            {
+                title: this.transloco.translate("land_cover_cat1"),
+                value: FORMATTED_FIELDS["land_cover_cat1"]!(
+                    openTestResponse,
+                    this.transloco.getTranslation(),
+                    this.transloco.getActiveLang(),
+                ),
+            },
+            {
+                title: this.transloco.translate("land_cover_cat2"),
+                value: FORMATTED_FIELDS["land_cover_cat2"]!(
+                    openTestResponse,
+                    this.transloco.getTranslation(),
+                    this.transloco.getActiveLang(),
+                ),
+            },
+        ]
+    }
+
+    private formatSearchableItem(
+        openTestResponse: any,
+        key: string,
+        value: any,
+    ) {
+        const searchable = SEARCHABLE_FIELDS[key] !== undefined
+        let v = FORMATTED_FIELDS[key]
+            ? FORMATTED_FIELDS[key]!(
+                  openTestResponse,
+                  this.transloco.getTranslation(this.transloco.getActiveLang()),
+                  this.transloco.getActiveLang(),
+              )
+            : value
+        if (!searchable) {
+            return {
+                title: this.transloco.translate(key),
+                value: v,
+            }
+        }
+        const searchTerm = SEARCHABLE_FIELDS[key]
+            ? SEARCHABLE_FIELDS[key]!(openTestResponse)
+            : undefined
+        const search = Array.isArray(searchTerm)
+            ? searchTerm.map((term) => `${key}=${term}`).join("&")
+            : `${key}=${searchTerm || value}`
+        const values = key === "time" ? v.split(" ") : [v]
+        return {
+            title: this.transloco.translate(key),
+            value: `<a href="${this.openResultBaseURL.replace("Opentest?", "opentests?").replace("opentest?", "opentests?")}${search}" target="_blank">${values[0]}</a>&nbsp;${values[1] ?? ""}`,
+        }
     }
 }

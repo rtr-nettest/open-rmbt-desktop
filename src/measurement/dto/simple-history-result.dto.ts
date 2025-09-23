@@ -10,7 +10,6 @@ import {
 } from "../interfaces/measurement-result.interface"
 import { IOverallResult } from "../interfaces/overall-result.interface"
 import { ISimpleHistoryResult } from "../interfaces/simple-history-result.interface"
-import { IDetailedHistoryResultItem } from "../interfaces/detailed-history-result-item.interface"
 import {
     ClassificationService,
     THRESHOLD_DOWNLOAD,
@@ -18,6 +17,7 @@ import {
     THRESHOLD_UPLOAD,
 } from "../services/classification.service"
 import { CalcService } from "../services/calc.service"
+import { IQoeItem } from "../interfaces/qoe-item.interface"
 
 export const RESULT_DATE_FORMAT = "YYYY-MM-DD HH:mm:ss"
 
@@ -140,54 +140,6 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         )
     }
 
-    static fromRTRMeasurementResult(
-        uuid: string,
-        response: any,
-        openTestsResponse: any,
-        testResultDetail: any,
-    ) {
-        return new SimpleHistoryResult(
-            response?.time
-                ? dayjs(response.time).format(RESULT_DATE_FORMAT)
-                : "",
-            openTestsResponse?.server_name,
-            response?.measurement_result?.download_kbit || 0,
-            response?.measurement_result?.upload_kbit || 0,
-            response?.measurement_result?.ping_ms || 0,
-            openTestsResponse?.public_ip_as_name,
-            openTestsResponse?.ip_anonym,
-            uuid,
-            response?.loop_uuid,
-            false,
-            CalcService.I.getOverallResultsFromSpeedCurve(
-                openTestsResponse?.speed_curve.download,
-            ),
-            CalcService.I.getOverallResultsFromSpeedCurve(
-                openTestsResponse?.speed_curve.upload,
-            ),
-            CalcService.I.getOverallPings(openTestsResponse?.speed_curve.ping),
-            response?.measurement_result?.download_classification ??
-                ClassificationService.I.classify(
-                    response?.measurement_result?.download_kbit,
-                    THRESHOLD_DOWNLOAD,
-                    "biggerBetter",
-                ),
-            response?.measurement_result?.upload_classification ??
-                ClassificationService.I.classify(
-                    response?.measurement_result?.upload_kbit,
-                    THRESHOLD_UPLOAD,
-                    "biggerBetter",
-                ),
-            response?.measurement_result?.ping_classification ??
-                ClassificationService.I.classify(
-                    response?.measurement_result?.ping_ms * 1e6,
-                    THRESHOLD_PING,
-                    "smallerBetter",
-                ),
-            testResultDetail?.testresultdetail,
-        )
-    }
-
     static fromONTMeasurementResult(uuid: string, response: any) {
         return new SimpleHistoryResult(
             response.measurement_date,
@@ -211,6 +163,61 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         )
     }
 
+    static fromOpenTestResponse(
+        uuid: string,
+        response: any,
+        openTestResponse: any,
+    ) {
+        return new SimpleHistoryResult(
+            openTestResponse?.time
+                ? dayjs(openTestResponse.time, RESULT_DATE_FORMAT)
+                      .utc(true)
+                      .tz(dayjs.tz.guess())
+                      .format(RESULT_DATE_FORMAT)
+                : "",
+            openTestResponse?.server_name,
+            openTestResponse?.download_kbit,
+            openTestResponse?.upload_kbit,
+            openTestResponse?.ping_ms,
+            openTestResponse?.public_ip_as_name,
+            openTestResponse?.ip_anonym,
+            uuid,
+            response?.loop_uuid,
+            false,
+            CalcService.I.getOverallResultsFromSpeedCurve(
+                openTestResponse?.speed_curve.download,
+            ),
+            CalcService.I.getOverallResultsFromSpeedCurve(
+                openTestResponse?.speed_curve.upload,
+            ),
+            CalcService.I.getOverallPings(openTestResponse?.speed_curve.ping),
+            response?.download_classification ||
+                openTestResponse?.download_classification ||
+                ClassificationService.I.classify(
+                    openTestResponse?.download_kbit,
+                    THRESHOLD_DOWNLOAD,
+                    "biggerBetter",
+                ),
+            response?.upload_classification ||
+                openTestResponse?.upload_classification ||
+                ClassificationService.I.classify(
+                    openTestResponse?.upload_kbit,
+                    THRESHOLD_UPLOAD,
+                    "biggerBetter",
+                ),
+            response?.ping_classification ||
+                openTestResponse?.ping_classification ||
+                ClassificationService.I.classify(
+                    openTestResponse?.ping_ms,
+                    THRESHOLD_PING,
+                    "smallerBetter",
+                ),
+            openTestResponse,
+            response?.qoe_classification ||
+                openTestResponse?.qoe_classification,
+        )
+    }
+
     constructor(
         public measurementDate: string,
         public measurementServerName: string,
@@ -228,6 +235,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         public downloadClass?: number,
         public uploadClass?: number,
         public pingClass?: number,
-        public detailedHistoryResult?: IDetailedHistoryResultItem[],
+        public openTestResponse?: { [key: string]: any },
+        public qoeClassification?: IQoeItem[],
     ) {}
 }

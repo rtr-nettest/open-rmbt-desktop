@@ -5,3 +5,8 @@ export const ERROR_OCCURED_DURING_LOOP = "An error occurred during test"
 export const ERROR_OCCURED_SENDING_RESULTS =
     "An error occurred while sending the results"
 export const TERMS_AND_CONDITIONS = "Terms and conditions text"
+export const RESULT_DATE_FORMAT = "YYYY-MM-DD HH:mm:ss"
+export const NUMBER_LOCALES: { [key: string]: string } = {
+    en: "en-CH",
+    de: "de-AT",
+}

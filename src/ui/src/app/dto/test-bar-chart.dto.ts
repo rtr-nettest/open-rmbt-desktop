@@ -7,6 +7,10 @@ import {
 import { TestChart } from "./test-chart.dto"
 import { TestBarChartOptions } from "./test-bar-chart-options.dto"
 import { TranslocoService } from "@ngneat/transloco"
+import {
+    getBarWidth,
+    PingBarChartPlugin,
+} from "../plugins/ping-bar-chart-plugin"
 
 export class TestBarChart extends TestChart {
     private barOptions?: BarOptions
@@ -14,7 +18,7 @@ export class TestBarChart extends TestChart {
     constructor(
         context: CanvasRenderingContext2D,
         transloco: TranslocoService,
-        private phase: ChartPhase
+        private phase: ChartPhase,
     ) {
         super(
             context,
@@ -24,22 +28,17 @@ export class TestBarChart extends TestChart {
                 datasets: [],
                 labels: [],
             },
-            new TestBarChartOptions(transloco)
+            new TestBarChartOptions(transloco),
+            [new PingBarChartPlugin()],
         )
     }
 
     override setData(data: ITestPhaseState) {
         const allData = this.getAllData(data)
         this.barOptions = {
-            barThickness: 6 * (10 / allData.length),
+            barThickness: getBarWidth(allData), // the more bars the thinner they are
         }
         this.resetDatasets()
-        if (!this.finished) {
-            const padder = { ...allData[allData.length - 1] }
-            padder.x += 10
-            padder.y = 0
-            allData.push(padder)
-        }
         this.data.datasets[0].data = allData
         this.finished = true
         this.update()

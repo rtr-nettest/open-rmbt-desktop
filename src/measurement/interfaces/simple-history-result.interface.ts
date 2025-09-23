@@ -1,6 +1,6 @@
-import { IDetailedHistoryResultItem } from "./detailed-history-result-item.interface"
 import { IPing } from "./measurement-result.interface"
 import { IOverallResult } from "./overall-result.interface"
+import { IQoeItem } from "./qoe-item.interface"
 
 export interface ISimpleHistoryPaginator {
     totalPages: number
@@ -24,6 +24,7 @@ export interface ISimpleHistoryResult {
     testUuid?: string
     loopUuid?: string
     isLocal?: boolean
-    detailedHistoryResult?: IDetailedHistoryResultItem[]
     paginator?: ISimpleHistoryPaginator
+    openTestResponse?: { [key: string]: any }
+    qoeClassification?: IQoeItem[]
 }

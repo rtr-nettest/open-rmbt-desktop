@@ -16,12 +16,14 @@ export class TestChart extends Chart {
             datasets: [new TestChartDataset(context)],
             labels: generateIndexesOfLength(100),
         },
-        options: { [key: string]: any } = new TestChartOptions(transloco)
+        options: { [key: string]: any } = new TestChartOptions(transloco),
+        plugins: any[] = [],
     ) {
         super(context, {
             type,
             data,
             options,
+            plugins,
         })
     }
 
@@ -77,15 +79,18 @@ export class TestChart extends Chart {
 
     protected getAllData(testItem: ITestPhaseState) {
         return testItem.chart?.length
-            ? testItem.chart.reduce((acc, item) => {
-                  if (this.finished) {
-                      return acc
-                  }
-                  if (item.x >= 100) {
-                      this.finished = true
-                  }
-                  return [...acc, item]
-              }, [] as { x: number; y: number }[])
+            ? testItem.chart.reduce(
+                  (acc, item) => {
+                      if (this.finished) {
+                          return acc
+                      }
+                      if (item.x >= 100) {
+                          this.finished = true
+                      }
+                      return [...acc, item]
+                  },
+                  [] as { x: number; y: number }[],
+              )
             : []
     }
 

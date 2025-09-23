@@ -24,7 +24,10 @@ import {
     TERMS_ACCEPTED_VERSION,
 } from "./store.service"
 import { DBService } from "./db.service"
-import { SimpleHistoryResult } from "../dto/simple-history-result.dto"
+import {
+    RESULT_DATE_FORMAT,
+    SimpleHistoryResult,
+} from "../dto/simple-history-result.dto"
 import { INewsRequest, INewsResponse } from "../interfaces/news.interface"
 import { EIPVersion } from "../enums/ip-version.enum"
 import { I18nService } from "./i18n.service"
@@ -36,7 +39,6 @@ import { UserSettingsRequest } from "../dto/user-settings-request.dto"
 import * as dns from "dns"
 import { IPaginator } from "../../ui/src/app/interfaces/paginator.interface"
 import { ISort } from "../../ui/src/app/interfaces/sort.interface"
-import { BrowserWindow } from "electron"
 
 const axios = require("axios")
 
@@ -52,9 +54,13 @@ export class ControlServer {
 
     private constructor() {}
 
+    private get settings() {
+        return Store.I.get(SETTINGS) as IUserSettings
+    }
+
     async getHost() {
         const ipv = Store.I.get(IP_VERSION) as EIPVersion
-        const settings = Store.I.get(SETTINGS) as IUserSettings
+        const settings = this.settings
         const settingsRequest = new UserSettingsRequest()
         const ipv6Host = settings.urls.control_ipv6_only
         const ipv4Host = settings.urls.control_ipv4_only
@@ -385,20 +391,20 @@ export class ControlServer {
     }
 
     async getMeasurementResult(
-        uuid: string,
+        testUuid: string,
     ): Promise<ISimpleHistoryResult | undefined> {
-        Logger.I.info("Receiving measurement result by UUID: %s", uuid)
+        Logger.I.info("Receiving measurement result: %s", testUuid)
         let retVal: ISimpleHistoryResult | undefined
         try {
-            if (process.env.HISTORY_RESULT_PATH_METHOD === "GET") {
+            if (process.env.FLAVOR === "ont") {
                 // as used by ONT
-                retVal = await this.getONTMeasurementResult(uuid)
-            } else if (process.env.HISTORY_RESULT_PATH_METHOD === "POST") {
+                retVal = await this.getONTMeasurementResult(testUuid!)
+            } else {
                 // as used by RTR
-                retVal = await this.getRTRMeasurementResult(uuid)
+                retVal = await this.getRTRMeasurementResult(testUuid!)
             }
         } catch (e: any) {
-            retVal = await DBService.I.getMeasurementByUuid(uuid)
+            retVal = await DBService.I.getMeasurementByUuid(testUuid!)
             if (!retVal) {
                 this.handleError(e)
             }
@@ -406,72 +412,63 @@ export class ControlServer {
         return retVal
     }
 
-    private async getRTRMeasurementResult(uuid: string) {
+    private async getRTRMeasurementResult(testUuid: string) {
         const body = {
-            test_uuid: uuid,
+            test_uuid: testUuid,
             timezone: dayjs.tz.guess(),
             capabilities: { classification: { count: 4 } },
         }
-        Logger.I.info(
-            ELoggerMessage.POST_REQUEST,
-            process.env.HISTORY_RESULT_PATH,
-            body,
-        )
-        let response = (
-            await axios.post(
-                `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}`,
-                body,
-                { headers: this.headers },
-            )
-        ).data
+
+        let response = testUuid
+            ? (
+                  await axios.post(
+                      `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}`,
+                      body,
+                      { headers: this.headers },
+                  )
+              ).data
+            : null
         Logger.I.info(ELoggerMessage.RESPONSE, response)
         if (response?.testresult?.length) {
             response = response.testresult[0]
         }
 
-        // Test metadata
+        const openTestsResponse = response?.open_test_uuid
+            ? (
+                  await axios.get(
+                      `${this.settings.urls.url_statistic_server}/opentests/${response.open_test_uuid}`,
+                  )
+              ).data
+            : null
+        Logger.I.info("Open test response is: %o", openTestsResponse)
 
-        let testResultDetail: any
-        if (process.env.HISTORY_RESULT_DETAILS_PATH) {
-            testResultDetail = (
-                await axios.post(
-                    `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_DETAILS_PATH}`,
-                    {
-                        ...body,
-                        language: I18nService.I.getActiveLanguage(),
-                    },
-                    { headers: this.headers },
-                )
-            ).data
-            Logger.I.info("Test result detail is: %o", testResultDetail)
-        }
-
-        // Graphs
-
-        let openTestsResponse: any
-        if (
-            process.env.HISTORY_RESULT_STATS_PATH &&
-            response &&
-            response.status != "error"
-        ) {
-            const settings = Store.I.get(SETTINGS) as IUserSettings
-            if (settings?.urls?.url_statistic_server) {
-                openTestsResponse = (
-                    await axios.get(
-                        `${settings?.urls?.url_statistic_server}${process.env.HISTORY_RESULT_STATS_PATH}/${response.open_test_uuid}`,
-                        { headers: this.headers },
-                    )
-                ).data
-            }
-            Logger.I.info("Open test response is: %o", openTestsResponse)
-        }
-
-        return SimpleHistoryResult.fromRTRMeasurementResult(
-            uuid,
+        const historyResult = SimpleHistoryResult.fromOpenTestResponse(
+            testUuid!,
             response,
             openTestsResponse,
-            testResultDetail,
         )
+        if (historyResult.openTestResponse && response) {
+            const trdSet = new Set(Object.keys(historyResult.openTestResponse))
+            const details = Object.entries(response)
+            for (const [key, value] of details) {
+                if (
+                    !trdSet.has(key) &&
+                    (typeof value === "string" || typeof value === "number")
+                ) {
+                    historyResult.openTestResponse[key] = value
+                }
+            }
+        }
+        if (response && response.status !== "finished") {
+            historyResult.openTestResponse = {
+                external_ip: response.external_ip,
+                time: dayjs(response.time).format(RESULT_DATE_FORMAT),
+                status: response.status,
+                error: true,
+            }
+        }
+
+        return historyResult
     }
 
     private async getONTMeasurementResult(uuid: string) {

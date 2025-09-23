@@ -5,6 +5,7 @@ import {
     from,
     interval,
     map,
+    Observable,
     of,
     withLatestFrom,
 } from "rxjs"
@@ -230,12 +231,17 @@ export class TestStore {
         this.loopCounter$.next(1)
     }
 
-    getMeasurementResult(testUuid: string | null) {
+    getMeasurementResult(
+        testUuid: string | null,
+    ): Observable<ISimpleHistoryResult | null> {
         if (!testUuid || this.mainStore.error$.value) {
             return of(null)
         }
         return from(window.electronAPI.getMeasurementResult(testUuid)).pipe(
             map((result) => {
+                if (!result) {
+                    return null
+                }
                 this.simpleHistoryResult$.next(result)
                 const newPhase = new TestPhaseState({
                     phase: EMeasurementStatus.SHOWING_RESULTS,

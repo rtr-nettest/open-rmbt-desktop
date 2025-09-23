@@ -406,6 +406,9 @@ export class ControlServer {
         } catch (e: any) {
             retVal = await DBService.I.getMeasurementByUuid(testUuid!)
             if (!retVal) {
+                if (e?.response?.status === 404) {
+                    return
+                }
                 this.handleError(e)
             }
         }

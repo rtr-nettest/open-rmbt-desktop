@@ -25,6 +25,11 @@ $container-width: 100%;
     align-items: center;
     display: flex;
     margin-bottom: 1em;
+
+    &--no-result {
+        flex: 1;
+        text-align: center;
+    }
 }
 
 .app-wrapper {

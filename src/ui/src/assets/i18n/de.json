@@ -239,5 +239,7 @@
     "status": "Status",
     "external_ip": "Externe IP",
     "hostname": "Hostname",
-    "millis": "ms"
+    "millis": "ms",
+
+    "No results available": "Keine Ergebnisse verfügbar"
 }

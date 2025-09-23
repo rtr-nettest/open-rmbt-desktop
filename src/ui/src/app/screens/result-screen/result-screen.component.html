@@ -17,84 +17,123 @@
 <ng-template #rtr>
     <app-body>
         <app-main-menu></app-main-menu>
-        <app-main-content
-            *ngIf="result$ | async as result; else noResult"
-            [style.flex-direction]="'column'"
-        >
-            <app-export-warning></app-export-warning>
-            <div class="app-main" *transloco="let t">
-                <div class="app-title">
-                    <button
-                        type="button"
-                        mat-icon-button
-                        (click)="weHaveToGoBack()"
-                        style="margin-right: 1ex"
-                        title="{{ t('Go back') }}"
-                    >
-                        <i class="app-icon app-icon--chevron-left"></i>
-                    </button>
-                    <h1 *ngIf="result.measurementDate" aria-live="polite">
-                        {{ t("Measurement result from") }}
-                        {{
-                            result.measurementDate
-                                | date: "medium" : undefined : locale
-                        }}
-                    </h1>
-                    <h1 *ngIf="!result.measurementDate" aria-live="polite">
-                        {{ t("Measurement result") }}
-                    </h1>
-                    <app-action-buttons
-                        [items]="actionButtons"
-                    ></app-action-buttons>
-                </div>
-                <div class="app-wrapper">
-                    <app-table
-                        [columns]="columns"
-                        [data]="getBasicResults(result)"
-                        [sort]="sort"
-                        aria-live="polite"
-                    ></app-table>
-                </div>
-                <ng-container
-                    *ngIf="getDetailedResults(result) as detailedResult"
-                >
-                    <div class="app-wrapper app-charts">
-                        <div class="app-charts__col">
-                            <h3 class="app-title">{{ t("Ping") }}</h3>
-                            <app-test-chart phase="ping"></app-test-chart>
-                        </div>
-                        <div class="app-charts__col">
-                            <h3 class="app-title">{{ t("Download") }}</h3>
-                            <app-test-chart phase="download"></app-test-chart>
-                        </div>
-                        <div class="app-charts__col">
-                            <h3 class="app-title">{{ t("Upload") }}</h3>
-                            <app-test-chart phase="upload"></app-test-chart>
-                        </div>
+        @if (result$ | async; as result) {
+            <app-main-content [style.flex-direction]="'column'">
+                <app-export-warning></app-export-warning>
+                <div class="app-main" *transloco="let t">
+                    <div class="app-title">
+                        <button
+                            type="button"
+                            mat-icon-button
+                            (click)="weHaveToGoBack()"
+                            style="margin-right: 1ex"
+                            title="{{ t('Go back') }}"
+                        >
+                            <i class="app-icon app-icon--chevron-left"></i>
+                        </button>
+                        <h1 *ngIf="result.measurementDate" aria-live="polite">
+                            {{ t("Measurement result from") }}
+                            {{
+                                result.measurementDate
+                                    | date: "medium" : undefined : locale
+                            }}
+                        </h1>
+                        <h1 *ngIf="!result.measurementDate" aria-live="polite">
+                            @if (failedDetailedResults()) {
+                                {{ t("Measurement failed.") }}
+                            } @else {
+                                {{ t("Measurement result") }}
+                            }
+                        </h1>
+                        @if (!failedDetailedResults()) {
+                            <app-action-buttons
+                                [items]="actionButtons"
+                            ></app-action-buttons>
+                        }
                     </div>
-                    <h3 class="app-title">{{ t("Detailed results") }}</h3>
-                    <div class="app-wrapper">
-                        <app-table
-                            [columns]="columns"
-                            [data]="detailedResult"
-                            [sort]="sort"
-                        ></app-table>
-                    </div>
-                </ng-container>
-            </div>
-            <app-footer></app-footer>
-        </app-main-content>
+                    @if (basicResults(); as basicResults) {
+                        <div class="app-wrapper">
+                            <app-table
+                                [columns]="columns"
+                                [data]="basicResults"
+                                [sort]="sort"
+                                aria-live="polite"
+                            ></app-table>
+                        </div>
+                    }
+                    @if (detailedResults(); as detailedResult) {
+                        <div class="app-wrapper app-charts">
+                            <div class="app-charts__col">
+                                <h3 class="app-title">{{ t("Ping") }}</h3>
+                                <app-test-chart phase="ping"></app-test-chart>
+                            </div>
+                            <div class="app-charts__col">
+                                <h3 class="app-title">{{ t("Download") }}</h3>
+                                <app-test-chart
+                                    phase="download"
+                                ></app-test-chart>
+                            </div>
+                            <div class="app-charts__col">
+                                <h3 class="app-title">{{ t("Upload") }}</h3>
+                                <app-test-chart phase="upload"></app-test-chart>
+                            </div>
+                        </div>
+                        <h3 class="app-title">{{ t("Detailed results") }}</h3>
+                        <div class="app-wrapper">
+                            <app-table
+                                [columns]="columns"
+                                [data]="detailedResult"
+                                [sort]="sort"
+                            ></app-table>
+                        </div>
+                    }
+                    @if (failedDetailedResults(); as failedDetailedResults) {
+                        <div
+                            class="app-container"
+                            *ngIf="failedDetailedResults.content.length"
+                        >
+                            <app-table
+                                [columns]="columns"
+                                [data]="failedDetailedResults"
+                                [shouldHideHeader]="true"
+                                [tableClassNames]="['app-table--bordered']"
+                                [sort]="sort"
+                            ></app-table>
+                        </div>
+                    }
+                </div>
+                <app-footer></app-footer>
+            </app-main-content>
+        } @else {
+            <ng-container *ngTemplateOutlet="noResult"></ng-container>
+        }
     </app-body>
 </ng-template>
 
 <ng-template #noResult>
-    <main *ngIf="error$ | async as error" class="app-main app-main--no-result">
-        {{ "Measurement failed." | transloco }} {{ error.message }}
-    </main>
-    <main
-        *ngIf="(error$ | async) === null"
-        class="app-main app-main--no-result"
-    >
-        {{ "Fetching the result..." | transloco }}
+    <main class="app-main">
+        <div class="app-title">
+            <button
+                type="button"
+                mat-icon-button
+                (click)="weHaveToGoBack()"
+                style="margin-right: 1ex"
+                title="{{ 'Go back' | transloco }}"
+            >
+                <i class="app-icon app-icon--chevron-left"></i>
+            </button>
+            <h1 class="app-title--no-result" aria-live="polite">
+                @if (loading()) {
+                    {{ "Fetching the result..." | transloco }}
+                } @else {
+                    @if (error$ | async; as error) {
+                        {{ "Measurement failed." | transloco }}
+                        {{ error.message }}
+                    } @else {
+                        {{ "No results available" | transloco }}
+                    }
+                }
+            </h1>
+        </div>
     </main>
 </ng-template>

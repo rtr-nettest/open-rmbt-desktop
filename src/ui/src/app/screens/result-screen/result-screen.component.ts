@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from "@angular/core"
+import {
+    ChangeDetectionStrategy,
+    Component,
+    OnDestroy,
+    signal,
+} from "@angular/core"
 import { ActivatedRoute, Router } from "@angular/router"
 import { TranslocoService } from "@ngneat/transloco"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
@@ -48,11 +53,27 @@ export class ResultScreenComponent implements OnDestroy {
         }),
     )
     error$ = this.mainStore.error$
+    loading = signal<boolean>(true)
     openResultBaseURL = ""
     openResultURL = ""
-    result$ = this.store.getMeasurementResult(
-        this.route.snapshot.paramMap.get("testUuid"),
-    )
+    result$ = this.store
+        .getMeasurementResult(this.route.snapshot.paramMap.get("testUuid"))
+        .pipe(
+            tap((result) => {
+                if (result && result.openTestResponse?.["error"] != true) {
+                    this.basicResults.set(this.getBasicResults(result))
+                    this.detailedResults.set(this.getDetailedResults(result))
+                } else if (
+                    result &&
+                    result.openTestResponse?.["error"] == true
+                ) {
+                    this.failedDetailedResults.set(
+                        this.getDetailedResults(result),
+                    )
+                }
+                this.loading.set(false)
+            }),
+        )
     sort: ISort = {
         active: "",
         direction: "",
@@ -69,6 +90,14 @@ export class ResultScreenComponent implements OnDestroy {
         },
     ]
     locale = this.transloco.getActiveLang()
+    basicResults = signal<IBasicResponse<IDetailedHistoryResultItem> | null>(
+        null,
+    )
+    detailedResults = signal<IBasicResponse<IDetailedHistoryResultItem> | null>(
+        null,
+    )
+    failedDetailedResults =
+        signal<IBasicResponse<IDetailedHistoryResultItem> | null>(null)
 
     constructor(
         private classification: ClassificationService,

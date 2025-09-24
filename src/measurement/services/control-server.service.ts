@@ -406,9 +406,6 @@ export class ControlServer {
         } catch (e: any) {
             retVal = await DBService.I.getMeasurementByUuid(testUuid!)
             if (!retVal) {
-                if (e?.response?.status === 404) {
-                    return
-                }
                 this.handleError(e)
             }
         }
@@ -436,13 +433,16 @@ export class ControlServer {
             response = response.testresult[0]
         }
 
-        const openTestsResponse = response?.open_test_uuid
-            ? (
-                  await axios.get(
-                      `${this.settings.urls.url_statistic_server}/opentests/${response.open_test_uuid}`,
-                  )
-              ).data
-            : null
+        let openTestsResponse: any = null
+        try {
+            openTestsResponse = (
+                await axios.get(
+                    `${this.settings.urls.url_statistic_server}/opentests/${response?.open_test_uuid}`,
+                )
+            ).data
+        } catch (e: any) {
+            Logger.I.warn("Could not get open test result: %o", e)
+        }
         Logger.I.info("Open test response is: %o", openTestsResponse)
 
         const historyResult = SimpleHistoryResult.fromOpenTestResponse(
@@ -450,7 +450,7 @@ export class ControlServer {
             response,
             openTestsResponse,
         )
-        if (historyResult.openTestResponse && response) {
+        if (response && historyResult.openTestResponse) {
             const trdSet = new Set(Object.keys(historyResult.openTestResponse))
             const details = Object.entries(response)
             for (const [key, value] of details) {

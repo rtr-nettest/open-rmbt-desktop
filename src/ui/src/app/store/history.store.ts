@@ -154,7 +154,7 @@ export class HistoryStore {
     }
 
     getRecentMeasurementHistory(paginator: IPaginator, sort?: ISort) {
-        if (this.mainStore.error$.value || !paginator.limit) {
+        if (!paginator.limit) {
             return of([])
         }
         return from(

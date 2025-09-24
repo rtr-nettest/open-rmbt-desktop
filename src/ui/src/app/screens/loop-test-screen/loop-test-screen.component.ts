@@ -17,7 +17,7 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
     selector: "app-loop-test-screen",
     templateUrl: "../test-screen/test-screen.component.html",
     styleUrls: ["../test-screen/test-screen.component.scss"],
-    standalone: false
+    standalone: false,
 })
 export class LoopTestScreenComponent extends TestScreenComponent {
     private waitingProgressMs = 0
@@ -44,11 +44,6 @@ export class LoopTestScreenComponent extends TestScreenComponent {
 
     override ngOnInit(): void {
         super.ngOnInit()
-        window.electronAPI.onAppResumed(() => {
-            this.ngZone.run(() => {
-                this.getRecentHistory(this.loopCount$.value)
-            })
-        })
         this.lastTestFinishedAt$
             .pipe(
                 filter((v) => v > 0),
@@ -70,12 +65,6 @@ export class LoopTestScreenComponent extends TestScreenComponent {
     }
 
     protected override openErrorDialog(state: ITestVisualizationState) {
-        this.message.closeAllDialogs()
-        const message =
-            this.transloco.translate(ERROR_OCCURED_DURING_LOOP) +
-            " " +
-            this.loopCount$.value
-        this.message.openConfirmDialog(message, () => void 0)
         this.goToResult(state)
     }
 

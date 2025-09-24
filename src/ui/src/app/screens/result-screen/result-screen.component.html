@@ -40,7 +40,7 @@
                         </h1>
                         <h1 *ngIf="!result.measurementDate" aria-live="polite">
                             @if (failedDetailedResults()) {
-                                {{ t("Measurement failed.") }}
+                                {{ t("Measurement failed") }}
                             } @else {
                                 {{ t("Measurement result") }}
                             }
@@ -127,7 +127,7 @@
                     {{ "Fetching the result..." | transloco }}
                 } @else {
                     @if (error$ | async; as error) {
-                        {{ "Measurement failed." | transloco }}
+                        {{ "Measurement failed" | transloco }}
                         {{ error.message }}
                     } @else {
                         {{ "No results available" | transloco }}

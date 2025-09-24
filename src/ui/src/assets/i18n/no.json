@@ -48,7 +48,7 @@
     "This result is only available locally.": "Dette resultatet er kun tilgjengelig lokalt.",
     "Details...": "Detaljer",
     "Fetching the result...": "Henter resultatet char@@0",
-    "Measurement failed.": "Målingen mislyktes.",
+    "Measurement failed": "Målingen mislyktes.",
     "Fetching the history...": "Henter loggen...",
     "Time": "Tid",
     "Detailed results": "Detaljerte resultater",

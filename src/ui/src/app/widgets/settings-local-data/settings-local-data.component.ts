@@ -8,6 +8,7 @@ import {
     selector: "app-settings-local-data",
     templateUrl: "./settings-local-data.component.html",
     styleUrls: ["./settings-local-data.component.scss"],
+    standalone: false
 })
 export class SettingsLocalDataComponent implements IDynamicComponent {
     @Input() parameters?: IDynamicComponentParameters

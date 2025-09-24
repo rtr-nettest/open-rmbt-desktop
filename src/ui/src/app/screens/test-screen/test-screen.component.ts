@@ -34,6 +34,7 @@ import { TranslocoService } from "@ngneat/transloco"
     templateUrl: "./test-screen.component.html",
     styleUrls: ["./test-screen.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class TestScreenComponent implements OnDestroy, OnInit {
     @Input() hideMenu = false

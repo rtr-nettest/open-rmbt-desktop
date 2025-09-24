@@ -15,6 +15,7 @@ import { combineLatest, Subscription } from "rxjs"
     selector: "app-paginator",
     templateUrl: "./paginator.component.html",
     styleUrls: ["./paginator.component.scss"],
+    standalone: false
 })
 export class PaginatorComponent implements AfterViewInit, OnDestroy {
     @Input() length: number = 0

@@ -9,6 +9,7 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
     templateUrl: "./test-boxes.component.html",
     styleUrls: ["./test-boxes.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class TestBoxesComponent {
     visualization$ = this.store.visualization$.pipe(

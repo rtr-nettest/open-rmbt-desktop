@@ -8,6 +8,7 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-terms-conditions-screen",
     templateUrl: "./terms-conditions-screen.component.html",
     styleUrls: ["./terms-conditions-screen.component.scss"],
+    standalone: false
 })
 export class TermsConditionsScreenComponent implements OnInit {
     terms$ = this.mainStore.settings$.pipe(

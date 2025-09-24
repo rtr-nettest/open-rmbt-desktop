@@ -25,6 +25,7 @@ import { PageEvent } from "@angular/material/paginator"
     templateUrl: "./table.component.html",
     styleUrls: ["./table.component.scss"],
     animations: [arrowRotate, expandVertically],
+    standalone: false
 })
 export class TableComponent implements OnInit, OnChanges {
     @Input() action?: (...ars: any[]) => any

@@ -11,6 +11,7 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-settings-engine",
     templateUrl: "./settings-engine.component.html",
     styleUrl: "./settings-engine.component.scss",
+    standalone: false
 })
 export class SettingsEngineComponent implements IDynamicComponent {
     @Input() parameters?: IDynamicComponentParameters

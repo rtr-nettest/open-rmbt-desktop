@@ -8,6 +8,7 @@ import { TestStore } from "src/app/store/test.store"
     templateUrl: "./start-test-button.component.html",
     styleUrls: ["./start-test-button.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class StartTestButtonComponent {
     env$ = this.mainStore.env$

@@ -10,6 +10,7 @@ import { ConversionService } from "src/app/services/conversion.service"
     templateUrl: "./interim-results.component.html",
     styleUrls: ["./interim-results.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class InterimResultsComponent {
     visualization$ = this.store.visualization$.pipe(

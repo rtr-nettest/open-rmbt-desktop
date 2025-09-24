@@ -6,6 +6,7 @@ import { TestStore } from "src/app/store/test.store"
     selector: "app-export-warning",
     templateUrl: "./export-warning.component.html",
     styleUrls: ["./export-warning.component.scss"],
+    standalone: false
 })
 export class ExportWarningComponent {
     isLocal$ = this.store.simpleHistoryResult$.pipe(

@@ -10,6 +10,7 @@ import { TestStore } from "src/app/store/test.store"
     selector: "app-social-buttons",
     templateUrl: "./social-buttons.component.html",
     styleUrls: ["./social-buttons.component.scss"],
+    standalone: false
 })
 export class SocialButtonsComponent {
     shareButtons$: Observable<{ className: string; url: string | SafeUrl }[]> =

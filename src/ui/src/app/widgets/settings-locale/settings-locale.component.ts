@@ -13,6 +13,7 @@ import { TranslocoConfigExt } from "src/transloco.config"
     selector: "app-settings-locale",
     templateUrl: "./settings-locale.component.html",
     styleUrls: ["./settings-locale.component.scss"],
+    standalone: false
 })
 export class SettingsLocaleComponent implements IDynamicComponent {
     @Input() parameters?: IDynamicComponentParameters

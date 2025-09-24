@@ -30,6 +30,7 @@ import { FORMATTED_FIELDS } from "src/app/constants/formatted-details-fields"
     templateUrl: "./result-screen.component.html",
     styleUrls: ["./result-screen.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ResultScreenComponent implements OnDestroy {
     columns: ITableColumn[] = [

@@ -6,6 +6,7 @@ import { arrowRotate } from "src/app/animations/arrow-rotate.animation"
     selector: "app-expand-arrow",
     templateUrl: "./expand-arrow.component.html",
     styleUrls: ["./expand-arrow.component.scss"],
+    standalone: false
 })
 export class ExpandArrowComponent {
     @Input() parameters?: { expanded: boolean }

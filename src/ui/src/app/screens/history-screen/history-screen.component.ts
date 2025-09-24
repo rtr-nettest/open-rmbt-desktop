@@ -26,6 +26,7 @@ import { HistoryExportService } from "src/app/services/history-export.service"
     selector: "app-history-screen",
     templateUrl: "./history-screen.component.html",
     styleUrls: ["./history-screen.component.scss"],
+    standalone: false
 })
 export class HistoryScreenComponent
     extends BaseScreen

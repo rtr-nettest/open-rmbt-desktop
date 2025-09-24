@@ -17,6 +17,7 @@ interface ITestStage {
     templateUrl: "./test-header.component.html",
     styleUrls: ["./test-header.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class TestHeaderComponent implements OnDestroy {
     currentStage?: EMeasurementStatus

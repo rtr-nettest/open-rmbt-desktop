@@ -11,6 +11,7 @@ import { ConversionService } from "src/app/services/conversion.service"
     templateUrl: "./gauge.component.html",
     styleUrls: ["./gauge.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class GaugeComponent {
     visualization$ = this.store.visualization$.pipe(

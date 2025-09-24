@@ -17,6 +17,7 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
     selector: "app-loop-test-screen",
     templateUrl: "../test-screen/test-screen.component.html",
     styleUrls: ["../test-screen/test-screen.component.scss"],
+    standalone: false
 })
 export class LoopTestScreenComponent extends TestScreenComponent {
     private waitingProgressMs = 0

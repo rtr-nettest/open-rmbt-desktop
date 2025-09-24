@@ -5,6 +5,7 @@ import { MessageService } from "../../services/message.service"
 
 @Component({
     template: ``,
+    standalone: false
 })
 export class BaseScreen implements OnDestroy {
     destroyed$ = new Subject<void>()

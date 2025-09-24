@@ -10,6 +10,7 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
     templateUrl: "./test-charts.component.html",
     styleUrls: ["./test-charts.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class TestChartsComponent {
     visualization$ = this.store.visualization$

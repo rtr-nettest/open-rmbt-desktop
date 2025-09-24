@@ -6,6 +6,7 @@ import { ClientSelectComponent } from "src/app/widgets/client-select/client-sele
     selector: "app-client-screen",
     templateUrl: "./client-screen.component.html",
     styleUrls: ["./client-screen.component.scss"],
+    standalone: false
 })
 export class ClientScreenComponent {
     @ViewChild(ClientSelectComponent) clientSelect?: ClientSelectComponent

@@ -8,6 +8,7 @@ import { ConversionService } from "src/app/services/conversion.service"
     selector: "nt-test-indicator",
     templateUrl: "./test-indicator.component.html",
     styleUrls: ["./test-indicator.component.scss"],
+    standalone: false
 })
 export class TestIndicatorComponent {
     @Input() data: ITestPhaseState | undefined

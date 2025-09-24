@@ -6,6 +6,7 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-news",
     templateUrl: "./news-screen.component.html",
     styleUrls: ["./news-screen.component.scss"],
+    standalone: false
 })
 export class NewsScreenComponent {
     news$ = this.mainStore.news$

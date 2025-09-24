@@ -12,6 +12,7 @@ import { TestStore } from "src/app/store/test.store"
     selector: "app-client-select",
     templateUrl: "./client-select.component.html",
     styleUrls: ["./client-select.component.scss"],
+    standalone: false
 })
 export class ClientSelectComponent implements IDynamicComponent {
     @Input() parameters?: IDynamicComponentParameters

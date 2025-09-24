@@ -24,6 +24,7 @@ import { TestPhaseState } from "src/app/dto/test-phase-state.dto"
     templateUrl: "./test-chart.component.html",
     styleUrls: ["./test-chart.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class TestChartComponent implements OnInit, OnDestroy {
     @Input() phase: ChartPhase = "download"

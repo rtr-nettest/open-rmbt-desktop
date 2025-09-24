@@ -8,6 +8,7 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-map-screen",
     templateUrl: "./map-screen.component.html",
     styleUrls: ["./map-screen.component.scss"],
+    standalone: false
 })
 export class MapScreenComponent {
     mapLink$ = this.mainStore.env$.pipe(

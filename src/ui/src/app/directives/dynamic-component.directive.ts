@@ -15,6 +15,7 @@ import {
 
 @Directive({
     selector: "[dynamicComponent]",
+    standalone: false
 })
 export class DynamicComponentDirective implements OnInit, OnChanges {
     @Input() dynamicComponent?: Type<IDynamicComponent>

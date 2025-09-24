@@ -24,6 +24,7 @@ import { TestStore } from "src/app/store/test.store"
     selector: "app-recent-history",
     templateUrl: "./recent-history.component.html",
     styleUrls: ["./recent-history.component.scss"],
+    standalone: false
 })
 export class RecentHistoryComponent implements OnChanges {
     @Input({ required: true }) result!: {

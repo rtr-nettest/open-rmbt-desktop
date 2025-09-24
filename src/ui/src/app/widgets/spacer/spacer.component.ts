@@ -5,5 +5,6 @@ import { ChangeDetectionStrategy, Component } from "@angular/core"
     templateUrl: "./spacer.component.html",
     styleUrls: ["./spacer.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class SpacerComponent {}

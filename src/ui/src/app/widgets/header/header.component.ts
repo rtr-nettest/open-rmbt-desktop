@@ -14,6 +14,7 @@ import { TestStore } from "src/app/store/test.store"
     templateUrl: "./header.component.html",
     styleUrls: ["./header.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class HeaderComponent {
     @Input() fixed = false

@@ -11,6 +11,7 @@ import { BaseScreen } from "../base-screen/base-screen.component"
     selector: "app-home-screen",
     templateUrl: "./home-screen.component.html",
     styleUrls: ["./home-screen.component.scss"],
+    standalone: false
 })
 export class HomeScreenComponent
     extends BaseScreen

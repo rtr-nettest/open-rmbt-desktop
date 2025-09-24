@@ -21,6 +21,7 @@ import { TestStore } from "src/app/store/test.store"
     selector: "app-main-menu",
     templateUrl: "./main-menu.component.html",
     styleUrls: ["./main-menu.component.scss"],
+    standalone: false
 })
 export class MainMenuComponent implements OnChanges {
     @Input() disabled = false

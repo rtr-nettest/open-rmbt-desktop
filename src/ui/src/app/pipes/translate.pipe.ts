@@ -5,6 +5,7 @@ import { MarkdownService } from "ngx-markdown"
 
 @Pipe({
     name: "translate",
+    standalone: false
 })
 export class TranslatePipe implements PipeTransform {
     constructor(

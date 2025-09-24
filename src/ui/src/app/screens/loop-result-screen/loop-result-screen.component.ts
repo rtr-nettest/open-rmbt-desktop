@@ -18,6 +18,7 @@ import { HistoryExportService } from "src/app/services/history-export.service"
     selector: "app-loop-result-screen",
     templateUrl: "../history-screen/history-screen.component.html",
     styleUrls: ["../history-screen/history-screen.component.scss"],
+    standalone: false
 })
 export class LoopResultScreenComponent extends HistoryScreenComponent {
     override shouldGroupHistory = false

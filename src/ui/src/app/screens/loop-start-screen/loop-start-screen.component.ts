@@ -12,6 +12,7 @@ type LoopForm = FormGroup<{
     selector: "app-loop-start-screen",
     templateUrl: "./loop-start-screen.component.html",
     styleUrls: ["./loop-start-screen.component.scss"],
+    standalone: false
 })
 export class LoopStartScreenComponent {
     env$ = this.mainStore.env$.pipe(

@@ -12,6 +12,7 @@ import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
     selector: "app-certified-result-screen",
     templateUrl: "../history-screen/history-screen.component.html",
     styleUrls: ["../history-screen/history-screen.component.scss"],
+    standalone: false
 })
 export class CertifiedResultScreenComponent extends HistoryScreenComponent {
     @Input() loopUuid: string | null = null

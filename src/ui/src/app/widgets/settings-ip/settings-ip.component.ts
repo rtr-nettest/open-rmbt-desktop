@@ -11,6 +11,7 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-settings-ip",
     templateUrl: "./settings-ip.component.html",
     styleUrls: ["./settings-ip.component.scss"],
+    standalone: false
 })
 export class SettingsIpComponent implements IDynamicComponent {
     @Input() parameters?: IDynamicComponentParameters

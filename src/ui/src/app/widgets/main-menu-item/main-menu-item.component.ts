@@ -6,6 +6,7 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-main-menu-item",
     templateUrl: "./main-menu-item.component.html",
     styleUrls: ["./main-menu-item.component.scss"],
+    standalone: false
 })
 export class MainMenuItemComponent {
     @Input() item?: IMainMenuItem

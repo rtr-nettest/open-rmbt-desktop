@@ -5,6 +5,7 @@ import { AssetsService } from "src/app/services/assets.service"
     selector: "app-certified-info",
     templateUrl: "./certified-info.component.html",
     styleUrls: ["./certified-info.component.scss"],
+    standalone: false
 })
 export class CertifiedInfoComponent {
     data$ = this.assets.getLocalizedHtml("certified-measurement")

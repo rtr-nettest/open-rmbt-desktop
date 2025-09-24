@@ -17,6 +17,7 @@ import { TestStore } from "src/app/store/test.store"
     selector: "app-certified-data-form",
     templateUrl: "./certified-data-form.component.html",
     styleUrls: ["./certified-data-form.component.scss"],
+    standalone: false
 })
 export class CertifiedDataFormComponent implements OnInit, OnDestroy {
     @Output() formChange = new EventEmitter<ICertifiedDataForm | null>()

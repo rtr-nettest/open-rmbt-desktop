@@ -7,6 +7,7 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-settings-uuid",
     templateUrl: "./settings-uuid.component.html",
     styleUrls: ["./settings-uuid.component.scss"],
+    standalone: false
 })
 export class SettingsUuidComponent {
     uuid$ = this.store.settings$.pipe(

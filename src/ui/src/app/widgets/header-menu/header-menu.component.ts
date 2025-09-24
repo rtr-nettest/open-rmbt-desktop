@@ -5,5 +5,6 @@ import { MainMenuComponent } from "../main-menu/main-menu.component"
     selector: "app-header-menu",
     templateUrl: "./header-menu.component.html",
     styleUrls: ["./header-menu.component.scss"],
+    standalone: false
 })
 export class HeaderMenuComponent extends MainMenuComponent {}

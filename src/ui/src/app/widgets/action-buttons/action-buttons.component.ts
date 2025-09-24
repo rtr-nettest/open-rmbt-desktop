@@ -6,6 +6,7 @@ import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
     selector: "app-action-buttons",
     templateUrl: "./action-buttons.component.html",
     styleUrls: ["./action-buttons.component.scss"],
+    standalone: false
 })
 export class ActionButtonsComponent {
     @Input() items?: IMainMenuItem[]

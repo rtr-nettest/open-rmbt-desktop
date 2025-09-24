@@ -26,6 +26,7 @@ const BreadCrumbsNames = {
     selector: "app-certified-screen",
     templateUrl: "./certified-screen.component.html",
     styleUrls: ["./certified-screen.component.scss"],
+    standalone: false
 })
 export class CertifiedScreenComponent implements OnDestroy {
     activeBreadCrumbIndex = EBreadCrumbs.INFO

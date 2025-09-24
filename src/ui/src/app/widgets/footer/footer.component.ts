@@ -6,6 +6,7 @@ import { MainStore } from "src/app/store/main.store"
     templateUrl: "./footer.component.html",
     styleUrls: ["./footer.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class FooterComponent {
     env$ = this.mainStore.env$

@@ -1,4 +1,4 @@
-import { APP_INITIALIZER, NgModule } from "@angular/core"
+import { NgModule, inject, provideAppInitializer } from "@angular/core"
 import { BrowserModule } from "@angular/platform-browser"
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations"
 
@@ -301,12 +301,10 @@ declare global {
         TranslocoRootModule,
     ],
     providers: [
-        {
-            provide: APP_INITIALIZER,
-            useFactory: MainStore.factory,
-            deps: [MainStore],
-            multi: true,
-        },
+        provideAppInitializer(() => {
+        const initializerFn = (MainStore.factory)(inject(MainStore));
+        return initializerFn();
+      }),
         {
             provide: DatePipe,
         },

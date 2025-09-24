@@ -13,6 +13,7 @@ import {
     selector: "app-test-servers",
     templateUrl: "./test-servers.component.html",
     styleUrls: ["./test-servers.component.scss"],
+    standalone: false
 })
 export class TestServersComponent implements OnInit, IDynamicComponent {
     @Input() parameters?: IDynamicComponentParameters | undefined

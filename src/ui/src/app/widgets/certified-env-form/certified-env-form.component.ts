@@ -20,6 +20,7 @@ import { v4 } from "uuid"
     selector: "app-certified-env-form",
     templateUrl: "./certified-env-form.component.html",
     styleUrls: ["./certified-env-form.component.scss"],
+    standalone: false
 })
 export class CertifiedEnvFormComponent {
     @Output() formChange = new EventEmitter<ICertifiedEnvForm | null>()

@@ -4,6 +4,7 @@ import { Component, HostListener } from "@angular/core"
     selector: "app-scroll-top",
     templateUrl: "./scroll-top.component.html",
     styleUrls: ["./scroll-top.component.scss"],
+    standalone: false
 })
 export class ScrollTopComponent {
     isVisible = false

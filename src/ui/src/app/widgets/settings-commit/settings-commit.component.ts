@@ -6,6 +6,7 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-settings-commit",
     templateUrl: "./settings-commit.component.html",
     styleUrls: ["./settings-commit.component.scss"],
+    standalone: false
 })
 export class SettingsCommitComponent {
     commit$ = this.store.env$.pipe(map((s) => s?.GIT_INFO))

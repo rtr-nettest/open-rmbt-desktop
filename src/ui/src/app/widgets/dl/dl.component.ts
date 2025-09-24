@@ -5,6 +5,7 @@ import { ChangeDetectionStrategy, Component, Input } from "@angular/core"
     templateUrl: "./dl.component.html",
     styleUrls: ["./dl.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class DlComponent {
     @Input() items?: { [key: string]: string }

@@ -8,6 +8,7 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-statistics-screen",
     templateUrl: "./statistics-screen.component.html",
     styleUrls: ["./statistics-screen.component.scss"],
+    standalone: false
 })
 export class StatisticsScreenComponent {
     statisticsLink$ = this.mainStore.env$.pipe(

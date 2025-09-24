@@ -7,6 +7,7 @@ import { TestStore } from "src/app/store/test.store"
     selector: "app-stop-loop-button",
     templateUrl: "./stop-loop-button.component.html",
     styleUrls: ["./stop-loop-button.component.scss"],
+    standalone: false
 })
 export class StopLoopButtonComponent {
     constructor(private testStore: TestStore, private router: Router) {}

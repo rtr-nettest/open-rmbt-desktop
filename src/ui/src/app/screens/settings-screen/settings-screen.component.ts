@@ -38,6 +38,7 @@ export interface ISettingsRow {
     selector: "app-settings-screen",
     templateUrl: "./settings-screen.component.html",
     styleUrls: ["./settings-screen.component.scss"],
+    standalone: false
 })
 export class SettingsScreenComponent
     extends BaseScreen

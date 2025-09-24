@@ -4,6 +4,7 @@ import { Component, HostListener, Input } from "@angular/core"
     selector: "app-scroll-bottom",
     templateUrl: "./scroll-bottom.component.html",
     styleUrls: ["./scroll-bottom.component.scss"],
+    standalone: false
 })
 export class ScrollBottomComponent {
     @Input() isVisible = true

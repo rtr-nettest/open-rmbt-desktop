@@ -39,13 +39,13 @@ $app-theme: mat.m2-define-light-theme(
 
 .app-snackbar {
     --mat-mdc-snack-bar-button-color: black;
-    --mdc-snackbar-container-color: white;
-    --mdc-snackbar-supporting-text-color: black;
+    --mat-snackbar-container-color: white;
+    --mat-snackbar-supporting-text-color: black;
     text-align: center;
 }
 
 .mat-mdc-slide-toggle.app-slide-toggle {
-    --mdc-switch-unselected-handle-color: white;
+    --mat-slide-toggle-unselected-handle-color: white;
 }
 
 .cdk-overlay-pane {

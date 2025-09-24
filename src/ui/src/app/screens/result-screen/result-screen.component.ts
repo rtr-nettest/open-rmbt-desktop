@@ -24,13 +24,14 @@ import { HistoryExportService } from "src/app/services/history-export.service"
 import { SKIPPED_FIELDS } from "src/app/constants/skipped-details-fields"
 import { SEARCHABLE_FIELDS } from "src/app/constants/searchable-details-fields"
 import { FORMATTED_FIELDS } from "src/app/constants/formatted-details-fields"
+import { MessageService } from "src/app/services/message.service"
 
 @Component({
     selector: "app-result-screen",
     templateUrl: "./result-screen.component.html",
     styleUrls: ["./result-screen.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: false,
 })
 export class ResultScreenComponent implements OnDestroy {
     columns: ITableColumn[] = [
@@ -73,6 +74,14 @@ export class ResultScreenComponent implements OnDestroy {
                     )
                 }
                 this.loading.set(false)
+                if (
+                    result?.downloadKbit ||
+                    result?.uploadKbit ||
+                    result?.ping
+                ) {
+                    // Measurement successful, close confusing dialogs
+                    this.message.closeAllDialogs()
+                }
             }),
         )
     sort: ISort = {
@@ -106,6 +115,7 @@ export class ResultScreenComponent implements OnDestroy {
         private exporter: HistoryExportService,
         private i18n: I18nService,
         private mainStore: MainStore,
+        private message: MessageService,
         private store: TestStore,
         private route: ActivatedRoute,
         private router: Router,

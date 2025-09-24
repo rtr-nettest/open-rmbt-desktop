@@ -2,7 +2,10 @@
     <div class="app-menu" *ngIf="env.FLAVOR !== 'ont'">
         <aside class="app-aside">
             <div>
-                <app-header [fixed]="true"></app-header>
+                <app-header
+                    [fixed]="true"
+                    [hideLoopModeAlert]="true"
+                ></app-header>
                 <ul *ngIf="menu$ | async as menu" class="app-list" role="menu">
                     <ng-container *ngFor="let item of menu; trackBy: trackBy">
                         <li

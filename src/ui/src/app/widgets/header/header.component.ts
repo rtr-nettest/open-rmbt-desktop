@@ -19,6 +19,7 @@ import { TestStore } from "src/app/store/test.store"
 export class HeaderComponent {
     @Input() fixed = false
     @Input() hideMenu = false
+    @Input() hideLoopModeAlert = false
     private noGo = "javascript:;"
     link$ = combineLatest([
         this.activeRoute.url,
@@ -33,7 +34,7 @@ export class HeaderComponent {
                 return this.noGo
             }
             return "/"
-        })
+        }),
     )
     env$ = this.mainStore.env$
     isLoopModeTestScreen$ = combineLatest([
@@ -42,15 +43,15 @@ export class HeaderComponent {
     ]).pipe(
         map(([loopMode, certifiedMeasurement]) => {
             return !!loopMode && !certifiedMeasurement
-        })
+        }),
     )
     ontLogo$ = this.mainStore.env$.pipe(
         concatMap((env) =>
             this.cms.getAssetByName(
                 `logo-header.${
                     env?.X_NETTEST_CLIENT
-                }.${this.transloco.getActiveLang()}.svg`
-            )
+                }.${this.transloco.getActiveLang()}.svg`,
+            ),
         ),
         concatMap((asset) =>
             asset
@@ -58,10 +59,10 @@ export class HeaderComponent {
                 : this.cms.getAssetByName(
                       `logo-header.${
                           this.mainStore.env$.value?.X_NETTEST_CLIENT
-                      }.${this.transloco.getDefaultLang()}.svg`
-                  )
+                      }.${this.transloco.getDefaultLang()}.svg`,
+                  ),
         ),
-        map((asset) => asset?.url || "/assets/images/logo-header.svg")
+        map((asset) => asset?.url || "/assets/images/logo-header.svg"),
     )
 
     constructor(
@@ -71,7 +72,7 @@ export class HeaderComponent {
         private testStore: TestStore,
         private message: MessageService,
         private router: Router,
-        private transloco: TranslocoService
+        private transloco: TranslocoService,
     ) {}
 
     handleClick(event: MouseEvent, link: string) {
@@ -83,7 +84,7 @@ export class HeaderComponent {
                 () => {
                     this.router.navigate(["/"])
                 },
-                { canCancel: true }
+                { canCancel: true },
             )
         }
     }

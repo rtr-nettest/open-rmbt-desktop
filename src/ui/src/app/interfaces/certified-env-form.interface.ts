@@ -9,11 +9,12 @@ export enum ECertifiedLocationType {
 }
 
 export interface ICertifiedEnvForm {
-    locationType: ECertifiedLocationType[]
+    locationType: Array<ECertifiedLocationType | null>
     locationTypeOther?: string | null
     typeText?: string | null
     testDevice?: string | null
     testPictures: { [key: string]: File }
+    isValid: boolean
 }
 
 export interface ICertifiedEnvFormControls {

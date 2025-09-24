@@ -22,17 +22,9 @@
                     "
                 >
                     <mat-checkbox
-                        *ngIf="i < locationValues.length - 1"
                         [value]="locationValues[i]"
                         [formControl]="control"
                         >{{ t(locationNames[i]) }}</mat-checkbox
-                    >
-                    <mat-checkbox
-                        *ngIf="i === locationValues.length - 1"
-                        (change)="toggleLocationTypeOther(!$event.checked)"
-                        [value]="locationValues[i]"
-                        [formControl]="control"
-                        >{{ t(locationNames[i]) }}:</mat-checkbox
                     >
                 </li>
             </ul>

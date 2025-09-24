@@ -7,6 +7,7 @@ export interface ICertifiedDataForm {
     titleAppend: string | null
     address: string
     isFirstCycle: boolean
+    isValid: boolean
 }
 
 export interface ICertifiedDataFormControls {

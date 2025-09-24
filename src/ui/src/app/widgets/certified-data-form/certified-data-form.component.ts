@@ -17,14 +17,17 @@ import { TestStore } from "src/app/store/test.store"
     selector: "app-certified-data-form",
     templateUrl: "./certified-data-form.component.html",
     styleUrls: ["./certified-data-form.component.scss"],
-    standalone: false
+    standalone: false,
 })
 export class CertifiedDataFormComponent implements OnInit, OnDestroy {
-    @Output() formChange = new EventEmitter<ICertifiedDataForm | null>()
+    @Output() formChange = new EventEmitter<ICertifiedDataForm>()
     form?: FormGroup<ICertifiedDataFormControls>
     private destroyed$ = new Subject()
 
-    constructor(private fb: FormBuilder, private testStore: TestStore) {}
+    constructor(
+        private fb: FormBuilder,
+        private testStore: TestStore,
+    ) {}
 
     ngOnDestroy(): void {
         this.destroyed$.next(void 0)
@@ -53,20 +56,23 @@ export class CertifiedDataFormComponent implements OnInit, OnDestroy {
                 {
                     nonNullable: true,
                     validators: Validators.required,
-                }
+                },
             ),
         })
         this.form.valueChanges
             .pipe(
                 map((f) => {
-                    if (this.form?.valid) {
-                        this.formChange.emit(f as ICertifiedDataForm)
-                    } else {
-                        this.formChange.emit(null)
-                    }
+                    this.formChange.emit({
+                        ...(f as ICertifiedDataForm),
+                        isValid: this.form?.valid ?? false,
+                    })
                 }),
-                takeUntil(this.destroyed$)
+                takeUntil(this.destroyed$),
             )
             .subscribe()
+        this.formChange.emit({
+            ...(this.form.value as ICertifiedDataForm),
+            isValid: this.form.valid,
+        })
     }
 }

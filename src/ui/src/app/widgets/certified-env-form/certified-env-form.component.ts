@@ -13,6 +13,7 @@ import {
     ICertifiedEnvFormControls,
 } from "src/app/interfaces/certified-env-form.interface"
 import { FileService } from "src/app/services/file.service"
+import { CertifiedStore } from "src/app/store/certified.store"
 import { TestStore } from "src/app/store/test.store"
 import { v4 } from "uuid"
 
@@ -20,11 +21,12 @@ import { v4 } from "uuid"
     selector: "app-certified-env-form",
     templateUrl: "./certified-env-form.component.html",
     styleUrls: ["./certified-env-form.component.scss"],
-    standalone: false
+    standalone: false,
 })
 export class CertifiedEnvFormComponent {
-    @Output() formChange = new EventEmitter<ICertifiedEnvForm | null>()
+    @Output() formChange = new EventEmitter<ICertifiedEnvForm>()
     form?: FormGroup<ICertifiedEnvFormControls>
+    disabled = true
     locationValues = Object.values(ECertifiedLocationType)
     locationNames = [
         "Apartment building",
@@ -34,13 +36,17 @@ export class CertifiedEnvFormComponent {
         "Other",
     ]
     fileIds = [v4()]
-    files: { [key: string]: File } = {}
     private destroyed$ = new Subject()
 
+    get files() {
+        return this.store.files
+    }
+
     constructor(
+        private store: CertifiedStore,
         private fb: FormBuilder,
         private fs: FileService,
-        private ts: TestStore
+        private ts: TestStore,
     ) {}
 
     ngOnDestroy(): void {
@@ -56,53 +62,48 @@ export class CertifiedEnvFormComponent {
                     (_, i) =>
                         new FormControl(!!savedForm?.locationType[i], {
                             nonNullable: true,
-                        })
-                )
+                        }),
+                ),
             ),
             locationTypeOther: new FormControl(
-                savedForm?.locationTypeOther || "",
-                Validators.required
+                {
+                    value: savedForm?.locationTypeOther || "",
+                    disabled: !savedForm?.locationType[4],
+                },
+                Validators.required,
             ),
             typeText: new FormControl(savedForm?.typeText || ""),
             testDevice: new FormControl(savedForm?.testDevice || ""),
         })
-        this.toggleLocationTypeOther(true)
-        this.form.valueChanges
+        this.form.controls.locationType.valueChanges
             .pipe(
-                map((f) => {
-                    if (!f.locationType?.some((lt) => !!lt)) {
-                        this.form?.markAsPristine()
-                        this.formChange.emit(null)
-                        return
-                    }
-                    if (this.form?.valid) {
-                        const locationType =
-                            f.locationType?.reduce(
-                                (acc, lt, i) =>
-                                    lt ? [...acc, this.locationValues[i]] : acc,
-                                [] as ECertifiedLocationType[]
-                            ) || []
-                        const formValue: ICertifiedEnvForm = {
-                            ...f,
-                            testPictures: this.files,
-                            locationType,
-                        }
-                        this.formChange.emit(formValue)
-                    } else {
-                        this.formChange.emit(null)
-                    }
-                }),
-                takeUntil(this.destroyed$)
+                map(this.onCheckboxChange.bind(this)),
+                takeUntil(this.destroyed$),
             )
             .subscribe()
-    }
-
-    toggleLocationTypeOther(isEnabled: boolean) {
-        if (isEnabled) {
-            this.form?.controls.locationTypeOther.disable()
-        } else {
-            this.form?.controls.locationTypeOther.enable()
-        }
+        this.form.controls.locationTypeOther.valueChanges
+            .pipe(
+                map(this.onLocationTypeOtherChange.bind(this)),
+                takeUntil(this.destroyed$),
+            )
+            .subscribe()
+        this.form.controls.typeText.valueChanges
+            .pipe(
+                map(() => this.onFormChange()),
+                takeUntil(this.destroyed$),
+            )
+            .subscribe()
+        this.form.controls.testDevice.valueChanges
+            .pipe(
+                map(() => this.onFormChange()),
+                takeUntil(this.destroyed$),
+            )
+            .subscribe()
+        this.onCheckboxChange(this.form.controls.locationType.value)
+        this.onLocationTypeOtherChange(
+            this.form.controls.locationTypeOther.value,
+        )
+        this.initFiles()
     }
 
     async onFileSelected(event: Event, fileId: string) {
@@ -124,9 +125,60 @@ export class CertifiedEnvFormComponent {
         delete this.files[uuid]
         if (this.fileIds.length > 1) {
             const uuidIndex = this.fileIds.findIndex(
-                (fileId) => fileId === uuid
+                (fileId) => fileId === uuid,
             )
             this.fileIds.splice(uuidIndex, 1)
+        }
+    }
+
+    private onFormChange() {
+        const f = this.form?.value!
+        const locationType =
+            f.locationType?.map(
+                (lt, i) => (lt ? this.locationValues[i] : null),
+                [] as ECertifiedLocationType[],
+            ) || []
+        const formValue: ICertifiedEnvForm = {
+            ...f,
+            testPictures: this.files,
+            locationType,
+            isValid: this.form!.valid && !this.disabled,
+        }
+        this.formChange.emit(formValue)
+    }
+
+    private onLocationTypeOtherChange = (locationTypeOther: string | null) => {
+        if (!this.form?.controls.locationType.value[4]) {
+            return
+        }
+        this.disabled = !locationTypeOther
+        this.onFormChange()
+    }
+
+    private onCheckboxChange = (boxes: boolean[]) => {
+        if (boxes.some(Boolean)) {
+            let isDisabled = false
+            if (boxes[4]) {
+                this.form?.controls.locationTypeOther.enable()
+                isDisabled = !this.form?.controls.locationTypeOther.value
+            } else {
+                this.form?.controls.locationTypeOther.disable()
+            }
+            this.disabled = isDisabled
+        } else {
+            this.disabled = true
+            this.form?.controls.locationTypeOther.disable()
+        }
+        this.onFormChange()
+    }
+
+    private initFiles() {
+        if (Object.keys(this.files).length) {
+            this.fileIds = []
+            for (const fileId in this.files) {
+                this.fileIds.push(fileId)
+            }
+            this.fileIds.push(v4())
         }
     }
 }

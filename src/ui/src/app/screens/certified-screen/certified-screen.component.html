@@ -47,41 +47,37 @@
                 [hideMenu]="true"
                 [loopUuid]="loopUuid"
             ></app-certified-result-screen>
-            <button
-                *ngIf="
-                    activeBreadCrumbIndex == breadCrumbs.INFO ||
-                    (!isReady &&
-                        activeBreadCrumbIndex < breadCrumbs.ENVIRONMENT)
-                "
-                mat-flat-button
-                color="primary"
-                style="margin-top: 1.6em"
-                (click)="forward()"
-                [disabled]="
-                    activeBreadCrumbIndex > breadCrumbs.INFO && !isDataFormValid
-                "
-            >
-                {{ t("Next") }}
-            </button>
-            <button
-                *ngIf="
-                    (isReady &&
-                        activeBreadCrumbIndex != breadCrumbs.INFO &&
-                        activeBreadCrumbIndex < breadCrumbs.MEASUREMENT) ||
-                    activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT
-                "
-                mat-flat-button
-                color="primary"
-                style="margin-top: 1.6em"
-                (click)="startCertifiedMeasurement()"
-                [disabled]="
-                    activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT
-                        ? !isEnvFormValid
-                        : !isDataFormValid
-                "
-            >
-                {{ t("Start certified measurement") }}
-            </button>
+            @if (
+                activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT ||
+                (activeBreadCrumbIndex == breadCrumbs.DATA && !isFirstCycle)
+            ) {
+                <button
+                    mat-flat-button
+                    color="primary"
+                    style="margin-top: 1.6em"
+                    (click)="startCertifiedMeasurement()"
+                    [disabled]="
+                        activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT
+                            ? !isEnvFormValid
+                            : !isDataFormValid
+                    "
+                >
+                    {{ t("Start certified measurement") }}
+                </button>
+            } @else if (activeBreadCrumbIndex <= breadCrumbs.DATA) {
+                <button
+                    mat-flat-button
+                    color="primary"
+                    style="margin-top: 1.6em"
+                    (click)="forward()"
+                    [disabled]="
+                        activeBreadCrumbIndex > breadCrumbs.INFO &&
+                        !isDataFormValid
+                    "
+                >
+                    {{ t("Next") }}
+                </button>
+            }
         </div>
     </app-main-content>
 </app-body>

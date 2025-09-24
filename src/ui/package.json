@@ -29,7 +29,6 @@
     "dayjs": "^1.11.13",
     "file-saver": "^2.0.5",
     "marked": "^12.0.2",
-    "ngx-markdown": "^18.0.0",
     "rxjs": "~7.8.1",
     "tslib": "^2.7.0",
     "zone.js": "~0.14.0"

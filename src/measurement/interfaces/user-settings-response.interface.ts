@@ -14,13 +14,14 @@ export interface IUserSettings {
         control_ipv6_only: string
         statistics: string
         url_statistic_server: string
+        url_web_statistic_server: string
     }
     uuid: string
     qostesttype_desc: [
         {
             name: string
             test_type: string
-        }
+        },
     ]
     ipInfo?: IPInfo
     terms_and_conditions: ITerms

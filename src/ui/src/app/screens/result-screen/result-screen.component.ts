@@ -94,7 +94,7 @@ export class ResultScreenComponent implements OnDestroy {
             translations: [],
             icon: "filetype-pdf",
             action: () =>
-                this.exporter.exportAsPdf([
+                this.exporter.quickPdfExport([
                     this.store.simpleHistoryResult$.value!,
                 ]),
         },

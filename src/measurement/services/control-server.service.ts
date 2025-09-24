@@ -303,10 +303,10 @@ export class ControlServer {
         }
         let retVal: ISimpleHistoryResult[] | undefined
         try {
-            if (process.env.HISTORY_RESULT_PATH_METHOD === "GET") {
+            if (process.env.FLAVOR === "ont") {
                 // as used by ONT
                 retVal = await this.getONTHistory(paginator, sort)
-            } else if (process.env.HISTORY_RESULT_PATH_METHOD === "POST") {
+            } else {
                 // as used by RTR
                 retVal = await this.getRTRHistory(paginator)
             }

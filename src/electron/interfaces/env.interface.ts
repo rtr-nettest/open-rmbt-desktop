@@ -16,9 +16,7 @@ export interface IEnv {
     FULL_STATISTICS_URL: string | undefined
     FULL_MAP_URL: string | undefined
     GIT_INFO: string | undefined
-    HISTORY_EXPORT_URL: string | undefined
     HISTORY_RESULTS_LIMIT: number | undefined
-    HISTORY_SEARCH_URL: string | undefined
     IP_VERSION: string | null
     LOOP_MODE_MIN_INTERVAL: number
     LOOP_MODE_MAX_INTERVAL: number

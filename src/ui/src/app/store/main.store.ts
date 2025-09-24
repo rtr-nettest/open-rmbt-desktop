@@ -48,6 +48,10 @@ export class MainStore {
     terms$ = new BehaviorSubject<IMainPage | null>(null)
     maxJitter = 5
 
+    get api() {
+        return this.settings$.value?.urls
+    }
+
     constructor(
         private router: Router,
         private transloco: TranslocoService,

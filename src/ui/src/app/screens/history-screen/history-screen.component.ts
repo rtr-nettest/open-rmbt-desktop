@@ -26,7 +26,7 @@ import { HistoryExportService } from "src/app/services/history-export.service"
     selector: "app-history-screen",
     templateUrl: "./history-screen.component.html",
     styleUrls: ["./history-screen.component.scss"],
-    standalone: false
+    standalone: false,
 })
 export class HistoryScreenComponent
     extends BaseScreen
@@ -50,7 +50,8 @@ export class HistoryScreenComponent
             label: "Export as PDF",
             translations: [],
             icon: "filetype-pdf",
-            action: () => this.exporter.exportAsPdf(this.store.history$.value),
+            action: () =>
+                this.exporter.slowPdfExport(this.store.history$.value),
         },
         {
             label: "Export as XLSX",
@@ -70,7 +71,7 @@ export class HistoryScreenComponent
         protected exporter: HistoryExportService,
         protected store: HistoryStore,
         private cdr: ChangeDetectorRef,
-        private transloco: TranslocoService
+        private transloco: TranslocoService,
     ) {
         super(mainStore, message)
     }
@@ -96,7 +97,7 @@ export class HistoryScreenComponent
 
     getHeading(count: number) {
         const heading = this.transloco.translate(
-            `history.table.heading-${count === 1 ? 1 : 2}`
+            `history.table.heading-${count === 1 ? 1 : 2}`,
         )
         return `${count || 0} ${heading}`
     }

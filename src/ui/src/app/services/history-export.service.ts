@@ -16,15 +16,20 @@ import { TestStore } from "../store/test.store"
 export class HistoryExportService {
     lastCertifiedPdfUrl$ = new BehaviorSubject("")
 
-    private get exportUrl() {
-        return this.mainStore.env$.value?.HISTORY_EXPORT_URL
+    protected get generalUrl() {
+        return `${this.mainStore.api?.url_statistic_server}/opentests/search`
     }
 
-    private get pdfUrl() {
-        if (!this.exportUrl) {
-            return null
-        }
-        return this.exportUrl + "/pdf/" + this.transloco.getActiveLang()
+    protected get quickPdfUrl() {
+        return `${this.mainStore.api?.url_statistic_server}/export/pdf/${this.transloco.getActiveLang()}`
+    }
+
+    protected get slowPdfUrl() {
+        return `${this.mainStore.api?.url_web_statistic_server}/export/pdf/${this.transloco.getActiveLang()}`
+    }
+
+    protected get certifiedPdfUrl() {
+        return `${this.mainStore.api?.url_web_statistic_server}/export/pdf/`
     }
 
     constructor(
@@ -32,11 +37,11 @@ export class HistoryExportService {
         private mainStore: MainStore,
         private message: MessageService,
         private http: HttpClient,
-        private transloco: TranslocoService
+        private transloco: TranslocoService,
     ) {}
 
     exportAs(format: "csv" | "xlsx", results: ISimpleHistoryResult[]) {
-        const exportUrl = this.mainStore.env$.value?.HISTORY_SEARCH_URL
+        const exportUrl = this.generalUrl
         if (!exportUrl) {
             return of(null)
         }
@@ -50,18 +55,40 @@ export class HistoryExportService {
             .pipe(tap(this.saveFile(format)), catchError(this.handleError))
     }
 
-    exportAsPdf(results: ISimpleHistoryResult[]) {
-        if (!this.pdfUrl) {
+    quickPdfExport(results: any[]) {
+        const formdata = new FormData()
+        console.log(results)
+        formdata.append(
+            "open_test_uuid",
+            results[0].openTestResponse?.["open_test_uuid"],
+        )
+        return this.exportAsPdf(results, this.quickPdfUrl, formdata)
+    }
+
+    slowPdfExport(results: any[]) {
+        return this.exportAsPdf(results, this.slowPdfUrl)
+    }
+
+    private exportAsPdf(
+        results: any[],
+        basePdfUrl: string,
+        httpParams?: HttpParams | FormData,
+    ) {
+        if (!basePdfUrl) {
             return of(null)
         }
         this.mainStore.inProgress$.next(true)
         return this.http
-            .post(this.pdfUrl, this.getExportParams("pdf", results))
-            .pipe(
-                concatMap(this.downloadPdf),
-                tap(this.saveFile("pdf")),
-                catchError(this.handleError)
+            .post(
+                basePdfUrl,
+                httpParams || this.getExportParams("pdf", results),
+                {
+                    headers: { Accept: "application/pdf" },
+                    responseType: "blob",
+                    observe: "response",
+                },
             )
+            .pipe(tap(this.saveFile("pdf")), catchError(this.handleError))
     }
 
     exportAsCertified(loopUuid?: string | null) {
@@ -69,46 +96,47 @@ export class HistoryExportService {
             window.electronAPI.openPdf(this.lastCertifiedPdfUrl$.value)
             return this.lastCertifiedPdfUrl$.asObservable()
         }
-        if (!this.pdfUrl || !loopUuid) {
+        if (!this.slowPdfUrl || !loopUuid) {
             return of(null)
         }
         this.mainStore.inProgress$.next(true)
         return this.http
-            .post<any>(this.pdfUrl, this.getFormData(loopUuid))
+            .post<any>(this.slowPdfUrl, this.getFormData(loopUuid))
             .pipe(
-                concatMap(this.downloadPdf),
+                concatMap((resp) => {
+                    if (resp?.["file"]) {
+                        return this.http.get(
+                            this.certifiedPdfUrl + resp["file"],
+                            {
+                                responseType: "blob",
+                                observe: "response",
+                            },
+                        )
+                    }
+                    return of(null)
+                }),
                 tap(this.saveFile("pdf")),
-                catchError(this.handleError)
+                catchError(this.handleError),
             )
     }
 
     getCertifiedPdfUrl(loopUuid?: string | null) {
-        if (!this.pdfUrl || !loopUuid) {
+        if (!this.slowPdfUrl || !loopUuid) {
             return of(null)
         }
         return this.http
-            .post<any>(this.pdfUrl, this.getFormData(loopUuid))
+            .post<any>(this.slowPdfUrl, this.getFormData(loopUuid))
             .pipe(
                 map((resp: any) => {
                     if (resp?.["file"]) {
-                        const fileUrl = this.exportUrl + "/pdf/" + resp["file"]
+                        const fileUrl = this.certifiedPdfUrl + resp["file"]
                         this.lastCertifiedPdfUrl$.next(fileUrl)
                         return fileUrl
                     }
                     return null
                 }),
-                catchError(this.handleError)
+                catchError(this.handleError),
             )
-    }
-
-    private downloadPdf = (resp: any) => {
-        if (resp?.["file"]) {
-            return this.http.get(this.exportUrl + "/pdf/" + resp["file"], {
-                responseType: "blob",
-                observe: "response",
-            })
-        }
-        return of(null)
     }
 
     private saveFile = (format: string) => (data: any) => {
@@ -141,7 +169,7 @@ export class HistoryExportService {
         formData.append("loop_uuid", "L" + loopUuid)
         if (envForm?.locationType.length) {
             for (const [i, l] of Object.values(
-                ECertifiedLocationType
+                ECertifiedLocationType,
             ).entries()) {
                 if (envForm.locationType.includes(l)) {
                     formData.append(`location_type_${i}`, l)

@@ -11,7 +11,7 @@ import { BaseScreen } from "../base-screen/base-screen.component"
     selector: "app-home-screen",
     templateUrl: "./home-screen.component.html",
     styleUrls: ["./home-screen.component.scss"],
-    standalone: false
+    standalone: false,
 })
 export class HomeScreenComponent
     extends BaseScreen
@@ -29,25 +29,25 @@ export class HomeScreenComponent
                 return [
                     `${this.transloco.translate("IPv4")}:&nbsp;${this.getIPIcon(
                         publicV4,
-                        privateV4
+                        privateV4,
                     )}&nbsp;${textV4}`,
                     `${this.transloco.translate("IPv6")}:&nbsp;${this.getIPIcon(
                         publicV6,
-                        privateV6
+                        privateV6,
                     )}&nbsp;${textV6}`,
                 ]
             }
             return [
                 `${this.transloco.translate("IPv4")}:&nbsp;${this.getIPIcon(
                     UNKNOWN,
-                    UNKNOWN
+                    UNKNOWN,
                 )}`,
                 `${this.transloco.translate("IPv6")}:&nbsp;${this.getIPIcon(
                     UNKNOWN,
-                    UNKNOWN
+                    UNKNOWN,
                 )}`,
             ]
-        })
+        }),
     )
     jitterInfo$ = this.mainStore.jitterInfo$.pipe(
         map((info) => {
@@ -55,10 +55,10 @@ export class HomeScreenComponent
                 const { jitter, packetLoss, ping } = info
                 return [
                     `${this.transloco.translate(
-                        "Ping"
+                        "Ping",
                     )}:&nbsp;${ping} ${this.transloco.translate("ms")}`,
                     `${this.transloco.translate(
-                        "Packet loss"
+                        "Packet loss",
                     )}:&nbsp;${packetLoss}%`,
                     `${this.transloco.translate("Jitter")}:&nbsp;${jitter}`,
                 ]
@@ -66,19 +66,19 @@ export class HomeScreenComponent
                 return [
                     `${this.transloco.translate("Ping")}:&nbsp;${UNKNOWN}`,
                     `${this.transloco.translate(
-                        "Packet loss"
+                        "Packet loss",
                     )}:&nbsp;${UNKNOWN}`,
                     `${this.transloco.translate("Jitter")}:&nbsp;${UNKNOWN}`,
                 ]
             }
-        })
+        }),
     )
     testInviteImg$ = this.mainStore.env$.pipe(
         switchMap((env) =>
             this.cmsService.getAssetByName(
-                `test-invite-img.${env?.X_NETTEST_CLIENT}.svg`
-            )
-        )
+                `test-invite-img.${env?.X_NETTEST_CLIENT}.svg`,
+            ),
+        ),
     )
     showProgress = true
     methodologyLink$ = this.cmsService.getProject().pipe(
@@ -89,7 +89,7 @@ export class HomeScreenComponent
                 lang = "en"
             }
             return `${this.env$.value?.WEBSITE_HOST}/${lang}/${path}`
-        })
+        }),
     )
     private checkIpInterval?: any
 
@@ -98,7 +98,7 @@ export class HomeScreenComponent
         message: MessageService,
         private cdr: ChangeDetectorRef,
         private cmsService: CMSService,
-        private transloco: TranslocoService
+        private transloco: TranslocoService,
     ) {
         super(mainStore, message)
     }
@@ -128,19 +128,19 @@ export class HomeScreenComponent
         const t = (str: string) => this.transloco.translate(str)
         if (publicAddress === UNKNOWN) {
             return `<i title="${t(
-                "Unknown"
+                "Unknown",
             )}" class="app-icon--class app-icon--class-gray"></i>`
         } else if (!publicAddress) {
             return `<i title="${t(
-                "No connectivity"
+                "No connectivity",
             )}" class="app-icon--class app-icon--class-red"></i>`
         } else if (publicAddress !== privateAddress) {
             return `<i title="${t(
-                "NAT"
+                "NAT",
             )}" class="app-icon--class app-icon--class-yellow"></i>`
         } else {
             return `<i title="${t(
-                "Public IP"
+                "Public IP",
             )}" class="app-icon--class app-icon--class-green"></i>`
         }
     }

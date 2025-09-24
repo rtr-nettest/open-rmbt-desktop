@@ -18,7 +18,7 @@ import { HistoryExportService } from "src/app/services/history-export.service"
     selector: "app-loop-result-screen",
     templateUrl: "../history-screen/history-screen.component.html",
     styleUrls: ["../history-screen/history-screen.component.scss"],
-    standalone: false
+    standalone: false,
 })
 export class LoopResultScreenComponent extends HistoryScreenComponent {
     override shouldGroupHistory = false
@@ -40,7 +40,7 @@ export class LoopResultScreenComponent extends HistoryScreenComponent {
             label: "",
             translations: [],
             icon: "filetype-pdf",
-            action: () => this.exporter.exportAsPdf(this.loopResults),
+            action: () => this.exporter.slowPdfExport(this.loopResults),
         },
         {
             label: "",
@@ -53,7 +53,7 @@ export class LoopResultScreenComponent extends HistoryScreenComponent {
     private get loopResults() {
         return this.store.getLoopResults(
             this.store.history$.value,
-            this.activatedRoute.snapshot.params["loopUuid"]
+            this.activatedRoute.snapshot.params["loopUuid"],
         )
     }
 
@@ -64,7 +64,7 @@ export class LoopResultScreenComponent extends HistoryScreenComponent {
         cdr: ChangeDetectorRef,
         store: HistoryStore,
         transloco: TranslocoService,
-        private activatedRoute: ActivatedRoute
+        private activatedRoute: ActivatedRoute,
     ) {
         super(mainStore, message, exporter, store, cdr, transloco)
     }

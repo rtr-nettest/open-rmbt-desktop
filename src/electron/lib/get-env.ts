@@ -40,11 +40,9 @@ export const getEnv = () => {
         FULL_HISTORY_RESULT_URL: process.env.FULL_HISTORY_RESULT_URL,
         FULL_STATISTICS_URL: process.env.FULL_STATISTICS_URL,
         FULL_MAP_URL: process.env.FULL_MAP_URL,
-        HISTORY_EXPORT_URL: `${settings?.urls?.url_statistic_server}${process.env.HISTORY_EXPORT_PATH}`,
         HISTORY_RESULTS_LIMIT: process.env.HISTORY_RESULTS_LIMIT
             ? parseInt(process.env.HISTORY_RESULTS_LIMIT)
             : undefined,
-        HISTORY_SEARCH_URL: `${settings?.urls?.url_statistic_server}${process.env.HISTORY_SEARCH_PATH}`,
         IP_VERSION: (Store.I.get(IP_VERSION) as string) || "",
         LOOP_MODE_MIN_INTERVAL: process.env.LOOP_MODE_MIN_INTERVAL
             ? parseInt(process.env.LOOP_MODE_MIN_INTERVAL)

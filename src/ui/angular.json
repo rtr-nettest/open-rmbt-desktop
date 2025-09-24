@@ -23,7 +23,7 @@
                             "file-saver"
                         ],
                         "outputPath": {
-                          "base": "dist/ui"
+                            "base": "dist/ui"
                         },
                         "index": "src/index.html",
                         "polyfills": ["zone.js"],
@@ -34,9 +34,15 @@
                         "scripts": [],
                         "browser": "src/main.ts",
                         "stylePreprocessorOptions": {
-                          "includePaths": [
-                            "."
-                          ]
+                            "includePaths": ["."],
+                            "sass": {
+                                "silenceDeprecations": [
+                                    "mixed-decls",
+                                    "color-functions",
+                                    "global-builtin",
+                                    "import"
+                                ]
+                            }
                         }
                     },
                     "configurations": {
@@ -56,7 +62,7 @@
                             "outputHashing": "all"
                         },
                         "development": {
-                          "optimization": false,
+                            "optimization": false,
                             "extractLicenses": false,
                             "sourceMap": true,
                             "namedChunks": true
@@ -68,10 +74,10 @@
                     "builder": "@angular/build:dev-server",
                     "configurations": {
                         "production": {
-                          "buildTarget": "ui:build:production"
+                            "buildTarget": "ui:build:production"
                         },
                         "development": {
-                          "buildTarget": "ui:build:development"
+                            "buildTarget": "ui:build:development"
                         }
                     },
                     "defaultConfiguration": "development"
@@ -79,7 +85,7 @@
                 "extract-i18n": {
                     "builder": "@angular/build:extract-i18n",
                     "options": {
-                      "buildTarget": "ui:build"
+                        "buildTarget": "ui:build"
                     }
                 },
                 "test": {
@@ -100,29 +106,29 @@
         "analytics": false
     },
     "schematics": {
-      "@schematics/angular:component": {
-        "type": "component"
-      },
-      "@schematics/angular:directive": {
-        "type": "directive"
-      },
-      "@schematics/angular:service": {
-        "type": "service"
-      },
-      "@schematics/angular:guard": {
-        "typeSeparator": "."
-      },
-      "@schematics/angular:interceptor": {
-        "typeSeparator": "."
-      },
-      "@schematics/angular:module": {
-        "typeSeparator": "."
-      },
-      "@schematics/angular:pipe": {
-        "typeSeparator": "."
-      },
-      "@schematics/angular:resolver": {
-        "typeSeparator": "."
-      }
+        "@schematics/angular:component": {
+            "type": "component"
+        },
+        "@schematics/angular:directive": {
+            "type": "directive"
+        },
+        "@schematics/angular:service": {
+            "type": "service"
+        },
+        "@schematics/angular:guard": {
+            "typeSeparator": "."
+        },
+        "@schematics/angular:interceptor": {
+            "typeSeparator": "."
+        },
+        "@schematics/angular:module": {
+            "typeSeparator": "."
+        },
+        "@schematics/angular:pipe": {
+            "typeSeparator": "."
+        },
+        "@schematics/angular:resolver": {
+            "typeSeparator": "."
+        }
     }
 }

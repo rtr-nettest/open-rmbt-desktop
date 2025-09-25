@@ -89,6 +89,9 @@ export class TestVisualizationState implements ITestVisualizationState {
                 EMeasurementStatus.UP
             ].setRTRChartFromOverallSpeed?.(result.uploadOverTime ?? [])
         }
+        newState.phases[EMeasurementStatus.DOWN].downs =
+            result.downloadOverTime ?? []
+        newState.phases[EMeasurementStatus.UP].ups = result.uploadOverTime ?? []
         newState.phases[EMeasurementStatus.PING].setChartFromPings?.(
             result.pingOverTime ?? [],
         )

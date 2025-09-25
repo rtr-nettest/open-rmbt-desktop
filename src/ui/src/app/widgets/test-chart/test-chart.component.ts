@@ -24,7 +24,7 @@ import { TestPhaseState } from "src/app/dto/test-phase-state.dto"
     templateUrl: "./test-chart.component.html",
     styleUrls: ["./test-chart.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: false,
 })
 export class TestChartComponent implements OnInit, OnDestroy {
     @Input() phase: ChartPhase = "download"
@@ -188,11 +188,41 @@ export class TestChartComponent implements OnInit, OnDestroy {
                         ctx!,
                         this.transloco,
                         this.phase,
+                        this.getMaxSpeed(),
                     )
                 }
             } catch (e) {
                 console.warn(e)
             }
         }
+    }
+
+    private getMaxSpeed() {
+        const visualization = this.store.visualization$.value
+
+        if (
+            visualization.currentPhaseName !==
+            EMeasurementStatus.SHOWING_RESULTS
+        ) {
+            return
+        }
+
+        let retVal = 0
+
+        if (this.phase === "download") {
+            retVal = Math.max(
+                ...visualization.phases[EMeasurementStatus.DOWN].downs!.map(
+                    (v) => v.speed / 1e6,
+                ),
+            )
+        } else if (this.phase === "upload") {
+            retVal = Math.max(
+                ...visualization.phases[EMeasurementStatus.UP].ups!.map(
+                    (v) => v.speed / 1e6,
+                ),
+            )
+        }
+
+        return retVal
     }
 }

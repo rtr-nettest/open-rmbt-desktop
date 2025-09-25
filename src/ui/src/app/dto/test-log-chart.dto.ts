@@ -10,7 +10,8 @@ export class TestLogChart extends TestChart {
     constructor(
         context: CanvasRenderingContext2D,
         transloco: TranslocoService,
-        private phase: ChartPhase
+        private phase: ChartPhase,
+        maxValue?: number,
     ) {
         super(
             context,
@@ -20,7 +21,7 @@ export class TestLogChart extends TestChart {
                 datasets: [new TestRTRChartDataset(phase)],
                 labels: generateIndexesOfLength(8),
             },
-            new TestLogChartOptions(transloco)
+            new TestLogChartOptions(transloco, maxValue),
         )
     }
 
@@ -32,7 +33,7 @@ export class TestLogChart extends TestChart {
                 this.data.datasets[0].data[
                     this.data.datasets[0].data.length - 1
                 ] as Point
-            ).x
+            ).x,
         )
         const { labels } = this.data
         if (labels && labels.length <= lastIndex) {

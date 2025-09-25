@@ -45,7 +45,7 @@ export class TestBarChartOptions {
                 callback: (value: any) => {
                     const duration = (value - this.startTime) / 1000
                     if (duration % 0.5 === 0) {
-                        return `${duration} ${this.t.translate("s")}`
+                        return `${duration.toLocaleString(this.t.getActiveLang())} ${this.t.translate("s")}`
                     }
                     return ""
                 },
@@ -73,7 +73,7 @@ export class TestBarChartOptions {
                 },
                 maxTicksLimit: 6,
                 callback: (value: any) => {
-                    return `${value} ${this.t.translate("millis")}`
+                    return `${value.toLocaleString(this.t.getActiveLang())} ${this.t.translate("millis")}`
                 },
             },
         },

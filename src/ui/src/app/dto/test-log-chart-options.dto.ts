@@ -72,9 +72,9 @@ export class TestLogChartOptions {
                         retVal *= 10
                     }
                     if (retVal >= 1000) {
-                        return `${retVal / 1000} ${this.t.translate("Gbps")}`
+                        return `${(retVal / 1000).toLocaleString(this.t.getActiveLang())} ${this.t.translate("Gbps")}`
                     }
-                    return `${retVal} ${this.t.translate("Mbps")}`
+                    return `${retVal.toLocaleString(this.t.getActiveLang())} ${this.t.translate("Mbps")}`
                 },
             },
         },

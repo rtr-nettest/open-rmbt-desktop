@@ -140,6 +140,7 @@ import { CertifiedEnvFormComponent } from "./widgets/certified-env-form/certifie
 import { CertifiedResultScreenComponent } from "./screens/certified-result-screen/certified-result-screen.component"
 import { SettingsCommitComponent } from "./widgets/settings-commit/settings-commit.component"
 import { SettingsEngineComponent } from "./widgets/settings-engine/settings-engine.component"
+import { patchToLocaleString } from "./helpers/number"
 
 Chart.register(
     BarElement,
@@ -152,6 +153,8 @@ Chart.register(
     TimeScale,
     Filler,
 )
+
+patchToLocaleString()
 
 declare global {
     interface Window {

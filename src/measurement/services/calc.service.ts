@@ -7,6 +7,8 @@ import {
 import { IOverallResult } from "../interfaces/overall-result.interface"
 import { TransferDirection } from "./rmbt-client.service"
 
+const noTransferThreshold = 1400
+
 type CurveItem = {
     bytes_total: number
     time_elapsed: number
@@ -82,6 +84,21 @@ export class CalcService {
         for (const ci of curve) {
             const result = this.calcResultForStep(ci, options)
             if (result) {
+                const prevResult = resp[resp.length - 1]
+                if (
+                    prevResult &&
+                    result.nsec - prevResult.nsec > noTransferThreshold * 1e6
+                ) {
+                    // fill gap with zero-speed entries
+                    resp.push({
+                        ...prevResult,
+                        speed: 0,
+                    })
+                    resp.push({
+                        ...result,
+                        speed: 0,
+                    })
+                }
                 resp.push(result)
             }
         }

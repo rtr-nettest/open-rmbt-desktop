@@ -227,12 +227,6 @@ export class TestStore {
                 state.ups,
             )
             this.visualization$.next(v)
-            this.historyStore
-                .getRecentMeasurementHistory({
-                    offset: 0,
-                    limit: this.loopCounter$.value - 1,
-                })
-                .subscribe()
         })
     }
 

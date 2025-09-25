@@ -26,7 +26,7 @@ import { TestPhaseState } from "src/app/dto/test-phase-state.dto"
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false,
 })
-export class TestChartComponent implements OnInit, OnDestroy {
+export class TestChartComponent {
     @Input() phase: ChartPhase = "download"
     @Input() type: "line" | "bar" = "line"
 
@@ -66,46 +66,6 @@ export class TestChartComponent implements OnInit, OnDestroy {
         private store: TestStore,
         private transloco: TranslocoService,
     ) {}
-
-    ngOnDestroy(): void {
-        window.removeEventListener("focus", this.setChartOnFocus)
-    }
-
-    ngOnInit(): void {
-        window.addEventListener("focus", this.setChartOnFocus)
-    }
-
-    private setChartOnFocus = () => {
-        if (
-            this.flavor === "ont" ||
-            this.store.visualization$.value.currentPhaseName ===
-                EMeasurementStatus.SHOWING_RESULTS
-        ) {
-            return
-        }
-        window.electronAPI.getMeasurementState().then((state) => {
-            this.initChart()
-            const phaseTestState = new TestPhaseState()
-            if (this.phase === "ping") {
-                phaseTestState.setChartFromPings(state.pings)
-            } else {
-                const phaseResultsKey =
-                    this.phase === "download" ? "downs" : "ups"
-                if (this.flavor === "ont") {
-                    phaseTestState.setONTChartFromOverallSpeed(
-                        state[phaseResultsKey],
-                    )
-                } else {
-                    phaseTestState.setRTRChartFromOverallSpeed(
-                        state[phaseResultsKey],
-                    )
-                }
-            }
-            try {
-                this.chart?.setData(phaseTestState)
-            } catch (_) {}
-        })
-    }
 
     private handleChanges(visualization: ITestVisualizationState) {
         this.ngZone.runOutsideAngular(async () => {

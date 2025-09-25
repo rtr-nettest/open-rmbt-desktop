@@ -183,6 +183,7 @@ export class TestStore {
             max_tests: this.mainStore.env$.value!.CERTIFIED_TEST_COUNT,
             test_counter: loopCounter,
             loop_uuid: loopUuid,
+            cert_mode: true,
         }
         window.electronAPI.onMaxTestsReached(() =>
             this.maxTestsReached$.next(true),

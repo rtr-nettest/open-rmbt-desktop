@@ -7,6 +7,7 @@ export interface ILoopModeInfo {
     max_movement?: number
     max_tests?: number
     test_counter: number
+    cert_mode?: boolean
 }
 
 export interface IMeasurementRegistrationRequest {

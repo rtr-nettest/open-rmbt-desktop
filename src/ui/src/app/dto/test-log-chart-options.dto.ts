@@ -1,5 +1,6 @@
 import { EColors } from "src/app/enums/colors.enum"
 import { TranslocoService } from "@ngneat/transloco"
+import { roundToSignificantDigits } from "../helpers/math"
 
 export class TestLogChartOptions {
     animation = {
@@ -16,6 +17,11 @@ export class TestLogChartOptions {
     parsing = false as const
     scales = {
         x: {
+            type: "linear",
+            min: 0,
+            max: 7,
+            minRotation: 0,
+            maxRotation: 0,
             grid: {
                 color: EColors.SECONDARY_10,
             },
@@ -27,7 +33,11 @@ export class TestLogChartOptions {
                 },
             },
             ticks: {
-                callback: (value: any) => `${value} ${this.t.translate("s")}`,
+                stepSize: 1,
+                callback: (value: any) =>
+                    `${roundToSignificantDigits(value).toLocaleString(
+                        this.t.getActiveLang(),
+                    )} ${this.t.translate("s")}`,
             },
         },
         y: {

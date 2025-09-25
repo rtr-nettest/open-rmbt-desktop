@@ -28,13 +28,30 @@
     position: relative;
 
     app-test-chart {
-        height: 18vh;
-        width: 40vw;
+        height: rem(130);
     }
 
     &--ping {
         app-test-chart {
-            height: 14vh;
+            height: rem(90);
         }
+    }
+}
+
+.app-table {
+    margin-bottom: rem(40);
+    .app-row {
+        padding-bottom: rem(10);
+    }
+    .app-cell {
+        font-size: rem($font-size-xl);
+        &--left {
+            text-align: left;
+        }
+    }
+    th {
+        color: $color-primary;
+        padding-right: rem(12);
+        text-align: left;
     }
 }

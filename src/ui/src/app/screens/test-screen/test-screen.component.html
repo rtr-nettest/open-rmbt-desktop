@@ -34,7 +34,7 @@
                     >
                         {{
                             t("Result of measurement - waiting")
-                                | sprintf : loopCount
+                                | sprintf: loopCount
                         }}
                     </h1>
                 </ng-container>
@@ -45,7 +45,7 @@
                 kind="warning"
                 [text]="
                     t('CPU usage is higher than %0%. Results may be skewed.')
-                        | sprintf : cpuUsage
+                        | sprintf: cpuUsage
                 "
             ></app-alert>
             <div class="app-main">
@@ -58,7 +58,9 @@
                     ></app-gauge>
                 </div>
                 <app-spacer></app-spacer>
-                <app-interim-results></app-interim-results>
+                <app-interim-results
+                    [estimatedEndTime]="estimatedEndTime()"
+                ></app-interim-results>
             </div>
             <ng-container *ngIf="(enableLoopMode$ | async) === true">
                 <app-recent-history
@@ -86,7 +88,7 @@
                 {{
                     t("Next measurement in") +
                         " " +
-                        (ms$ | async | date : "mm:ss")
+                        (ms$ | async | date: "mm:ss")
                 }}
             </h2>
         </ng-container>

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from "@angular/core"
+import { ChangeDetectionStrategy, Component, input } from "@angular/core"
 import { tap } from "rxjs"
 import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
@@ -10,9 +10,11 @@ import { ConversionService } from "src/app/services/conversion.service"
     templateUrl: "./interim-results.component.html",
     styleUrls: ["./interim-results.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: false,
 })
 export class InterimResultsComponent {
+    basicNetworkInfo$ = this.store.basicNetworkInfo$
+    estimatedEndTime = input<Date | null>(null)
     visualization$ = this.store.visualization$.pipe(
         tap((state) => {
             const locale = this.transloco.getActiveLang()

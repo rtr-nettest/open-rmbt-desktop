@@ -5,6 +5,7 @@ import {
     NgZone,
     OnDestroy,
     OnInit,
+    signal,
 } from "@angular/core"
 import { Router } from "@angular/router"
 import {
@@ -34,11 +35,12 @@ import { TranslocoService } from "@ngneat/transloco"
     templateUrl: "./test-screen.component.html",
     styleUrls: ["./test-screen.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: false,
 })
 export class TestScreenComponent implements OnDestroy, OnInit {
     @Input() hideMenu = false
     enableLoopMode$ = this.store.enableLoopMode$
+    estimatedEndTime = signal<Date | null>(null)
     loopCount$ = this.store.loopCounter$
     env$ = this.mainStore.env$
     stopped$: Subject<void> = new Subject()
@@ -52,7 +54,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
             } else if (state.currentPhaseName === EMeasurementStatus.END) {
                 this.goToResult(state)
             }
-        })
+        }),
     )
     loopWaiting$ = new BehaviorSubject(false)
     result$ = this.historyStore.getFormattedHistory({
@@ -63,7 +65,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
     ms$ = new BehaviorSubject(0)
     progress$ = new BehaviorSubject(0)
     progressMode$ = new BehaviorSubject<"determinate" | "indeterminate">(
-        "determinate"
+        "determinate",
     )
 
     constructor(
@@ -73,7 +75,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
         protected ngZone: NgZone,
         protected router: Router,
         protected message: MessageService,
-        protected transloco: TranslocoService
+        protected transloco: TranslocoService,
     ) {}
 
     ngOnInit(): void {

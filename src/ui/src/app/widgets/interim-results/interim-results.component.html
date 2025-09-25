@@ -75,5 +75,45 @@
                 ></app-test-chart>
             </div>
         </div>
+        @if (basicNetworkInfo$ | async; as info) {
+            <div class="app-container">
+                <table class="app-table">
+                    @if (estimatedEndTime(); as endTime) {
+                        <tr class="app-row">
+                            <th class="app-cell">
+                                {{ "Estimated end time" | transloco }}
+                            </th>
+                            <td class="app-cell">
+                                {{ endTime | date: "HH:mm" }}
+                            </td>
+                        </tr>
+                    }
+                    <tr class="app-row">
+                        <th class="app-cell app-cell--left">
+                            {{ "Testserver" | transloco }}
+                        </th>
+                        <td class="app-cell app-cell--left">
+                            {{ info.serverName }}
+                        </td>
+                    </tr>
+                    <tr class="app-row">
+                        <th class="app-cell app-cell--left">
+                            {{ "IP" | transloco }}
+                        </th>
+                        <td class="app-cell app-cell--left">
+                            {{ info.ipAddress }}
+                        </td>
+                    </tr>
+                    <tr class="app-row">
+                        <th class="app-cell app-cell--left">
+                            {{ "Provider" | transloco }}
+                        </th>
+                        <td class="app-cell app-cell--left">
+                            {{ info.providerName }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        }
     </ng-container>
 </div>

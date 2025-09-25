@@ -61,6 +61,9 @@ export class LoopTestScreenComponent extends TestScreenComponent {
             this.currentTestUuid$.next(testUuid)
             this.loopWaiting$.next(false)
             this.waitingProgressMs = 0
+            this.estimatedEndTime.set(
+                new Date(this.store.estimatedEndTime() as number),
+            )
         }
     }
 

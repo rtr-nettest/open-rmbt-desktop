@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from "@angular/core"
+import { computed, Injectable, NgZone } from "@angular/core"
 import {
     BehaviorSubject,
     concatMap,
@@ -55,6 +55,17 @@ export class TestStore {
     maxTestsReached$ = new BehaviorSubject<boolean>(false)
     certifiedDataForm$ = new BehaviorSubject<ICertifiedDataForm | null>(null)
     certifiedEnvForm$ = new BehaviorSubject<ICertifiedEnvForm | null>(null)
+    estimatedEndTime = computed(() => {
+        const maxTests = this.mainStore.env$.value?.CERTIFIED_TEST_COUNT
+        if (!this.enableLoopMode$.value || !maxTests) {
+            return null
+        }
+        const singleTestDuration = this.fullTestIntervalMs
+        if (!singleTestDuration) {
+            return null
+        }
+        return Date.now() + singleTestDuration * maxTests
+    })
 
     get fullTestIntervalMs() {
         return this.testIntervalMinutes$.value! * 60 * 1000

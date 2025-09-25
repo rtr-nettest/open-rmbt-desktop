@@ -302,9 +302,9 @@ declare global {
     ],
     providers: [
         provideAppInitializer(() => {
-        const initializerFn = (MainStore.factory)(inject(MainStore));
-        return initializerFn();
-      }),
+            const initializerFn = MainStore.factory(inject(MainStore))
+            return initializerFn()
+        }),
         {
             provide: DatePipe,
         },

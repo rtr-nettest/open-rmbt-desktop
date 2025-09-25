@@ -35,7 +35,7 @@
                             {{ t("Measurement result from") }}
                             {{
                                 result.measurementDate
-                                    | date: "medium" : undefined : locale
+                                    | date: "dd.MM.yyyy, HH:mm:ss"
                             }}
                         </h1>
                         <h1 *ngIf="!result.measurementDate" aria-live="polite">

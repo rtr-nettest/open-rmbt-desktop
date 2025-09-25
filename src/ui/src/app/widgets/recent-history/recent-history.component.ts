@@ -24,7 +24,7 @@ import { TestStore } from "src/app/store/test.store"
     selector: "app-recent-history",
     templateUrl: "./recent-history.component.html",
     styleUrls: ["./recent-history.component.scss"],
-    standalone: false
+    standalone: false,
 })
 export class RecentHistoryComponent implements OnChanges {
     @Input({ required: true }) result!: {
@@ -53,6 +53,7 @@ export class RecentHistoryComponent implements OnChanges {
                         {
                             columnDef: "time",
                             header: "history.table.time",
+                            isDate: true,
                         },
                         {
                             columnDef: "providerName",
@@ -80,15 +81,9 @@ export class RecentHistoryComponent implements OnChanges {
                 } else {
                     cols = [
                         {
-                            columnDef: "count",
-                            header: "#",
-                            transformValue(value) {
-                                return value.groupHeader ? "" : value.count
-                            },
-                        },
-                        {
                             columnDef: "measurementDate",
                             header: "Time",
+                            isDate: true,
                         },
                         {
                             columnDef: "download",
@@ -112,9 +107,9 @@ export class RecentHistoryComponent implements OnChanges {
                     ] as ITableColumn<IHistoryRowRTR>[]
                 }
                 return cols.filter(
-                    (c) => !this.excludeColumns?.includes(c.columnDef)
+                    (c) => !this.excludeColumns?.includes(c.columnDef),
                 )
-            })
+            }),
         )
     env$ = this.mainStore.env$.pipe(
         map((env) => {
@@ -122,7 +117,7 @@ export class RecentHistoryComponent implements OnChanges {
                 this.tableClassNames = ["app-table--ont"]
             }
             return env
-        })
+        }),
     )
 
     sort$ = this.store.historySort$
@@ -138,7 +133,7 @@ export class RecentHistoryComponent implements OnChanges {
         private message: MessageService,
         private router: Router,
         private store: HistoryStore,
-        private testStore: TestStore
+        private testStore: TestStore,
     ) {}
 
     ngOnChanges(): void {
@@ -160,7 +155,7 @@ export class RecentHistoryComponent implements OnChanges {
                 window.electronAPI.abortMeasurement()
                 this.testStore.disableLoopMode()
                 this.router.navigateByUrl(
-                    "/" + ERoutes.TEST_RESULT.replace(":testUuid", loopUuid)
+                    "/" + ERoutes.TEST_RESULT.replace(":testUuid", loopUuid),
                 )
             }
             if (this.interruptsTests) {
@@ -169,7 +164,7 @@ export class RecentHistoryComponent implements OnChanges {
                     navFunc,
                     {
                         canCancel: true,
-                    }
+                    },
                 )
             } else {
                 navFunc()

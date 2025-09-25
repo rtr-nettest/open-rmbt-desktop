@@ -17,6 +17,7 @@ export interface ITableColumn<T = any> {
     header: string
     isSortable?: boolean
     isComponent?: boolean
+    isDate?: boolean
     isHtml?: boolean
     justify?: "flex-start" | "center" | "flex-end"
     key?: string

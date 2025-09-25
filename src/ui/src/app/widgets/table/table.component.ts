@@ -19,13 +19,15 @@ import { ISort } from "src/app/interfaces/sort.interface"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
 import { TableSortService } from "src/app/services/table-sort.service"
 import { PageEvent } from "@angular/material/paginator"
+import dayjs from "dayjs"
+import { RESULT_DATE_FORMAT } from "src/app/constants/strings"
 
 @Component({
     selector: "app-table",
     templateUrl: "./table.component.html",
     styleUrls: ["./table.component.scss"],
     animations: [arrowRotate, expandVertically],
-    standalone: false
+    standalone: false,
 })
 export class TableComponent implements OnInit, OnChanges {
     @Input() action?: (...ars: any[]) => any
@@ -53,7 +55,7 @@ export class TableComponent implements OnInit, OnChanges {
 
     constructor(
         private tableSortService: TableSortService,
-        public transloco: TranslocoService
+        public transloco: TranslocoService,
     ) {}
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -65,7 +67,7 @@ export class TableComponent implements OnInit, OnChanges {
     ngOnInit() {
         this.displayedColumns = this.columns?.map((col) => col.columnDef)
         this.displayedSubHeaderColumns = this.subHeaderColumns?.map(
-            (col) => col.columnDef
+            (col) => col.columnDef,
         )
     }
 
@@ -77,15 +79,23 @@ export class TableComponent implements OnInit, OnChanges {
         if (column.transformValue) {
             const transformed = column.transformValue(element, column, i)
             if (typeof transformed === "number") {
-                return transformed.toLocaleString()
+                return transformed.toLocaleString(
+                    this.transloco.getActiveLang(),
+                )
             }
             return transformed
         }
 
         const value = element[column.key || column.columnDef]
+        return this.toString(value, column)
+    }
 
+    toString(value: any, column: ITableColumn): string {
+        const date = Date.parse(value)
         if (typeof value === "number") {
-            return value.toLocaleString()
+            return value.toLocaleString(this.transloco.getActiveLang())
+        } else if (!isNaN(date) && column.isDate) {
+            return dayjs(date).format(RESULT_DATE_FORMAT)
         }
         return value || "-"
     }

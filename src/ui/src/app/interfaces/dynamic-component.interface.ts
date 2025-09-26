@@ -1,5 +1,5 @@
-export interface IDynamicComponent {
-    parameters?: IDynamicComponentParameters
+export interface IDynamicComponent<T = any> {
+    parameters?: T
 }
 
 export interface IDynamicComponentParameters {

@@ -25,6 +25,7 @@ import { SKIPPED_FIELDS } from "src/app/constants/skipped-details-fields"
 import { SEARCHABLE_FIELDS } from "src/app/constants/searchable-details-fields"
 import { FORMATTED_FIELDS } from "src/app/constants/formatted-details-fields"
 import { MessageService } from "src/app/services/message.service"
+import { QoeBarComponent } from "src/app/widgets/qoe-bar/qoe-bar.component"
 
 @Component({
     selector: "app-result-screen",
@@ -43,6 +44,22 @@ export class ResultScreenComponent implements OnDestroy {
             columnDef: "value",
             header: "",
             isHtml: true,
+        },
+    ]
+    qoeColumns: ITableColumn[] = [
+        {
+            columnDef: "title",
+            header: "",
+            getNgClass: () => "app-cell--30",
+            isHtml: true,
+        },
+        {
+            columnDef: "value",
+            header: "",
+            component: QoeBarComponent,
+            getComponentParameters(value) {
+                return value
+            },
         },
     ]
     env$ = this.mainStore.env$.pipe(
@@ -65,6 +82,7 @@ export class ResultScreenComponent implements OnDestroy {
                 if (result && result.openTestResponse?.["error"] != true) {
                     this.basicResults.set(this.getBasicResults(result))
                     this.detailedResults.set(this.getDetailedResults(result))
+                    this.qoeResults.set(this.getQoeResults(result))
                 } else if (
                     result &&
                     result.openTestResponse?.["error"] == true
@@ -108,6 +126,7 @@ export class ResultScreenComponent implements OnDestroy {
     )
     failedDetailedResults =
         signal<IBasicResponse<IDetailedHistoryResultItem> | null>(null)
+    qoeResults = signal<IBasicResponse<IDetailedHistoryResultItem> | null>(null)
 
     constructor(
         private classification: ClassificationService,
@@ -146,7 +165,7 @@ export class ResultScreenComponent implements OnDestroy {
         )
     }
 
-    getBasicResults(
+    private getBasicResults(
         result: ISimpleHistoryResult,
     ): IBasicResponse<IDetailedHistoryResultItem> {
         const content = Object.entries(result).reduce((acc, [key, value]) => {
@@ -197,7 +216,7 @@ export class ResultScreenComponent implements OnDestroy {
         }
     }
 
-    getDetailedResults(
+    private getDetailedResults(
         result: ISimpleHistoryResult,
     ): IBasicResponse<IDetailedHistoryResultItem> | null {
         if (!result.openTestResponse) {
@@ -247,6 +266,22 @@ export class ResultScreenComponent implements OnDestroy {
         return {
             content,
             totalElements: content.length ?? 0,
+        }
+    }
+
+    private getQoeResults(result: ISimpleHistoryResult) {
+        const content =
+            result.qoeClassification?.map((item) => {
+                return {
+                    title: `${this.classification.getQoeIconByCategory(
+                        item.category,
+                    )}<span>${this.transloco.translate(item.category)}</span>`,
+                    value: item,
+                }
+            }) ?? []
+        return {
+            content,
+            totalElements: content.length,
         }
     }
 

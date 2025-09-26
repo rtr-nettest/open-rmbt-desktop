@@ -61,6 +61,20 @@
                             ></app-table>
                         </div>
                     }
+                    @if (qoeResults(); as qoeResults) {
+                        @if (qoeResults.content.length) {
+                            <h3 class="app-title">
+                                {{ "Quality" | transloco }}
+                            </h3>
+                            <app-table
+                                [columns]="qoeColumns"
+                                [data]="qoeResults"
+                                [sort]="sort"
+                                [shouldHideHeader]="true"
+                                aria-live="polite"
+                            ></app-table>
+                        }
+                    }
                     @if (detailedResults(); as detailedResult) {
                         <div class="app-wrapper app-charts">
                             <div class="app-charts__col">

@@ -54,6 +54,42 @@
                 </mat-cell>
             </ng-container>
 
+            <ng-container
+                *ngIf="
+                    column.component && column.getComponentParameters;
+                    else defaultCell
+                "
+            >
+                <mat-cell
+                    *matCellDef="let element; let i = dataIndex"
+                    [style]="justify(column)"
+                    [ngClass]="column.getNgClass?.(element, column)"
+                >
+                    <span class="app-table__mobile-label">{{
+                        column.header
+                    }}</span>
+                    @if (column.isExpandable) {
+                        <div
+                            [@expandVertically]="isElementExpanded(element.id)"
+                        >
+                            <ng-template
+                                [dynamicComponent]="column.component"
+                                [parameters]="
+                                    column.getComponentParameters(element)
+                                "
+                            ></ng-template>
+                        </div>
+                    } @else {
+                        <ng-template
+                            [dynamicComponent]="column.component"
+                            [parameters]="
+                                column.getComponentParameters(element)
+                            "
+                        ></ng-template>
+                    }
+                </mat-cell>
+            </ng-container>
+
             <ng-container *ngIf="column.isHtml; else defaultCell">
                 <mat-cell
                     *matCellDef="let element; let i = dataIndex"
@@ -66,17 +102,17 @@
             <ng-container *ngIf="column.columnDef == 'groupArrowIndicator'">
                 <mat-cell *matCellDef="let element; let i = dataIndex">
                     @if (element.groupHeader) {
-                    <span class="app-table__arrow-indicator">
-                        <mat-icon
-                            [@arrowRotate]="
-                                isElementExpanded(element.id)
-                                    ? 'expanded'
-                                    : 'collapsed'
-                            "
+                        <span class="app-table__arrow-indicator">
+                            <mat-icon
+                                [@arrowRotate]="
+                                    isElementExpanded(element.id)
+                                        ? 'expanded'
+                                        : 'collapsed'
+                                "
+                            >
+                                keyboard_arrow_down
+                            </mat-icon></span
                         >
-                            keyboard_arrow_down
-                        </mat-icon></span
-                    >
                     }
                 </mat-cell>
             </ng-container>
@@ -89,7 +125,8 @@
                     <a
                         *ngIf="!shouldShowText(column, element)"
                         [routerLink]="column.link?.(element.id)"
-                        [matTooltip]="column.getTooltip?.(element, column) ?? ''
+                        [matTooltip]="
+                            column.getTooltip?.(element, column) ?? ''
                         "
                         [ngClass]="
                             column.getNgClass &&
@@ -105,9 +142,7 @@
                         [matTooltip]="
                             column.getTooltip?.(element, column) ?? ''
                         "
-                        [ngClass]="
-                            column.getNgClass?.(element, column)
-                        "
+                        [ngClass]="column.getNgClass?.(element, column)"
                         [class.app-table__cell--sortable]="column.isSortable"
                     >
                         {{ getDefaultValue(column, element, i) }}
@@ -142,9 +177,7 @@
                                 {{ action.label }}
                             </button>
                             <mat-spinner
-                                *ngIf="
-                                    action.getInProgress?.(element, column)
-                                "
+                                *ngIf="action.getInProgress?.(element, column)"
                                 [diameter]="18"
                             ></mat-spinner>
                         </ng-container>

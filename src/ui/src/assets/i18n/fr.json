@@ -242,5 +242,16 @@
     "millis": "ms",
 
     "No results available": "Aucun résultat disponible",
-    "Not available": "Non disponible"
+    "Not available": "Non disponible",
+
+    "gaming_cloud": "Gaming Cloud",
+    "gaming_download": "Gaming Download",
+    "gaming_streaming": "Gaming Streaming",
+    "gaming": "Gaming",
+    "video_conferencing": "Video Conferencing",
+    "video_hd": "Videos HD",
+    "video_sd": "Videos SD",
+    "video_telephony": "Video Telephony",
+    "video_uhd": "Videos UHD",
+    "voip": "VoIP"
 }

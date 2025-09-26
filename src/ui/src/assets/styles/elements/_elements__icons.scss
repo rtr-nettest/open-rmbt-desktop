@@ -163,6 +163,52 @@
                 background-image: url("/assets/images/ping-4.svg");
             }
         }
+
+        &-streaming_audio_streaming {
+            background-image: url("/assets/images/ic_qoe_music.svg");
+        }
+        &-video_sd {
+            background-image: url("/assets/images/ic_qoe_video.svg");
+        }
+        &-video_hd {
+            background-image: url("/assets/images/ic_qoe_video.svg");
+        }
+        &-video_uhd {
+            background-image: url("/assets/images/ic_qoe_video.svg");
+        }
+        &-gaming {
+            background-image: url("/assets/images/ic_qoe_game.svg");
+        }
+        &-gaming_cloud {
+            background-image: url("/assets/images/ic_qoe_game.svg");
+        }
+        &-gaming_streaming {
+            background-image: url("/assets/images/ic_qoe_game.svg");
+        }
+        &-gaming_download {
+            background-image: url("/assets/images/ic_qoe_game.svg");
+        }
+        &-voip {
+            background-image: url("/assets/images/ic_qoe_voip.svg");
+        }
+        &-video_telephony {
+            background-image: url("/assets/images/ic_qoe_voip.svg");
+        }
+        &-video_conferencing {
+            background-image: url("/assets/images/ic_qoe_voip.svg");
+        }
+        &-messaging {
+            background-image: url("/assets/images/ic_qoe_image.svg");
+        }
+        &-web {
+            background-image: url("/assets/images/ic_qoe_image.svg");
+        }
+        &-cloud {
+            background-image: url("/assets/images/ic_qoe_image.svg");
+        }
+        &-qos {
+            background-image: url("/assets/images/ic_qoe_qos.svg");
+        }
     }
 }
 

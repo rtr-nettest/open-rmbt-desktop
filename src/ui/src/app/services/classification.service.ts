@@ -8,7 +8,7 @@ export class ClassificationService {
 
     getPhaseIconByClass(
         phase: "down" | "up" | "ping",
-        classification?: number
+        classification?: number,
     ) {
         switch (classification) {
             case 1:
@@ -37,5 +37,12 @@ export class ClassificationService {
             default:
                 return `app-phase app-phase-${phase}"`
         }
+    }
+
+    getQoeIconByCategory(category?: string) {
+        if (!category) {
+            return `<i class="app-icon--phase"></i>`
+        }
+        return `<i class="app-icon--phase app-icon--phase-${category}"></i>`
     }
 }

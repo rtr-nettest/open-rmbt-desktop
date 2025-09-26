@@ -1,6 +1,10 @@
+import { Type } from "@angular/core"
 import { ITableColumnAction } from "./table-column-action.interface"
+import { IDynamicComponent } from "./dynamic-component.interface"
 
 export interface ITableColumn<T = any> {
+    component?: Type<IDynamicComponent<any>>
+    getComponentParameters?: (value: T) => { [key: string]: any }
     columnDef: string
     getActions?: (
         value: T,
@@ -18,6 +22,7 @@ export interface ITableColumn<T = any> {
     isSortable?: boolean
     isComponent?: boolean
     isDate?: boolean
+    isExpandable?: boolean
     isHtml?: boolean
     justify?: "flex-start" | "center" | "flex-end"
     key?: string

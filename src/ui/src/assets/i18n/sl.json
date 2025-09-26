@@ -241,5 +241,6 @@
     "hostname": "Hostname",
     "millis": "ms",
 
-    "No results available": "Ni na voljo nobenih rezultatov"
+    "No results available": "Ni na voljo nobenih rezultatov",
+    "Not available": "Ni na voljo"
 }

@@ -24,8 +24,10 @@ export class HomeScreenComponent
             setTimeout(() => this.cdr.detectChanges(), 100)
             if (ipInfo && isOnline) {
                 const { publicV4, publicV6, privateV4, privateV6 } = ipInfo
-                const textV4 = publicV4 == UNKNOWN ? "" : publicV4
-                const textV6 = publicV6 == UNKNOWN ? "" : publicV6
+                let textV4 = publicV4 == UNKNOWN ? "" : publicV4
+                textV4 = textV4 || this.transloco.translate("Not available")
+                let textV6 = publicV6 == UNKNOWN ? "" : publicV6
+                textV6 = textV6 || this.transloco.translate("Not available")
                 return [
                     `${this.transloco.translate("IPv4")}:&nbsp;${this.getIPIcon(
                         publicV4,

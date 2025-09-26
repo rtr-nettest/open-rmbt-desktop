@@ -241,5 +241,6 @@
     "hostname": "Hostname",
     "millis": "ms",
 
-    "No results available": "Nessun risultato disponibile"
+    "No results available": "Nessun risultato disponibile",
+    "Not available": "Non disponibile"
 }

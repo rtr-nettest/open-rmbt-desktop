@@ -240,5 +240,6 @@
     "hostname": "Hostname",
     "millis": "ms",
 
-    "No results available": "Žádné výsledky nejsou k dispozici"
+    "No results available": "Žádné výsledky nejsou k dispozici",
+    "Not available": "Není dostupné"
 }

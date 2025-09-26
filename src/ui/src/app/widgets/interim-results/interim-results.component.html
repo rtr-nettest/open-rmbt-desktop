@@ -88,30 +88,36 @@
                             </td>
                         </tr>
                     }
-                    <tr class="app-row">
-                        <th class="app-cell app-cell--left">
-                            {{ "Testserver" | transloco }}
-                        </th>
-                        <td class="app-cell app-cell--left">
-                            {{ info.serverName }}
-                        </td>
-                    </tr>
-                    <tr class="app-row">
-                        <th class="app-cell app-cell--left">
-                            {{ "IP" | transloco }}
-                        </th>
-                        <td class="app-cell app-cell--left">
-                            {{ info.ipAddress }}
-                        </td>
-                    </tr>
-                    <tr class="app-row">
-                        <th class="app-cell app-cell--left">
-                            {{ "Provider" | transloco }}
-                        </th>
-                        <td class="app-cell app-cell--left">
-                            {{ info.providerName }}
-                        </td>
-                    </tr>
+                    @if (info.serverName != "-") {
+                        <tr class="app-row">
+                            <th class="app-cell app-cell--left">
+                                {{ "Testserver" | transloco }}
+                            </th>
+                            <td class="app-cell app-cell--left">
+                                {{ info.serverName }}
+                            </td>
+                        </tr>
+                    }
+                    @if (info.ipAddress != "-") {
+                        <tr class="app-row">
+                            <th class="app-cell app-cell--left">
+                                {{ "IP" | transloco }}
+                            </th>
+                            <td class="app-cell app-cell--left">
+                                {{ info.ipAddress }}
+                            </td>
+                        </tr>
+                    }
+                    @if (info.providerName != "-") {
+                        <tr class="app-row">
+                            <th class="app-cell app-cell--left">
+                                {{ "Provider" | transloco }}
+                            </th>
+                            <td class="app-cell app-cell--left">
+                                {{ info.providerName }}
+                            </td>
+                        </tr>
+                    }
                 </table>
             </div>
         }

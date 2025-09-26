@@ -89,20 +89,8 @@ export class RMBTJavaClient implements IRMBTClient {
 
     constructor() {
         this.params = {
-            client_remote_ip: "-",
-            test_uuid: "",
-            result_url: "https://c01.netztest.at/RMBTControlServer/result",
             test_duration: 7,
-            test_numthreads: 3,
-            test_server_port: 443,
-            test_server_name: "ServerName",
-            test_wait: 0,
-            test_server_address: "example.com",
-            test_server_encryption: true,
-            test_token: "",
-            test_numpings: 10,
-            error: [],
-        }
+        } as any
 
         this.estimatePhaseDuration[EMeasurementStatus.DOWN] = Number(
             this.params.test_duration,
@@ -321,15 +309,7 @@ export class RMBTJavaClient implements IRMBTClient {
                 Logger.I.info(`Java client process exited with code ${code}`)
                 if (code === 0) {
                     child = null
-
-                    //this.measurementStatus = EMeasurementStatus.SUBMITTING_RESULTS
-                    //this.phaseStartTimeNs[EMeasurementStatus.SUBMITTING_RESULTS] = Time.nowNs()
-
-                    //this.measurementStatus = EMeasurementStatus.END
-                    //this.phaseStartTimeNs[EMeasurementStatus.END] = Time.nowNs()
-
-                    resolve([]) // You might want to construct proper results here
-                    //this.finishMeasurement(resolve);
+                    resolve([])
                 } else {
                     this.measurementStatus = EMeasurementStatus.ERROR
                     reject(
@@ -362,7 +342,6 @@ export class RMBTJavaClient implements IRMBTClient {
                 this.measurementStatus = EMeasurementStatus.ABORTED
                 this.isRunning = false
                 resolve([])
-                //reject(new Error("Measurement aborted"));
             })
         })
     }
@@ -381,10 +360,6 @@ export class RMBTJavaClient implements IRMBTClient {
                 ) {
                     this._testUuid = parsed_data["testUuid"]
                     this.params.test_uuid = parsed_data["testUuid"]
-
-                    // tale vsaj obstaja
-                    //this._testUuid = "6d41a209-2bb3-4ae2-a0b3-7571542f6c39";
-                    //this.params.test_uuid = "6d41a209-2bb3-4ae2-a0b3-7571542f6c39";
                 } else if (parsed_data["type"] == "STATE_CHANGE") {
                     switch (parsed_data["state"]) {
                         case "NOT_STARTED":
@@ -503,21 +478,6 @@ export class RMBTJavaClient implements IRMBTClient {
             Logger.I.info("SETTING STATE TO END")
             this.measurementStatus = EMeasurementStatus.END
             this.phaseStartTimeNs[EMeasurementStatus.END] = Time.nowNs()
-            //ipcRenderer.send('SHOW_WEB_RESULT', "6d41a209-2bb3-4ae2-a0b3-7571542f6c39")
         }, 1000)
-
-        /*        
-        setTimeout(() => {
-            this.measurementStatus = EMeasurementStatus.SUBMITTING_RESULTS
-            this.phaseStartTimeNs[EMeasurementStatus.SUBMITTING_RESULTS] = Time.nowNs()
-        }, 7500);
-        */
-
-        /*
-        setTimeout(() => {
-            this.measurementStatus = EMeasurementStatus.SHOWING_RESULTS
-            this.phaseStartTimeNs[EMeasurementStatus.SHOWING_RESULTS] = Time.nowNs()
-        }, 10000);
-        */
     }
 }

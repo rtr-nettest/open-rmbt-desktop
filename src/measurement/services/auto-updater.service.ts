@@ -58,10 +58,14 @@ export class AutoUpdater {
                     {
                         headers: {
                             accept: "application/vnd.github+json",
-                            authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+                            ...(process.env.GITHUB_TOKEN
+                                ? {
+                                      authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+                                  }
+                                : {}),
                             "X-GitHub-Api-Version": "2022-11-28",
                         },
-                    }
+                    },
                 )
             ).data as ILatestRelease | null
             const latestVersion =

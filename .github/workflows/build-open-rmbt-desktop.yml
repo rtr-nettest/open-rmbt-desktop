@@ -1,6 +1,8 @@
 name: Build Open-RMBT-Desktop apps
 
-on: [push]
+on: 
+- push
+- workflow_dispatch
     
 jobs:
 

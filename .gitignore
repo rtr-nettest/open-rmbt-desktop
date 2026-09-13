@@ -24,11 +24,11 @@ SHASUMS256.txt
 compile_commands.json
 .envrc
 
-# version 2 java
+# version 2 java, version 3 rust
 binaries/
 src/measurement/java_client/
-
-
+src/measurement/rust_client/
+src/measurement/c_client/
 
 # npm package
 /npm/dist

@@ -29,7 +29,7 @@ import { LoopService } from "./services/loop.service"
 import { Events } from "../electron/enums/events.enum"
 import { BrowserWindow } from "electron"
 import { MeasurementOptions } from "./interfaces/measurement-options.interface"
-import { RMBTJavaClient } from "./services/rmbt-java-client.service"
+import { RMBTRustClient } from "./services/rmbt-rust-client.service"
 import { IRMBTClient } from "./interfaces/rmbt-client.interface"
 import { IMeasurementThreadResult } from "./interfaces/measurement-result.interface"
 
@@ -232,10 +232,22 @@ export class MeasurementRunner {
     }
 
     private async setRMBTClient(options?: MeasurementOptions) {
-        if (Store.I.get(MEASUREMENT_ENGINE) === "java") {
-            Logger.I.info("Using Java measurement engine")
-            this.rmbtClient = new RMBTJavaClient()
+        const engine = Store.I.get(MEASUREMENT_ENGINE)
+        // The native Rust client is the DEFAULT engine (no Java runtime needed).
+        // The user can force the built-in JavaScript engine (for performance
+        // comparison) by choosing "node"/"js"; everything else (unset, "rust",
+        // legacy "java") requests Rust. If the Rust binary is not bundled for this
+        // architecture or fails to run, fall back to the JavaScript engine.
+        const wantsJs = engine === "node" || engine === "js"
+        if (!wantsJs && RMBTRustClient.isAvailable()) {
+            Logger.I.info("Using Rust measurement engine (native, default)")
+            this.rmbtClient = new RMBTRustClient()
         } else {
+            if (!wantsJs) {
+                Logger.I.warn(
+                    "Rust measurement engine unavailable — falling back to the JavaScript engine",
+                )
+            }
             Logger.I.info("Using NodeJS measurement engine")
             if (!this.settings) {
                 await this.registerClient(options)
@@ -248,7 +260,12 @@ export class MeasurementRunner {
     private async finalizeMeasurement(
         threadResults: IMeasurementThreadResult[],
     ) {
-        if (Store.I.get(MEASUREMENT_ENGINE) !== "java") {
+        // Key on the client actually used (which may have fallen back to JS),
+        // not the requested engine: the native Rust client submits its own
+        // results to the control server, so the desktop submits only for the
+        // built-in JavaScript engine.
+        const externalEngine = this.rmbtClient instanceof RMBTRustClient
+        if (!externalEngine) {
             this.registrationRequest = {
                 ...this.registrationRequest!,
                 networkType: await NetworkInfoService.I.getNetworkType(),

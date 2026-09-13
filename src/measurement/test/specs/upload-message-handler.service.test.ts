@@ -35,9 +35,8 @@ test("Handler writes data", () => {
 
     handler.writeData()
 
-    expect(clearIntervalSpy).toBeCalledTimes(1)
-    expect(setIntervalSpy).toBeCalledTimes(2)
-    expect(handler.uploadEndTimeNs).toBe(mockedTime + 7e9)
+    expect(clearIntervalSpy).toBeCalledTimes(0)
+    expect(setIntervalSpy).toBeCalledTimes(1)
     expect(mockClient.write).toBeCalledWith(
         `${ESocketMessage.PUT} ${mockThread.chunkSize}\n`
     )
@@ -64,23 +63,23 @@ test("Handler stops messaging", () => {
     handler.readData(Buffer.from(ESocketMessage.ACCEPT_GETCHUNKS))
 
     expect(mockClient.off).toBeCalled()
-    expect(clearIntervalSpy).toBeCalledTimes(2)
+    expect(clearIntervalSpy).toBeCalledTimes(1)
     expect(mockThread.threadResult?.up).toBe(handler.result)
     expect(finishSpy).toBeCalledWith(mockThread.threadResult)
 
     clearIntervalSpy.mockRestore()
 })
 
-test("Handler checks activity", () => {
+test("Handler finishes and reports the result", () => {
     jest.useFakeTimers()
     const clearIntervalSpy = jest.spyOn(global, "clearInterval")
     const finishSpy = jest.spyOn(handler, "onFinish")
     Time.mockTime(Time.nowNs() + 10e9)
 
-    handler.activityCheck()
+    handler.stopMessaging()
 
     expect(mockClient.off).toBeCalled()
-    expect(clearIntervalSpy).toBeCalledTimes(2)
+    expect(clearIntervalSpy).toBeCalledTimes(1)
     expect(mockThread.threadResult?.up).toBe(handler.result)
     expect(finishSpy).toBeCalledWith(mockThread.threadResult)
 

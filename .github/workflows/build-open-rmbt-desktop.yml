@@ -3,8 +3,13 @@ name: Build apps
 on:
     push:
 
+# Version of the native Rust measurement client (open-rmbt-client-cli release)
+# bundled into the app. Downloaded per-platform via the public release URL.
+env:
+    RUST_CLIENT_VERSION: v2.2.1
+
 jobs:
-    build-linux:
+    test:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
@@ -15,19 +20,44 @@ jobs:
                   REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
               run: |
                   curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.jj2
-            - name: Use Node.js ${{ matrix.node-version }}
+            - name: Use Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: 20.x
+                  node-version: 22.x
+            - name: Install dependencies
+              run: npm install
+            - name: Run tests
+              run: npm test
+
+    build-linux:
+        needs: test
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # Fetch all history and tags
+            - name: Get .env
+              env:
+                  REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+              run: |
+                  curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.jj2
+            - name: Use Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22.x
+            - name: Download Rust measurement client (linux-x64)
+              run: |
+                  mkdir -p src/measurement/rust_client
+                  curl -fsSL -o rust-client.zip "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/${RUST_CLIENT_VERSION}/rmbt-client-rust-linux-x64.zip"
+                  unzip -o rust-client.zip -d src/measurement/rust_client
+                  chmod +x src/measurement/rust_client/rmbt-client
             - name: Build
               run: |
                   sudo apt-get install -y rpm
                   npm install
-                  cd src
-                  cd ui
+                  cd src/ui
                   npm install
-                  cd ..
-                  cd ..
+                  cd ../..
                   npm run make:deb
                   npm run make:rpm
             - uses: actions/upload-artifact@v4
@@ -40,6 +70,7 @@ jobs:
                   path: out/make/deb/x64/*.deb
 
     build-macos:
+        needs: test
         runs-on: macos-latest
         steps:
             - uses: actions/checkout@v4
@@ -48,18 +79,22 @@ jobs:
                   REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
               run: |
                   curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.jj2
-            - name: Use Node.js ${{ matrix.node-version }}
+            - name: Use Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: 20.x
+                  node-version: 22.x
+            - name: Download Rust measurement client (macos-arm64)
+              run: |
+                  mkdir -p src/measurement/rust_client
+                  curl -fsSL -o rust-client.zip "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/${RUST_CLIENT_VERSION}/rmbt-client-rust-macos-arm64.zip"
+                  unzip -o rust-client.zip -d src/measurement/rust_client
+                  chmod +x src/measurement/rust_client/rmbt-client
             - name: Build
               run: |
                   npm install
-                  cd src
-                  cd ui
+                  cd src/ui
                   npm install
-                  cd ..
-                  cd ..
+                  cd ../..
                   npm run package
             - uses: actions/upload-artifact@v4
               with:
@@ -67,8 +102,8 @@ jobs:
                   path: out/**
 
     build-win:
+        needs: test
         runs-on: windows-latest
-
         steps:
             - uses: actions/checkout@v4
             - name: Get .env
@@ -77,19 +112,22 @@ jobs:
                   REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
               run: |
                   curl -H "Authorization: token %REPO_TOKEN%" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.jj2
-                  dir
-            - name: Use Node.js ${{ matrix.node-version }}
+            - name: Use Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: 20.x
+                  node-version: 22.x
+            - name: Download Rust measurement client (windows-x64)
+              shell: pwsh
+              run: |
+                  New-Item -ItemType Directory -Force src/measurement/rust_client | Out-Null
+                  Invoke-WebRequest -Uri "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/$env:RUST_CLIENT_VERSION/rmbt-client-rust-windows-x64.zip" -OutFile rust-client.zip
+                  Expand-Archive -Path rust-client.zip -DestinationPath src/measurement/rust_client -Force
             - name: Build
               run: |
                   npm install
-                  cd src
-                  cd ui
+                  cd src/ui
                   npm install
-                  cd ..
-                  cd ..
+                  cd ../..
                   npm run make:windows
             - uses: actions/upload-artifact@v4
               with:
@@ -150,10 +188,10 @@ jobs:
                   echo "Listing files in windows-zip"
                   ls windows-zip
                   zip -r RTR-Netztest-windows-x86.zip windows-zip
-                  echo "Listing files in macos"        
+                  echo "Listing files in macos"
                   ls -R macos
                   # macos/RTR-Netztest-darwin-arm64/RTR-Netztest.app
-                  cd macos/RTR-Netztest-darwin-arm64          
+                  cd macos/RTR-Netztest-darwin-arm64
                   zip -r ../../RTR-Netztest-macos.zip RTR-Netztest.app
                   cd ../..
                   ls -l
@@ -164,7 +202,7 @@ jobs:
               with:
                   files: |
                       RTR-Netztest-linux-x86.deb
-                      RTR-Netztest-linux-x86.rpm            
+                      RTR-Netztest-linux-x86.rpm
                       RTR-Netztest-macos.zip
                       RTR-Netztest-windows-x86-Setup.exe
                       RTR-Netztest-windows-x86.zip

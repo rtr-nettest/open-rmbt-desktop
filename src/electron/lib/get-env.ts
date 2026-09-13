@@ -57,7 +57,7 @@ export const getEnv = () => {
             ? parseInt(process.env.LOOP_MODE_MAX_DURATION)
             : 2880,
         MEASUREMENT_ENGINE:
-            (Store.I.get(MEASUREMENT_ENGINE) as string) || "node",
+            (Store.I.get(MEASUREMENT_ENGINE) as string) || "rust",
         OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
         REPO_URL: pack.repository,
         TERMS_ACCEPTED_VERSION: Store.I.get(TERMS_ACCEPTED_VERSION) as number,

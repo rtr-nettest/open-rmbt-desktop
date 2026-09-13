@@ -130,6 +130,11 @@ export class DownloadMessageHandler implements IMessageHandler {
             this.stopMessaging()
             return
         }
+        if (data.indexOf(ESocketMessage.TIME) === 0) {
+            // The server's final "TIME <ns>" is a control message, not download
+            // payload — do not count it towards the transferred byte total.
+            return
+        }
         let lastByte = 0
         let isFullChunk = false
         if (data.length > 0) {

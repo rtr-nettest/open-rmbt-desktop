@@ -35,7 +35,9 @@ test("Handler stops reading data", () => {
 
     handler.readData(Buffer.from(ESocketMessage.ACCEPT_GETCHUNKS))
 
-    expect(finishSpy).toBeCalledWith(handler.chunkSize)
+    expect(finishSpy).toBeCalledWith(
+        expect.objectContaining({ chunkSize: handler.chunkSize })
+    )
 
     Time.mockRestore()
 })

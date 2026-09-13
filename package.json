@@ -5,7 +5,7 @@
     "description": "RTR-Netztest Desktop App",
     "main": "dist/main.js",
     "engines": {
-        "node": ">=18"
+        "node": ">=22.12.0"
     },
     "repository": "https://github.com/rtr-nettest/open-rmbt-desktop",
     "scripts": {
@@ -24,8 +24,7 @@
         "make:app-store": "npm run build:all && cross-env APP_STORE=true electron-forge make --platform=mas --arch=x64",
         "make:deb": "npm run build:all && cross-env DEB=true electron-forge make --platform=linux --arch=x64",
         "make:rpm": "npm run build:all && cross-env RPM=true electron-forge make --platform=linux --arch=x64",
-        "prepare": "husky install",
-        "postinstall": "npx ts-node scripts/download-java-engine.ts"
+        "prepare": "husky install"
     },
     "author": "RTR-Netztest",
     "license": "Apache-2.0",

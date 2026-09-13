@@ -40,8 +40,11 @@ const baseConfig = {
                     to: "migrations",
                 },
                 {
-                    from: "src/measurement/java_client",
-                    to: "java_client",
+                    // Native Rust measurement client binary, bundled as a static
+                    // file (mirrors the former java_client packaging). Copied next
+                    // to dist/main.js so it resolves via __dirname at runtime.
+                    from: "src/measurement/rust_client",
+                    to: "rust_client",
                 },
             ],
         }),

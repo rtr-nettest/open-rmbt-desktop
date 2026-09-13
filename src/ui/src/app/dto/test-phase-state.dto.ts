@@ -1,4 +1,3 @@
-import { Point } from "chart.js"
 import { EMeasurementStatus } from "../../../../measurement/enums/measurement-status.enum"
 import { IPing } from "../../../../measurement/interfaces/measurement-result.interface"
 import { IOverallResult } from "../../../../measurement/interfaces/overall-result.interface"
@@ -56,7 +55,7 @@ export class TestPhaseState implements ITestPhaseState {
                     y: this.conversion.speedLog(r.speed / 1e6),
                 },
             ]
-        }, [] as Point[])
+        }, [] as { x: number; y: number }[])
     }
 
     setChartFromPings(pings: IPing[]): void {

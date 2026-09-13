@@ -41,7 +41,7 @@ export class TestLogChart extends TestChart {
                 this.data.datasets[0].data[
                     this.data.datasets[0].data.length - 1
                 ] as Point
-            ).x,
+            ).x ?? 0,
         )
         const { labels } = this.data
         if (labels) {

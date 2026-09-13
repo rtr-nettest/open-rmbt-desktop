@@ -16,8 +16,8 @@ import { MainStore } from "src/app/store/main.store"
 export class SettingsEngineComponent implements IDynamicComponent {
     @Input() parameters?: IDynamicComponentParameters
     engines = [
-        { id: "node", name: "NodeJS" },
-        { id: "java", name: "Java" },
+        { id: "rust", name: "Rust (native)" },
+        { id: "node", name: "JavaScript (NodeJS)" },
     ]
     selectedEngine$ = this.mainStore.env$.pipe(
         tap((env) => {

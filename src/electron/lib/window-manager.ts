@@ -41,10 +41,7 @@ export class WindowManager {
         if (process.env.DEV !== "true") {
             // Needs to happen before creating/loading the browser window;
             // protocol is only used in prod
-            protocol.registerBufferProtocol(
-                Protocol.scheme,
-                Protocol.requestHandler
-            )
+            protocol.handle(Protocol.scheme, Protocol.handle)
         }
 
         const { screen } = require("electron")
@@ -78,6 +75,30 @@ export class WindowManager {
         } else {
             win.loadURL(`${Protocol.scheme}://index.html`)
         }
+
+        // Diagnostics: record whether the renderer actually loaded & bootstrapped
+        // (helps catch protocol/MIME regressions where the shell renders as text).
+        const diag = (msg: string) => {
+            try {
+                fs.appendFileSync(
+                    path.join(app.getPath("userData"), "render-diag.log"),
+                    `${new Date().toISOString()} ${msg}\n`
+                )
+            } catch {}
+        }
+        win.webContents.on("did-fail-load", (_e, code, desc, url) =>
+            diag(`did-fail-load ${code} ${desc} ${url}`)
+        )
+        win.webContents.on("did-finish-load", async () => {
+            try {
+                const n = await win.webContents.executeJavaScript(
+                    'document.querySelector("app-root")?.childElementCount ?? -1'
+                )
+                diag(`did-finish-load app-root children=${n}`)
+            } catch (e) {
+                diag(`did-finish-load exec-error ${e}`)
+            }
+        })
 
         win.on("close", async (event) => {
             if (

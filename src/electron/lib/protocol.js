@@ -1,17 +1,11 @@
-// Source: https://www.debugandrelease.com/how-to-load-images-in-electron-applications/
-/*
-Reasonably Secure Electron
-Copyright (C) 2021  Bishop Fox
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
--------------------------------------------------------------------------
-Implementing a custom protocol achieves two goals:
-  1) Allows us to use ES6 modules/targets for Angular
-  2) Avoids running the app in a file:// origin
-*/
+// Custom "app://" scheme used in production to serve the packaged Angular UI.
+// Implemented with Electron's modern protocol.handle() API and explicit MIME
+// types so ES-module scripts and stylesheets are served with the correct
+// Content-Type (the deprecated registerBufferProtocol path intermittently
+// mis-served index.html as text, showing raw CSS/HTML instead of the app).
+//
+// Implementing a custom protocol (instead of file://) lets Angular use ES module
+// targets and avoids running the app in a file:// origin.
 
 const fs = require("fs")
 const path = require("path")
@@ -30,44 +24,61 @@ const mimeTypes = {
     ".ico": "image/vnd.microsoft.icon",
     ".png": "image/png",
     ".jpg": "image/jpeg",
-    ".map": "text/plain",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+    ".map": "application/json",
     ".ttf": "font/ttf",
+    ".woff": "font/woff",
+    ".woff2": "font/woff2",
+    ".wasm": "application/wasm",
+    ".txt": "text/plain",
 }
 
-function charset(mimeExt) {
-    return [".html", ".htm", ".js", ".mjs"].some((m) => m === mimeExt)
-        ? "utf-8"
-        : null
+function mimeFor(filePath) {
+    return (
+        mimeTypes[path.extname(filePath).toLowerCase()] ||
+        "application/octet-stream"
+    )
 }
 
-function mime(filename) {
-    const mimeExt = path.extname(`${filename || ""}`).toLowerCase()
-    const mimeType = mimeTypes[mimeExt]
-    return mimeType ? { mimeExt, mimeType } : { mimeExt: null, mimeType: null }
-}
-
-function requestHandler(req, next) {
-    const reqUrl = new URL(req.url)
-    let reqPath = path.normalize(reqUrl.pathname)
-    if (reqPath === "/" || reqPath === "\\") {
-        reqPath = "/index.html"
+// protocol.handle() handler: resolve the request path under DIST_PATH and return
+// a Response with an explicit Content-Type. Requests look like
+// "app://index.html/<path>" (host is always "index.html"); we key off the path,
+// defaulting to index.html for the app shell.
+async function handle(request) {
+    let pathname
+    try {
+        pathname = new URL(request.url).pathname
+    } catch {
+        pathname = "/"
     }
-    const reqFilename = path.basename(reqPath)
-    fs.readFile(path.join(DIST_PATH, reqPath), (err, data) => {
-        const { mimeExt, mimeType } = mime(reqFilename)
-        if (!err && mimeType !== null) {
-            next({
-                mimeType,
-                charset: charset(mimeExt),
-                data,
-            })
-        } else {
-            console.error(err)
-        }
-    })
+    let rel = decodeURIComponent(pathname || "/")
+    if (rel === "/" || rel === "") {
+        rel = "/index.html"
+    }
+
+    const distRoot = path.normalize(DIST_PATH)
+    const filePath = path.normalize(path.join(distRoot, rel))
+
+    // Prevent path traversal outside the packaged dist directory.
+    if (filePath !== distRoot && !filePath.startsWith(distRoot + path.sep)) {
+        return new Response("Forbidden", { status: 403 })
+    }
+
+    try {
+        const data = await fs.promises.readFile(filePath)
+        return new Response(data, {
+            status: 200,
+            headers: { "content-type": mimeFor(filePath) },
+        })
+    } catch (err) {
+        console.error(`[app protocol] ${rel}: ${err.code || err.message}`)
+        return new Response("Not found", { status: 404 })
+    }
 }
 
 module.exports = {
     scheme,
-    requestHandler,
+    handle,
 }

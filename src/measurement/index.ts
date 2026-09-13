@@ -30,6 +30,7 @@ import { Events } from "../electron/enums/events.enum"
 import { BrowserWindow } from "electron"
 import { MeasurementOptions } from "./interfaces/measurement-options.interface"
 import { RMBTRustClient } from "./services/rmbt-rust-client.service"
+import { RMBTCClient } from "./services/rmbt-c-client.service"
 import { IRMBTClient } from "./interfaces/rmbt-client.interface"
 import { IMeasurementThreadResult } from "./interfaces/measurement-result.interface"
 
@@ -233,21 +234,38 @@ export class MeasurementRunner {
 
     private async setRMBTClient(options?: MeasurementOptions) {
         const engine = Store.I.get(MEASUREMENT_ENGINE)
-        // The native Rust client is the DEFAULT engine (no Java runtime needed).
-        // The user can force the built-in JavaScript engine (for performance
-        // comparison) by choosing "node"/"js"; everything else (unset, "rust",
-        // legacy "java") requests Rust. If the Rust binary is not bundled for this
-        // architecture or fails to run, fall back to the JavaScript engine.
-        const wantsJs = engine === "node" || engine === "js"
-        if (!wantsJs && RMBTRustClient.isAvailable()) {
-            Logger.I.info("Using Rust measurement engine (native, default)")
-            this.rmbtClient = new RMBTRustClient()
-        } else {
-            if (!wantsJs) {
+        // Engine selection:
+        //   - "node"/"js"          → built-in JavaScript engine
+        //   - "c"                  → native C client
+        //   - everything else      → native Rust client (DEFAULT; also "rust" and
+        //                            the legacy "java" value)
+        // Each native engine requires its binary to be bundled and runnable on
+        // this platform/architecture; if not, we fall back to the JavaScript
+        // engine (e.g. the C client has no Windows build). No Java runtime needed.
+        let nativeClient: RMBTRustClient | undefined
+        if (engine === "c") {
+            if (RMBTCClient.isAvailable()) {
+                Logger.I.info("Using C measurement engine (native)")
+                nativeClient = new RMBTCClient()
+            } else {
+                Logger.I.warn(
+                    "C measurement engine unavailable — falling back to the JavaScript engine",
+                )
+            }
+        } else if (engine !== "node" && engine !== "js") {
+            if (RMBTRustClient.isAvailable()) {
+                Logger.I.info("Using Rust measurement engine (native, default)")
+                nativeClient = new RMBTRustClient()
+            } else {
                 Logger.I.warn(
                     "Rust measurement engine unavailable — falling back to the JavaScript engine",
                 )
             }
+        }
+
+        if (nativeClient) {
+            this.rmbtClient = nativeClient
+        } else {
             Logger.I.info("Using NodeJS measurement engine")
             if (!this.settings) {
                 await this.registerClient(options)

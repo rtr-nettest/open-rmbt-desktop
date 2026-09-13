@@ -11,9 +11,22 @@ import { ACTIVE_CLIENT } from "../../measurement/services/store.service"
 import { app } from "electron"
 import pack from "../../../package.json"
 import { IUserSettings } from "../../measurement/interfaces/user-settings-response.interface"
+import { availableEngines, defaultEngine } from "./engine-availability"
 
 export const getEnv = () => {
     const settings = Store.I.get(SETTINGS) as IUserSettings
+
+    // Only offer engines whose binary is bundled & runnable on this platform.
+    // If the stored engine isn't available here (e.g. "c" on Windows, or a
+    // legacy value), reset it to the platform default (Rust, else JavaScript)
+    // and persist the correction.
+    const engines = availableEngines()
+    let measurementEngine =
+        (Store.I.get(MEASUREMENT_ENGINE) as string) || defaultEngine()
+    if (!engines.includes(measurementEngine)) {
+        measurementEngine = defaultEngine()
+        Store.I.set(MEASUREMENT_ENGINE, measurementEngine)
+    }
     return {
         ACTIVE_LANGUAGE: I18nService.I.getActiveLanguage(),
         APP_VERSION: pack.version,
@@ -56,8 +69,8 @@ export const getEnv = () => {
         LOOP_MODE_MAX_DURATION: process.env.LOOP_MODE_MAX_DURATION
             ? parseInt(process.env.LOOP_MODE_MAX_DURATION)
             : 2880,
-        MEASUREMENT_ENGINE:
-            (Store.I.get(MEASUREMENT_ENGINE) as string) || "rust",
+        MEASUREMENT_ENGINE: measurementEngine,
+        AVAILABLE_ENGINES: engines,
         OPEN_HISTORY_RESUlT_URL: process.env.OPEN_HISTORY_RESULT_URL || "",
         REPO_URL: pack.repository,
         TERMS_ACCEPTED_VERSION: Store.I.get(TERMS_ACCEPTED_VERSION) as number,

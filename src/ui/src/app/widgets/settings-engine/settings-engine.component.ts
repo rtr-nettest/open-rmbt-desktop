@@ -15,21 +15,29 @@ import { MainStore } from "src/app/store/main.store"
 export class SettingsEngineComponent implements IDynamicComponent {
     @Input() parameters?: IDynamicComponentParameters
 
-    // Selectable measurement engines. Add "c" / "java" entries here as they ship;
-    // the radio list renders however many are present, always with one active.
-    engines = [
+    // All engines the app knows about, in display order. Only those actually
+    // available on the running platform (env.AVAILABLE_ENGINES, provided by the
+    // main process) are shown; add "java" here once it ships.
+    private allEngines = [
         { id: "rust", name: "Rust (native)" },
+        { id: "c", name: "C (native)" },
         { id: "node", name: "JavaScript (NodeJS)" },
     ]
 
-    // Currently active engine id. Unknown / legacy values (e.g. "java") fall back
-    // to the first option so exactly one radio is always selected.
-    selectedEngineId$ = this.mainStore.env$.pipe(
+    // View model: the engines to show plus the currently selected id. The main
+    // process already resets an unavailable stored engine to the default, but we
+    // guard here too so exactly one available option is always selected.
+    vm$ = this.mainStore.env$.pipe(
         map((env) => {
-            const id = env?.MEASUREMENT_ENGINE
-            return this.engines.some((e) => e.id === id)
-                ? (id as string)
-                : this.engines[0].id
+            const available = env?.AVAILABLE_ENGINES ?? ["rust", "node"]
+            const engines = this.allEngines.filter((e) =>
+                available.includes(e.id),
+            )
+            let selected = env?.MEASUREMENT_ENGINE
+            if (!engines.some((e) => e.id === selected)) {
+                selected = engines[0]?.id
+            }
+            return { engines, selected }
         }),
     )
 

@@ -22,39 +22,46 @@ const packJson = require("../../../package.json")
 export type TransferDirection = "down" | "up"
 
 export class RMBTRustClient implements IRMBTClient {
-    /** Absolute path to the bundled native client binary for this platform. */
-    static binaryPath(): string {
+    /** Subdirectory (next to dist/main.js) holding this engine's native binary. */
+    protected clientDir = "rust_client"
+    /** Human-readable engine name, used only in log messages. */
+    protected clientLabel = "Rust"
+
+    /**
+     * Absolute path to a bundled native client binary. `dir` selects the engine
+     * (e.g. "rust_client", "c_client"); webpack copies src/measurement/<dir> ->
+     * dist/<dir>, so __dirname resolves it in dev and production.
+     */
+    static binaryPath(dir = "rust_client"): string {
         const exeName =
             process.platform === "win32" ? "rmbt-client.exe" : "rmbt-client"
-        // webpack copies src/measurement/rust_client -> dist/rust_client, next to
-        // the bundled main.js, so __dirname resolves it in dev and production.
-        return path.join(__dirname, "rust_client", exeName)
+        return path.join(__dirname, dir, exeName)
     }
 
     /**
-     * Whether the native Rust client can actually run on this machine. Returns
-     * false if the binary for this platform/architecture is not bundled or fails
-     * to execute (e.g. wrong arch / missing libs) — the caller then falls back to
-     * the built-in JavaScript engine.
+     * Whether the native client in `dir` can actually run on this machine.
+     * Returns false if the binary for this platform/architecture is not bundled
+     * or fails to execute (e.g. wrong arch / missing libs / no build for this OS)
+     * — the caller then falls back to the built-in JavaScript engine.
      */
-    static isAvailable(): boolean {
+    static isAvailable(dir = "rust_client"): boolean {
         try {
-            const bin = RMBTRustClient.binaryPath()
+            const bin = RMBTRustClient.binaryPath(dir)
             if (!existsSync(bin)) {
-                Logger.I.warn(`Rust client binary not bundled at ${bin}`)
+                Logger.I.warn(`Native client binary not bundled at ${bin}`)
                 return false
             }
             // Probe: `--help` runs without network and exits 0 on a working binary.
             const res = spawnSync(bin, ["--help"], { timeout: 5000 })
             if (res.error || res.status !== 0) {
                 Logger.I.warn(
-                    `Rust client probe failed (${res.error?.message ?? "exit " + res.status})`,
+                    `Native client probe failed (${res.error?.message ?? "exit " + res.status})`,
                 )
                 return false
             }
             return true
         } catch (e) {
-            Logger.I.warn("Rust client availability check threw: " + e)
+            Logger.I.warn("Native client availability check threw: " + e)
             return false
         }
     }
@@ -125,7 +132,9 @@ export class RMBTRustClient implements IRMBTClient {
         return (this.finalResultUp?.speed ?? 0) / 1e6
     }
 
-    constructor() {
+    constructor(clientDir = "rust_client", clientLabel = "Rust") {
+        this.clientDir = clientDir
+        this.clientLabel = clientLabel
         this.params = {
             test_duration: 7,
         } as any
@@ -211,9 +220,9 @@ export class RMBTRustClient implements IRMBTClient {
             // spawn process =========================================================================
             Logger.I.info("Spawning external process...")
 
-            // Native Rust client binary (no Java runtime). Availability is
-            // pre-checked in MeasurementRunner.setRMBTClient (with JS fallback).
-            const binary_path = RMBTRustClient.binaryPath()
+            // Native client binary (no Java runtime). Availability is pre-checked
+            // in MeasurementRunner.setRMBTClient (with JS fallback).
+            const binary_path = RMBTRustClient.binaryPath(this.clientDir)
 
             let bin_options = [
                 "-h",
@@ -329,7 +338,7 @@ export class RMBTRustClient implements IRMBTClient {
 
             // handle java errors and exit codes
             child.on("close", (code) => {
-                Logger.I.info(`Rust client process exited with code ${code}`)
+                Logger.I.info(`${this.clientLabel} client process exited with code ${code}`)
                 if (code === 0) {
                     child = null
                     resolve([])
@@ -337,14 +346,14 @@ export class RMBTRustClient implements IRMBTClient {
                     this.measurementStatus = EMeasurementStatus.ERROR
                     reject(
                         new Error(
-                            `Rust client process exited with code ${code}`,
+                            `${this.clientLabel} client process exited with code ${code}`,
                         ),
                     )
                 }
             })
 
             child.on("error", (err) => {
-                Logger.I.error("Failed to start Rust client process:", err)
+                Logger.I.error(`Failed to start ${this.clientLabel} client process:`, err)
                 this.measurementStatus = EMeasurementStatus.ERROR
                 reject(err)
             })

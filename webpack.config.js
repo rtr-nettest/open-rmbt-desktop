@@ -46,6 +46,14 @@ const baseConfig = {
                     from: "src/measurement/rust_client",
                     to: "rust_client",
                 },
+                {
+                    // Native C measurement client binary (no Windows build).
+                    // Populated per-platform in CI; may be empty locally, so
+                    // tolerate a missing/empty directory.
+                    from: "src/measurement/c_client",
+                    to: "c_client",
+                    noErrorOnMissing: true,
+                },
             ],
         }),
     ],

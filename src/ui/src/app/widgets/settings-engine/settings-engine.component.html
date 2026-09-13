@@ -1,10 +1,10 @@
-@if (selectedEngineId$ | async; as selectedId) {
+@if (vm$ | async; as vm) {
     <mat-radio-group
         class="app-engine-group"
-        [ngModel]="selectedId"
+        [ngModel]="vm.selected"
         (ngModelChange)="change($event)"
     >
-        @for (engine of engines; track engine.id) {
+        @for (engine of vm.engines; track engine.id) {
             <mat-radio-button class="app-engine-option" [value]="engine.id">
                 {{ engine.name }}
             </mat-radio-button>

@@ -1,16 +1,13 @@
-@if (selectedEngine$ | async) {
-    <mat-select
-        disableOptionCentering
-        [(ngModel)]="selectedEngine"
-        (selectionChange)="change($event)"
+@if (selectedEngineId$ | async; as selectedId) {
+    <mat-radio-group
+        class="app-engine-group"
+        [ngModel]="selectedId"
+        (ngModelChange)="change($event)"
     >
-        <mat-select-trigger>
-            {{ selectedEngine().name }}
-        </mat-select-trigger>
-        <mat-option *ngFor="let engine of engines" [value]="engine">
-            <div class="app-engine-name">
+        @for (engine of engines; track engine.id) {
+            <mat-radio-button class="app-engine-option" [value]="engine.id">
                 {{ engine.name }}
-            </div>
-        </mat-option>
-    </mat-select>
+            </mat-radio-button>
+        }
+    </mat-radio-group>
 }

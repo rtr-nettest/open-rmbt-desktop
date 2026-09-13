@@ -1,6 +1,5 @@
-import { Component, Input, model } from "@angular/core"
-import { MatSelectChange } from "@angular/material/select"
-import { map, tap } from "rxjs"
+import { Component, Input } from "@angular/core"
+import { map } from "rxjs"
 import {
     IDynamicComponent,
     IDynamicComponentParameters,
@@ -11,30 +10,36 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-settings-engine",
     templateUrl: "./settings-engine.component.html",
     styleUrl: "./settings-engine.component.scss",
-    standalone: false
+    standalone: false,
 })
 export class SettingsEngineComponent implements IDynamicComponent {
     @Input() parameters?: IDynamicComponentParameters
+
+    // Selectable measurement engines. Add "c" / "java" entries here as they ship;
+    // the radio list renders however many are present, always with one active.
     engines = [
         { id: "rust", name: "Rust (native)" },
         { id: "node", name: "JavaScript (NodeJS)" },
     ]
-    selectedEngine$ = this.mainStore.env$.pipe(
-        tap((env) => {
-            this.selectedEngine.set(
-                this.engines.find((l) => l.id === env?.MEASUREMENT_ENGINE),
-            )
+
+    // Currently active engine id. Unknown / legacy values (e.g. "java") fall back
+    // to the first option so exactly one radio is always selected.
+    selectedEngineId$ = this.mainStore.env$.pipe(
+        map((env) => {
+            const id = env?.MEASUREMENT_ENGINE
+            return this.engines.some((e) => e.id === id)
+                ? (id as string)
+                : this.engines[0].id
         }),
     )
-    selectedEngine = model<any>(null)
 
     constructor(private readonly mainStore: MainStore) {}
 
-    change(event: MatSelectChange) {
+    change(id: string) {
         this.mainStore.env$.next({
             ...this.mainStore.env$.value!,
-            MEASUREMENT_ENGINE: event.value.id,
+            MEASUREMENT_ENGINE: id,
         })
-        window.electronAPI.setMeasurementEngine(event.value.id)
+        window.electronAPI.setMeasurementEngine(id)
     }
 }

@@ -1,5 +1,8 @@
 import { app, BrowserWindow, ipcMain, protocol } from "electron"
 if (require("electron-squirrel-startup")) app.quit()
+// Expose the OS app-data dir so worker threads (no `electron` module) write log
+// files to the same location as the main process.
+process.env.RMBT_LOG_DIR = app.getPath("userData")
 import { Events } from "./enums/events.enum"
 import Protocol from "./lib/protocol"
 import {

@@ -18,7 +18,6 @@ import { NetworkInfoService } from "./services/network-info.service"
 import { DBService } from "./services/db.service"
 import "reflect-metadata"
 import { EMeasurementFinalStatus } from "./enums/measurement-final-status"
-import { AutoUpdater } from "./services/auto-updater.service"
 import {
     ACTIVE_SERVER,
     MEASUREMENT_ENGINE,
@@ -92,7 +91,6 @@ export class MeasurementRunner {
 
     async registerClient(options?: MeasurementOptions): Promise<IUserSettings> {
         try {
-            AutoUpdater.I.checkForNewRelease()
             this.settingsRequest = new UserSettingsRequest(options)
             this.settings = await ControlServer.I.getUserSettings(
                 this.settingsRequest,

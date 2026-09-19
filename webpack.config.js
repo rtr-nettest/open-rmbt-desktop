@@ -1,6 +1,39 @@
 const path = require("path")
+const fs = require("fs")
 const Dotenv = require("dotenv-webpack")
 const CopyPlugin = require("copy-webpack-plugin")
+
+// copy-webpack-plugin emits copied files with default (non-executable) mode, so
+// the bundled native measurement clients (rust_client/c_client) lose their +x
+// bit and can't be spawned from the packaged app. Restore it after emit so the
+// binaries are executable in dist/ before electron-forge packages (and signs)
+// them; otherwise engine detection falls back to the JavaScript engine.
+class MakeNativeClientsExecutablePlugin {
+    apply(compiler) {
+        compiler.hooks.afterEmit.tap(
+            "MakeNativeClientsExecutable",
+            (compilation) => {
+                const outDir = compiler.options.output.path
+                const exe =
+                    process.platform === "win32"
+                        ? "rmbt-client.exe"
+                        : "rmbt-client"
+                for (const sub of ["rust_client", "c_client"]) {
+                    const bin = path.join(outDir, sub, exe)
+                    try {
+                        if (fs.existsSync(bin)) fs.chmodSync(bin, 0o755)
+                    } catch (e) {
+                        compilation.warnings.push(
+                            new Error(
+                                `Could not chmod +x ${bin}: ${e.message}`
+                            )
+                        )
+                    }
+                }
+            }
+        )
+    }
+}
 
 const baseConfig = {
     node: {
@@ -56,6 +89,7 @@ const baseConfig = {
                 },
             ],
         }),
+        new MakeNativeClientsExecutablePlugin(),
     ],
 }
 

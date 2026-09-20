@@ -173,6 +173,7 @@
     "province": "Bundesland",
     "lte_rsrq": "Signalqualität (RSRQ)",
     "server_name": "Name Testserver",
+    "rmbt_server_version": "Version RMBT-Server",
     "implausibleResult": "Anmerkung: Implausibles Testergebnis, Test wird ignoriert.",
     "pinned": "Pinned",
     "test_duration": "Nominelle Testdauer",

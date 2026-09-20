@@ -10,7 +10,6 @@ import {
 import Protocol from "./protocol"
 import path from "path"
 import { buildMenu } from "./menu"
-import { EMeasurementStatus } from "../../measurement/enums/measurement-status.enum"
 import { MeasurementRunner } from "../../measurement"
 import { LoopService } from "../../measurement/services/loop.service"
 import { t } from "../../measurement/services/i18n.service"
@@ -121,14 +120,13 @@ export class WindowManager {
 
         powerMonitor.on("suspend", () => {
             this.isSuspended = true
+            // Only notify the renderer (which shows the "measurement aborted"
+            // alert) when a measurement was actually running at suspend time.
+            // Otherwise the alert would also pop up after an already-finished
+            // measurement (phase END/ERROR/ABORTED), i.e. with nothing ongoing.
             if (MeasurementRunner.I.isMeasurementInProgress) {
                 MeasurementRunner.I.abortMeasurement()
                 LoopService.I.resetTimeout()
-            }
-            if (
-                MeasurementRunner.I.getCurrentPhaseState().phase !==
-                EMeasurementStatus.NOT_STARTED
-            ) {
                 win.webContents.send(Events.APP_SUSPENDED)
             }
         })

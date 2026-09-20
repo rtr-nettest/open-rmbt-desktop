@@ -9,7 +9,6 @@ import { ETestLabels } from "../enums/test-labels.enum"
 import { ISimpleHistoryResult } from "../../../../measurement/interfaces/simple-history-result.interface"
 
 export class TestVisualizationState implements ITestVisualizationState {
-    flavor: string = "rtr"
     phases: {
         [key: string]: ITestPhaseState
     } = {
@@ -46,7 +45,6 @@ export class TestVisualizationState implements ITestVisualizationState {
     static from(
         initialState: ITestVisualizationState,
         phaseState: IMeasurementPhaseState,
-        flavor: string,
     ) {
         const newState = extend<ITestVisualizationState>(initialState)
         if (newState.phases[phaseState.phase]) {
@@ -54,7 +52,6 @@ export class TestVisualizationState implements ITestVisualizationState {
                 newState.phases[phaseState.phase],
                 phaseState,
             )
-            newState.flavor = flavor
             newState.phases[phaseState.phase] = newTestPhaseState
             newState.setCounter(phaseState.phase, newTestPhaseState)
             newState.extendChart(phaseState.phase)
@@ -67,28 +64,14 @@ export class TestVisualizationState implements ITestVisualizationState {
         result: ISimpleHistoryResult,
         initialState: ITestVisualizationState,
         phaseState: IMeasurementPhaseState,
-        flavor: string,
     ) {
-        const newState = TestVisualizationState.from(
-            initialState,
-            phaseState,
-            flavor,
+        const newState = TestVisualizationState.from(initialState, phaseState)
+        newState.phases[EMeasurementStatus.DOWN].setRTRChartFromOverallSpeed?.(
+            result.downloadOverTime ?? [],
         )
-        if (flavor !== "rtr") {
-            newState.phases[
-                EMeasurementStatus.DOWN
-            ].setONTChartFromOverallSpeed?.(result.downloadOverTime ?? [])
-            newState.phases[
-                EMeasurementStatus.UP
-            ].setONTChartFromOverallSpeed?.(result.uploadOverTime ?? [])
-        } else {
-            newState.phases[
-                EMeasurementStatus.DOWN
-            ].setRTRChartFromOverallSpeed?.(result.downloadOverTime ?? [])
-            newState.phases[
-                EMeasurementStatus.UP
-            ].setRTRChartFromOverallSpeed?.(result.uploadOverTime ?? [])
-        }
+        newState.phases[EMeasurementStatus.UP].setRTRChartFromOverallSpeed?.(
+            result.uploadOverTime ?? [],
+        )
         newState.phases[EMeasurementStatus.DOWN].downs =
             result.downloadOverTime ?? []
         newState.phases[EMeasurementStatus.UP].ups = result.uploadOverTime ?? []
@@ -163,11 +146,6 @@ export class TestVisualizationState implements ITestVisualizationState {
     }
 
     extendChart(newPhaseName: EMeasurementStatus) {
-        const newPhase = this.phases[newPhaseName]
-        if (this.flavor !== "rtr") {
-            newPhase.extendONTSpeedChart()
-        } else {
-            newPhase.extendRTRSpeedChart()
-        }
+        this.phases[newPhaseName].extendRTRSpeedChart()
     }
 }

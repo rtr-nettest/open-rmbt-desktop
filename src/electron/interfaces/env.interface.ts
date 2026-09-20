@@ -6,12 +6,10 @@ export interface IEnv {
     CHECK_IP_INTERVAL_MS: number
     CMS_URL: string
     CPU_WARNING_PERCENT: number | undefined
-    CROWDIN_UPDATE_AT_RUNTIME: string
     ENABLE_HOME_SCREEN_JITTER_BOX: boolean
     ENABLE_LANGUAGE_SWITCH: string
     ENABLE_LOOP_MODE: string
     EXCLUDE_MENU_ITEMS: string[] | undefined
-    FLAVOR: string
     FULL_HISTORY_RESULT_URL: string | undefined
     FULL_STATISTICS_URL: string | undefined
     FULL_MAP_URL: string | undefined

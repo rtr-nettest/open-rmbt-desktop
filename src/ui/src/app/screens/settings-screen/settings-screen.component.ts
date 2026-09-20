@@ -20,9 +20,6 @@ import { Observable, combineLatest, map } from "rxjs"
 import { TranslocoService } from "@ngneat/transloco"
 import { BaseScreen } from "../base-screen/base-screen.component"
 import { MessageService } from "src/app/services/message.service"
-import { ClientSelectComponent } from "src/app/widgets/client-select/client-select.component"
-import { TestServersComponent } from "src/app/widgets/test-servers/test-servers.component"
-import { CMSService } from "src/app/services/cms.service"
 import { SettingsLocalDataComponent } from "src/app/widgets/settings-local-data/settings-local-data.component"
 import { Router } from "@angular/router"
 import { SettingsCommitComponent } from "src/app/widgets/settings-commit/settings-commit.component"
@@ -59,9 +56,8 @@ export class SettingsScreenComponent
     data$: Observable<IBasicResponse<ISettingsRow>> = combineLatest([
         this.transloco.selectTranslation(),
         this.mainStore.settings$,
-        this.cms.getProject({ dropCache: true }),
     ]).pipe(
-        map(([t, settings, project]) => {
+        map(([t, settings]) => {
             const env = this.env$.value
             const content: ISettingsRow[] = [
                 {
@@ -109,32 +105,10 @@ export class SettingsScreenComponent
                     component: SettingsLocaleComponent,
                 })
             }
-            if (env?.FLAVOR === "ont") {
-                content.push({
-                    title: t["Region"],
-                    component: ClientSelectComponent,
-                    parameters: {
-                        className: "app-client-select--settings",
-                        reloadPage: true,
-                    },
-                })
-            }
-            if (env?.FLAVOR === "ont" && project?.can_choose_server) {
-                content.push({
-                    title: t["Server"],
-                    component: TestServersComponent,
-                    parameters: {
-                        hideTitle: true,
-                    },
-                })
-            }
             content.push({
                 title: t["Local data"],
                 component: SettingsLocalDataComponent,
             })
-            if (env?.FLAVOR === "ont") {
-                this.tableClassNames.push("app-table--ont")
-            }
             return {
                 content,
                 totalElements: content.length,
@@ -152,7 +126,6 @@ export class SettingsScreenComponent
         message: MessageService,
         private router: Router,
         private transloco: TranslocoService,
-        private cms: CMSService,
         private cdr: ChangeDetectorRef,
     ) {
         super(mainStore, message)

@@ -1,65 +1,17 @@
-import { Component, Input } from "@angular/core"
-import { DomSanitizer, SafeUrl } from "@angular/platform-browser"
-import { TranslocoService } from "@ngneat/transloco"
-import { Observable, combineLatest, map, withLatestFrom } from "rxjs"
-import { CMSService } from "src/app/services/cms.service"
-import { MainStore } from "src/app/store/main.store"
-import { TestStore } from "src/app/store/test.store"
+import { Component } from "@angular/core"
+import { SafeUrl } from "@angular/platform-browser"
+import { Observable, of } from "rxjs"
 
 @Component({
     selector: "app-social-buttons",
     templateUrl: "./social-buttons.component.html",
     styleUrls: ["./social-buttons.component.scss"],
-    standalone: false
+    standalone: false,
 })
 export class SocialButtonsComponent {
+    // Social sharing was only populated for the (removed) ONT flavor, which
+    // sourced the regulator link from the CMS project. There are no share
+    // buttons in this build.
     shareButtons$: Observable<{ className: string; url: string | SafeUrl }[]> =
-        combineLatest([
-            this.testStore.simpleHistoryResult$,
-            this.transloco.selectTranslation(),
-            this.cms.getProject(),
-        ]).pipe(
-            map(([result, t, project]) => {
-                if (!result || !t || !project) {
-                    return []
-                }
-                const pageTitle = t["Sharing title"]
-                const pageUrl = `${project.regulator_link}${t["Sharing path"]}${result.testUuid}`
-                return [
-                    {
-                        className: "twitter",
-                        url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                            pageTitle
-                        )}&url=${encodeURIComponent(pageUrl)}`,
-                    },
-                    {
-                        className: "facebook",
-                        url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-                            pageUrl
-                        )}`,
-                    },
-                    {
-                        className: "linkedin",
-                        url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-                            pageUrl
-                        )}`,
-                    },
-                    {
-                        className: "whatsapp",
-                        url: this.sanitizer.bypassSecurityTrustUrl(
-                            `https://wa.me/?text=${encodeURIComponent(
-                                pageTitle
-                            )}%20${encodeURIComponent(pageUrl)}`
-                        ),
-                    },
-                ]
-            })
-        )
-
-    constructor(
-        private cms: CMSService,
-        private testStore: TestStore,
-        private transloco: TranslocoService,
-        private sanitizer: DomSanitizer
-    ) {}
+        of([])
 }

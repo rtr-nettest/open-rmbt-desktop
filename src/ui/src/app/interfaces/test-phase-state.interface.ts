@@ -10,8 +10,6 @@ export interface ITestPhaseState extends IMeasurementPhaseState {
     label?: string
 
     setRTRChartFromOverallSpeed?(overallResults: IOverallResult[]): void
-    setONTChartFromOverallSpeed?(overallResults: IOverallResult[]): void
     setChartFromPings?(pings: IPing[]): void
     extendRTRSpeedChart(): void
-    extendONTSpeedChart(): void
 }

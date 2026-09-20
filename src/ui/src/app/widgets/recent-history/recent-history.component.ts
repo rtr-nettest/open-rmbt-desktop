@@ -12,7 +12,6 @@ import { MainStore } from "src/app/store/main.store"
 import { ISort } from "src/app/interfaces/sort.interface"
 import { HistoryStore } from "src/app/store/history.store"
 import {
-    IHistoryRowONT,
     IHistoryRowRTR,
 } from "src/app/interfaces/history-row.interface"
 import { Router } from "@angular/router"
@@ -28,7 +27,7 @@ import { TestStore } from "src/app/store/test.store"
 })
 export class RecentHistoryComponent implements OnChanges {
     @Input({ required: true }) result!: {
-        content: IHistoryRowONT[] | IHistoryRowRTR[]
+        content: IHistoryRowRTR[]
         totalElements: number
     }
     @Input() grouped?: boolean
@@ -36,89 +35,41 @@ export class RecentHistoryComponent implements OnChanges {
     @Input() excludeColumns?: string[]
     @Input() interruptsTests = false
     @Output() sortChange: EventEmitter<ISort> = new EventEmitter()
-    columns$: Observable<ITableColumn<IHistoryRowRTR | IHistoryRowONT>[]> =
+    columns$: Observable<ITableColumn<IHistoryRowRTR>[]> =
         this.mainStore.env$.pipe(
-            map((env) => {
-                let cols: ITableColumn<IHistoryRowRTR | IHistoryRowONT>[] = []
-                if (env?.FLAVOR === "ont") {
-                    cols = [
-                        {
-                            columnDef: "measurementDate",
-                            header: "history.table.date",
-                            isSortable: true,
-                            link: (id) =>
-                                "/" +
-                                ERoutes.TEST_RESULT.replace(":testUuid", id),
-                        },
-                        {
-                            columnDef: "time",
-                            header: "history.table.time",
-                            isDate: true,
-                        },
-                        {
-                            columnDef: "providerName",
-                            header: "test.provider",
-                        },
-                        {
-                            columnDef: "download",
-                            isSortable: true,
-                            header: "history.table.download",
-                            justify: "flex-end",
-                        },
-                        {
-                            columnDef: "upload",
-                            isSortable: true,
-                            header: "history.table.upload",
-                            justify: "flex-end",
-                        },
-                        {
-                            columnDef: "ping",
-                            isSortable: true,
-                            header: "history.table.ping",
-                            justify: "flex-end",
-                        },
-                    ]
-                } else {
-                    cols = [
-                        {
-                            columnDef: "measurementDate",
-                            header: "Time",
-                            isDate: true,
-                        },
-                        {
-                            columnDef: "download",
-                            header: "Download",
-                            getNgClass: (value) => value.downloadClass,
-                        },
-                        {
-                            columnDef: "upload",
-                            header: "Upload",
-                            getNgClass: (value) => value.uploadClass,
-                        },
-                        {
-                            columnDef: "ping",
-                            header: "Ping",
-                            getNgClass: (value) => value.pingClass,
-                        },
-                        {
-                            columnDef: "groupArrowIndicator",
-                            header: "",
-                        },
-                    ] as ITableColumn<IHistoryRowRTR>[]
-                }
+            map(() => {
+                const cols = [
+                    {
+                        columnDef: "measurementDate",
+                        header: "Time",
+                        isDate: true,
+                    },
+                    {
+                        columnDef: "download",
+                        header: "Download",
+                        getNgClass: (value) => value.downloadClass,
+                    },
+                    {
+                        columnDef: "upload",
+                        header: "Upload",
+                        getNgClass: (value) => value.uploadClass,
+                    },
+                    {
+                        columnDef: "ping",
+                        header: "Ping",
+                        getNgClass: (value) => value.pingClass,
+                    },
+                    {
+                        columnDef: "groupArrowIndicator",
+                        header: "",
+                    },
+                ] as ITableColumn<IHistoryRowRTR>[]
                 return cols.filter(
                     (c) => !this.excludeColumns?.includes(c.columnDef),
                 )
             }),
         )
-    env$ = this.mainStore.env$.pipe(
-        map((env) => {
-            if (env?.FLAVOR === "ont") {
-                this.tableClassNames = ["app-table--ont"]
-            }
-            return env
-        }),
-    )
+    env$ = this.mainStore.env$
 
     sort$ = this.store.historySort$
     tableClassNames?: string[]

@@ -17,7 +17,6 @@ import { BaseScreen } from "../base-screen/base-screen.component"
 import { MessageService } from "src/app/services/message.service"
 import { HistoryStore } from "src/app/store/history.store"
 import {
-    IHistoryRowONT,
     IHistoryRowRTR,
 } from "src/app/interfaces/history-row.interface"
 import { HistoryExportService } from "src/app/services/history-export.service"
@@ -62,7 +61,7 @@ export class HistoryScreenComponent
         },
     ]
     pageTitle = "History"
-    result$: Observable<IBasicResponse<IHistoryRowRTR | IHistoryRowONT>> =
+    result$: Observable<IBasicResponse<IHistoryRowRTR>> =
         this.store.getFormattedHistory({ grouped: this.shouldGroupHistory })
 
     constructor(

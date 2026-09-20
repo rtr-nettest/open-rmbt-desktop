@@ -9,7 +9,7 @@
                 [columns]="(columns$ | async)!"
                 [data]="result"
                 [expandedElements]="expandedElements"
-                [rowsAreCLickable]="(env$ | async)?.FLAVOR !== 'ont'"
+                [rowsAreCLickable]="true"
                 [sort]="(sort$ | async)!"
                 [shouldHideHeader]="false"
                 [tableClassNames]="tableClassNames ?? []"

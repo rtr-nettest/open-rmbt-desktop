@@ -10,15 +10,12 @@ import {
     tap,
 } from "rxjs"
 import { IEnv } from "../../../../electron/interfaces/env.interface"
-import { IMainAsset } from "../interfaces/main-asset.interface"
-import { IMainProject } from "../interfaces/main-project.interface"
 import { IUserSettings } from "../../../../measurement/interfaces/user-settings-response.interface"
 import { INewsItem } from "../../../../measurement/interfaces/news.interface"
 import { EIPVersion } from "../../../../measurement/enums/ip-version.enum"
 import { Router } from "@angular/router"
 import { Translation, TranslocoService } from "@ngneat/transloco"
 import { TranslocoHttpLoader } from "../transloco-root.module"
-import { IMainPage } from "../interfaces/main-page.interface"
 import { IJitterInfo } from "../../../../measurement/interfaces/jitter-info.interface"
 import { IPInfo } from "../../../../measurement/interfaces/ip-info.interface"
 
@@ -30,7 +27,6 @@ export class MainStore {
         return () => firstValueFrom(store.setEnv())
     }
 
-    assets$ = new BehaviorSubject<{ [key: string]: IMainAsset }>({})
     env$ = new BehaviorSubject<IEnv | null>(null)
     inProgress$ = new BehaviorSubject<boolean>(false)
     isOnline$ = new BehaviorSubject<boolean>(navigator.onLine)
@@ -39,13 +35,11 @@ export class MainStore {
         packetLoss: 1,
         ping: 1,
     })
-    project$ = new BehaviorSubject<IMainProject | null>(null)
     ipInfo$ = new BehaviorSubject<IPInfo | null>(null)
     settings$ = new BehaviorSubject<IUserSettings | null>(null)
     error$ = new BehaviorSubject<Error | null>(null)
     news$ = new BehaviorSubject<INewsItem[] | null>(null)
     referrer$ = new BehaviorSubject<string | null>(null)
-    terms$ = new BehaviorSubject<IMainPage | null>(null)
     maxJitter = 5
 
     get api() {
@@ -120,16 +114,4 @@ export class MainStore {
         }
     }
 
-    setClient(client: string) {
-        window.electronAPI.setActiveClient(client)
-        const newEnv = { ...this.env$.value, X_NETTEST_CLIENT: client } as IEnv
-        this.env$.next(newEnv)
-        this.project$.next(null)
-        const loader$ = this.transLoader.getTranslation(
-            this.transloco.getActiveLang(),
-        ) as Observable<Translation>
-        lastValueFrom(loader$).then((dict) => {
-            this.transloco.setTranslation(dict)
-        })
-    }
 }

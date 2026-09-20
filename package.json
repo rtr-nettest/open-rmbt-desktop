@@ -9,7 +9,6 @@
     },
     "repository": "https://github.com/rtr-nettest/open-rmbt-desktop",
     "scripts": {
-        "prepare:translations": "npx ts-node scripts/download-translations.ts",
         "build:all": "shx rm -rf dist && node scripts/set-package-name.js && webpack --mode production && cd src/ui && npm run build-for-packaging && shx cp -rf dist/ui/browser/* ../../dist",
         "start:cli": "webpack --mode development --config ./webpack.cli.config.js && cross-env DEV=true npx ts-node src/cli/cli.ts",
         "start:electron": "webpack --mode development && cross-env DEV=true electron dist/main.js",
@@ -66,7 +65,6 @@
         "typescript": "^5.5.4",
         "webpack": "^5.94.0",
         "webpack-cli": "^5.1.4",
-        "xliff": "^6.2.1",
         "yargs": "^17.7.2"
     },
     "dependencies": {

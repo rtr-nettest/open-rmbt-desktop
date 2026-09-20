@@ -1,15 +1,5 @@
 <app-header *ngIf="!hideMenu"></app-header>
-<ng-container
-    [ngTemplateOutlet]="(env$ | async)?.FLAVOR === 'ont' ? ont : rtr"
-></ng-container>
-
-<ng-template #ont>
-    <main *ngIf="visualization$ | async" class="app-main app-main--ont">
-        <nt-test-header></nt-test-header>
-        <app-test-boxes></app-test-boxes>
-        <app-test-charts></app-test-charts>
-    </main>
-</ng-template>
+<ng-container [ngTemplateOutlet]="rtr"></ng-container>
 
 <ng-template #rtr>
     <app-body *transloco="let t">

@@ -158,11 +158,7 @@ export class TestStore {
         } else {
             newState = oldVisualization
         }
-        newState = TestVisualizationState.from(
-            newState,
-            phaseState,
-            this.mainStore.env$.value?.FLAVOR ?? "rtr",
-        )
+        newState = TestVisualizationState.from(newState, phaseState)
         this.visualization$.next(newState)
         this.basicNetworkInfo$.next(phaseState)
         return newState
@@ -210,9 +206,8 @@ export class TestStore {
 
     private setLatestTestState = () => {
         if (
-            this.mainStore.env$.value?.FLAVOR === "ont" ||
             this.visualization$.value.currentPhaseName ===
-                EMeasurementStatus.SHOWING_RESULTS
+            EMeasurementStatus.SHOWING_RESULTS
         ) {
             return
         }
@@ -265,7 +260,6 @@ export class TestStore {
                     result,
                     this.visualization$.value,
                     newPhase,
-                    this.mainStore.env$.value?.FLAVOR ?? "rtr",
                 )
                 this.visualization$.next(newState)
                 this.basicNetworkInfo$.next({

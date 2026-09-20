@@ -3,7 +3,6 @@ import { HistoryScreenComponent } from "../history-screen/history-screen.compone
 import { Observable, of } from "rxjs"
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
 import {
-    IHistoryRowONT,
     IHistoryRowRTR,
 } from "src/app/interfaces/history-row.interface"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
@@ -20,7 +19,7 @@ export class CertifiedResultScreenComponent extends HistoryScreenComponent {
     override shouldGroupHistory = false
     override pageTitle = "Certified measurement results"
     override result$: Observable<
-        IBasicResponse<IHistoryRowRTR | IHistoryRowONT>
+        IBasicResponse<IHistoryRowRTR>
     > = of()
     override actionButtons: IMainMenuItem[] = [
         {

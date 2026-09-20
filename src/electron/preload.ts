@@ -10,8 +10,6 @@ import { IUserSettings } from "../measurement/interfaces/user-settings-response.
 
 contextBridge.exposeInMainWorld("electronAPI", {
     quit: () => ipcRenderer.send(Events.QUIT),
-    getTranslations: (lang: string) =>
-        ipcRenderer.invoke(Events.GET_TRANSLATIONS, lang),
     getNews: () => ipcRenderer.invoke(Events.GET_NEWS),
     acceptTerms: (terms: number) =>
         ipcRenderer.send(Events.ACCEPT_TERMS, terms),

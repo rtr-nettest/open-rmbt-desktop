@@ -28,11 +28,8 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
 import { MatProgressBarModule } from "@angular/material/progress-bar"
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http"
 import { TranslocoRootModule } from "./transloco-root.module"
-import { TestHeaderComponent } from "./widgets/test-header/test-header.component"
 import { TestIndicatorComponent } from "./widgets/test-indicator/test-indicator.component"
-import { TestBoxesComponent } from "./widgets/test-boxes/test-boxes.component"
 import { TestChartComponent } from "./widgets/test-chart/test-chart.component"
-import { TestChartsComponent } from "./widgets/test-charts/test-charts.component"
 import { ICPU } from "../../../measurement/interfaces/cpu.interface"
 import {
     Chart,
@@ -68,7 +65,6 @@ import { ConfirmDialogComponent } from "./widgets/confirm-dialog/confirm-dialog.
 import { MatDialogModule } from "@angular/material/dialog"
 import { ExportWarningComponent } from "./widgets/export-warning/export-warning.component"
 import { TermsConditionsScreenComponent } from "./screens/terms-conditions-screen/terms-conditions-screen.component"
-import { ICrowdinJson } from "../../../measurement/interfaces/crowdin.interface"
 import { INewsItem } from "../../../measurement/interfaces/news.interface"
 import { SettingsScreenComponent } from "./screens/settings-screen/settings-screen.component"
 import { NewsScreenComponent } from "./screens/news-screen/news-screen.component"
@@ -109,10 +105,7 @@ import localeSrMeLatn from "@angular/common/locales/sr-Latn-ME"
 import { DatePipe, registerLocaleData } from "@angular/common"
 import { HeaderMenuComponent } from "./widgets/header-menu/header-menu.component"
 import { IMeasurementServerResponse } from "../../../measurement/interfaces/measurement-server-response.interface"
-import { TestServersComponent } from "./widgets/test-servers/test-servers.component"
 import { DistancePipe } from "./pipes/distance.pipe"
-import { ClientScreenComponent } from "./screens/client-screen/client-screen.component"
-import { ClientSelectComponent } from "./widgets/client-select/client-select.component"
 import { IPaginator } from "./interfaces/paginator.interface"
 import { ISort } from "./interfaces/sort.interface"
 import { ScrollBottomComponent } from "./widgets/scroll-bottom/scroll-bottom.component"
@@ -160,7 +153,6 @@ declare global {
     interface Window {
         electronAPI: {
             quit: () => Promise<void>
-            getTranslations: (lang: string) => Promise<ICrowdinJson | null>
             getNews: () => Promise<INewsItem[] | null>
             acceptTerms: (terms: number) => Promise<void>
             registerClient: () => Promise<IUserSettings>
@@ -231,10 +223,7 @@ declare global {
         SpacerComponent,
         StartTestButtonComponent,
         TableComponent,
-        TestBoxesComponent,
         TestChartComponent,
-        TestChartsComponent,
-        TestHeaderComponent,
         TestIndicatorComponent,
         TestScreenComponent,
         ConfirmDialogComponent,
@@ -252,9 +241,6 @@ declare global {
         ActionButtonsComponent,
         ScrollTopComponent,
         HeaderMenuComponent,
-        TestServersComponent,
-        ClientScreenComponent,
-        ClientSelectComponent,
         ScrollBottomComponent,
         SettingsLocalDataComponent,
         StatisticsScreenComponent,

@@ -11,13 +11,7 @@ import { MainStore } from "src/app/store/main.store"
 })
 export class SettingsUuidComponent {
     uuid$ = this.store.settings$.pipe(
-        withLatestFrom(this.store.env$),
-        map(([settings, env]) => {
-            if (env?.FLAVOR === "ont") {
-                return settings?.uuid
-            }
-            return "U" + settings?.uuid
-        })
+        map((settings) => "U" + settings?.uuid)
     )
 
     constructor(private store: MainStore, private message: MessageService) {}

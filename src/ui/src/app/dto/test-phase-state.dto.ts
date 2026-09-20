@@ -34,17 +34,6 @@ export class TestPhaseState implements ITestPhaseState {
         }
     }
 
-    setONTChartFromOverallSpeed(overallResults: IOverallResult[]) {
-        this.chart = overallResults.map((r) => ({
-            x: (r.nsec * 100) / overallResults[overallResults.length - 1].nsec,
-            y: r.speed / 1e6,
-        }))
-        // Always start at 0
-        if (this.chart[0]?.x != 0) {
-            this.chart.unshift({ x: 0, y: 0 })
-        }
-    }
-
     setRTRChartFromOverallSpeed(overallResults: IOverallResult[]) {
         this.chart = overallResults.reduce((acc, r, i) => {
             const msec = r.nsec / 1e6
@@ -82,13 +71,4 @@ export class TestPhaseState implements ITestPhaseState {
         ]
     }
 
-    extendONTSpeedChart() {
-        this.chart = [
-            ...(this.chart || []),
-            {
-                x: this.progress * 100,
-                y: Math.max(0, this.counter),
-            },
-        ]
-    }
 }

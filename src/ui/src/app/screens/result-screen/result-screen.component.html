@@ -1,18 +1,6 @@
 <app-header></app-header>
-<ng-container
-    [ngTemplateOutlet]="(env$ | async)?.FLAVOR === 'ont' ? ont : rtr"
-></ng-container>
+<ng-container [ngTemplateOutlet]="rtr"></ng-container>
 <app-scroll-top></app-scroll-top>
-
-<ng-template #ont>
-    <main
-        *ngIf="result$ | async as result; else noResult"
-        class="app-main app-main--ont"
-    >
-        <app-test-boxes></app-test-boxes>
-        <app-test-charts></app-test-charts>
-    </main>
-</ng-template>
 
 <ng-template #rtr>
     <app-body>

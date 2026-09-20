@@ -2,7 +2,6 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core"
 import { TranslocoService } from "@ngneat/transloco"
 import { map, switchMap, takeUntil, withLatestFrom } from "rxjs"
 import { UNKNOWN } from "src/app/constants/strings"
-import { CMSService } from "src/app/services/cms.service"
 import { MessageService } from "src/app/services/message.service"
 import { MainStore } from "src/app/store/main.store"
 import { BaseScreen } from "../base-screen/base-screen.component"
@@ -75,31 +74,13 @@ export class HomeScreenComponent
             }
         }),
     )
-    testInviteImg$ = this.mainStore.env$.pipe(
-        switchMap((env) =>
-            this.cmsService.getAssetByName(
-                `test-invite-img.${env?.X_NETTEST_CLIENT}.svg`,
-            ),
-        ),
-    )
     showProgress = true
-    methodologyLink$ = this.cmsService.getProject().pipe(
-        map(() => {
-            const path = "methodology"
-            let lang = this.transloco.getActiveLang()
-            if (!["en", "de"].includes(lang)) {
-                lang = "en"
-            }
-            return `${this.env$.value?.WEBSITE_HOST}/${lang}/${path}`
-        }),
-    )
     private checkIpInterval?: any
 
     constructor(
         mainStore: MainStore,
         message: MessageService,
         private cdr: ChangeDetectorRef,
-        private cmsService: CMSService,
         private transloco: TranslocoService,
     ) {
         super(mainStore, message)

@@ -2,7 +2,6 @@ import { ChangeDetectorRef, Component } from "@angular/core"
 import { Observable } from "rxjs"
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
 import {
-    IHistoryRowONT,
     IHistoryRowRTR,
 } from "src/app/interfaces/history-row.interface"
 import { HistoryScreenComponent } from "../history-screen/history-screen.component"
@@ -24,7 +23,7 @@ export class LoopResultScreenComponent extends HistoryScreenComponent {
     override shouldGroupHistory = false
     override pageTitle = "Loop measurement results"
     override result$: Observable<
-        IBasicResponse<IHistoryRowRTR | IHistoryRowONT>
+        IBasicResponse<IHistoryRowRTR>
     > = this.store.getFormattedHistory({
         grouped: this.shouldGroupHistory,
         loopUuid: this.activatedRoute.snapshot.params["loopUuid"],

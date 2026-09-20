@@ -16,9 +16,7 @@
         *transloco="let t"
         mat-button
         color="primary"
-        class="app-menu-item {{ item.className }} app-menu-item--{{
-            env.FLAVOR
-        }}"
+        class="app-menu-item {{ item.className }} app-menu-item--rtr"
         [routerLink]="item.route"
         routerLinkActive="app-menu-item--active"
         (click)="menuClick.emit($event)"
@@ -36,9 +34,7 @@
         *transloco="let t"
         mat-button
         color="primary"
-        class="app-menu-item {{ item.className }} app-menu-item--{{
-            env.FLAVOR
-        }}"
+        class="app-menu-item {{ item.className }} app-menu-item--rtr"
         [href]="item.url"
         role="menuitem"
         target="_blank"
@@ -56,9 +52,7 @@
         mat-button
         color="primary"
         href="javascript:;"
-        class="app-menu-item {{ item.className }} app-menu-item--{{
-            env.FLAVOR
-        }}"
+        class="app-menu-item {{ item.className }} app-menu-item--rtr"
         (click)="menuClick.emit($event)"
         role="menuitem"
         [title]="t(item.label)"

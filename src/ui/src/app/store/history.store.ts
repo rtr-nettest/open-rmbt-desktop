@@ -20,7 +20,6 @@ import { ConversionService } from "../services/conversion.service"
 import { DatePipe } from "@angular/common"
 import {
     IHistoryGroupItem,
-    IHistoryRowONT,
     IHistoryRowRTR,
 } from "../interfaces/history-row.interface"
 import { ExpandArrowComponent } from "../widgets/expand-arrow/expand-arrow.component"
@@ -69,21 +68,13 @@ export class HistoryStore {
                     options?.loopUuid,
                 )
                 const countedHistory = this.countResults(loopHistory, paginator)
-                const h =
-                    options?.grouped && env?.FLAVOR !== "ont"
-                        ? this.groupResults(countedHistory, openLoops)
-                        : countedHistory
-                const content =
-                    env?.FLAVOR === "ont"
-                        ? h.map(this.historyItemToRowONT(t))
-                        : h.map(this.historyItemToRowRTR(t, openLoops))
-                const totalElements = history[0].paginator?.totalElements
+                const h = options?.grouped
+                    ? this.groupResults(countedHistory, openLoops)
+                    : countedHistory
+                const content = h.map(this.historyItemToRowRTR(t, openLoops))
                 return {
                     content,
-                    totalElements:
-                        env?.FLAVOR === "ont" && totalElements
-                            ? totalElements
-                            : content.length,
+                    totalElements: content.length,
                 }
             }),
         )
@@ -197,43 +188,6 @@ export class HistoryStore {
             count: paginator.limit ? index + 1 : history.length - index,
         }))
     }
-
-    private historyItemToRowONT =
-        (t: Translation) =>
-        (hi: ISimpleHistoryResult): IHistoryRowONT => {
-            const locale = this.transloco.getActiveLang()
-            return {
-                id: hi.testUuid!,
-                measurementDate: this.datePipe.transform(
-                    hi.measurementDate,
-                    "mediumDate",
-                    undefined,
-                    locale,
-                )!,
-                time: this.datePipe.transform(
-                    hi.measurementDate,
-                    "mediumTime",
-                    undefined,
-                    locale,
-                )!,
-                download: hi.downloadKbit
-                    ? this.conversion
-                          .getSignificantDigits(hi.downloadKbit / 1e3)
-                          .toLocaleString(locale)
-                    : " ",
-                upload: hi.uploadKbit
-                    ? this.conversion
-                          .getSignificantDigits(hi.uploadKbit / 1e3)
-                          .toLocaleString(locale)
-                    : t["Test failed"],
-                ping: hi.ping
-                    ? this.conversion
-                          .getSignificantDigits(hi.ping)
-                          .toLocaleString(locale)
-                    : " ",
-                providerName: hi.providerName,
-            }
-        }
 
     private historyItemToRowRTR =
         (t: Translation, openLoops: string[]) =>

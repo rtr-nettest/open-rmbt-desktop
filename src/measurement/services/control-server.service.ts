@@ -108,7 +108,7 @@ export class ControlServer {
     }
 
     async getNews() {
-        if (!process.env.NEWS_PATH || process.env.FLAVOR === "ont") {
+        if (!process.env.NEWS_PATH) {
             return null
         }
         const lastNewsUid = Store.I.get(LAST_NEWS_UID) as number
@@ -200,17 +200,13 @@ export class ControlServer {
             )
         ).data as IUserSetingsResponse
         if (response?.settings?.length) {
-            const settings =
-                process.env.FLAVOR === "ont"
-                    ? { ...response.settings[0], uuid: request.uuid }
-                    : response.settings[0]
+            const settings = response.settings[0]
             Logger.I.info("Using settings: %o", settings)
             Store.I.set(CLIENT_UUID, settings.uuid)
             Store.I.set(SETTINGS, settings)
             if (
-                process.env.FLAVOR !== "ont" &&
                 Store.I.get(TERMS_ACCEPTED_VERSION) !==
-                    settings.terms_and_conditions?.version
+                settings.terms_and_conditions?.version
             ) {
                 let termsText = (
                     await axios.get(settings.terms_and_conditions.url)
@@ -303,13 +299,7 @@ export class ControlServer {
         }
         let retVal: ISimpleHistoryResult[] | undefined
         try {
-            if (process.env.FLAVOR === "ont") {
-                // as used by ONT
-                retVal = await this.getONTHistory(paginator, sort)
-            } else {
-                // as used by RTR
-                retVal = await this.getRTRHistory(paginator)
-            }
+            retVal = await this.getRTRHistory(paginator)
         } catch (e) {
             retVal = await DBService.I.getAllMeasurements()
             if (!retVal) {
@@ -317,42 +307,6 @@ export class ControlServer {
             }
         }
         return retVal
-    }
-
-    async getONTHistory(paginator?: IPaginator, sort?: ISort) {
-        let params = `uuid=${Store.I.get(CLIENT_UUID) as string}`
-        if (paginator) {
-            const { offset, limit } = paginator
-            if (limit) {
-                let page = 1
-                if (offset >= limit) {
-                    page = offset / limit + 1
-                }
-                params += `&page=${page}&size=${limit}`
-            }
-        }
-        if (sort) {
-            const { active, direction } = sort
-            params += `&sort=${active},${direction}`
-        } else {
-            params += `&sort=measurementDate,desc`
-        }
-        const url = `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_PATH}?${params}`
-        Logger.I.info(ELoggerMessage.GET_REQUEST, url)
-        const resp = (await axios.get(url, { headers: this.headers })).data
-        Logger.I.warn("Response is %o", resp)
-        if (resp?.content.length) {
-            return resp.content.map((hi: any) => {
-                const result: ISimpleHistoryResult =
-                    SimpleHistoryResult.fromONTHistoryResult(hi)
-                result.paginator = {
-                    totalElements: resp.totalElements,
-                    totalPages: resp.totalPages,
-                }
-                return result
-            })
-        }
-        throw new Error("Something unexpected happened.")
     }
 
     async getRTRHistory(paginator?: IPaginator) {
@@ -396,13 +350,7 @@ export class ControlServer {
         Logger.I.info("Receiving measurement result: %s", testUuid)
         let retVal: ISimpleHistoryResult | undefined
         try {
-            if (process.env.FLAVOR === "ont") {
-                // as used by ONT
-                retVal = await this.getONTMeasurementResult(testUuid!)
-            } else {
-                // as used by RTR
-                retVal = await this.getRTRMeasurementResult(testUuid!)
-            }
+            retVal = await this.getRTRMeasurementResult(testUuid!)
         } catch (e: any) {
             retVal = await DBService.I.getMeasurementByUuid(testUuid!)
             if (!retVal) {
@@ -472,25 +420,6 @@ export class ControlServer {
         }
 
         return historyResult
-    }
-
-    private async getONTMeasurementResult(uuid: string) {
-        let response: any
-        let retVal: ISimpleHistoryResult | undefined = undefined
-        response = (
-            await axios.get(
-                `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}/${uuid}`,
-                { headers: this.headers },
-            )
-        ).data
-        Logger.I.info(ELoggerMessage.RESPONSE, response)
-        if (response) {
-            retVal = SimpleHistoryResult.fromONTMeasurementResult(
-                uuid,
-                response,
-            )
-        }
-        return retVal
     }
 
     private handleError(e: any) {

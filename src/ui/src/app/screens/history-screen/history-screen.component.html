@@ -1,6 +1,6 @@
 <app-header *ngIf="!hideMenu"></app-header>
 <app-body *ngIf="env$ | async as env">
-    <app-main-menu *ngIf="env?.FLAVOR !== 'ont' && !hideMenu"></app-main-menu>
+    <app-main-menu *ngIf="!hideMenu"></app-main-menu>
     <app-main-content
         *ngIf="result$ | async as result; else noResult"
         [class.hidden-menu]="hideMenu"
@@ -11,14 +11,11 @@
             [class.app-main--no-padding]="hideMenu"
             *transloco="let t"
         >
-            <h1 *ngIf="env?.FLAVOR && env?.FLAVOR !== 'ont'" class="app-title">
+            <h1 class="app-title">
                 {{ t(pageTitle) }}
                 <app-action-buttons
                     [items]="actionButtons"
                 ></app-action-buttons>
-            </h1>
-            <h1 *ngIf="env?.FLAVOR === 'ont'" class="app-title app-title--ont">
-                {{ getHeading(result.totalElements) }}
             </h1>
             <div class="app-wrapper">
                 <app-recent-history
@@ -32,9 +29,6 @@
                     color="primary"
                     (click)="loadMore()"
                     [disabled]="loading"
-                    [ngClass]="
-                        env?.FLAVOR === 'ont' ? 'app-button--expanded' : ''
-                    "
                 >
                     {{ loading ? t("Loading") : t("Load more") }}
                 </button>

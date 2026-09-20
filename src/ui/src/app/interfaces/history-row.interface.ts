@@ -11,14 +11,6 @@ export interface IHistoryRowRTR extends IHistoryGroupItem {
     parameters?: { [key: string]: any }
 }
 
-export interface IHistoryRowONT extends IHistoryGroupItem {
-    time: string
-    providerName: string
-    download: string
-    upload: string
-    ping: string
-}
-
 export interface IHistoryGroupItem {
     id?: string
     measurementDate: string

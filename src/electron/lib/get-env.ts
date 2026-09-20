@@ -40,7 +40,6 @@ export const getEnv = () => {
         CPU_WARNING_PERCENT: process.env.CPU_WARNING_PERCENT
             ? parseFloat(process.env.CPU_WARNING_PERCENT)
             : undefined,
-        CROWDIN_UPDATE_AT_RUNTIME: process.env.CROWDIN_UPDATE_AT_RUNTIME || "",
         ENABLE_LANGUAGE_SWITCH: process.env.ENABLE_LANGUAGE_SWITCH || "",
         ENABLE_HOME_SCREEN_JITTER_BOX:
             process.env.ENABLE_HOME_SCREEN_JITTER_BOX === "true",
@@ -48,7 +47,6 @@ export const getEnv = () => {
         EXCLUDE_MENU_ITEMS: process.env.EXCLUDE_MENU_ITEMS
             ? process.env.EXCLUDE_MENU_ITEMS.split(",")
             : undefined,
-        FLAVOR: process.env.FLAVOR || "rtr",
         WEBSITE_HOST: new URL(process.env.FULL_HISTORY_RESULT_URL ?? "").origin,
         FULL_HISTORY_RESULT_URL: process.env.FULL_HISTORY_RESULT_URL,
         FULL_STATISTICS_URL: process.env.FULL_STATISTICS_URL,

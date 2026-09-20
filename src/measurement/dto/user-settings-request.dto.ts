@@ -10,7 +10,6 @@ import {
     TERMS_ACCEPTED_VERSION,
 } from "../services/store.service"
 import { I18nService } from "../services/i18n.service"
-import { v4 } from "uuid"
 import * as packJson from "../../../package.json"
 import { MeasurementOptions } from "../interfaces/measurement-options.interface"
 
@@ -19,10 +18,7 @@ dayjs.extend(tz)
 
 export class UserSettingsRequest implements IUserSettingsRequest {
     language = I18nService.I.getActiveLanguage()
-    name =
-        process.env.FLAVOR === "ont"
-            ? EMeasurementServerType.RMBTws
-            : EMeasurementServerType.RMBT
+    name = EMeasurementServerType.RMBT
     timezone = dayjs.tz.guess()
     terms_and_conditions_accepted = false
     terms_and_conditions_accepted_version?: number
@@ -51,17 +47,13 @@ export class UserSettingsRequest implements IUserSettingsRequest {
             this.terms_and_conditions_accepted = true
             this.terms_and_conditions_accepted_version = termsAccepted
         }
-        if (process.env.FLAVOR === "ont") {
-            this.uuid = (Store.I.get(CLIENT_UUID) as string) ?? v4()
-        } else {
-            this.uuid = Store.I.get(CLIENT_UUID) as string
-            const [platform, os_version] = this.operating_system.split(", ")
-            this.os_version = os_version
-            this.platform = platform
-            this.plattform = platform
-            this.model = "Desktop_" + os.machine()
-            this.softwareVersion = packJson.version
-            this.softwareRevision = `${packJson.gitInfo["branch"]}-${packJson.gitInfo["hash"]}`
-        }
+        this.uuid = Store.I.get(CLIENT_UUID) as string
+        const [platform, os_version] = this.operating_system.split(", ")
+        this.os_version = os_version
+        this.platform = platform
+        this.plattform = platform
+        this.model = "Desktop_" + os.machine()
+        this.softwareVersion = packJson.version
+        this.softwareRevision = `${packJson.gitInfo["branch"]}-${packJson.gitInfo["hash"]}`
     }
 }

@@ -11,7 +11,6 @@ import { NewsScreenComponent } from "./screens/news-screen/news-screen.component
 import { EnvResolver } from "./resolvers/env.resolver"
 import { HistoryScreenComponent } from "./screens/history-screen/history-screen.component"
 import { ReferrerResolver } from "./resolvers/referrer.resolver"
-import { ClientScreenComponent } from "./screens/client-screen/client-screen.component"
 import { StatisticsScreenComponent } from "./screens/statistics-screen/statistics-screen.component"
 import { MapScreenComponent } from "./screens/map-screen/map-screen.component"
 import { LoopStartScreenComponent } from "./screens/loop-start-screen/loop-start-screen.component"
@@ -64,10 +63,6 @@ const routes: Routes = [
         resolve: {
             measurementAborted: () => inject(MeasurementResolver).resolve(),
         },
-    },
-    {
-        path: ERoutes.CLIENT,
-        component: ClientScreenComponent,
     },
     {
         path: ERoutes.STATISTICS,

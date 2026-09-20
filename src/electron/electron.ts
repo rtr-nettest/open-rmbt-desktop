@@ -15,7 +15,6 @@ import {
     Store,
     TERMS_ACCEPTED_VERSION,
 } from "../measurement/services/store.service"
-import { CrowdinService } from "../measurement/services/crowdin.service"
 import { ControlServer } from "../measurement/services/control-server.service"
 import { EIPVersion } from "../measurement/enums/ip-version.enum"
 import { UserSettingsRequest } from "../measurement/dto/user-settings-request.dto"
@@ -54,10 +53,6 @@ app.on("activate", () => {
 ipcMain.on(Events.QUIT, () => {
     WindowManager.I.onQuit()
     app.quit()
-})
-
-ipcMain.handle(Events.GET_TRANSLATIONS, async (event, lang: string) => {
-    return await CrowdinService.I.getTranslations(lang)
 })
 
 ipcMain.handle(Events.GET_NEWS, async () => {

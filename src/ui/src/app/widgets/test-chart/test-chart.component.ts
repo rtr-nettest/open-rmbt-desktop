@@ -33,16 +33,13 @@ export class TestChartComponent {
     chart: TestChart | undefined
     visualization$: Observable<ITestVisualizationState> =
         this.store.visualization$.pipe(
-            withLatestFrom(this.mainStore.env$),
-            map(([s, env]) => {
-                this.flavor = env?.FLAVOR || "rtr"
+            map((s) => {
                 if (this.canvas) {
                     this.handleChanges(s)
                 }
                 return s
             }),
         )
-    flavor?: string
 
     get canvas() {
         return document.getElementById(this.id) as HTMLCanvasElement
@@ -135,9 +132,7 @@ export class TestChartComponent {
         const ctx = this.canvas?.getContext("2d")
         if (ctx && (options?.force || this.isCanvasEmpty)) {
             try {
-                if (this.flavor !== "rtr") {
-                    this.chart = new TestChart(ctx!, this.transloco)
-                } else if (this.phase === "ping") {
+                if (this.phase === "ping") {
                     this.chart = new TestBarChart(
                         ctx!,
                         this.transloco,

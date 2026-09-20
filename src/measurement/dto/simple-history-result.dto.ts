@@ -55,41 +55,6 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         )
     }
 
-    static fromONTHistoryResult(response: any) {
-        return new SimpleHistoryResult(
-            dayjs(response.measurementDate)
-                .tz(dayjs.tz.guess())
-                .format(RESULT_DATE_FORMAT),
-            "",
-            response.download,
-            response.upload,
-            response.ping,
-            response.clientProvider,
-            "",
-            response.openTestUuid ?? "",
-            response.loopUuid ?? "",
-            false,
-            [],
-            [],
-            [],
-            ClassificationService.I.classify(
-                response.download,
-                THRESHOLD_DOWNLOAD,
-                "biggerBetter",
-            ),
-            ClassificationService.I.classify(
-                response.upload,
-                THRESHOLD_UPLOAD,
-                "biggerBetter",
-            ),
-            ClassificationService.I.classify(
-                response.ping * 1e6,
-                THRESHOLD_PING,
-                "smallerBetter",
-            ),
-        )
-    }
-
     static fromRTRHistoryResult(response: any) {
         const downKbit =
             (!response?.speed_download && response?.speed_download != 0) ||
@@ -136,29 +101,6 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
                 pingMs != null ? pingMs * 1e6 : null,
                 THRESHOLD_PING,
                 "smallerBetter",
-            ),
-        )
-    }
-
-    static fromONTMeasurementResult(uuid: string, response: any) {
-        return new SimpleHistoryResult(
-            response.measurement_date,
-            response.measurementServerName ?? response.measurement_server_name,
-            response.speed_download,
-            response.speed_upload,
-            response.ping ?? response.ping_median,
-            response.operator ?? response.client_provider,
-            response.ip_address,
-            uuid,
-            response.loop_uuid,
-            false,
-            CalcService.I.getOverallResultsFromSpeedItems(
-                response.speed_detail,
-                "download",
-            ),
-            CalcService.I.getOverallResultsFromSpeedItems(
-                response.speed_detail,
-                "upload",
             ),
         )
     }

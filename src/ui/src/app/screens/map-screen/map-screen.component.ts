@@ -13,14 +13,12 @@ import { MainStore } from "src/app/store/main.store"
 export class MapScreenComponent {
     mapLink$ = this.mainStore.env$.pipe(
         map((env) =>
-            env?.FLAVOR !== "ont"
-                ? this.sanitizer.bypassSecurityTrustResourceUrl(
-                      env?.FULL_MAP_URL?.replace(
-                          "$lang",
-                          this.i18n.getActiveBrowserLang()
-                      ) ?? ""
-                  )
-                : null
+            this.sanitizer.bypassSecurityTrustResourceUrl(
+                env?.FULL_MAP_URL?.replace(
+                    "$lang",
+                    this.i18n.getActiveBrowserLang()
+                ) ?? ""
+            )
         )
     )
 

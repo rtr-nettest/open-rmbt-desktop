@@ -7,11 +7,11 @@ import {
 } from "@angular/core"
 import { ActivatedRoute, Router, UrlSegment } from "@angular/router"
 import { TranslocoService } from "@ngneat/transloco"
-import { combineLatest, map } from "rxjs"
+import { combineLatest, map, of } from "rxjs"
 import { THIS_INTERRUPTS_ACTION } from "src/app/constants/strings"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
-import { CMSService } from "src/app/services/cms.service"
+import { environment } from "src/app/constants/environment"
 import { I18nService } from "src/app/services/i18n.service"
 import { MessageService } from "src/app/services/message.service"
 import { MainStore } from "src/app/store/main.store"
@@ -31,7 +31,6 @@ export class MainMenuComponent implements OnChanges {
 
     constructor(
         private activeRoute: ActivatedRoute,
-        private cmsService: CMSService,
         private i18n: I18nService,
         private testStore: TestStore,
         private mainStore: MainStore,
@@ -66,9 +65,21 @@ export class MainMenuComponent implements OnChanges {
         return item.label
     }
 
+    private getMenuItems(): IMainMenuItem[] {
+        const excludeItems = this.mainStore.env$.value?.EXCLUDE_MENU_ITEMS
+            ?.length
+            ? new Set(this.mainStore.env$.value.EXCLUDE_MENU_ITEMS)
+            : undefined
+        return excludeItems?.size
+            ? environment.menu.filter(
+                  (mi) => mi.label && !excludeItems.has(mi.label)
+              )
+            : environment.menu
+    }
+
     private buildMenu() {
         return combineLatest([
-            this.cmsService.getMenu(),
+            of(this.getMenuItems()),
             this.activeRoute.url,
             this.transloco.selectTranslation(),
             this.mainStore.env$,

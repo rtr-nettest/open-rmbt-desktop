@@ -13,14 +13,12 @@ import { MainStore } from "src/app/store/main.store"
 export class StatisticsScreenComponent {
     statisticsLink$ = this.mainStore.env$.pipe(
         map((env) =>
-            env?.FLAVOR !== "ont"
-                ? this.sanitizer.bypassSecurityTrustResourceUrl(
-                      env?.FULL_STATISTICS_URL?.replace(
-                          "$lang",
-                          this.i18n.getActiveBrowserLang()
-                      ) ?? ""
-                  )
-                : null
+            this.sanitizer.bypassSecurityTrustResourceUrl(
+                env?.FULL_STATISTICS_URL?.replace(
+                    "$lang",
+                    this.i18n.getActiveBrowserLang()
+                ) ?? ""
+            )
         )
     )
 

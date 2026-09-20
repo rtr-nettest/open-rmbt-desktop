@@ -1,22 +1,12 @@
 # Open RMBT Desktop
 
-## Requirements
-
-The project requires Node.js v18 or later.
-
 ## Simple setup
 
-Install packages by running `npm i` or `yarn install` in the root folder and in the `src/ui` folder. Rename `.env.example` file into `.env` (look into the [Configuration](#configuration) section of this document for details).
+Install packages by running `npm i` or `yarn install` in the root folder and in the `src/ui` folder. Rename `example.env` file into `.env` (look into the [Configuration](#configuration) section of this document for details).
 Language support can be updated at `src/assets/rtr/src/transloco.config.ts`.
 In case of reinstalls, use `npm install --no-package-lock`.
 
 ## Compilation and running
-
-To download translations from the Crowdin API run
-
-```sh
-$ npm run prepare:translations
-```
 
 To run a measurement from the command line use (for development purposes only)
 
@@ -42,11 +32,9 @@ The app will be placed in the `out` folder at the root of the project.
 
 ### macOS
 
-Requires macOS Ventura or later, XCode 12.2.0 or later.
-
 1. Newly create and download Distribution, Mac Installer Distribution, and Developer ID certificates from https://developer.apple.com/account/resources/certificates/list (more info at https://developer.apple.com/help/account/create-certificates/create-developer-id-certificates/), then install them in your Mac's default keychain. You may have to restart the system to apply the changes.
-2. Put the name of the installed certificates into the `.env` file as `APPLE_CODESIGN_IDENTITY`,`APPLE_INSTALLER_IDENTITY`, and `APPLE_STANDALONE_CODESIGN_IDENTITY` respectively.
-3. Create and donwload a distribution provisioning profile from https://developer.apple.com/account/resources/profiles/list and put it into the `src/assets/<FLAVOR>` folder as `RMBTDesktop_Distribution_Profile.provisionprofile`.
+2. Put the name of the installed certificates into the `.env` file as `APPLE_CODESIGN_IDENTITY` and `APPLE_INSTALLER_IDENTITY` respectively.
+3. Create and donwload a distribution provisioning profile from https://developer.apple.com/account/resources/profiles/list and put it into the `src/assets/rtr` folder as `RMBTDesktop_Distribution_Profile.provisionprofile`.
 4. Set up the `.env` file with your `APPLE_ID`, `APPLE_PASSWORD`, and `APPLE_TEAM_ID`. See https://www.electronforge.io/guides/code-signing/code-signing-macos#option-1-using-an-app-specific-password for details.
 5. Make sure that all files have `644` or `744` permissions set.
 6. Remove the `out` folder, if exists, then build the distributable with
@@ -79,7 +67,7 @@ _Note: by default macOS overwrites already installed packages, so, if you want t
 
 Requires Windows 10 or later.
 
-1. Configure, if needed, `@electron-forge/maker-squirrel` options of `src/assets/<FLAVOR>/forge.config.js`.
+1. Configure, if needed, `@electron-forge/maker-squirrel` options of `src/assets/rtr/forge.config.js`.
 2. Build the distributable with
 
 ```sh
@@ -106,13 +94,9 @@ $ npm run make:rpm
 
 Both `deb` and `rpm` packages will be placed in the `out/make` folder at the root of the project. `RPM`s built on macOS are not valid and can be discarded.
 
-## Updating
-
-To enable auto-updates from Github releases, put the `GITHUB_API_URL` and `GITHUB_TOKEN` in the `.env` file.
-
 ## Configuration
 
-The project contains a `.env.example` file. You can use it as an example to configure the variables needed to successfully run a measurement. The path to your custom `.env` file can be passed through an environment variable `RMBT_DESKTOP_DOTENV_CONFIG_PATH`. Otherwise the client will read the variables from a `.env` file in the root of the project, if such exists.
+The project contains an `example.env` file. You can use it as an example to configure the variables needed to successfully run a measurement. The path to your custom `.env` file can be passed through an environment variable `RMBT_DESKTOP_DOTENV_CONFIG_PATH`. Otherwise the client will read the variables from a `.env` file in the root of the project, if such exists.
 
 ### Required variables
 
@@ -128,7 +112,6 @@ The project contains a `.env.example` file. You can use it as an example to conf
 | `FULL_STATISTICS_URL`          | A full URL of a webpage to be shown in an iframe on the Statistics screen.                                                           |
 | `FULL_MAP_URL`                 | A full URL of a webpage to be shown in an iframe on the Map screen.                                                                  |
 | `OPEN_HISTORY_RESUlT_URL`      | A full URL, without ` open_test_uuid`, of a webpage, which contains an open measurement result for sharing.                          |
-| `FLAVOR`                       | `rtr` or `ont`, determines the type of UI used for the Electron app. Defaults to ` rtr` if not set.                                  |
 | `ASSETS_FOLDER`                | A path to a folder that contains flavor specific files, such as icons and styles.                                                    |
 
 ### Optional variables
@@ -146,20 +129,14 @@ The project contains a `.env.example` file. You can use it as an example to conf
 | `CMS_URL`                            | A CMS instance to use for the `ont` flavor.                                                                                                                                                                                                        |
 | `ALLOWED_INACTIVITY_MS`              | Configures a period of inactivity allowed, in milliseconds, before the measurement is terminated. Default is 10 seconds.                                                                                                                           |
 | `ENABLE_LOOP_MODE`                   | If set to `true` will enable rudimentary loop mode (cururently supported only by the electron GUI).                                                                                                                                                |
-| `CROWDIN_PROJECT_URL`                | The translations' project in Crowdin. See `.env.example` on how to use. The avaialable languages can be configured in `src/assets/<FLAVOR>/src/transloco.config.ts`. The matching translation files should be present in `src/ui/src/assets/i18n`. |
-| `CROWDIN_API_TOKEN`                  | More information at https://crowdin.com/project/open-rmbt-desktop/tools/api.                                                                                                                                                                       |
-| `CROWDIN_UPDATE_AT_RUNTIME`          | If set to true, will try to download translations via the Crowdin API when user launches the app.                                                                                                                                                  |
 | `NEWS_PATH`                          | A control server endpoint starting with `/` which returns a list of news available for the platform.                                                                                                                                               |
 | `ENABLE_LANGUAGE_SWITCH`             | If set to true, will allow changing the app language from the settings.                                                                                                                                                                            |
 | `APPLE_CODESIGN_IDENTITY`            | The name of the Distribution Certificate installed in your default Keychain.                                                                                                                                                                       |
 | `APPLE_INSTALLER_IDENTITY`           | The name of the Mac Installer Distribution Certificate installed in your default Keychain.                                                                                                                                                         |
-| `APPLE_STANDALONE_CODESIGN_IDENTITY` | The name of the Developer ID Certificate installed in your default Keychain. It is used in the same way as `APPLE_CODESIGN_IDENTITY` but for standalone distribution as `\*.dmg` files (not via App Store).                                        |
 | `APPLE_ID`                           | Apple ID associated with your Apple Developer account.                                                                                                                                                                                             |
 | `APPLE_PASSWORD`                     | App-specific password. See https://support.apple.com/en-us/HT204397 for details.                                                                                                                                                                   |
 | `APPLE_TEAM_ID`                      | The Apple Team ID you want to notarize under. You can find Team IDs for team you belong to by going to https://developer.apple.com/account/#/membership.                                                                                           |
 | `WINDOWS_CERT_PATH`                  | Full path to your certificate.pfx                                                                                                                                                                                                                  |
-| `GITHUB_API_URL`                     | https://api.github.com/repos/<account>/<repo>, is used to check for new releases.                                                                                                                                                                  |
-| `GITHUB_TOKEN`                       | Github API token. Is not required for public repos.                                                                                                                                                                                                |
 | `LOOP_MODE_MIN_INTERVAL`             | Minimal allowed interval between tests in the loop mode, in minutes.                                                                                                                                                                               |
 | `LOOP_MODE_MAX_INTERVAL`             | Maximal allowed interval between tests in the loop mode, in minutes.                                                                                                                                                                               |
 | `LOOP_MODE_DEFAULT_INTERVAL`         | Interval between tests in the loop mode, in minutes, suggested by default.                                                                                                                                                                         |

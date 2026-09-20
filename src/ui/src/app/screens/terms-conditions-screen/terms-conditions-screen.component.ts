@@ -1,7 +1,6 @@
 import { Component, OnInit } from "@angular/core"
 import { Router } from "@angular/router"
-import { of, switchMap, withLatestFrom } from "rxjs"
-import { CMSService } from "src/app/services/cms.service"
+import { map } from "rxjs"
 import { MainStore } from "src/app/store/main.store"
 
 @Component({
@@ -12,10 +11,9 @@ import { MainStore } from "src/app/store/main.store"
 })
 export class TermsConditionsScreenComponent implements OnInit {
     terms$ = this.mainStore.settings$.pipe(
-        withLatestFrom(this.mainStore.env$),
-        switchMap(([settings, env]) => {
+        map((settings) => {
             this.termsText = settings?.termsText || ""
-            return env?.FLAVOR === "ont" ? this.cms.getTerms() : of(null)
+            return null
         })
     )
     isRead = false
@@ -23,7 +21,6 @@ export class TermsConditionsScreenComponent implements OnInit {
 
     constructor(
         private router: Router,
-        private cms: CMSService,
         private mainStore: MainStore
     ) {}
 
@@ -58,8 +55,6 @@ export class TermsConditionsScreenComponent implements OnInit {
         if (this.mainStore.settings$.value?.terms_and_conditions.version) {
             termsVersion =
                 this.mainStore.settings$.value.terms_and_conditions.version
-        } else if (this.mainStore.terms$.value?.version) {
-            termsVersion = this.mainStore.terms$.value.version
         }
         window.electronAPI.acceptTerms(termsVersion)
         this.router.navigateByUrl("/")

@@ -20,18 +20,17 @@ export class Logger {
 
     /**
      * Per-user writable directory for log files (the OS "app data" location).
-     * Uses Electron's userData path in the main process; worker threads (where
-     * `electron` is unavailable) fall back to RMBT_LOG_DIR exported by the main
-     * process, then to a platform-specific app-data path. Never uses the current
-     * working directory, which is unwritable ("/") for a launched .app bundle.
+     * The main process exports its Electron userData path as RMBT_LOG_DIR
+     * (see electron.ts), which worker threads inherit; otherwise we derive the
+     * same platform-specific app-data path. This module must NOT `require`
+     * "electron": it is bundled into the Node-target worker, where requiring the
+     * electron npm package pulls in its shim (which self-spawns to "download
+     * Electron") and, with process.execPath being the app binary, fork-bombs the
+     * app. Never uses the current working directory, which is unwritable ("/")
+     * for a launched .app bundle.
      */
     private static get logDir() {
-        let base: string | undefined
-        try {
-            const { app } = require("electron")
-            base = app?.getPath?.("userData")
-        } catch {}
-        if (!base) base = process.env.RMBT_LOG_DIR
+        let base: string | undefined = process.env.RMBT_LOG_DIR
         if (!base) {
             const pack = require("../../../package.json")
             const name = pack.productName || pack.name || "open-rmbt-desktop"

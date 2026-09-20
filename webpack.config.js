@@ -39,6 +39,13 @@ const baseConfig = {
     node: {
         __dirname: false,
     },
+    // Never bundle the "electron" npm package. It is provided by the runtime in
+    // the main/preload processes; bundling its shim (index.js) into the
+    // Node-target worker is catastrophic — the shim self-spawns process.execPath
+    // to "download Electron", which relaunches the packaged app in a fork bomb.
+    externals: {
+        electron: "commonjs2 electron",
+    },
     module: {
         noParse: /sql.js/,
         rules: [
@@ -79,14 +86,21 @@ const baseConfig = {
                     from: "src/measurement/rust_client",
                     to: "rust_client",
                 },
-                {
-                    // Native C measurement client binary (no Windows build).
-                    // Populated per-platform in CI; may be empty locally, so
-                    // tolerate a missing/empty directory.
-                    from: "src/measurement/c_client",
-                    to: "c_client",
-                    noErrorOnMissing: true,
-                },
+                // Native C measurement client binary (no Windows build).
+                // Excluded on macOS: the published macOS C binary is dynamically
+                // linked against Homebrew libcurl/openssl (absolute /opt/homebrew
+                // paths), so it can't run on end-user Macs — Rust/JS are used
+                // there instead. Populated per-platform in CI; may be empty
+                // locally, so tolerate a missing/empty directory.
+                ...(process.platform === "darwin"
+                    ? []
+                    : [
+                          {
+                              from: "src/measurement/c_client",
+                              to: "c_client",
+                              noErrorOnMissing: true,
+                          },
+                      ]),
             ],
         }),
         new MakeNativeClientsExecutablePlugin(),

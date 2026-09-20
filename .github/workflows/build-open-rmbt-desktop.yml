@@ -97,12 +97,9 @@ jobs:
                   curl -fsSL -o rust-client.zip "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/${RUST_CLIENT_VERSION}/rmbt-client-rust-macos-arm64.zip"
                   unzip -o rust-client.zip -d src/measurement/rust_client
                   chmod +x src/measurement/rust_client/rmbt-client
-            - name: Download C measurement client (macos-arm64)
-              run: |
-                  mkdir -p src/measurement/c_client
-                  curl -fsSL -o c-client.zip "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/${RUST_CLIENT_VERSION}/rmbt-client-c-macos-arm64.zip"
-                  unzip -o c-client.zip -d src/measurement/c_client
-                  chmod +x src/measurement/c_client/rmbt-client
+            # The C client is intentionally NOT bundled on macOS: its published
+            # macOS binary is dynamically linked against Homebrew libcurl/openssl
+            # and cannot run on end-user Macs. Rust (default) / JS are used there.
             - name: Build
               run: |
                   npm install

@@ -80,6 +80,8 @@ jobs:
         runs-on: macos-latest
         steps:
             - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # Fetch all history and tags (version from git tag)
             - name: Get .env
               env:
                   REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
@@ -118,6 +120,8 @@ jobs:
         runs-on: windows-latest
         steps:
             - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # Fetch all history and tags (version from git tag)
             - name: Get .env
               shell: cmd
               env:

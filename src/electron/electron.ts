@@ -211,4 +211,3 @@ ipcMain.handle(Events.GET_SERVERS, async (event) => {
 ipcMain.on(Events.OPEN_PDF, (_, url) => WindowManager.I.openPdf(url))
 
 app.whenReady().then(() => WindowManager.I.createWindow())
-app.disableHardwareAcceleration()

@@ -57,6 +57,12 @@ jobs:
                   curl -fsSL -o c-client.zip "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/${RUST_CLIENT_VERSION}/rmbt-client-c-linux-x64.zip"
                   unzip -o c-client.zip -d src/measurement/c_client
                   chmod +x src/measurement/c_client/rmbt-client
+            - name: Download Java measurement client (linux-x64, bundled JRE)
+              run: |
+                  mkdir -p src/measurement/java_client
+                  curl -fsSL -o java-client.zip "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/${RUST_CLIENT_VERSION}/rmbt-client-java-linux-x64.zip"
+                  unzip -o java-client.zip -d src/measurement/java_client
+                  chmod -R +x src/measurement/java_client/bin || true
             - name: Build
               run: |
                   sudo apt-get install -y rpm
@@ -97,6 +103,12 @@ jobs:
                   curl -fsSL -o rust-client.zip "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/${RUST_CLIENT_VERSION}/rmbt-client-rust-macos-arm64.zip"
                   unzip -o rust-client.zip -d src/measurement/rust_client
                   chmod +x src/measurement/rust_client/rmbt-client
+            - name: Download Java measurement client (macos-arm64, bundled JRE)
+              run: |
+                  mkdir -p src/measurement/java_client
+                  curl -fsSL -o java-client.zip "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/${RUST_CLIENT_VERSION}/rmbt-client-java-macos-arm64.zip"
+                  unzip -o java-client.zip -d src/measurement/java_client
+                  chmod +x "src/measurement/java_client/rmbt-client.app/Contents/MacOS/rmbt-client" || true
             # The C client is intentionally NOT bundled on macOS: its published
             # macOS binary is dynamically linked against Homebrew libcurl/openssl
             # and cannot run on end-user Macs. Rust (default) / JS are used there.
@@ -135,6 +147,12 @@ jobs:
                   New-Item -ItemType Directory -Force src/measurement/rust_client | Out-Null
                   Invoke-WebRequest -Uri "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/$env:RUST_CLIENT_VERSION/rmbt-client-rust-windows-x64.zip" -OutFile rust-client.zip
                   Expand-Archive -Path rust-client.zip -DestinationPath src/measurement/rust_client -Force
+            - name: Download Java measurement client (windows-x64, bundled JRE)
+              shell: pwsh
+              run: |
+                  New-Item -ItemType Directory -Force src/measurement/java_client | Out-Null
+                  Invoke-WebRequest -Uri "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/$env:RUST_CLIENT_VERSION/rmbt-client-java-windows-x64.zip" -OutFile java-client.zip
+                  Expand-Archive -Path java-client.zip -DestinationPath src/measurement/java_client -Force
             - name: Build
               run: |
                   npm install

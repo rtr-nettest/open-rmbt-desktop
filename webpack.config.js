@@ -4,10 +4,37 @@ const Dotenv = require("dotenv-webpack")
 const CopyPlugin = require("copy-webpack-plugin")
 
 // copy-webpack-plugin emits copied files with default (non-executable) mode, so
-// the bundled native measurement clients (rust_client/c_client) lose their +x
-// bit and can't be spawned from the packaged app. Restore it after emit so the
-// binaries are executable in dist/ before electron-forge packages (and signs)
-// them; otherwise engine detection falls back to the JavaScript engine.
+// the bundled measurement clients lose their +x bit and can't be spawned from
+// the packaged app. Restore it after emit so they are executable in dist/ before
+// electron-forge packages (and signs) them; otherwise engine detection falls
+// back to the JavaScript engine.
+//   - rust_client / c_client: a single `rmbt-client` binary.
+//   - java_client: a jpackage app-image bundling a whole JRE, i.e. many
+//     executables (launcher, runtime bin/*, jspawnhelper). We can't know which
+//     files were executable after the copy, so we restore +x on the entire tree
+//     (marking a data file executable is harmless).
+function chmodExecFile(file, compilation) {
+    try {
+        if (fs.existsSync(file)) fs.chmodSync(file, 0o755)
+    } catch (e) {
+        compilation.warnings.push(new Error(`Could not chmod +x ${file}: ${e.message}`))
+    }
+}
+
+function chmodTreeExec(dir, compilation) {
+    let entries
+    try {
+        entries = fs.readdirSync(dir, { withFileTypes: true })
+    } catch {
+        return
+    }
+    for (const entry of entries) {
+        const full = path.join(dir, entry.name)
+        if (entry.isDirectory()) chmodTreeExec(full, compilation)
+        else if (entry.isFile()) chmodExecFile(full, compilation)
+    }
+}
+
 class MakeNativeClientsExecutablePlugin {
     apply(compiler) {
         compiler.hooks.afterEmit.tap(
@@ -19,17 +46,10 @@ class MakeNativeClientsExecutablePlugin {
                         ? "rmbt-client.exe"
                         : "rmbt-client"
                 for (const sub of ["rust_client", "c_client"]) {
-                    const bin = path.join(outDir, sub, exe)
-                    try {
-                        if (fs.existsSync(bin)) fs.chmodSync(bin, 0o755)
-                    } catch (e) {
-                        compilation.warnings.push(
-                            new Error(
-                                `Could not chmod +x ${bin}: ${e.message}`
-                            )
-                        )
-                    }
+                    chmodExecFile(path.join(outDir, sub, exe), compilation)
                 }
+                const javaDir = path.join(outDir, "java_client")
+                if (fs.existsSync(javaDir)) chmodTreeExec(javaDir, compilation)
             }
         )
     }
@@ -101,6 +121,16 @@ const baseConfig = {
                               noErrorOnMissing: true,
                           },
                       ]),
+                {
+                    // Bundled Java measurement client: a jpackage app-image with
+                    // its own JRE. Published only for some platforms (macOS/arm64,
+                    // Windows/x64, Linux/x64) and populated per-platform in CI, so
+                    // tolerate a missing/empty directory. Its executables' +x bit
+                    // is restored by MakeNativeClientsExecutablePlugin.
+                    from: "src/measurement/java_client",
+                    to: "java_client",
+                    noErrorOnMissing: true,
+                },
             ],
         }),
         new MakeNativeClientsExecutablePlugin(),

@@ -30,6 +30,7 @@ import { BrowserWindow } from "electron"
 import { MeasurementOptions } from "./interfaces/measurement-options.interface"
 import { RMBTRustClient } from "./services/rmbt-rust-client.service"
 import { RMBTCClient } from "./services/rmbt-c-client.service"
+import { RMBTJavaClient } from "./services/rmbt-java-client.service"
 import { IRMBTClient } from "./interfaces/rmbt-client.interface"
 import { IMeasurementThreadResult } from "./interfaces/measurement-result.interface"
 
@@ -248,6 +249,15 @@ export class MeasurementRunner {
             } else {
                 Logger.I.warn(
                     "C measurement engine unavailable — falling back to the JavaScript engine",
+                )
+            }
+        } else if (engine === "java") {
+            if (RMBTJavaClient.isAvailable()) {
+                Logger.I.info("Using Java measurement engine (bundled JRE)")
+                nativeClient = new RMBTJavaClient()
+            } else {
+                Logger.I.warn(
+                    "Java measurement engine unavailable — falling back to the JavaScript engine",
                 )
             }
         } else if (engine !== "node" && engine !== "js") {

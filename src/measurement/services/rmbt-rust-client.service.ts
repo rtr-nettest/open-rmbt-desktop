@@ -39,6 +39,15 @@ export class RMBTRustClient implements IRMBTClient {
     }
 
     /**
+     * Path to the executable this instance spawns. Overridable so subclasses
+     * with a different on-disk layout (e.g. the Java jpackage app-image) can
+     * point elsewhere while reusing the rest of the spawn/parse logic.
+     */
+    protected getBinaryPath(): string {
+        return RMBTRustClient.binaryPath(this.clientDir)
+    }
+
+    /**
      * Whether the native client in `dir` can actually run on this machine.
      * Returns false if the binary for this platform/architecture is not bundled
      * or fails to execute (e.g. wrong arch / missing libs / no build for this OS)
@@ -222,7 +231,7 @@ export class RMBTRustClient implements IRMBTClient {
 
             // Native client binary (no Java runtime). Availability is pre-checked
             // in MeasurementRunner.setRMBTClient (with JS fallback).
-            const binary_path = RMBTRustClient.binaryPath(this.clientDir)
+            const binary_path = this.getBinaryPath()
 
             let bin_options = [
                 "-h",

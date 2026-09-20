@@ -21,6 +21,7 @@ export class SettingsEngineComponent implements IDynamicComponent {
     private allEngines = [
         { id: "rust", name: "Rust (native)" },
         { id: "c", name: "C (native)" },
+        { id: "java", name: "Java (bundled)" },
         { id: "node", name: "JavaScript (NodeJS)" },
     ]
 

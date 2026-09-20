@@ -6,7 +6,7 @@ on:
 # Version of the native Rust measurement client (open-rmbt-client-cli release)
 # bundled into the app. Downloaded per-platform via the public release URL.
 env:
-    RUST_CLIENT_VERSION: v2.3.2
+    RUST_CLIENT_VERSION: v2.3.3
 
 jobs:
     test:
@@ -19,7 +19,7 @@ jobs:
               env:
                   REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
               run: |
-                  curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.jj2
+                  curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/prod.env
             - name: Use Node.js
               uses: actions/setup-node@v4
               with:
@@ -40,7 +40,7 @@ jobs:
               env:
                   REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
               run: |
-                  curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.jj2
+                  curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/prod.env
             - name: Use Node.js
               uses: actions/setup-node@v4
               with:
@@ -92,7 +92,7 @@ jobs:
               env:
                   REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
               run: |
-                  curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.jj2
+                  curl -H "Authorization: token $REPO_TOKEN" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/prod.env
             - name: Use Node.js
               uses: actions/setup-node@v4
               with:
@@ -136,7 +136,7 @@ jobs:
               env:
                   REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
               run: |
-                  curl -H "Authorization: token %REPO_TOKEN%" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.jj2
+                  curl -H "Authorization: token %REPO_TOKEN%" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/prod.env
             - name: Use Node.js
               uses: actions/setup-node@v4
               with:
@@ -181,7 +181,7 @@ jobs:
               env:
                   REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
               run: |
-                  curl -H "Authorization: token %REPO_TOKEN%" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/.env.jj2
+                  curl -H "Authorization: token %REPO_TOKEN%" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/prod.env
             - name: Use Node.js
               uses: actions/setup-node@v4
               with:
@@ -192,6 +192,12 @@ jobs:
                   New-Item -ItemType Directory -Force src/measurement/rust_client | Out-Null
                   Invoke-WebRequest -Uri "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/$env:RUST_CLIENT_VERSION/rmbt-client-rust-windows-arm64.zip" -OutFile rust-client.zip
                   Expand-Archive -Path rust-client.zip -DestinationPath src/measurement/rust_client -Force
+            - name: Download Java measurement client (windows-arm64, bundled JRE)
+              shell: pwsh
+              run: |
+                  New-Item -ItemType Directory -Force src/measurement/java_client | Out-Null
+                  Invoke-WebRequest -Uri "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/$env:RUST_CLIENT_VERSION/rmbt-client-java-windows-arm64.zip" -OutFile java-client.zip
+                  Expand-Archive -Path java-client.zip -DestinationPath src/measurement/java_client -Force
             - name: Build
               run: |
                   npm install

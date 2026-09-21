@@ -4,6 +4,34 @@ const packJson = require("../../../package.json")
 const yargs = require("yargs")
 const argv = yargs.option("nosign").argv
 
+// Apple notarization needs an app-specific password. It is intentionally NOT
+// kept in prod.env / the .env file (that file is fetched from a repo and read
+// by the running client; a live Apple credential should not live there). Supply
+// it through the process ENVIRONMENT only, at the moment you build a signed
+// macOS build:
+//
+//   export APPLE_PASSWORD='xxxx-xxxx-xxxx-xxxx'   # app-specific password from
+//                                                 # https://appleid.apple.com
+//   npm run make:macos
+//
+// In CI it would be a GitHub Actions secret (secrets.APPLE_PASSWORD) exported as
+// an env var for the signing step — but note the CI workflow does NOT sign or
+// notarize (it never sets MACOS=true), so it does not need this at all. This
+// throws a clear error only when a signed build is actually requested without it.
+function requireApplePassword() {
+    const pw = process.env.APPLE_PASSWORD
+    if (!pw) {
+        throw new Error(
+            "APPLE_PASSWORD is not set. Notarization needs an Apple " +
+                "app-specific password provided via the environment, e.g. " +
+                "`export APPLE_PASSWORD=xxxx-xxxx-xxxx-xxxx` before " +
+                "`npm run make:macos`. It is deliberately not stored in " +
+                "prod.env/.env. Use `--nosign` to build without signing.",
+        )
+    }
+    return pw
+}
+
 module.exports = {
     hooks: {
         postPackage: async (_, options) => {
@@ -48,7 +76,8 @@ module.exports = {
                   osxNotarize: {
                       tool: "notarytool",
                       appleId: process.env.APPLE_ID,
-                      appleIdPassword: process.env.APPLE_PASSWORD,
+                      // From the environment, never prod.env — see requireApplePassword above.
+                      appleIdPassword: requireApplePassword(),
                       teamId: process.env.APPLE_TEAM_ID,
                   },
               }),

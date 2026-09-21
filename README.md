@@ -35,7 +35,14 @@ The app will be placed in the `out` folder at the root of the project.
 1. Newly create and download Distribution, Mac Installer Distribution, and Developer ID certificates from https://developer.apple.com/account/resources/certificates/list (more info at https://developer.apple.com/help/account/create-certificates/create-developer-id-certificates/), then install them in your Mac's default keychain. You may have to restart the system to apply the changes.
 2. Put the name of the installed certificates into the `.env` file as `APPLE_CODESIGN_IDENTITY` and `APPLE_INSTALLER_IDENTITY` respectively.
 3. Create and donwload a distribution provisioning profile from https://developer.apple.com/account/resources/profiles/list and put it into the `src/assets/rtr` folder as `RMBTDesktop_Distribution_Profile.provisionprofile`.
-4. Set up the `.env` file with your `APPLE_ID`, `APPLE_PASSWORD`, and `APPLE_TEAM_ID`. See https://www.electronforge.io/guides/code-signing/code-signing-macos#option-1-using-an-app-specific-password for details.
+4. Set up the `.env` file with your `APPLE_ID` and `APPLE_TEAM_ID`. Provide the Apple **app-specific password** through the shell environment (not the `.env`/`prod.env` file), only when building a signed macOS build:
+
+    ```sh
+    export APPLE_PASSWORD='xxxx-xxxx-xxxx-xxxx'
+    npm run make:macos
+    ```
+
+    Generate the app-specific password at https://appleid.apple.com. In CI it would be provided as a GitHub Actions secret (`secrets.APPLE_PASSWORD`); note the CI workflow does not sign or notarize, so it never needs it. See https://www.electronforge.io/guides/code-signing/code-signing-macos#option-1-using-an-app-specific-password for details.
 5. Make sure that all files have `644` or `744` permissions set.
 6. Remove the `out` folder, if exists, then build the distributable with
 
@@ -134,7 +141,7 @@ The project contains an `example.env` file. You can use it as an example to conf
 | `APPLE_CODESIGN_IDENTITY`            | The name of the Distribution Certificate installed in your default Keychain.                                                                                                                                                                       |
 | `APPLE_INSTALLER_IDENTITY`           | The name of the Mac Installer Distribution Certificate installed in your default Keychain.                                                                                                                                                         |
 | `APPLE_ID`                           | Apple ID associated with your Apple Developer account.                                                                                                                                                                                             |
-| `APPLE_PASSWORD`                     | App-specific password. See https://support.apple.com/en-us/HT204397 for details.                                                                                                                                                                   |
+| `APPLE_PASSWORD`                     | App-specific password, used only for macOS notarization (`make:macos`). **Provide via the shell environment / CI secret, not the `.env`/`prod.env` file.** See https://support.apple.com/en-us/HT204397 for details.                                |
 | `APPLE_TEAM_ID`                      | The Apple Team ID you want to notarize under. You can find Team IDs for team you belong to by going to https://developer.apple.com/account/#/membership.                                                                                           |
 | `WINDOWS_CERT_PATH`                  | Full path to your certificate.pfx                                                                                                                                                                                                                  |
 | `LOOP_MODE_MIN_INTERVAL`             | Minimal allowed interval between tests in the loop mode, in minutes.                                                                                                                                                                               |

@@ -24,6 +24,8 @@ import { SettingsLocalDataComponent } from "src/app/widgets/settings-local-data/
 import { Router } from "@angular/router"
 import { SettingsCommitComponent } from "src/app/widgets/settings-commit/settings-commit.component"
 import { SettingsEngineComponent } from "src/app/widgets/settings-engine/settings-engine.component"
+import { SettingsServerComponent } from "src/app/widgets/settings-server/settings-server.component"
+import { SettingsLogComponent } from "src/app/widgets/settings-log/settings-log.component"
 
 export interface ISettingsRow {
     title: string
@@ -103,6 +105,23 @@ export class SettingsScreenComponent
                 content.push({
                     title: t["Language"],
                     component: SettingsLocaleComponent,
+                })
+            }
+            // Advanced: pick a specific test server (ports the website's "Test
+            // server" option). Hidden unless --debug is set or a non-default
+            // server is already selected (computed in the main process).
+            if (env?.SHOW_SERVER_SELECTION) {
+                content.push({
+                    title: t["Test server"] || "Test server",
+                    component: SettingsServerComponent,
+                })
+            }
+            // Shown only when file logging is enabled: the folder logs are
+            // written to (LOG_PATH is empty otherwise; computed in get-env.ts).
+            if (env?.LOG_PATH) {
+                content.push({
+                    title: t["Log file"] || "Log file",
+                    component: SettingsLogComponent,
                 })
             }
             content.push({

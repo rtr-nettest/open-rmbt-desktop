@@ -1,0 +1,13 @@
+@if (vm$ | async; as vm) {
+    <mat-radio-group
+        class="app-server-group"
+        [ngModel]="vm.selected"
+        (ngModelChange)="change($event)"
+    >
+        @for (server of vm.options; track server.id) {
+            <mat-radio-button class="app-server-option" [value]="server.id">
+                {{ server.name }}
+            </mat-radio-button>
+        }
+    </mat-radio-group>
+}

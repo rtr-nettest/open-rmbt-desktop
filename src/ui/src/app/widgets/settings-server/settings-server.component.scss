@@ -1,0 +1,11 @@
+@import "../../../assets/styles/core.scss";
+
+.app-server-group {
+    display: flex;
+    flex-direction: column;
+    gap: rem(8);
+}
+
+.app-server-option {
+    font-size: rem(14);
+}

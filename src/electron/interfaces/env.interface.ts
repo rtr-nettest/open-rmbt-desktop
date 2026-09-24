@@ -9,6 +9,9 @@ export interface IEnv {
     ENABLE_HOME_SCREEN_JITTER_BOX: boolean
     ENABLE_LANGUAGE_SWITCH: string
     ENABLE_LOOP_MODE: string
+    DEBUG: boolean
+    SHOW_SERVER_SELECTION: boolean
+    LOG_PATH: string
     EXCLUDE_MENU_ITEMS: string[] | undefined
     FULL_HISTORY_RESULT_URL: string | undefined
     FULL_STATISTICS_URL: string | undefined

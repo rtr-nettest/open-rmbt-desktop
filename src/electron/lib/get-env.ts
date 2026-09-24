@@ -8,7 +8,9 @@ import {
 } from "../../measurement/services/store.service"
 import { TERMS_ACCEPTED_VERSION } from "../../measurement/services/store.service"
 import { ACTIVE_CLIENT } from "../../measurement/services/store.service"
+import { ACTIVE_SERVER } from "../../measurement/services/store.service"
 import { app } from "electron"
+import path from "path"
 import pack from "../../../package.json"
 import { IUserSettings } from "../../measurement/interfaces/user-settings-response.interface"
 import { availableEngines, defaultEngine } from "./engine-availability"
@@ -27,6 +29,28 @@ export const getEnv = () => {
         measurementEngine = defaultEngine()
         Store.I.set(MEASUREMENT_ENGINE, measurementEngine)
     }
+
+    // Test-server selection is normally hidden. Show it in debug mode (the
+    // `--debug` CLI switch, see electron.ts) or whenever a non-default server is
+    // already selected — ACTIVE_SERVER is set only for a non-default choice — so
+    // an existing selection stays visible and reversible without the flag.
+    const debug = process.env.CLI_DEBUG === "true"
+    const showServerSelection = debug || !!Store.I.get(ACTIVE_SERVER)
+
+    // When file logging is on — via .env (LOG_TO_FILE) or the `--file-log`
+    // switch (CLI_LOG_TO_FILE) — expose the destination folder so the settings
+    // screen can tell the user where the logs are written. Must match the
+    // directory Logger uses: RMBT_LOG_DIR (the Electron userData path, set in
+    // electron.ts) + "log". Empty string means file logging is off.
+    const fileLoggingEnabled =
+        process.env.LOG_TO_FILE === "true" ||
+        process.env.CLI_LOG_TO_FILE === "true"
+    const logPath = fileLoggingEnabled
+        ? path.join(
+              process.env.RMBT_LOG_DIR || app.getPath("userData"),
+              "log",
+          )
+        : ""
     return {
         ACTIVE_LANGUAGE: I18nService.I.getActiveLanguage(),
         APP_VERSION: pack.version,
@@ -44,6 +68,9 @@ export const getEnv = () => {
         ENABLE_HOME_SCREEN_JITTER_BOX:
             process.env.ENABLE_HOME_SCREEN_JITTER_BOX === "true",
         ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",
+        DEBUG: debug,
+        SHOW_SERVER_SELECTION: showServerSelection,
+        LOG_PATH: logPath,
         EXCLUDE_MENU_ITEMS: process.env.EXCLUDE_MENU_ITEMS
             ? process.env.EXCLUDE_MENU_ITEMS.split(",")
             : undefined,

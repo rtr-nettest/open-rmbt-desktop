@@ -11,6 +11,7 @@ if (require("electron-squirrel-startup")) app.quit()
 // consulted by Logger / ControlServer. Must run before any Logger.init() or
 // control-server call.
 //
+//   --debug          reveal debug-only UI (e.g. test-server selection)
 //   --file-log       force file logging    -> <userData>/log/*.log
 //   --console-log    force console logging  -> stdout
 //   --host <host>    custom control server for this launch; accepts a bare
@@ -21,6 +22,7 @@ if (require("electron-squirrel-startup")) app.quit()
 //                    "--host=<host>" form, are both rejected as errors.
 {
     const argv = process.argv.slice(1)
+    if (argv.includes("--debug")) process.env.CLI_DEBUG = "true"
     if (argv.includes("--file-log")) process.env.CLI_LOG_TO_FILE = "true"
     if (argv.includes("--console-log")) process.env.CLI_LOG_TO_CONSOLE = "true"
 

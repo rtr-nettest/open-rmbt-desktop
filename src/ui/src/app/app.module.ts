@@ -133,6 +133,8 @@ import { CertifiedEnvFormComponent } from "./widgets/certified-env-form/certifie
 import { CertifiedResultScreenComponent } from "./screens/certified-result-screen/certified-result-screen.component"
 import { SettingsCommitComponent } from "./widgets/settings-commit/settings-commit.component"
 import { SettingsEngineComponent } from "./widgets/settings-engine/settings-engine.component"
+import { SettingsServerComponent } from "./widgets/settings-server/settings-server.component"
+import { SettingsLogComponent } from "./widgets/settings-log/settings-log.component"
 import { patchToLocaleString } from "./helpers/number"
 
 Chart.register(
@@ -263,6 +265,8 @@ declare global {
         CertifiedResultScreenComponent,
         SettingsCommitComponent,
         SettingsEngineComponent,
+        SettingsServerComponent,
+        SettingsLogComponent,
     ],
     bootstrap: [AppComponent],
     imports: [

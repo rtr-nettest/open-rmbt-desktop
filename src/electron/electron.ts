@@ -1,5 +1,56 @@
 import { app, BrowserWindow, ipcMain, protocol } from "electron"
 if (require("electron-squirrel-startup")) app.quit()
+
+// --- Runtime CLI switches ----------------------------------------------------
+// These override build-time .env values for a single launch, so a packaged
+// end-user build can be reconfigured from the command line without a rebuild.
+// dotenv-webpack INLINES every `process.env.X` whose key is in .env (e.g.
+// LOG_TO_FILE, CONTROL_SERVER_URL) at build time, so setting those at runtime
+// has no effect. Each switch below therefore maps to a var that is NOT in .env
+// and thus stays a genuine runtime lookup (CLI_LOG_*, CONTROL_SERVER_OVERRIDE),
+// consulted by Logger / ControlServer. Must run before any Logger.init() or
+// control-server call.
+//
+//   --file-log       force file logging    -> <userData>/log/*.log
+//   --console-log    force console logging  -> stdout
+//   --host <host>    custom control server for this launch; accepts a bare
+//                    host ("c01.netztest.at", assumed https) or a full URL
+//                    ("https://c01.netztest.at"). Only the space-separated form
+//                    "--host <host>" is valid: the value is a separate,
+//                    mandatory token. "--host" with no value, and the joined
+//                    "--host=<host>" form, are both rejected as errors.
+{
+    const argv = process.argv.slice(1)
+    if (argv.includes("--file-log")) process.env.CLI_LOG_TO_FILE = "true"
+    if (argv.includes("--console-log")) process.env.CLI_LOG_TO_CONSOLE = "true"
+
+    const fail = (msg: string) => {
+        console.error(msg)
+        app.exit(1)
+    }
+
+    // "--host=<host>" is not accepted — "=" is not a valid separator here.
+    const joined = argv.find((a) => a.startsWith("--host="))
+    if (joined) {
+        fail(
+            `Error: invalid argument "${joined}". Use a space: --host c01.netztest.at`,
+        )
+    }
+
+    // "--host <host>": the value is the next token and is mandatory (it must be
+    // present and not another flag).
+    const hostIdx = argv.indexOf("--host")
+    if (hostIdx >= 0) {
+        const host = argv[hostIdx + 1]?.trim()
+        if (!host || host.startsWith("-")) {
+            fail("Error: --host requires a value, e.g. --host c01.netztest.at")
+        } else {
+            const url = /^https?:\/\//i.test(host) ? host : `https://${host}`
+            process.env.CONTROL_SERVER_OVERRIDE = url.replace(/\/+$/, "")
+        }
+    }
+}
+
 // Expose the OS app-data dir so worker threads (no `electron` module) write log
 // files to the same location as the main process.
 process.env.RMBT_LOG_DIR = app.getPath("userData")

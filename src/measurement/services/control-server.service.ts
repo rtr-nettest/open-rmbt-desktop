@@ -52,6 +52,20 @@ export class ControlServer {
         return this.instance
     }
 
+    /**
+     * Effective control-server base URL. Prefers the runtime `--host` override
+     * (CONTROL_SERVER_OVERRIDE, set in electron.ts) over the build-time
+     * CONTROL_SERVER_URL — the latter is inlined by dotenv-webpack and so can't
+     * be changed at runtime, which is why the override is a separate key. Both
+     * are absolute `https://…` URLs without a trailing slash.
+     */
+    static get baseUrl(): string {
+        return (
+            process.env.CONTROL_SERVER_OVERRIDE ||
+            process.env.CONTROL_SERVER_URL!
+        )
+    }
+
     private constructor() {}
 
     private get settings() {
@@ -65,7 +79,7 @@ export class ControlServer {
         const ipv6Host = settings.urls.control_ipv6_only
         const ipv4Host = settings.urls.control_ipv4_only
         let resolved: string | undefined
-        let retVal = process.env.CONTROL_SERVER_URL!
+        let retVal = ControlServer.baseUrl
         if (ipv6Host && ipv === EIPVersion.v6) {
             resolved = (
                 await NetworkInfoService.I.getIpV6Info(
@@ -129,7 +143,7 @@ export class ControlServer {
         try {
             const response = (
                 await axios.post(
-                    `${process.env.CONTROL_SERVER_URL}${process.env.NEWS_PATH}`,
+                    `${ControlServer.baseUrl}${process.env.NEWS_PATH}`,
                     newsRequest,
                 )
             ).data as INewsResponse
@@ -159,7 +173,7 @@ export class ControlServer {
         )
         const servers = (
             await axios.get(
-                `${process.env.CONTROL_SERVER_URL}${process.env.MEASUREMENT_SERVERS_PATH}`,
+                `${ControlServer.baseUrl}${process.env.MEASUREMENT_SERVERS_PATH}`,
                 { headers: this.headers },
             )
         ).data as IMeasurementServerResponse[]
@@ -194,7 +208,7 @@ export class ControlServer {
         )
         const response = (
             await axios.post(
-                `${process.env.CONTROL_SERVER_URL}${process.env.SETTINGS_PATH}`,
+                `${ControlServer.baseUrl}${process.env.SETTINGS_PATH}`,
                 request,
                 { headers: this.headers },
             )
@@ -262,7 +276,7 @@ export class ControlServer {
         try {
             const response = (
                 await axios.post(
-                    `${process.env.CONTROL_SERVER_URL}${process.env.RESULT_SUBMISSION_PATH}`,
+                    `${ControlServer.baseUrl}${process.env.RESULT_SUBMISSION_PATH}`,
                     result,
                     { headers: this.headers },
                 )
@@ -327,7 +341,7 @@ export class ControlServer {
         )
         const resp = (
             await axios.post(
-                `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_PATH}`,
+                `${ControlServer.baseUrl}${process.env.HISTORY_PATH}`,
                 body,
                 { headers: this.headers },
             )
@@ -370,7 +384,7 @@ export class ControlServer {
         let response = testUuid
             ? (
                   await axios.post(
-                      `${process.env.CONTROL_SERVER_URL}${process.env.HISTORY_RESULT_PATH}`,
+                      `${ControlServer.baseUrl}${process.env.HISTORY_RESULT_PATH}`,
                       body,
                       { headers: this.headers },
                   )

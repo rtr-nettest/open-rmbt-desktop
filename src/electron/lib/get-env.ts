@@ -75,7 +75,10 @@ export const getEnv = () => {
         X_NETTEST_CLIENT: (Store.I.get(ACTIVE_CLIENT) as string) || "",
         USER_DATA: app.getPath("temp"),
         MEASUREMENT_SERVERS_PATH: process.env.MEASUREMENT_SERVERS_PATH || "",
-        CONTROL_SERVER_URL: process.env.CONTROL_SERVER_URL || "",
+        CONTROL_SERVER_URL:
+            process.env.CONTROL_SERVER_OVERRIDE ||
+            process.env.CONTROL_SERVER_URL ||
+            "",
         OS:
             process.platform === "win32"
                 ? "windows"

@@ -56,11 +56,20 @@ export class Logger {
         if (!this.instance) {
             const streams: pino.StreamEntry[] = []
 
+            // Runtime CLI overrides (see electron.ts): CLI_LOG_TO_FILE
+            // (`--file-log`) and CLI_LOG_TO_CONSOLE (`--console-log`) force
+            // logging on for this launch regardless of the LOG_TO_* values
+            // baked in at build time by dotenv-webpack. These keys are not in
+            // .env, so they stay genuine runtime lookups and can be flipped
+            // from the command line.
+            const forceConsole = process.env.CLI_LOG_TO_CONSOLE === "true"
+            const forceFile = process.env.CLI_LOG_TO_FILE === "true"
+
             if (isMainThread || process.env.LOG_WORKERS === "true") {
-                if (process.env.LOG_TO_CONSOLE === "true") {
+                if (process.env.LOG_TO_CONSOLE === "true" || forceConsole) {
                     streams.push({ stream: pretty() })
                 }
-                if (process.env.LOG_TO_FILE === "true") {
+                if (process.env.LOG_TO_FILE === "true" || forceFile) {
                     try {
                         const logDir = this.logDir
                         fs.mkdirSync(logDir, { recursive: true })

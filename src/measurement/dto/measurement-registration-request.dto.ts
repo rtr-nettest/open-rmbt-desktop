@@ -14,7 +14,7 @@ export class MeasurementRegistrationRequest
     language = ""
     measurement_server_id: number | undefined
     measurement_type_flag = "regular"
-    prefer_server: number | undefined
+    prefer_server: number | string | undefined
     time = new Date().getTime()
     timezone = ""
     type = ""
@@ -28,11 +28,19 @@ export class MeasurementRegistrationRequest
         public uuid: string,
         measurementServerId?: number,
         settingsRequest?: UserSettingsRequest,
-        loopModeInfo?: ILoopModeInfo
+        loopModeInfo?: ILoopModeInfo,
+        preferServerUuid?: string
     ) {
         if (typeof measurementServerId === "number") {
             this.prefer_server = measurementServerId
             this.measurement_server_id = measurementServerId
+            this.user_server_selection = true
+        }
+        // Server chosen from the control server's `servers_ws` list is uuid-based
+        // (no numeric id). The control server accepts prefer_server as the server
+        // uuid, same as the web client.
+        if (preferServerUuid) {
+            this.prefer_server = preferServerUuid
             this.user_server_selection = true
         }
         if (settingsRequest) {

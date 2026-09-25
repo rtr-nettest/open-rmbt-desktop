@@ -27,7 +27,7 @@ export interface IMeasurementRegistrationRequest {
     operating_system?: string
     platform?: string
     plattform?: string
-    prefer_server?: number
+    prefer_server?: number | string
     previousTestStatus?: string
     protocol_version?: string
     softwareRevision?: string

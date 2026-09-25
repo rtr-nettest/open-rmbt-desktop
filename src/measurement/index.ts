@@ -406,11 +406,17 @@ export class MeasurementRunner {
     }
 
     private async registerMeasurement(options?: MeasurementOptions) {
+        // The selected server (from settings `servers_ws`) is stored as a
+        // { uuid, name } in ACTIVE_SERVER; forward its uuid as prefer_server.
+        const preferServerUuid = (
+            this.measurementServer as unknown as { uuid?: string } | undefined
+        )?.uuid
         this.registrationRequest = new MeasurementRegistrationRequest(
             this.settings!.uuid,
             this.measurementServer?.id,
             this.settingsRequest,
             options?.loopModeInfo,
+            preferServerUuid,
         )
         if (options?.loopModeInfo) {
             Logger.I.info(

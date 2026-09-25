@@ -35,7 +35,12 @@ export const getEnv = () => {
     // already selected — ACTIVE_SERVER is set only for a non-default choice — so
     // an existing selection stays visible and reversible without the flag.
     const debug = process.env.CLI_DEBUG === "true"
-    const showServerSelection = debug || !!Store.I.get(ACTIVE_SERVER)
+    // The chosen test server is persisted in ACTIVE_SERVER as a { uuid, name }
+    // taken from the control server's settings (`servers_ws`). Empty uuid means
+    // the default (nearest) server.
+    const activeServer = Store.I.get(ACTIVE_SERVER) as { uuid?: string } | null
+    const preferredServer = activeServer?.uuid || ""
+    const showServerSelection = debug || !!preferredServer
 
     // When file logging is on — via .env (LOG_TO_FILE) or the `--file-log`
     // switch (CLI_LOG_TO_FILE) — expose the destination folder so the settings
@@ -70,6 +75,7 @@ export const getEnv = () => {
         ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",
         DEBUG: debug,
         SHOW_SERVER_SELECTION: showServerSelection,
+        PREFERRED_SERVER: preferredServer,
         LOG_PATH: logPath,
         EXCLUDE_MENU_ITEMS: process.env.EXCLUDE_MENU_ITEMS
             ? process.env.EXCLUDE_MENU_ITEMS.split(",")

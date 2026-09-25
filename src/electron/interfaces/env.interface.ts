@@ -11,6 +11,7 @@ export interface IEnv {
     ENABLE_LOOP_MODE: string
     DEBUG: boolean
     SHOW_SERVER_SELECTION: boolean
+    PREFERRED_SERVER: string
     LOG_PATH: string
     EXCLUDE_MENU_ITEMS: string[] | undefined
     FULL_HISTORY_RESULT_URL: string | undefined

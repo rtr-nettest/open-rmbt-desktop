@@ -58,9 +58,9 @@ export class SettingsScreenComponent
     data$: Observable<IBasicResponse<ISettingsRow>> = combineLatest([
         this.transloco.selectTranslation(),
         this.mainStore.settings$,
+        this.mainStore.env$,
     ]).pipe(
-        map(([t, settings]) => {
-            const env = this.env$.value
+        map(([t, settings, env]) => {
             const content: ISettingsRow[] = [
                 {
                     title: t["Client UUID"],
@@ -109,8 +109,10 @@ export class SettingsScreenComponent
             }
             // Advanced: pick a specific test server (ports the website's "Test
             // server" option). Hidden unless --debug is set or a non-default
-            // server is already selected (computed in the main process).
-            if (env?.SHOW_SERVER_SELECTION) {
+            // server is currently selected. Evaluated from live env (data$ now
+            // reacts to env$), so choosing "Default server" clears
+            // PREFERRED_SERVER and the row disappears.
+            if (env?.DEBUG || !!env?.PREFERRED_SERVER) {
                 content.push({
                     title: t["Test server"] || "Test server",
                     component: SettingsServerComponent,

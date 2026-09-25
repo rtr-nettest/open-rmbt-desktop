@@ -40,7 +40,6 @@ export const getEnv = () => {
     // the default (nearest) server.
     const activeServer = Store.I.get(ACTIVE_SERVER) as { uuid?: string } | null
     const preferredServer = activeServer?.uuid || ""
-    const showServerSelection = debug || !!preferredServer
 
     // When file logging is on — via .env (LOG_TO_FILE) or the `--file-log`
     // switch (CLI_LOG_TO_FILE) — expose the destination folder so the settings
@@ -74,7 +73,6 @@ export const getEnv = () => {
             process.env.ENABLE_HOME_SCREEN_JITTER_BOX === "true",
         ENABLE_LOOP_MODE: process.env.ENABLE_LOOP_MODE || "",
         DEBUG: debug,
-        SHOW_SERVER_SELECTION: showServerSelection,
         PREFERRED_SERVER: preferredServer,
         LOG_PATH: logPath,
         EXCLUDE_MENU_ITEMS: process.env.EXCLUDE_MENU_ITEMS

@@ -14,8 +14,10 @@ import { IMeasurementServerResponse } from "../../../../../measurement/interface
  * — name + uuid), the same source the website uses; no separate endpoint or
  * .env path is involved. The chosen server is persisted (as a { uuid, name })
  * via setActiveServer, and the registration request sends its uuid as
- * `prefer_server`. Shown only when SHOW_SERVER_SELECTION is set (see
- * get-env.ts): the `--debug` switch, or a non-default server already chosen.
+ * `prefer_server`. The settings screen shows this row only when `--debug`
+ * (env.DEBUG) is set or a non-default server is currently chosen
+ * (env.PREFERRED_SERVER); that gate reacts to env changes, so selecting
+ * "Default server" clears PREFERRED_SERVER and the row disappears live.
  */
 @Component({
     selector: "app-settings-server",

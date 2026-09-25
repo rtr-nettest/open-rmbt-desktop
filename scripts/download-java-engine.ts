@@ -1,6 +1,9 @@
 import fs from "fs"
 import path from "path"
-import extract from "extract-zip"
+import AdmZip from "adm-zip"
+
+// The only artifact we need out of the release archive.
+const JAR_ENTRY = "app/RMBTClient-all.jar"
 
 async function downloadJavaEngine() {
     console.log("Checking for Java engine...")
@@ -14,16 +17,15 @@ async function downloadJavaEngine() {
         )
     }
 
-    const buffer = await response.arrayBuffer()
-    const tempDir = path.join(__dirname, "temp")
-    if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true })
+    // Read the archive in memory and pull out just the one entry we need, rather
+    // than extracting the whole zip to disk — no temp dir, and nothing outside
+    // the destination is ever written.
+    const zip = new AdmZip(Buffer.from(await response.arrayBuffer()))
+    const entry = zip.getEntry(JAR_ENTRY)
+    if (!entry) {
+        throw new Error(`Entry "${JAR_ENTRY}" not found in the downloaded zip`)
     }
-    const zipPath = path.join(tempDir, "RTR-NetztestCLI-win32.zip")
-    fs.writeFileSync(zipPath, Buffer.from(buffer))
-    await extract(zipPath, {
-        dir: tempDir,
-    })
+
     const destDir = path.join(
         __dirname,
         "..",
@@ -31,21 +33,11 @@ async function downloadJavaEngine() {
         "measurement",
         "java_client",
     )
-    if (!fs.existsSync(destDir)) {
-        fs.mkdirSync(destDir, { recursive: true })
-    }
-    fs.copyFileSync(
-        path.join(tempDir, "app", "RMBTClient-all.jar"),
-        path.join(
-            __dirname,
-            "..",
-            "src",
-            "measurement",
-            "java_client",
-            "RMBTClient-all.jar",
-        ),
-    )
-    fs.rmSync(tempDir, { recursive: true, force: true })
+    fs.mkdirSync(destDir, { recursive: true })
+
+    // maintainEntryPath=false → writes <destDir>/RMBTClient-all.jar (drops the
+    // "app/" prefix); overwrite=true.
+    zip.extractEntryTo(entry, destDir, false, true)
     console.log("Java engine downloaded and extracted successfully.")
 }
 

@@ -6,7 +6,7 @@ on:
 # Version of the native Rust measurement client (open-rmbt-client-cli release)
 # bundled into the app. Downloaded per-platform via the public release URL.
 env:
-    RUST_CLIENT_VERSION: v2.3.3
+    RUST_CLIENT_VERSION: v2.3.4
 
 jobs:
     test:
@@ -147,6 +147,15 @@ jobs:
                   New-Item -ItemType Directory -Force src/measurement/rust_client | Out-Null
                   Invoke-WebRequest -Uri "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/$env:RUST_CLIENT_VERSION/rmbt-client-rust-windows-x64.zip" -OutFile rust-client.zip
                   Expand-Archive -Path rust-client.zip -DestinationPath src/measurement/rust_client -Force
+                  # Ship the MSVC runtime next to rmbt-client.exe so the Rust
+                  # client runs on machines without the VC++ Redistributable
+                  # (app-local deployment; Windows searches the exe's own
+                  # directory first). vcruntime140_1.dll is x64-only, so copy
+                  # whichever DLLs exist on the runner.
+                  foreach ($dll in "vcruntime140.dll","vcruntime140_1.dll","msvcp140.dll") {
+                      $src = Join-Path $env:SystemRoot "System32\$dll"
+                      if (Test-Path $src) { Copy-Item $src src/measurement/rust_client/ -Force }
+                  }
             - name: Download Java measurement client (windows-x64, bundled JRE)
               shell: pwsh
               run: |

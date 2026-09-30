@@ -1,4 +1,4 @@
-import { computed, Injectable, NgZone } from "@angular/core"
+import { Injectable, NgZone } from "@angular/core"
 import {
     BehaviorSubject,
     concatMap,
@@ -7,6 +7,7 @@ import {
     map,
     Observable,
     of,
+    Subject,
     withLatestFrom,
 } from "rxjs"
 import { TestVisualizationState } from "../dto/test-visualization-state.dto"
@@ -52,20 +53,38 @@ export class TestStore {
     lastTestFinishedAt$ = new BehaviorSubject<number>(0)
     loopCounter$ = new BehaviorSubject<number>(1)
     loopUuid$ = new BehaviorSubject<string | null>(null)
+    // Emits when a normal loop reaches its max duration, so the loop screen can
+    // stop the "Next measurement in …" waiting animation (there is no next test).
+    loopModeExpired$ = new Subject<void>()
+    // Wall-clock time the current loop started, used to compute its estimated
+    // end time (loop start + LOOP_MODE_MAX_DURATION for a normal loop).
+    private loopStartedAt = 0
     maxTestsReached$ = new BehaviorSubject<boolean>(false)
     certifiedDataForm$ = new BehaviorSubject<ICertifiedDataForm | null>(null)
     certifiedEnvForm$ = new BehaviorSubject<ICertifiedEnvForm | null>(null)
-    estimatedEndTime = computed(() => {
-        const maxTests = this.mainStore.env$.value?.CERTIFIED_TEST_COUNT
-        if (!this.enableLoopMode$.value || !maxTests) {
+    // Estimated end time of the running loop. The two modes are bounded
+    // differently, so they must not share CERTIFIED_TEST_COUNT (that was the bug
+    // that leaked an 8-test end time into normal loop mode):
+    //   • Certified: exactly CERTIFIED_TEST_COUNT tests → now + count × interval.
+    //   • Normal loop: runs until stopped, but the main process force-expires it
+    //     after LOOP_MODE_MAX_DURATION minutes (see LoopService), so the end time
+    //     is the loop's start + that duration.
+    // Returns null when no loop is running. A plain method (not a memoized
+    // computed) so it re-evaluates each call.
+    // Wall-clock time a NORMAL loop will end: the main process force-expires it
+    // after LOOP_MODE_MAX_DURATION minutes (see LoopService). Shown inline in the
+    // loop header, not as a per-test row. A certified run is bounded by its test
+    // count (not by time), so it has no such end time.
+    loopModeEndTime(): number | null {
+        if (this.isCertifiedMeasurement$.value || !this.enableLoopMode$.value) {
             return null
         }
-        const singleTestDuration = this.fullTestIntervalMs
-        if (!singleTestDuration) {
+        const maxDurationMin = this.mainStore.env$.value?.LOOP_MODE_MAX_DURATION
+        if (!maxDurationMin) {
             return null
         }
-        return Date.now() + singleTestDuration * maxTests
-    })
+        return (this.loopStartedAt || Date.now()) + maxDurationMin * 60 * 1000
+    }
 
     get fullTestIntervalMs() {
         return this.testIntervalMinutes$.value! * 60 * 1000
@@ -87,6 +106,9 @@ export class TestStore {
         })
         window.electronAPI.onLoopModeExpired(() => {
             this.ngZone.run(() => {
+                // Stop the "Next measurement in …" waiting animation — the loop
+                // is over, there is no next test.
+                this.loopModeExpired$.next()
                 const message = this.transloco.translate(
                     "The loop measurement has expired",
                 )
@@ -167,6 +189,7 @@ export class TestStore {
     launchCertifiedTest() {
         const loopUuid = v4()
         const loopCounter = 1
+        this.loopStartedAt = Date.now()
         this.loopUuid$.next(loopUuid)
         this.loopCounter$.next(loopCounter)
         this.enableLoopMode$.next(true)
@@ -191,9 +214,11 @@ export class TestStore {
     launchLoopTest(interval: number) {
         const loopUuid = v4()
         const loopCounter = 1
+        this.loopStartedAt = Date.now()
         this.loopUuid$.next(loopUuid)
         this.loopCounter$.next(loopCounter)
         this.enableLoopMode$.next(true)
+        this.isCertifiedMeasurement$.next(false)
         this.testIntervalMinutes$.next(interval)
         const loopModeInfo: ILoopModeInfo | undefined = {
             max_delay: this.testIntervalMinutes$.value ?? 0,

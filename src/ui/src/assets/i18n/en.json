@@ -87,6 +87,7 @@
     "minutes": "minutes",
     "Start loop test": "Start loop test",
     "Tests are conducted repeatedly until they are stopped manually": "Tests are conducted repeatedly until they are stopped manually",
+    "Tests are conducted repeatedly until %0 or until stopped": "Tests are conducted repeatedly until %0 or until stopped",
     "Measurement": "Measurement",
     "End tests": "End tests",
     "Next measurement in": "Next measurement in",

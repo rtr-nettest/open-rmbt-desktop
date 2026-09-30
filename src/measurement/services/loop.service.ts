@@ -4,6 +4,10 @@ import { ILoopModeInfo } from "../interfaces/measurement-registration-request.in
 import { Logger } from "./logger.service"
 import { powerSaveBlocker } from "electron"
 
+// While a test is still running (it overran its slot) we re-check this often so
+// the next test starts as soon as the current one finishes.
+const POLL_MS = 1000
+
 export class LoopService {
     private static instance = new LoopService()
 
@@ -11,19 +15,25 @@ export class LoopService {
         return this.instance
     }
 
-    deviationAdjustment = 0
     loopTimeout?: NodeJS.Timeout
-    expireTimeout?: NodeJS.Timeout
     powerSaverBlockerId?: number
+
+    // Absolute wall-clock anchors for the running loop. Every test starts at
+    // loopStartMs + (n-1)*interval, so cadence is fixed to the *start* of the
+    // previous test regardless of how long it took or whether it failed.
+    private loopStartMs = 0
+    // For a normal loop: the time the loop force-expires (loopStartMs +
+    // LOOP_MODE_MAX_DURATION). 0 = no duration limit (certified is bounded by
+    // its test count instead).
+    private expiryMs = 0
 
     private constructor() {}
 
     resetTimeout() {
         clearTimeout(this.loopTimeout)
         this.loopTimeout = undefined
-        clearTimeout(this.expireTimeout)
-        this.expireTimeout = undefined
-        this.deviationAdjustment = 0
+        this.loopStartMs = 0
+        this.expiryMs = 0
         if (this.powerSaverBlockerId) {
             const stopped = powerSaveBlocker.stop(this.powerSaverBlockerId)
             Logger.I.warn(`Power saving is ${stopped ? "ON" : "OFF"}`)
@@ -39,41 +49,74 @@ export class LoopService {
         onTime: (counter: number) => void
         onExpire?: () => void
     }) {
-        const { test_counter: counter } = options.loopModeInfo
-        clearTimeout(this.loopTimeout)
-        const setLoopTimeout = () => {
-            const actualInterval = options.interval - this.deviationAdjustment
-            return setTimeout(() => {
-                MeasurementRunner.I.updateStartTime()
-                this.deviationAdjustment = Date.now() % 1000
-                if (
-                    WindowManager.I.isSuspended ||
-                    MeasurementRunner.I.isMeasurementInProgress
-                ) {
-                    this.loopTimeout = setLoopTimeout()
-                } else {
-                    const nextCounter = counter + 1
-                    Logger.I.info(
-                        "Starting test %d after %d ms",
-                        nextCounter,
-                        actualInterval
-                    )
-                    options.onTime(nextCounter)
-                }
-            }, actualInterval)
-        }
-        this.loopTimeout = setLoopTimeout()
+        const counter = options.loopModeInfo.test_counter
 
-        const expireTimeout = process.env.LOOP_MODE_MAX_DURATION
-            ? parseInt(process.env.LOOP_MODE_MAX_DURATION)
-            : 0
-        if (!this.expireTimeout && options.onExpire && expireTimeout > 0) {
-            this.expireTimeout = setTimeout(() => {
+        // First test of a fresh loop: anchor the cadence and (for a normal loop)
+        // the 48h expiry to this moment.
+        if (counter <= 1) {
+            this.loopStartMs = 0
+            this.expiryMs = 0
+        }
+        if (!this.loopStartMs) {
+            this.loopStartMs = Date.now()
+            // The duration limit applies to a normal loop only; a certified run
+            // is bounded by its test count (max_tests), not by wall-clock time.
+            const maxDurationMin =
+                !options.loopModeInfo.max_tests &&
+                process.env.LOOP_MODE_MAX_DURATION
+                    ? parseInt(process.env.LOOP_MODE_MAX_DURATION)
+                    : 0
+            this.expiryMs =
+                maxDurationMin > 0
+                    ? this.loopStartMs + maxDurationMin * 60 * 1000
+                    : 0
+        }
+
+        // Absolute target for the NEXT test (test `counter + 1`, i.e. `counter`
+        // intervals after the loop started).
+        const nextTargetMs = this.loopStartMs + counter * options.interval
+
+        clearTimeout(this.loopTimeout)
+
+        const scheduleTick = () => {
+            const fireAt = this.expiryMs
+                ? Math.min(nextTargetMs, this.expiryMs)
+                : nextTargetMs
+            this.loopTimeout = setTimeout(tick, Math.max(0, fireAt - Date.now()))
+        }
+
+        const tick = () => {
+            // A test is still running (or the app is suspended): never expire or
+            // start mid-test — let the current test finish first.
+            if (
+                WindowManager.I.isSuspended ||
+                MeasurementRunner.I.isMeasurementInProgress
+            ) {
+                this.loopTimeout = setTimeout(tick, POLL_MS)
+                return
+            }
+            // Normal loop: once the max duration has elapsed, stop and notify.
+            // Checked here — after a test has finished and while waiting — so it
+            // fires at a test boundary rather than interrupting a running test.
+            if (options.onExpire && this.expiryMs && Date.now() >= this.expiryMs) {
                 Logger.I.info("Loop mode expired")
                 this.resetTimeout()
-                options.onExpire?.()
-            }, expireTimeout * 60 * 1000)
+                options.onExpire()
+                return
+            }
+            // Time for the next test.
+            if (Date.now() >= nextTargetMs) {
+                MeasurementRunner.I.updateStartTime()
+                Logger.I.info("Starting test %d", counter + 1)
+                options.onTime(counter + 1)
+                return
+            }
+            // Still waiting for the slot (e.g. woke early for an earlier expiry
+            // check) — re-arm for the slot or the expiry, whichever is first.
+            scheduleTick()
         }
+
+        scheduleTick()
 
         if (!!options.loopModeInfo.max_tests && !this.powerSaverBlockerId) {
             this.powerSaverBlockerId = powerSaveBlocker.start(

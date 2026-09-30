@@ -16,6 +16,7 @@ import { MeasurementOptions } from "../interfaces/measurement-options.interface"
 import { IRMBTClient } from "../interfaces/rmbt-client.interface"
 import path from "path"
 import { ControlServer } from "./control-server.service"
+import { ACTIVE_SERVER, Store } from "./store.service"
 
 const packJson = require("../../../package.json")
 
@@ -202,7 +203,7 @@ export class RMBTRustClient implements IRMBTClient {
     private async runMeasurement(
         options?: MeasurementOptions,
     ): Promise<IMeasurementThreadResult[]> {
-        // main method to spawn JAVA client
+        // main method to spawn client
         this.isRunning = true
         this.measurementStart = Date.now()
 
@@ -255,7 +256,7 @@ export class RMBTRustClient implements IRMBTClient {
                 "-v",
             ]
 
-            // pass loop mode parameters to java
+            // pass loop mode parameters
             if (options?.loopModeInfo) {
                 Logger.I.info("Loop mode enabled, loop mode info start")
                 Logger.I.info(options)
@@ -284,6 +285,21 @@ export class RMBTRustClient implements IRMBTClient {
                 bin_options.push(user_uuid)
             }
 
+            // Custom test-server selection: forward the chosen server's UUID so
+            // the native client requests it from the control server
+            // (prefer_server / user_server_selection). Absent when "Default
+            // server" is selected (ACTIVE_SERVER cleared) → server auto-assigned.
+            const activeServer = Store.I.get(ACTIVE_SERVER) as {
+                uuid?: string
+            } | null
+            if (activeServer?.uuid) {
+                Logger.I.info(
+                    "Preferred server uuid is " + activeServer.uuid,
+                )
+                bin_options.push("--server_uuid")
+                bin_options.push(activeServer.uuid)
+            }
+
             var child
             // spawn the native Rust client directly (no `java -jar`)
             Logger.I.info([binary_path, ...bin_options])
@@ -302,13 +318,13 @@ export class RMBTRustClient implements IRMBTClient {
                 lines.forEach((line) => {
                     // get line from rechunked process stdout
 
-                    Logger.I.info("   ====> JAVA LINE: " + line)
+                    Logger.I.info("   ====> LINE: " + line)
                     if (line.startsWith("{")) {
-                        Logger.I.info("   -------> JAVA JSON: " + line)
+                        Logger.I.info("   -------> JSON: " + line)
                         this.parseMessageFromJava(line.trim())
                     }
                     if (line.startsWith("ENDING TEST.")) {
-                        Logger.I.info("   -------> JAVA DONE")
+                        Logger.I.info("   -------> ENGINE DONE")
                         this.WrapUp()
                     }
 

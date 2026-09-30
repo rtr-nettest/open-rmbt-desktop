@@ -78,16 +78,6 @@
         @if (basicNetworkInfo$ | async; as info) {
             <div class="app-container">
                 <table class="app-table">
-                    @if (estimatedEndTime(); as endTime) {
-                        <tr class="app-row">
-                            <th class="app-cell">
-                                {{ "Estimated end time" | transloco }}
-                            </th>
-                            <td class="app-cell">
-                                {{ endTime | date: "HH:mm" }}
-                            </td>
-                        </tr>
-                    }
                     @if (info.serverName != "-") {
                         <tr class="app-row">
                             <th class="app-cell app-cell--left">

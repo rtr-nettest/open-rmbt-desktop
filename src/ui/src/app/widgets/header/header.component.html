@@ -15,9 +15,7 @@
                 "
                 style="display: flex; justify-content: center; flex: 1"
             >
-                <app-alert
-                    text="Tests are conducted repeatedly until they are stopped manually"
-                >
+                <app-alert [text]="loopModeAlertText$ | async">
                     <app-stop-loop-button></app-stop-loop-button>
                 </app-alert>
             </div>

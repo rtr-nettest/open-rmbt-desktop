@@ -44,12 +44,43 @@ export class HeaderComponent {
             return !!loopMode && !certifiedMeasurement
         }),
     )
+    // Loop-header text. A normal loop names when it will end (loop start +
+    // LOOP_MODE_MAX_DURATION); otherwise the plain "until stopped" hint.
+    loopModeAlertText$ = combineLatest([
+        this.transloco.selectTranslation(),
+        this.testStore.enableLoopMode$,
+        this.testStore.isCertifiedMeasurement$,
+        this.mainStore.env$,
+    ]).pipe(
+        map(([t]) => {
+            const endMs = this.testStore.loopModeEndTime()
+            if (!endMs) {
+                return t[
+                    "Tests are conducted repeatedly until they are stopped manually"
+                ]
+            }
+            const end = new Date(endMs).toLocaleString(
+                this.transloco.getActiveLang(),
+                {
+                    day: "2-digit",
+                    month: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                },
+            )
+            const template =
+                t["Tests are conducted repeatedly until %0 or until stopped"] ??
+                "Tests are conducted repeatedly until %0 or until stopped"
+            return template.replace("%0", end)
+        }),
+    )
     constructor(
         private activeRoute: ActivatedRoute,
         private mainStore: MainStore,
         private testStore: TestStore,
         private message: MessageService,
         private router: Router,
+        private transloco: TranslocoService,
     ) {}
 
     handleClick(event: MouseEvent, link: string) {

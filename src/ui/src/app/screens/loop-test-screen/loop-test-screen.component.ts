@@ -53,6 +53,16 @@ export class LoopTestScreenComponent extends TestScreenComponent {
             .subscribe(() => {
                 this.getRecentHistory(this.loopCount$.value)
             })
+        // When the loop expires, end the waiting countdown/animation and stop
+        // polling — there is no next test. (The expiry dialog then navigates to
+        // the result overview on confirm.)
+        this.store.loopModeExpired$
+            .pipe(takeUntil(this.stopped$))
+            .subscribe(() => {
+                this.loopWaiting$.next(false)
+                this.progressMode$.next("determinate")
+                this.stopped$.next()
+            })
     }
 
     private initNewLoop(testUuid: string) {
@@ -61,9 +71,6 @@ export class LoopTestScreenComponent extends TestScreenComponent {
             this.currentTestUuid$.next(testUuid)
             this.loopWaiting$.next(false)
             this.waitingProgressMs = 0
-            this.estimatedEndTime.set(
-                new Date(this.store.estimatedEndTime() as number),
-            )
         }
     }
 

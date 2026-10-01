@@ -1,5 +1,11 @@
 import { Component } from "@angular/core"
-import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms"
+import {
+    FormBuilder,
+    FormControl,
+    FormGroup,
+    ValidatorFn,
+    Validators,
+} from "@angular/forms"
 import { map, withLatestFrom } from "rxjs"
 import { MainStore } from "src/app/store/main.store"
 import { TestStore } from "src/app/store/test.store"
@@ -7,6 +13,15 @@ import { TestStore } from "src/app/store/test.store"
 type LoopForm = FormGroup<{
     interval: FormControl<number>
 }>
+
+// Only whole numbers are valid intervals (rejects e.g. 1.5).
+const integerValidator: ValidatorFn = (control) => {
+    const v = control.value
+    if (v === null || v === undefined || v === "") {
+        return null
+    }
+    return Number.isInteger(Number(v)) ? null : { integer: true }
+}
 
 @Component({
     selector: "app-loop-start-screen",
@@ -19,13 +34,18 @@ export class LoopStartScreenComponent {
         withLatestFrom(this.testStore.testIntervalMinutes$),
         map(([env, savedInterval]) => {
             const def: number = env!.LOOP_MODE_DEFAULT_INTERVAL
-            this.min = env!.LOOP_MODE_MIN_INTERVAL
+            const debug = !!env!.DEBUG
+            // In debug mode the minimum-interval constraint is lifted: any
+            // non-negative whole number is allowed (0 is valid — it means "wait
+            // 5s between tests", see LoopService). Otherwise enforce the
+            // configured min/max.
+            this.min = debug ? 0 : env!.LOOP_MODE_MIN_INTERVAL
             this.max = env!.LOOP_MODE_MAX_INTERVAL
+            const validators = debug
+                ? [Validators.required, Validators.min(0), integerValidator]
+                : [Validators.min(this.min), Validators.max(this.max)]
             this.form = this.fb.group({
-                interval: new FormControl(savedInterval || def, [
-                    Validators.min(this.min),
-                    Validators.max(this.max),
-                ]),
+                interval: new FormControl(savedInterval || def, validators),
             }) as LoopForm
             return env
         })

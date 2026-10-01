@@ -8,6 +8,16 @@ import { powerSaveBlocker } from "electron"
 // the next test starts as soon as the current one finishes.
 const POLL_MS = 1000
 
+// A 0-minute interval (only selectable in debug mode) means "as fast as
+// possible", but we still keep a small gap between test starts rather than
+// running them truly back-to-back.
+const ZERO_INTERVAL_MS = 5000
+
+// In --debug mode the normal-loop duration limit is a hardcoded 480h, ignoring
+// LOOP_MODE_MAX_DURATION. Ugly, but convenient for debugging a --debug build
+// without touching .env.
+const DEBUG_MAX_DURATION_MIN = 480 * 60
+
 export class LoopService {
     private static instance = new LoopService()
 
@@ -61,20 +71,29 @@ export class LoopService {
             this.loopStartMs = Date.now()
             // The duration limit applies to a normal loop only; a certified run
             // is bounded by its test count (max_tests), not by wall-clock time.
-            const maxDurationMin =
-                !options.loopModeInfo.max_tests &&
-                process.env.LOOP_MODE_MAX_DURATION
-                    ? parseInt(process.env.LOOP_MODE_MAX_DURATION)
-                    : 0
+            // --debug uses the hardcoded 480h limit instead of the configured one.
+            let maxDurationMin = 0
+            if (!options.loopModeInfo.max_tests) {
+                maxDurationMin =
+                    process.env.CLI_DEBUG === "true"
+                        ? DEBUG_MAX_DURATION_MIN
+                        : process.env.LOOP_MODE_MAX_DURATION
+                          ? parseInt(process.env.LOOP_MODE_MAX_DURATION)
+                          : 0
+            }
             this.expiryMs =
                 maxDurationMin > 0
                     ? this.loopStartMs + maxDurationMin * 60 * 1000
                     : 0
         }
 
+        // Effective spacing between test starts; a 0 interval becomes a 5s gap.
+        const interval =
+            options.interval > 0 ? options.interval : ZERO_INTERVAL_MS
+
         // Absolute target for the NEXT test (test `counter + 1`, i.e. `counter`
         // intervals after the loop started).
-        const nextTargetMs = this.loopStartMs + counter * options.interval
+        const nextTargetMs = this.loopStartMs + counter * interval
 
         clearTimeout(this.loopTimeout)
 

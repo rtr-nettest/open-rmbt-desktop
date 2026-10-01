@@ -176,7 +176,16 @@ export class HistoryStore {
         if (!loopUuid) {
             return history
         }
-        return history.filter((hi) => hi.loopUuid === "L" + loopUuid)
+        // The desktop tracks a bare v4 loop uuid, but the stored result carries a
+        // leading "L" marker. How that prefix ends up applied differs between
+        // measurement engines (the JS engine let the server add it, the native
+        // engines round-trip it through the client), which left the loop history
+        // empty when a hard-coded "L" + uuid no longer matched. Compare on the
+        // bare uuid so the loop's results match regardless of the prefix — a v4
+        // uuid never starts with "L", so stripping a leading "L" is unambiguous.
+        const bareUuid = (u?: string | null) => (u ?? "").replace(/^L+/, "")
+        const target = bareUuid(loopUuid)
+        return history.filter((hi) => bareUuid(hi.loopUuid) === target)
     }
 
     private countResults(

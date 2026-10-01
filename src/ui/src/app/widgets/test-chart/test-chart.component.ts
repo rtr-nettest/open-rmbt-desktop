@@ -73,7 +73,16 @@ export class TestChartComponent {
                     case EMeasurementStatus.INIT_DOWN:
                     case EMeasurementStatus.PING:
                     case EMeasurementStatus.NOT_STARTED:
-                        this.chart?.resetData()
+                        // Start of a test. In loop mode the same canvas is reused
+                        // for every iteration, so if the chart still holds the
+                        // finished previous measurement, rebuild it from scratch
+                        // (clearing the canvas) to stop the old curve bleeding
+                        // through the new one. Otherwise just clear the data.
+                        if (this.chart?.finished) {
+                            this.initChart({ force: true })
+                        } else {
+                            this.chart?.resetData()
+                        }
                         break
                     case EMeasurementStatus.DOWN:
                         this.updateDownload(visualization)
@@ -132,6 +141,12 @@ export class TestChartComponent {
         const ctx = this.canvas?.getContext("2d")
         if (ctx && (options?.force || this.isCanvasEmpty)) {
             try {
+                // A Chart.js instance keeps ownership of its canvas; creating a
+                // new one over it throws ("canvas is already in use") and leaves
+                // the old drawing on screen. Destroy the previous chart first so
+                // the canvas is fully cleared before we redraw it.
+                this.chart?.destroy()
+                this.chart = undefined
                 if (this.phase === "ping") {
                     this.chart = new TestBarChart(
                         ctx!,

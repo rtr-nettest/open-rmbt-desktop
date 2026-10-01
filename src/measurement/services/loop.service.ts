@@ -8,10 +8,15 @@ import { powerSaveBlocker } from "electron"
 // the next test starts as soon as the current one finishes.
 const POLL_MS = 1000
 
-// A 0-minute interval (only selectable in debug mode) means "as fast as
-// possible", but we still keep a small gap between test starts rather than
-// running them truly back-to-back.
-const ZERO_INTERVAL_MS = 5000
+// Minimum gap between the END of one test and the START of the next, so tests
+// never run back-to-back. A 0-minute interval (debug only) means "just this
+// break after each test finishes".
+const MIN_BREAK_MS = 5000
+
+// Grace window after a test is triggered before "not in progress" is treated as
+// "finished" — covers the async startup gap (e.g. JS-engine registration), so a
+// test that hasn't registered as running yet is not mistaken for a finished one.
+const STARTUP_GRACE_MS = 10000
 
 // In --debug mode the normal-loop duration limit is a hardcoded 480h, ignoring
 // LOOP_MODE_MAX_DURATION. Ugly, but convenient for debugging a --debug build
@@ -87,63 +92,76 @@ export class LoopService {
                     : 0
         }
 
-        // Effective spacing between test starts; a 0 interval becomes a 5s gap.
-        const interval =
-            options.interval > 0 ? options.interval : ZERO_INTERVAL_MS
-
-        // The next test starts `interval` after THIS test's start. scheduleLoop
-        // is called right as the current test begins, so anchor to `now`.
-        //
-        // This MUST be relative to the current start, not loopStart +
-        // counter*interval: if a test runs longer than the interval, absolute
-        // targets pile up in the past and the scheduler fires a burst of
-        // "catch-up" tests all at once — overlapping measurements that stomp on
-        // each other's state and time out. Anchoring to the current start means
-        // an overrun yields exactly one next test, right after the current one
-        // finishes (and exact start-to-start spacing when interval > duration).
-        const nextTargetMs = Date.now() + interval
+        // scheduleLoop runs as THIS test begins, so `now` is its start time, and
+        // the start-to-start target is start + interval (interval may be 0).
+        const startMs = Date.now()
+        const startTargetMs = startMs + options.interval
 
         clearTimeout(this.loopTimeout)
 
-        const scheduleTick = () => {
-            const fireAt = this.expiryMs
-                ? Math.min(nextTargetMs, this.expiryMs)
-                : nextTargetMs
-            this.loopTimeout = setTimeout(tick, Math.max(0, fireAt - Date.now()))
-        }
+        // The next test must start at the LATER of:
+        //   • `interval` after this test started  (exact start-to-start cadence
+        //     when the interval exceeds the test duration), and
+        //   • MIN_BREAK after this test finished   (so there is always a gap, and
+        //     a 0 interval means "MIN_BREAK after each test finishes").
+        // Anchoring the break to the finish time is why we poll through the run
+        // to detect it, rather than firing on an absolute clock (which piled up
+        // overlapping catch-up tests when a test ran longer than the interval).
+        let wasRunning = false
+        let finishMs = 0
 
         const tick = () => {
-            // A test is still running (or the app is suspended): never expire or
-            // start mid-test — let the current test finish first.
+            const now = Date.now()
+
             if (
                 WindowManager.I.isSuspended ||
                 MeasurementRunner.I.isMeasurementInProgress
             ) {
+                wasRunning = true
+                finishMs = 0
                 this.loopTimeout = setTimeout(tick, POLL_MS)
                 return
             }
-            // Normal loop: once the max duration has elapsed, stop and notify.
-            // Checked here — after a test has finished and while waiting — so it
-            // fires at a test boundary rather than interrupting a running test.
-            if (options.onExpire && this.expiryMs && Date.now() >= this.expiryMs) {
+
+            // Not running. Until the test has actually been seen running, treat
+            // "not in progress" as "still starting up" (not "finished") — unless
+            // it is taking suspiciously long.
+            if (!wasRunning && now - startMs < STARTUP_GRACE_MS) {
+                this.loopTimeout = setTimeout(tick, POLL_MS)
+                return
+            }
+
+            if (finishMs === 0) {
+                finishMs = now
+            }
+
+            // Normal loop: stop once the max duration has elapsed (checked here,
+            // at a test boundary, never mid-test).
+            if (options.onExpire && this.expiryMs && now >= this.expiryMs) {
                 Logger.I.info("Loop mode expired")
                 this.resetTimeout()
                 options.onExpire()
                 return
             }
-            // Time for the next test.
-            if (Date.now() >= nextTargetMs) {
+
+            const target = Math.max(startTargetMs, finishMs + MIN_BREAK_MS)
+            if (now >= target) {
                 MeasurementRunner.I.updateStartTime()
                 Logger.I.info("Starting test %d", counter + 1)
                 options.onTime(counter + 1)
                 return
             }
-            // Still waiting for the slot (e.g. woke early for an earlier expiry
-            // check) — re-arm for the slot or the expiry, whichever is first.
-            scheduleTick()
+
+            // Wait until the next-start target (or the expiry, whichever first).
+            const fireAt = this.expiryMs
+                ? Math.min(target, this.expiryMs)
+                : target
+            this.loopTimeout = setTimeout(tick, Math.max(0, fireAt - now))
         }
 
-        scheduleTick()
+        // Start polling shortly after the test begins; the tick detects when the
+        // test finishes and then waits out the remaining break/interval.
+        this.loopTimeout = setTimeout(tick, POLL_MS)
 
         if (!!options.loopModeInfo.max_tests && !this.powerSaverBlockerId) {
             this.powerSaverBlockerId = powerSaveBlocker.start(

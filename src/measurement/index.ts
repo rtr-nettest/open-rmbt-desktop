@@ -212,7 +212,14 @@ export class MeasurementRunner {
 
     onScheduleLoop = (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
         const webContents = event.sender
-        this.onRunMeasurement(event, loopModeInfo)
+        // Never start a loop test while one is already running. LoopService
+        // already serializes starts (it only fires onTime when idle), but this
+        // guards against any stray re-trigger spawning an overlapping test —
+        // overlapping measurements corrupt the shared runner state and cause
+        // "Measurement timed out".
+        if (!this.isMeasurementInProgress) {
+            this.onRunMeasurement(event, loopModeInfo)
+        }
         if (loopModeInfo.test_counter < (loopModeInfo.max_tests || Infinity)) {
             LoopService.I.scheduleLoop({
                 interval: loopInterval,

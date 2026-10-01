@@ -91,9 +91,17 @@ export class LoopService {
         const interval =
             options.interval > 0 ? options.interval : ZERO_INTERVAL_MS
 
-        // Absolute target for the NEXT test (test `counter + 1`, i.e. `counter`
-        // intervals after the loop started).
-        const nextTargetMs = this.loopStartMs + counter * interval
+        // The next test starts `interval` after THIS test's start. scheduleLoop
+        // is called right as the current test begins, so anchor to `now`.
+        //
+        // This MUST be relative to the current start, not loopStart +
+        // counter*interval: if a test runs longer than the interval, absolute
+        // targets pile up in the past and the scheduler fires a burst of
+        // "catch-up" tests all at once — overlapping measurements that stomp on
+        // each other's state and time out. Anchoring to the current start means
+        // an overrun yields exactly one next test, right after the current one
+        // finishes (and exact start-to-start spacing when interval > duration).
+        const nextTargetMs = Date.now() + interval
 
         clearTimeout(this.loopTimeout)
 

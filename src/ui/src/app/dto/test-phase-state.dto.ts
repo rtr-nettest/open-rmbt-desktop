@@ -5,7 +5,6 @@ import { ETestStatuses } from "../enums/test-statuses.enum"
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
 import { ConversionService } from "../services/conversion.service"
 import dayjs from "dayjs"
-import { STATE_UPDATE_TIMEOUT } from "../store/test.store"
 
 export class TestPhaseState implements ITestPhaseState {
     counter: number = -1
@@ -25,6 +24,12 @@ export class TestPhaseState implements ITestPhaseState {
     ups: IOverallResult[] = []
     startTimeMs: number = 0
     endTimeMs: number = 0
+    // Elapsed phase time of the first charted speed sample, used to anchor the
+    // speed chart to t=0. The native engines only report a speed a second or two
+    // into each phase; without this the download/upload curve would begin partway
+    // along the x-axis instead of at 0 s (the browser engine reports almost
+    // immediately, so its chart already starts at 0).
+    chartStartDuration?: number
 
     private conversion = new ConversionService()
 
@@ -62,10 +67,17 @@ export class TestPhaseState implements ITestPhaseState {
         if (this.counter < 0) {
             return
         }
+        // Anchor the first sample to t=0 so the curve starts at the left edge of
+        // the chart regardless of how long into the phase the engine took to
+        // report a speed; later samples keep their real elapsed time relative to
+        // that first sample.
+        if (this.chartStartDuration === undefined) {
+            this.chartStartDuration = this.duration
+        }
         this.chart = [
             ...(this.chart || []),
             {
-                x: Math.max(this.duration - STATE_UPDATE_TIMEOUT / 1000, 0),
+                x: Math.max(this.duration - this.chartStartDuration, 0),
                 y: this.conversion.speedLog(this.counter),
             },
         ]

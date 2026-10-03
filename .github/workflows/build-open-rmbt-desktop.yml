@@ -7,7 +7,7 @@ on:
 # come from this single open-rmbt-client-cli release, downloaded per-platform
 # via the public release URLs.
 env:
-    MEASUREMENT_ENGINE_VERSION: v2.5.0
+    MEASUREMENT_ENGINE_VERSION: v2.5.1
 
 jobs:
     test:

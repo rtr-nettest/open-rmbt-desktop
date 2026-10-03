@@ -12,6 +12,7 @@ import {
     BehaviorSubject,
     Subject,
     distinctUntilChanged,
+    switchMap,
     takeUntil,
     tap,
     withLatestFrom,
@@ -57,10 +58,17 @@ export class TestScreenComponent implements OnDestroy, OnInit {
         }),
     )
     loopWaiting$ = new BehaviorSubject(false)
-    result$ = this.historyStore.getFormattedHistory({
-        grouped: false,
-        loopUuid: this.store.loopUuid$.value ?? undefined,
-    })
+    // The loop UUID is learned from the server during the first test, so re-fetch
+    // the grouped loop results whenever it becomes known (or changes).
+    result$ = this.store.loopUuid$.pipe(
+        distinctUntilChanged(),
+        switchMap((loopUuid) =>
+            this.historyStore.getFormattedHistory({
+                grouped: false,
+                loopUuid: loopUuid ?? undefined,
+            }),
+        ),
+    )
     showCPUWarning$ = new BehaviorSubject(0)
     ms$ = new BehaviorSubject(0)
     progress$ = new BehaviorSubject(0)

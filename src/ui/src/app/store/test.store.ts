@@ -22,7 +22,6 @@ import { MainStore } from "./main.store"
 import { IMeasurementServerResponse } from "../../../../measurement/interfaces/measurement-server-response.interface"
 import { ERoutes } from "../enums/routes.enum"
 import { ILoopModeInfo } from "../../../../measurement/interfaces/measurement-registration-request.interface"
-import { v4 } from "uuid"
 import { MessageService } from "../services/message.service"
 import { TranslocoService } from "@ngneat/transloco"
 import { SprintfPipe } from "../pipes/sprintf.pipe"
@@ -183,14 +182,21 @@ export class TestStore {
         newState = TestVisualizationState.from(newState, phaseState)
         this.visualization$.next(newState)
         this.basicNetworkInfo$.next(phaseState)
+        // Learn the server-minted loop UUID (bare) once it is known, so the loop
+        // result view, history grouping and certified PDF export can use it. The
+        // desktop never generates it; the control server does on the first test.
+        if (phaseState.loopUuid && this.loopUuid$.value !== phaseState.loopUuid) {
+            this.loopUuid$.next(phaseState.loopUuid)
+        }
         return newState
     }
 
     launchCertifiedTest() {
-        const loopUuid = v4()
         const loopCounter = 1
         this.loopStartedAt = Date.now()
-        this.loopUuid$.next(loopUuid)
+        // The loop UUID is minted by the control server on the first test and
+        // learned from the measurement state (see setTestState); never generated here.
+        this.loopUuid$.next(null)
         this.loopCounter$.next(loopCounter)
         this.enableLoopMode$.next(true)
         this.isCertifiedMeasurement$.next(true)
@@ -201,7 +207,6 @@ export class TestStore {
             max_delay: this.testIntervalMinutes$.value ?? 0,
             max_tests: this.mainStore.env$.value!.CERTIFIED_TEST_COUNT,
             test_counter: loopCounter,
-            loop_uuid: loopUuid,
             cert_mode: true,
         }
         window.electronAPI.onMaxTestsReached(() =>
@@ -212,10 +217,11 @@ export class TestStore {
     }
 
     launchLoopTest(interval: number) {
-        const loopUuid = v4()
         const loopCounter = 1
         this.loopStartedAt = Date.now()
-        this.loopUuid$.next(loopUuid)
+        // The loop UUID is minted by the control server on the first test and
+        // learned from the measurement state (see setTestState); never generated here.
+        this.loopUuid$.next(null)
         this.loopCounter$.next(loopCounter)
         this.enableLoopMode$.next(true)
         this.isCertifiedMeasurement$.next(false)
@@ -223,7 +229,6 @@ export class TestStore {
         const loopModeInfo: ILoopModeInfo | undefined = {
             max_delay: this.testIntervalMinutes$.value ?? 0,
             test_counter: loopCounter,
-            loop_uuid: loopUuid,
         }
         window.electronAPI.scheduleLoop(this.fullTestIntervalMs, loopModeInfo)
         this.router.navigate(["/", ERoutes.LOOP_TEST])

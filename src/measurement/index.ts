@@ -56,6 +56,12 @@ export class MeasurementRunner {
     private settingsRequest?: UserSettingsRequest
     private startTimeMs = 0
     private endTimeMs = 0
+    // Server loop UUID (bare, no "L" prefix) for the running loop. The desktop no
+    // longer generates loop UUIDs: it is left empty on the first iteration so the
+    // control server mints one, captured from that iteration's result (JS engine:
+    // registration response; native engine: the client's UUID_INFO), then reused
+    // on every subsequent iteration. Reset at the start of each new loop.
+    private serverLoopUuid?: string
 
     get isMeasurementInProgress() {
         return ![
@@ -175,6 +181,10 @@ export class MeasurementRunner {
             ups: this.rmbtClient?.ups ?? [],
             phase,
             testUuid: this.rmbtClient?.getTestUuid() ?? "",
+            loopUuid:
+                this.serverLoopUuid ??
+                this.rmbtClient?.params?.loop_uuid?.replace(/^L/, "") ??
+                "",
             ipAddress: this.rmbtClient?.params.client_remote_ip ?? "-",
             serverName: this.rmbtClient?.params.test_server_name ?? "-",
             providerName: this.rmbtClient?.params.provider ?? "-",
@@ -190,9 +200,26 @@ export class MeasurementRunner {
     onRunMeasurement = async (event, loopModeInfo?: ILoopModeInfo) => {
         const webContents = event.sender
         try {
+            // The server owns the loop UUID: send whatever we have learned so far
+            // (undefined on the first iteration → the server mints one). A plain
+            // single test clears it so no stale loop UUID leaks into its state.
+            if (loopModeInfo) {
+                loopModeInfo.loop_uuid = this.serverLoopUuid
+            } else {
+                this.serverLoopUuid = undefined
+            }
             const status = await MeasurementRunner.I.runMeasurement({
                 loopModeInfo,
             })
+            // Capture the loop UUID the server minted on the first iteration
+            // (JS engine: registration response; native engine: UUID_INFO), then
+            // reuse it for the rest of the loop. Stored bare (no "L" prefix).
+            if (loopModeInfo && !this.serverLoopUuid) {
+                const minted = this.rmbtClient?.params?.loop_uuid
+                if (minted) {
+                    this.serverLoopUuid = minted.replace(/^L/, "")
+                }
+            }
             if (status === EMeasurementStatus.ABORTED) {
                 webContents.send(Events.MEASUREMENT_ABORTED)
             }
@@ -212,6 +239,11 @@ export class MeasurementRunner {
 
     onScheduleLoop = (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
         const webContents = event.sender
+        // A fresh loop is starting: forget any previous loop's server UUID so the
+        // first iteration asks the server to mint a new one.
+        if (loopModeInfo.test_counter <= 1) {
+            this.serverLoopUuid = undefined
+        }
         // Never start a loop test while one is already running. LoopService
         // already serializes starts (it only fires onTime when idle), but this
         // guards against any stray re-trigger spawning an overlapping test —

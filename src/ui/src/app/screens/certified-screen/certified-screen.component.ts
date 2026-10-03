@@ -1,5 +1,5 @@
 import { Component, OnDestroy } from "@angular/core"
-import { Subject, firstValueFrom, takeWhile, tap } from "rxjs"
+import { Subject, firstValueFrom, takeUntil, takeWhile, tap } from "rxjs"
 import { ICertifiedDataForm } from "src/app/interfaces/certified-data-form.interface"
 import { ICertifiedEnvForm } from "src/app/interfaces/certified-env-form.interface"
 import { HistoryExportService } from "src/app/services/history-export.service"
@@ -75,7 +75,9 @@ export class CertifiedScreenComponent implements OnDestroy {
                 tap((isMaxValueReached) => {
                     if (isMaxValueReached) {
                         firstValueFrom(
-                            this.exporter.getCertifiedPdfUrl(this.loopUuid),
+                            this.exporter.getCertifiedPdfUrl(
+                                this.testStore.loopUuid$.value,
+                            ),
                         ).then((url) =>
                             url ? window.electronAPI.openPdf(url) : void 0,
                         )
@@ -86,7 +88,13 @@ export class CertifiedScreenComponent implements OnDestroy {
                 takeWhile((isMaxValueReached) => !isMaxValueReached),
             )
             .subscribe()
-        this.loopUuid = this.testStore.launchCertifiedTest().loop_uuid
+        // The loop UUID is minted by the server on the first test and learned from
+        // the measurement state; keep the result screen's input in sync with it
+        // (never generated or captured here).
+        this.testStore.loopUuid$
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((u) => (this.loopUuid = u ?? ""))
+        this.testStore.launchCertifiedTest()
         this.activeBreadCrumbIndex = EBreadCrumbs.MEASUREMENT
     }
 

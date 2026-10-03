@@ -270,10 +270,15 @@ export class RMBTRustClient implements IRMBTClient {
                     "--user-loop-mode-test-counter",
                     options?.loopModeInfo?.test_counter,
                 )
-                bin_options.push(
-                    "--user-loop-mode-uuid",
-                    options?.loopModeInfo?.loop_uuid,
-                )
+                // Only pass the loop UUID once it is known. On the first iteration
+                // it is omitted so the control server mints one, which we then read
+                // back from the client's UUID_INFO message.
+                if (options?.loopModeInfo?.loop_uuid) {
+                    bin_options.push(
+                        "--user-loop-mode-uuid",
+                        options.loopModeInfo.loop_uuid,
+                    )
+                }
             }
 
             // get the uuid from settings and push it to java options array
@@ -417,6 +422,11 @@ export class RMBTRustClient implements IRMBTClient {
                 ) {
                     this._testUuid = parsed_data["testUuid"]
                     this.params.test_uuid = parsed_data["testUuid"]
+                    // Server loop UUID minted on the first loop iteration; the
+                    // runner reads it from params and reuses it for the rest.
+                    if (parsed_data["loopUuid"]) {
+                        this.params.loop_uuid = parsed_data["loopUuid"]
+                    }
                 } else if (parsed_data["type"] == "STATE_CHANGE") {
                     switch (parsed_data["state"]) {
                         case "NOT_STARTED":

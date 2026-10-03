@@ -2,7 +2,10 @@ import { EMeasurementServerType } from "../enums/measurement-server-type.enum"
 import { IGeolocation } from "./geolocation.interface"
 
 export interface ILoopModeInfo {
-    loop_uuid: string
+    // Server loop UUID. Undefined/null on the first iteration of a loop: the
+    // control server then mints it and returns it, and it is reused (echoed) on
+    // every subsequent iteration. The desktop never generates this itself.
+    loop_uuid?: string | null
     max_delay: number
     max_movement?: number
     max_tests?: number

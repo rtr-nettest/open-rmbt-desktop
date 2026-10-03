@@ -170,6 +170,38 @@ export class RMBTRustClient implements IRMBTClient {
         return Math.min(1, this.getPhaseDuration(phase) / estimatePhaseDuration)
     }
 
+    // Measurement phases in the order they occur. advanceToPhase() uses this to
+    // keep transitions monotonic.
+    private static readonly PHASE_SEQUENCE: EMeasurementStatus[] = [
+        EMeasurementStatus.NOT_STARTED,
+        EMeasurementStatus.WAIT,
+        EMeasurementStatus.INIT,
+        EMeasurementStatus.INIT_DOWN,
+        EMeasurementStatus.PING,
+        EMeasurementStatus.DOWN,
+        EMeasurementStatus.INIT_UP,
+        EMeasurementStatus.UP,
+        EMeasurementStatus.SUBMITTING_RESULTS,
+        EMeasurementStatus.END,
+    ]
+
+    /**
+     * Move the measurement forward to `phase`, recording its start time once.
+     * Transitions to the current or an earlier phase are ignored, so the phase —
+     * and the progress gauge derived from phaseStartTimeNs — never steps back.
+     * In particular this stops the INIT→INIT_DOWN fallback timer from resetting
+     * INIT_DOWN after the engine has already entered it (which made the init
+     * gauge jump up, back down, then up again).
+     */
+    private advanceToPhase(phase: EMeasurementStatus) {
+        const seq = RMBTRustClient.PHASE_SEQUENCE
+        if (seq.indexOf(phase) <= seq.indexOf(this.measurementStatus)) {
+            return
+        }
+        this.measurementStatus = phase
+        this.phaseStartTimeNs[phase] = Time.nowNs()
+    }
+
     async scheduleMeasurement(
         options?: MeasurementOptions,
     ): Promise<IMeasurementThreadResult[]> {
@@ -224,8 +256,7 @@ export class RMBTRustClient implements IRMBTClient {
             // set the state to INIT =================================================================
             // CORRECT STATE PROGRESSION:
             // NOT_STARTED --> INIT --> INIT_DOWN --> PING --> DOWN --> INIT_UP --> UP --> SUBMITTING_RESULTS --> END
-            this.measurementStatus = EMeasurementStatus.INIT
-            this.phaseStartTimeNs[EMeasurementStatus.INIT] = Time.nowNs()
+            this.advanceToPhase(EMeasurementStatus.INIT)
 
             // spawn process =========================================================================
             Logger.I.info("Spawning external process...")
@@ -345,9 +376,11 @@ export class RMBTRustClient implements IRMBTClient {
 
             // Handle phase transitions ================================================================
             setTimeout(() => {
-                this.measurementStatus = EMeasurementStatus.INIT_DOWN
-                this.phaseStartTimeNs[EMeasurementStatus.INIT_DOWN] =
-                    Time.nowNs()
+                // Fallback INIT → INIT_DOWN transition in case the engine hasn't
+                // emitted a state change yet. advanceToPhase() makes this a no-op
+                // once the engine has already moved on, so it can't reset the
+                // phase start and make the progress gauge jump backwards.
+                this.advanceToPhase(EMeasurementStatus.INIT_DOWN)
             }, 1000)
 
             let allowedInactivityMs = Number(process.env.ALLOWED_INACTIVITY_MS)
@@ -436,31 +469,19 @@ export class RMBTRustClient implements IRMBTClient {
                         case "INIT":
                             break
                         case "PING":
-                            this.measurementStatus = EMeasurementStatus.PING
-                            this.phaseStartTimeNs[EMeasurementStatus.PING] =
-                                Time.nowNs()
+                            this.advanceToPhase(EMeasurementStatus.PING)
                             break
                         case "INIT_DOWN":
-                            this.measurementStatus =
-                                EMeasurementStatus.INIT_DOWN
-                            this.phaseStartTimeNs[
-                                EMeasurementStatus.INIT_DOWN
-                            ] = Time.nowNs()
+                            this.advanceToPhase(EMeasurementStatus.INIT_DOWN)
                             break
                         case "DOWN":
-                            this.measurementStatus = EMeasurementStatus.DOWN
-                            this.phaseStartTimeNs[EMeasurementStatus.DOWN] =
-                                Time.nowNs()
+                            this.advanceToPhase(EMeasurementStatus.DOWN)
                             break
                         case "INIT_UP":
-                            this.measurementStatus = EMeasurementStatus.INIT_UP
-                            this.phaseStartTimeNs[EMeasurementStatus.INIT_UP] =
-                                Time.nowNs()
+                            this.advanceToPhase(EMeasurementStatus.INIT_UP)
                             break
                         case "UP":
-                            this.measurementStatus = EMeasurementStatus.UP
-                            this.phaseStartTimeNs[EMeasurementStatus.UP] =
-                                Time.nowNs()
+                            this.advanceToPhase(EMeasurementStatus.UP)
                             break
                         case "SUBMITTING_RESULTS":
                             break

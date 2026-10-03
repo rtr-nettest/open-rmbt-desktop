@@ -5,7 +5,7 @@ import {
     signal,
 } from "@angular/core"
 import { ActivatedRoute, Router } from "@angular/router"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
 import { MainStore } from "src/app/store/main.store"
 import { TestStore } from "src/app/store/test.store"
@@ -19,7 +19,6 @@ import { ERoutes } from "src/app/enums/routes.enum"
 import { ClassificationService } from "src/app/services/classification.service"
 import { ConversionService } from "src/app/services/conversion.service"
 import { UNKNOWN } from "src/app/constants/strings"
-import { I18nService } from "src/app/services/i18n.service"
 import { HistoryExportService } from "src/app/services/history-export.service"
 import { SKIPPED_FIELDS } from "src/app/constants/skipped-details-fields"
 import { SEARCHABLE_FIELDS } from "src/app/constants/searchable-details-fields"
@@ -138,7 +137,7 @@ export class ResultScreenComponent implements OnDestroy {
         private store: TestStore,
         private route: ActivatedRoute,
         private router: Router,
-        private transloco: TranslocoService,
+        private transloco: I18nService,
     ) {}
 
     ngOnDestroy(): void {

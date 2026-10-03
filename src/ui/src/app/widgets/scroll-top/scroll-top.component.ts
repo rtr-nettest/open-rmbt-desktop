@@ -1,10 +1,11 @@
-import { Component, HostListener } from "@angular/core"
+import { Component, HostListener, ChangeDetectionStrategy } from "@angular/core"
 
 @Component({
     selector: "app-scroll-top",
     templateUrl: "./scroll-top.component.html",
     styleUrls: ["./scroll-top.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class ScrollTopComponent {
     isVisible = false

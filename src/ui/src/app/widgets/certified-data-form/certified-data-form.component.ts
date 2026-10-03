@@ -4,6 +4,7 @@ import {
     OnDestroy,
     OnInit,
     Output,
+    ChangeDetectionStrategy,
 } from "@angular/core"
 import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms"
 import { Subject, map, takeUntil } from "rxjs"
@@ -17,6 +18,7 @@ import { TestStore } from "src/app/store/test.store"
     selector: "app-certified-data-form",
     templateUrl: "./certified-data-form.component.html",
     styleUrls: ["./certified-data-form.component.scss"],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class CertifiedDataFormComponent implements OnInit, OnDestroy {

@@ -8,7 +8,7 @@
         @if (result$ | async; as result) {
             <app-main-content [style.flex-direction]="'column'">
                 <app-export-warning></app-export-warning>
-                <div class="app-main" *transloco="let t">
+                <div class="app-main" *localize="let t">
                     <div class="app-title">
                         <button
                             type="button"
@@ -19,20 +19,24 @@
                         >
                             <i class="app-icon app-icon--chevron-left"></i>
                         </button>
-                        <h1 *ngIf="result.measurementDate" aria-live="polite">
-                            {{ t("Measurement result from") }}
-                            {{
-                                result.measurementDate
-                                    | date: "dd.MM.yyyy, HH:mm:ss"
-                            }}
-                        </h1>
-                        <h1 *ngIf="!result.measurementDate" aria-live="polite">
-                            @if (failedDetailedResults()) {
-                                {{ t("Measurement failed") }}
-                            } @else {
-                                {{ t("Measurement result") }}
-                            }
-                        </h1>
+                        @if (result.measurementDate) {
+                            <h1 aria-live="polite">
+                                {{ t("Measurement result from") }}
+                                {{
+                                    result.measurementDate
+                                        | date: "dd.MM.yyyy, HH:mm:ss"
+                                }}
+                            </h1>
+                        }
+                        @if (!result.measurementDate) {
+                            <h1 aria-live="polite">
+                                @if (failedDetailedResults()) {
+                                    {{ t("Measurement failed") }}
+                                } @else {
+                                    {{ t("Measurement result") }}
+                                }
+                            </h1>
+                        }
                         @if (!failedDetailedResults()) {
                             <app-action-buttons
                                 [items]="actionButtons"
@@ -52,7 +56,7 @@
                     @if (qoeResults(); as qoeResults) {
                         @if (qoeResults.content.length) {
                             <h3 class="app-title">
-                                {{ "Quality" | transloco }}
+                                {{ "Quality" | localize }}
                             </h3>
                             <app-table
                                 [columns]="qoeColumns"
@@ -90,18 +94,17 @@
                         </div>
                     }
                     @if (failedDetailedResults(); as failedDetailedResults) {
-                        <div
-                            class="app-container"
-                            *ngIf="failedDetailedResults.content.length"
-                        >
-                            <app-table
-                                [columns]="columns"
-                                [data]="failedDetailedResults"
-                                [shouldHideHeader]="true"
-                                [tableClassNames]="['app-table--bordered']"
-                                [sort]="sort"
-                            ></app-table>
-                        </div>
+                        @if (failedDetailedResults.content.length) {
+                            <div class="app-container">
+                                <app-table
+                                    [columns]="columns"
+                                    [data]="failedDetailedResults"
+                                    [shouldHideHeader]="true"
+                                    [tableClassNames]="['app-table--bordered']"
+                                    [sort]="sort"
+                                ></app-table>
+                            </div>
+                        }
                     }
                 </div>
                 <app-footer></app-footer>
@@ -120,19 +123,19 @@
                 mat-icon-button
                 (click)="weHaveToGoBack()"
                 style="margin-right: 1ex"
-                title="{{ 'Go back' | transloco }}"
+                title="{{ 'Go back' | localize }}"
             >
                 <i class="app-icon app-icon--chevron-left"></i>
             </button>
             <h1 class="app-title--no-result" aria-live="polite">
                 @if (loading()) {
-                    {{ "Fetching the result..." | transloco }}
+                    {{ "Fetching the result..." | localize }}
                 } @else {
                     @if (error$ | async; as error) {
-                        {{ "Measurement failed" | transloco }}
+                        {{ "Measurement failed" | localize }}
                         {{ error.message }}
                     } @else {
-                        {{ "No results available" | transloco }}
+                        {{ "No results available" | localize }}
                     }
                 }
             </h1>

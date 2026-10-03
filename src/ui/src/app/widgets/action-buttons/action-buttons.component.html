@@ -1,14 +1,17 @@
-<ng-container *ngIf="items?.length">
-    <ng-container *transloco="let t">
-        <button
-            class="app-button"
-            mat-icon-button
-            *ngFor="let item of items; let i = index"
-            (click)="handleClick($event, i)"
-            [disabled]="(disabledItems$ | async)!.has(i)"
-            [title]="t(item.label)"
-        >
-            <i class="app-icon app-icon--{{ item.icon }}" *ngIf="item.icon"></i>
-        </button>
+@if (items?.length) {
+    <ng-container *localize="let t">
+        @for (item of items; track item; let i = $index) {
+            <button
+                class="app-button"
+                mat-icon-button
+                (click)="handleClick($event, i)"
+                [disabled]="(disabledItems$ | async)!.has(i)"
+                [title]="t(item.label)"
+            >
+                @if (item.icon) {
+                    <i class="app-icon app-icon--{{ item.icon }}"></i>
+                }
+            </button>
+        }
     </ng-container>
-</ng-container>
+}

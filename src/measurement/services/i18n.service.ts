@@ -1,4 +1,4 @@
-import { TranslocoConfigExt } from "../../ui/src/transloco.config"
+import { I18N_CONFIG } from "../../ui/src/i18n.config"
 import { ACTIVE_LANGUAGE, DEFAULT_LANGUAGE, Store } from "./store.service"
 
 export class I18nService {
@@ -11,7 +11,7 @@ export class I18nService {
     private translations: { [key: string]: { [key: string]: string } } = {}
 
     private constructor() {
-        for (const lang of TranslocoConfigExt["availableLangs"]) {
+        for (const lang of I18N_CONFIG["availableLangs"]) {
             try {
                 this.translations[
                     lang
@@ -30,8 +30,8 @@ export class I18nService {
         if (!language) {
             language = Intl.DateTimeFormat().resolvedOptions().locale
         }
-        if (!TranslocoConfigExt["availableLangs"].includes(language)) {
-            language = TranslocoConfigExt["defaultLang"]
+        if (!I18N_CONFIG["availableLangs"].includes(language)) {
+            language = I18N_CONFIG["defaultLang"]
         }
         return language
     }

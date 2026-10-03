@@ -6,7 +6,7 @@ import {
 } from "./test-rtr-chart-dataset.dto"
 import { TestChart } from "./test-chart.dto"
 import { TestBarChartOptions } from "./test-bar-chart-options.dto"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import {
     getBarWidth,
     PingBarChartPlugin,
@@ -17,7 +17,7 @@ export class TestBarChart extends TestChart {
 
     constructor(
         context: CanvasRenderingContext2D,
-        transloco: TranslocoService,
+        transloco: I18nService,
         private phase: ChartPhase,
     ) {
         super(

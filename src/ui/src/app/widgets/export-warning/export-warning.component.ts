@@ -1,4 +1,4 @@
-import { Component } from "@angular/core"
+import { Component, ChangeDetectionStrategy } from "@angular/core"
 import { map } from "rxjs"
 import { TestStore } from "src/app/store/test.store"
 
@@ -6,11 +6,12 @@ import { TestStore } from "src/app/store/test.store"
     selector: "app-export-warning",
     templateUrl: "./export-warning.component.html",
     styleUrls: ["./export-warning.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class ExportWarningComponent {
     isLocal$ = this.store.simpleHistoryResult$.pipe(
-        map((result) => result?.isLocal)
+        map((result) => result?.isLocal),
     )
 
     constructor(private store: TestStore) {}

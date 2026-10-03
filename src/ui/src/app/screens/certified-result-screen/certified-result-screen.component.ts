@@ -1,26 +1,29 @@
-import { ChangeDetectorRef, Component, Input, OnInit } from "@angular/core"
+import {
+    ChangeDetectorRef,
+    Component,
+    Input,
+    OnInit,
+    ChangeDetectionStrategy,
+} from "@angular/core"
 import { HistoryScreenComponent } from "../history-screen/history-screen.component"
 import { Observable, of } from "rxjs"
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
-import {
-    IHistoryRowRTR,
-} from "src/app/interfaces/history-row.interface"
+import { IHistoryRowRTR } from "src/app/interfaces/history-row.interface"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 
 @Component({
     selector: "app-certified-result-screen",
     templateUrl: "../history-screen/history-screen.component.html",
     styleUrls: ["../history-screen/history-screen.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class CertifiedResultScreenComponent extends HistoryScreenComponent {
     @Input() loopUuid: string | null = null
 
     override shouldGroupHistory = false
     override pageTitle = "Certified measurement results"
-    override result$: Observable<
-        IBasicResponse<IHistoryRowRTR>
-    > = of()
+    override result$: Observable<IBasicResponse<IHistoryRowRTR>> = of()
     override actionButtons: IMainMenuItem[] = [
         {
             label: "",

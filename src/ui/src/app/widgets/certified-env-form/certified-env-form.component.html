@@ -1,4 +1,4 @@
-<ng-container *transloco="let t">
+<ng-container *localize="let t">
     <h1>{{ t("Certified measurement") }}</h1>
     <h2>{{ t("Further information on the certified measurement") }}</h2>
     <p>
@@ -8,101 +8,110 @@
             )
         }}
     </p>
-    <div *ngIf="form">
-        <form [formGroup]="form">
-            <h4>
-                {{ t("Please describe the location of your Internet access")
-                }}<sup>*</sup>
-            </h4>
-            <ul>
-                <li
-                    *ngFor="
-                        let control of form.controls.locationType.controls;
-                        let i = index
-                    "
-                >
-                    <mat-checkbox
-                        [value]="locationValues[i]"
-                        [formControl]="control"
-                        >{{ t(locationNames[i]) }}</mat-checkbox
+    @if (form) {
+        <div>
+            <form [formGroup]="form">
+                <h4>
+                    {{
+                        t(
+                            "Please describe the location of your Internet access"
+                        )
+                    }}<sup>*</sup>
+                </h4>
+                <ul>
+                    @for (
+                        control of form.controls.locationType.controls;
+                        track control;
+                        let i = $index
+                    ) {
+                        <li>
+                            <mat-checkbox
+                                [value]="locationValues[i]"
+                                [formControl]="control"
+                                >{{ t(locationNames[i]) }}</mat-checkbox
+                            >
+                        </li>
+                    }
+                </ul>
+                <mat-form-field appearance="outline">
+                    <textarea
+                        matInput
+                        formControlName="locationTypeOther"
+                        name="locationTypeOther"
+                    ></textarea>
+                </mat-form-field>
+                <h4>
+                    {{ t("Please describe your Internet access") }}
+                </h4>
+                <p>
+                    {{ t("What kind of Internet access do you have?") }}
+                </p>
+                <mat-form-field appearance="outline">
+                    <textarea
+                        matInput
+                        formControlName="typeText"
+                        name="typeText"
+                    ></textarea>
+                </mat-form-field>
+                <h4>
+                    {{ t("Please describe your device used for measuring") }}
+                </h4>
+                <p>
+                    {{
+                        t(
+                            "Describe the computer that you are running the test with."
+                        )
+                    }}
+                </p>
+                <mat-form-field appearance="outline">
+                    <textarea
+                        matInput
+                        formControlName="testDevice"
+                        name="testDevice"
+                    ></textarea>
+                </mat-form-field>
+                <h4>
+                    {{ t("Photo upload") }}
+                </h4>
+                <p>
+                    {{ t("Please send us a photo of the modem") }}
+                </p>
+                @for (fileId of fileIds; track fileId) {
+                    <p
+                        style="
+                            align-items: center;
+                            display: flex;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                        "
                     >
-                </li>
-            </ul>
-            <mat-form-field appearance="outline">
-                <textarea
-                    matInput
-                    formControlName="locationTypeOther"
-                    name="locationTypeOther"
-                ></textarea>
-            </mat-form-field>
-            <h4>
-                {{ t("Please describe your Internet access") }}
-            </h4>
-            <p>
-                {{ t("What kind of Internet access do you have?") }}
-            </p>
-            <mat-form-field appearance="outline">
-                <textarea
-                    matInput
-                    formControlName="typeText"
-                    name="typeText"
-                ></textarea>
-            </mat-form-field>
-            <h4>
-                {{ t("Please describe your device used for measuring") }}
-            </h4>
-            <p>
-                {{
-                    t(
-                        "Describe the computer that you are running the test with."
-                    )
-                }}
-            </p>
-            <mat-form-field appearance="outline">
-                <textarea
-                    matInput
-                    formControlName="testDevice"
-                    name="testDevice"
-                ></textarea>
-            </mat-form-field>
-            <h4>
-                {{ t("Photo upload") }}
-            </h4>
-            <p>
-                {{ t("Please send us a photo of the modem") }}
-            </p>
-            <p
-                *ngFor="let fileId of fileIds"
-                style="
-                    align-items: center;
-                    display: flex;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                "
-            >
-                <input
-                    [id]="fileId"
-                    style="display: none"
-                    type="file"
-                    (change)="onFileSelected($event, fileId)"
-                />
-                <button mat-button (click)="onFileUploadClick(fileId)">
-                    <mat-icon>attach_file</mat-icon>{{ t("Upload file") }}
-                </button>
-                <span
-                    *ngIf="files[fileId]?.name"
-                    style="margin-left: 1em; margin-right: 1em"
-                    >{{ files[fileId].name }}</span
-                >
-                <button
-                    *ngIf="files[fileId]?.name"
-                    mat-icon-button
-                    (click)="onDeleteFile(fileId)"
-                >
-                    <mat-icon>delete</mat-icon>
-                </button>
-            </p>
-        </form>
-    </div>
+                        <input
+                            [id]="fileId"
+                            style="display: none"
+                            type="file"
+                            (change)="onFileSelected($event, fileId)"
+                        />
+                        <button mat-button (click)="onFileUploadClick(fileId)">
+                            <mat-icon>attach_file</mat-icon
+                            >{{ t("Upload file") }}
+                        </button>
+                        @if (files[fileId]?.name) {
+                            <span style="margin-left: 1em; margin-right: 1em">{{
+                                files[fileId].name
+                            }}</span>
+                        }
+                        @if (files[fileId]?.name) {
+                            <button
+                                mat-icon-button
+                                (click)="onDeleteFile(fileId)"
+                            >
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        }
+                    </p>
+                }
+            </form>
+        </div>
+    }
 </ng-container>

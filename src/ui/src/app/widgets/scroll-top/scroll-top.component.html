@@ -1,10 +1,10 @@
-<ng-container *ngIf="isVisible">
+@if (isVisible) {
     <button
         color="primary"
         mat-button
-        *transloco="let t"
+        *localize="let t"
         (click)="handleClick($event)"
     >
         {{ t("Back to top") }}
     </button>
-</ng-container>
+}

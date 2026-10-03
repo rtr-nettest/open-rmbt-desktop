@@ -3,7 +3,7 @@ import { MainStore } from "../store/main.store"
 import { ISimpleHistoryResult } from "../../../../measurement/interfaces/simple-history-result.interface"
 import { BehaviorSubject, catchError, concatMap, map, of, tap } from "rxjs"
 import { HttpClient, HttpParams } from "@angular/common/http"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { MessageService } from "./message.service"
 import saveAs from "file-saver"
 import { ERROR_OCCURED } from "../constants/strings"
@@ -37,7 +37,7 @@ export class HistoryExportService {
         private mainStore: MainStore,
         private message: MessageService,
         private http: HttpClient,
-        private transloco: TranslocoService,
+        private transloco: I18nService,
     ) {}
 
     exportAs(format: "csv" | "xlsx", results: ISimpleHistoryResult[]) {

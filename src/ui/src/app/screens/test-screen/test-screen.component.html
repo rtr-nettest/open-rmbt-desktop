@@ -1,89 +1,92 @@
-<app-header *ngIf="!hideMenu"></app-header>
+@if (!hideMenu) {
+    <app-header></app-header>
+}
 <ng-container [ngTemplateOutlet]="rtr"></ng-container>
 
 <ng-template #rtr>
-    <app-body *transloco="let t">
-        <app-main-menu *ngIf="!hideMenu" [disabled]="true"></app-main-menu>
-        <app-main-content
-            *ngIf="visualization$ | async"
-            [class.hidden-menu]="hideMenu"
-        >
-            <ng-container *ngIf="(enableLoopMode$ | async) === true">
-                <ng-container *ngIf="loopCount$ | async as loopCount">
-                    <h1
-                        *ngIf="(loopWaiting$ | async) !== true"
-                        class="app-title"
-                        aria-live="polite"
-                    >
-                        {{ t("Measurement") + " " + loopCount }}
-                    </h1>
-                    <ng-container *ngIf="(loopWaiting$ | async) === true">
-                        <h1 class="app-title" aria-live="polite">
-                            {{ t("Waiting for next measurement") }}
-                        </h1>
-                        <h2 class="app-title app-title--sub">
-                            {{ t("Result of measurement") | sprintf: loopCount }}
-                        </h2>
-                    </ng-container>
-                </ng-container>
-            </ng-container>
-            <app-alert
-                aria-live="assertive"
-                *ngIf="showCPUWarning$ | async as cpuUsage"
-                kind="warning"
-                [text]="
-                    t('CPU usage is higher than %0%. Results may be skewed.')
-                        | sprintf: cpuUsage
-                "
-            ></app-alert>
-            <div class="app-main">
-                <div class="app-progress-bar-wrapper">
-                    <app-gauge
-                        *ngIf="
-                            (loopWaiting$ | async) !== true;
-                            else loopWaitProgressBar
+    <app-body *localize="let t">
+        @if (!hideMenu) {
+            <app-main-menu [disabled]="true"></app-main-menu>
+        }
+        @if (visualization$ | async) {
+            <app-main-content [class.hidden-menu]="hideMenu">
+                @if ((enableLoopMode$ | async) === true) {
+                    @if (loopCount$ | async; as loopCount) {
+                        @if ((loopWaiting$ | async) !== true) {
+                            <h1 class="app-title" aria-live="polite">
+                                {{ t("Measurement") + " " + loopCount }}
+                            </h1>
+                        }
+                        @if ((loopWaiting$ | async) === true) {
+                            <h1 class="app-title" aria-live="polite">
+                                {{ t("Waiting for next measurement") }}
+                            </h1>
+                            <h2 class="app-title app-title--sub">
+                                {{
+                                    t("Result of measurement")
+                                        | sprintf: loopCount
+                                }}
+                            </h2>
+                        }
+                    }
+                }
+                @if (showCPUWarning$ | async; as cpuUsage) {
+                    <app-alert
+                        aria-live="assertive"
+                        kind="warning"
+                        [text]="
+                            t(
+                                'CPU usage is higher than %0%. Results may be skewed.'
+                            ) | sprintf: cpuUsage
                         "
-                    ></app-gauge>
+                    ></app-alert>
+                }
+                <div class="app-main">
+                    <div class="app-progress-bar-wrapper">
+                        @if ((loopWaiting$ | async) !== true) {
+                            <app-gauge></app-gauge>
+                        } @else {
+                            @if (progressMode$ | async; as progressMode) {
+                                <div style="width: 100%; padding: 0.5em">
+                                    @if (progressMode === "determinate") {
+                                        <h2 *localize="let t" class="app-title">
+                                            {{
+                                                t("Next measurement in") +
+                                                    " " +
+                                                    (ms$
+                                                        | async
+                                                        | date: "mm:ss")
+                                            }}
+                                        </h2>
+                                    }
+                                    <mat-progress-bar
+                                        class="app-progress-bar--loop"
+                                        [mode]="progressMode"
+                                        [value]="progress$ | async"
+                                    ></mat-progress-bar>
+                                </div>
+                            }
+                        }
+                    </div>
+                    <app-spacer></app-spacer>
+                    <app-interim-results
+                        [estimatedEndTime]="estimatedEndTime()"
+                    ></app-interim-results>
                 </div>
-                <app-spacer></app-spacer>
-                <app-interim-results
-                    [estimatedEndTime]="estimatedEndTime()"
-                ></app-interim-results>
-            </div>
-            <ng-container *ngIf="(enableLoopMode$ | async) === true">
-                <app-recent-history
-                    *ngIf="result$ | async as result"
-                    class="app-padding"
-                    [class.app-padding--hidden-menu]="hideMenu"
-                    [result]="result"
-                    [excludeColumns]="['details']"
-                    [interruptsTests]="true"
-                    title="Recent measurements"
-                ></app-recent-history>
-            </ng-container>
-        </app-main-content>
+                @if ((enableLoopMode$ | async) === true) {
+                    @if (result$ | async; as result) {
+                        <app-recent-history
+                            class="app-padding"
+                            [class.app-padding--hidden-menu]="hideMenu"
+                            [result]="result"
+                            [excludeColumns]="['details']"
+                            [interruptsTests]="true"
+                            title="Recent measurements"
+                        ></app-recent-history>
+                    }
+                }
+            </app-main-content>
+        }
         <app-footer></app-footer>
     </app-body>
-</ng-template>
-
-<ng-template #loopWaitProgressBar>
-    <div
-        *ngIf="progressMode$ | async as progressMode"
-        style="width: 100%; padding: 0.5em"
-    >
-        <ng-container *ngIf="progressMode === 'determinate'">
-            <h2 *transloco="let t" class="app-title">
-                {{
-                    t("Next measurement in") +
-                        " " +
-                        (ms$ | async | date: "mm:ss")
-                }}
-            </h2>
-        </ng-container>
-        <mat-progress-bar
-            class="app-progress-bar--loop"
-            [mode]="progressMode"
-            [value]="progress$ | async"
-        ></mat-progress-bar>
-    </div>
 </ng-template>

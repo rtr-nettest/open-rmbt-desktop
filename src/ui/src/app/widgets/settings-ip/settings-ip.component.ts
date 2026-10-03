@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core"
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core"
 import { MatSlideToggleChange } from "@angular/material/slide-toggle"
 import { map } from "rxjs"
 import {
@@ -11,7 +11,8 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-settings-ip",
     templateUrl: "./settings-ip.component.html",
     styleUrls: ["./settings-ip.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class SettingsIpComponent implements IDynamicComponent {
     @Input() parameters?: IDynamicComponentParameters
@@ -20,8 +21,8 @@ export class SettingsIpComponent implements IDynamicComponent {
         map(
             (env) =>
                 !!this.parameters?.["ipVersion"] &&
-                env?.IP_VERSION === this.parameters?.["ipVersion"]
-        )
+                env?.IP_VERSION === this.parameters?.["ipVersion"],
+        ),
     )
 
     constructor(private store: MainStore) {}

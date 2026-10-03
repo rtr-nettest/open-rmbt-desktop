@@ -1,4 +1,4 @@
-import { Component } from "@angular/core"
+import { Component, ChangeDetectionStrategy } from "@angular/core"
 import { SafeUrl } from "@angular/platform-browser"
 import { Observable, of } from "rxjs"
 
@@ -6,6 +6,7 @@ import { Observable, of } from "rxjs"
     selector: "app-social-buttons",
     templateUrl: "./social-buttons.component.html",
     styleUrls: ["./social-buttons.component.scss"],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SocialButtonsComponent {

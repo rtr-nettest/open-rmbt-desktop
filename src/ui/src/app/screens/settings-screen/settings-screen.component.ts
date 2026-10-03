@@ -4,6 +4,7 @@ import {
     Component,
     OnInit,
     Type,
+    ChangeDetectionStrategy,
 } from "@angular/core"
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
 import { IDynamicComponentParameters } from "src/app/interfaces/dynamic-component.interface"
@@ -17,7 +18,7 @@ import { SettingsVersionComponent } from "src/app/widgets/settings-version/setti
 import { EIPVersion } from "../../../../../measurement/enums/ip-version.enum"
 import { SettingsLocaleComponent } from "src/app/widgets/settings-locale/settings-locale.component"
 import { Observable, combineLatest, map } from "rxjs"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { BaseScreen } from "../base-screen/base-screen.component"
 import { MessageService } from "src/app/services/message.service"
 import { SettingsLocalDataComponent } from "src/app/widgets/settings-local-data/settings-local-data.component"
@@ -37,7 +38,8 @@ export interface ISettingsRow {
     selector: "app-settings-screen",
     templateUrl: "./settings-screen.component.html",
     styleUrls: ["./settings-screen.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class SettingsScreenComponent
     extends BaseScreen
@@ -146,7 +148,7 @@ export class SettingsScreenComponent
         mainStore: MainStore,
         message: MessageService,
         private router: Router,
-        private transloco: TranslocoService,
+        private transloco: I18nService,
         private cdr: ChangeDetectorRef,
     ) {
         super(mainStore, message)

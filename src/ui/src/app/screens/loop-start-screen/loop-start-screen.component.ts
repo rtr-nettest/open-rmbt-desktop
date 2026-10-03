@@ -1,4 +1,4 @@
-import { Component } from "@angular/core"
+import { Component, ChangeDetectionStrategy } from "@angular/core"
 import {
     FormBuilder,
     FormControl,
@@ -27,7 +27,8 @@ const integerValidator: ValidatorFn = (control) => {
     selector: "app-loop-start-screen",
     templateUrl: "./loop-start-screen.component.html",
     styleUrls: ["./loop-start-screen.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class LoopStartScreenComponent {
     env$ = this.mainStore.env$.pipe(
@@ -48,7 +49,7 @@ export class LoopStartScreenComponent {
                 interval: new FormControl(savedInterval || def, validators),
             }) as LoopForm
             return env
-        })
+        }),
     )
     form?: LoopForm
     min?: number
@@ -57,7 +58,7 @@ export class LoopStartScreenComponent {
     constructor(
         private testStore: TestStore,
         private mainStore: MainStore,
-        private fb: FormBuilder
+        private fb: FormBuilder,
     ) {}
 
     onSubmit() {

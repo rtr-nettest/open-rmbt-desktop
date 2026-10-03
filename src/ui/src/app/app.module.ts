@@ -26,8 +26,15 @@ import { MatTooltipModule } from "@angular/material/tooltip"
 import { MatSnackBarModule } from "@angular/material/snack-bar"
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
 import { MatProgressBarModule } from "@angular/material/progress-bar"
-import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http"
-import { TranslocoRootModule } from "./transloco-root.module"
+import {
+    provideHttpClient,
+    withInterceptorsFromDi,
+    withXhr,
+} from "@angular/common/http"
+import { LocalizeDirective } from "./directives/localize.directive"
+import { LocalizePipe } from "./pipes/localize.pipe"
+import { I18nService } from "./services/i18n.service"
+import { I18N_CONFIG } from "src/i18n.config"
 import { TestIndicatorComponent } from "./widgets/test-indicator/test-indicator.component"
 import { TestChartComponent } from "./widgets/test-chart/test-chart.component"
 import { ICPU } from "../../../measurement/interfaces/cpu.interface"
@@ -249,6 +256,8 @@ declare global {
         MapScreenComponent,
         LoopStartScreenComponent,
         SprintfPipe,
+        LocalizePipe,
+        LocalizeDirective,
         AlertComponent,
         StopLoopButtonComponent,
         RecentHistoryComponent,
@@ -291,12 +300,23 @@ declare global {
         MatTooltipModule,
         MatSlideToggleModule,
         MatSelectModule,
-        TranslocoRootModule,
     ],
     providers: [
         provideAppInitializer(() => {
             const initializerFn = MainStore.factory(inject(MainStore))
             return initializerFn()
+        }),
+        // Load the initial UI language before first paint: the OS locale if we
+        // ship it, otherwise the default. A stored user choice is applied later
+        // by EnvResolver.
+        provideAppInitializer(() => {
+            const i18n = inject(I18nService)
+            let lang = Intl.DateTimeFormat().resolvedOptions().locale
+            if (!I18N_CONFIG["availableLangs"].includes(lang)) {
+                lang = I18N_CONFIG["defaultLang"]
+            }
+            window.electronAPI.setDefaultLanguage(lang)
+            return i18n.setActiveLang(lang)
         }),
         {
             provide: DatePipe,
@@ -304,7 +324,7 @@ declare global {
         {
             provide: SprintfPipe,
         },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
     ],
 })
 export class AppModule {

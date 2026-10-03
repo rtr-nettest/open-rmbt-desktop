@@ -1,4 +1,4 @@
-import { Component, Inject } from "@angular/core"
+import { Component, Inject, ChangeDetectionStrategy } from "@angular/core"
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog"
 
 export type ConfirmDialogOpts = {
@@ -12,7 +12,8 @@ export type ConfirmDialogOpts = {
     selector: "app-confirm-dialog",
     templateUrl: "./confirm-dialog.component.html",
     styleUrls: ["./confirm-dialog.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class ConfirmDialogComponent {
     get text() {
@@ -40,7 +41,7 @@ export class ConfirmDialogComponent {
     constructor(
         private dialogRef: MatDialogRef<any>,
         @Inject(MAT_DIALOG_DATA)
-        private data: { text: string } & ConfirmDialogOpts
+        private data: { text: string } & ConfirmDialogOpts,
     ) {}
 
     close(confirmAction?: boolean) {

@@ -1,5 +1,11 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core"
-import { TranslocoService } from "@ngneat/transloco"
+import {
+    ChangeDetectorRef,
+    Component,
+    OnDestroy,
+    OnInit,
+    ChangeDetectionStrategy,
+} from "@angular/core"
+import { I18nService } from "src/app/services/i18n.service"
 import { map, switchMap, takeUntil, withLatestFrom } from "rxjs"
 import { UNKNOWN } from "src/app/constants/strings"
 import { MessageService } from "src/app/services/message.service"
@@ -10,6 +16,7 @@ import { BaseScreen } from "../base-screen/base-screen.component"
     selector: "app-home-screen",
     templateUrl: "./home-screen.component.html",
     styleUrls: ["./home-screen.component.scss"],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class HomeScreenComponent
@@ -81,7 +88,7 @@ export class HomeScreenComponent
         mainStore: MainStore,
         message: MessageService,
         private cdr: ChangeDetectorRef,
-        private transloco: TranslocoService,
+        private transloco: I18nService,
     ) {
         super(mainStore, message)
     }

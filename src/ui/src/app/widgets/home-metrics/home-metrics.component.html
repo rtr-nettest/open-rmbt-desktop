@@ -1,12 +1,14 @@
 <div class="app-wrapper">
-    <ng-container *transloco="let t">
-        <h4 *ngIf="title" class="app-title">{{ t(title) }}</h4>
-        <ul *ngIf="list" class="app-list">
-            <li
-                *ngFor="let item of list"
-                class="app-list-item"
-                [innerHtml]="item"
-            ></li>
-        </ul>
+    <ng-container *localize="let t">
+        @if (title) {
+            <h4 class="app-title">{{ t(title) }}</h4>
+        }
+        @if (list) {
+            <ul class="app-list">
+                @for (item of list; track item) {
+                    <li class="app-list-item" [innerHtml]="item"></li>
+                }
+            </ul>
+        }
     </ng-container>
 </div>

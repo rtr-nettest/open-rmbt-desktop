@@ -1,4 +1,9 @@
-import { Component, EventEmitter, Output } from "@angular/core"
+import {
+    Component,
+    EventEmitter,
+    Output,
+    ChangeDetectionStrategy,
+} from "@angular/core"
 import {
     FormArray,
     FormBuilder,
@@ -21,6 +26,7 @@ import { v4 } from "uuid"
     selector: "app-certified-env-form",
     templateUrl: "./certified-env-form.component.html",
     styleUrls: ["./certified-env-form.component.scss"],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class CertifiedEnvFormComponent {

@@ -1,21 +1,22 @@
 <div
     class="app-wrapper app-wrapper--charts"
-    *transloco="let t"
+    *localize="let t"
     aria-live="assertive"
 >
-    <ng-container *ngIf="visualization$ | async as state">
+    @if (visualization$ | async; as state) {
         <div class="app-container">
             <h4 class="app-title">
                 <span>{{ t("Ping") }}:</span>
-                <div
-                    class="app-spinner"
-                    *ngIf="state.currentPhaseName === phases.PING"
-                >
-                    <mat-spinner></mat-spinner>
-                </div>
-                <span *ngIf="state.currentPhaseName !== phases.PING && ping">
-                    {{ ping }}
-                </span>
+                @if (state.currentPhaseName === phases.PING) {
+                    <div class="app-spinner">
+                        <mat-spinner></mat-spinner>
+                    </div>
+                }
+                @if (state.currentPhaseName !== phases.PING && ping) {
+                    <span>
+                        {{ ping }}
+                    </span>
+                }
             </h4>
             <div class="app-chart app-chart--ping">
                 <app-test-chart
@@ -27,17 +28,16 @@
         <div class="app-container">
             <h4 class="app-title">
                 <span>{{ t("Download") }}:</span>
-                <div
-                    class="app-spinner"
-                    *ngIf="state.currentPhaseName === phases.DOWN"
-                >
-                    <mat-spinner></mat-spinner>
-                </div>
-                <span
-                    *ngIf="state.currentPhaseName !== phases.DOWN && download"
-                >
-                    {{ download }}
-                </span>
+                @if (state.currentPhaseName === phases.DOWN) {
+                    <div class="app-spinner">
+                        <mat-spinner></mat-spinner>
+                    </div>
+                }
+                @if (state.currentPhaseName !== phases.DOWN && download) {
+                    <span>
+                        {{ download }}
+                    </span>
+                }
             </h4>
             <div class="app-chart app-chart--down">
                 <app-test-chart
@@ -49,24 +49,23 @@
         <div class="app-container">
             <h4 class="app-title">
                 <span>{{ t("Upload") }}:</span>
-                <div
-                    class="app-spinner"
-                    *ngIf="
-                        state.currentPhaseName === phases.UP ||
-                        state.currentPhaseName === phases.INIT_UP
-                    "
-                >
-                    <mat-spinner></mat-spinner>
-                </div>
-                <span
-                    *ngIf="
-                        state.currentPhaseName !== phases.UP &&
-                        state.currentPhaseName !== phases.INIT_UP &&
-                        upload
-                    "
-                >
-                    {{ upload }}
-                </span>
+                @if (
+                    state.currentPhaseName === phases.UP ||
+                    state.currentPhaseName === phases.INIT_UP
+                ) {
+                    <div class="app-spinner">
+                        <mat-spinner></mat-spinner>
+                    </div>
+                }
+                @if (
+                    state.currentPhaseName !== phases.UP &&
+                    state.currentPhaseName !== phases.INIT_UP &&
+                    upload
+                ) {
+                    <span>
+                        {{ upload }}
+                    </span>
+                }
             </h4>
             <div class="app-chart app-chart--up">
                 <app-test-chart
@@ -81,7 +80,7 @@
                     @if (info.serverName != "-") {
                         <tr class="app-row">
                             <th class="app-cell app-cell--left">
-                                {{ "Testserver" | transloco }}
+                                {{ "Testserver" | localize }}
                             </th>
                             <td class="app-cell app-cell--left">
                                 {{ info.serverName }}
@@ -91,7 +90,7 @@
                     @if (info.ipAddress != "-") {
                         <tr class="app-row">
                             <th class="app-cell app-cell--left">
-                                {{ "IP" | transloco }}
+                                {{ "IP" | localize }}
                             </th>
                             <td class="app-cell app-cell--left">
                                 {{ info.ipAddress }}
@@ -101,7 +100,7 @@
                     @if (info.providerName != "-") {
                         <tr class="app-row">
                             <th class="app-cell app-cell--left">
-                                {{ "Provider" | transloco }}
+                                {{ "Provider" | localize }}
                             </th>
                             <td class="app-cell app-cell--left">
                                 {{ info.providerName }}
@@ -111,5 +110,5 @@
                 </table>
             </div>
         }
-    </ng-container>
+    }
 </div>

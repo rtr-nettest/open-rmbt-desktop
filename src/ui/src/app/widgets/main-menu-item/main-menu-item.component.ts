@@ -1,4 +1,10 @@
-import { Component, Input, Output, EventEmitter } from "@angular/core"
+import {
+    Component,
+    Input,
+    Output,
+    EventEmitter,
+    ChangeDetectionStrategy,
+} from "@angular/core"
 import { IMainMenuItem } from "../../interfaces/main-menu-item.interface"
 import { MainStore } from "src/app/store/main.store"
 
@@ -6,7 +12,8 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-main-menu-item",
     templateUrl: "./main-menu-item.component.html",
     styleUrls: ["./main-menu-item.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class MainMenuItemComponent {
     @Input() item?: IMainMenuItem

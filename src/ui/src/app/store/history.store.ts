@@ -13,7 +13,7 @@ import {
 import { ISimpleHistoryResult } from "../../../../measurement/interfaces/simple-history-result.interface"
 import { MainStore } from "./main.store"
 import { IPaginator } from "../interfaces/paginator.interface"
-import { Translation, TranslocoService } from "@ngneat/transloco"
+import { I18nService, Translation } from "src/app/services/i18n.service"
 import { ISort } from "../interfaces/sort.interface"
 import { ClassificationService } from "../services/classification.service"
 import { ConversionService } from "../services/conversion.service"
@@ -45,7 +45,7 @@ export class HistoryStore {
         private conversion: ConversionService,
         private datePipe: DatePipe,
         private mainStore: MainStore,
-        private transloco: TranslocoService,
+        private transloco: I18nService,
     ) {}
 
     getFormattedHistory(options?: {

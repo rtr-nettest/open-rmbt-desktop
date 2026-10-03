@@ -1,13 +1,17 @@
-<div *ngIf="news$ | async as news" class="app-wrapper">
-    <div *ngFor="let item of news">
-        <div class="app-article">
-            <h2>{{ item.title }}</h2>
-            <div [innerHTML]="item.text"></div>
-        </div>
+@if (news$ | async; as news) {
+    <div class="app-wrapper">
+        @for (item of news; track item) {
+            <div>
+                <div class="app-article">
+                    <h2>{{ item.title }}</h2>
+                    <div [innerHTML]="item.text"></div>
+                </div>
+            </div>
+        }
+        <footer *localize="let t" class="app-footer">
+            <button mat-button color="primary" (click)="close()">
+                {{ t("Close") }}
+            </button>
+        </footer>
     </div>
-    <footer *transloco="let t" class="app-footer">
-        <button mat-button color="primary" (click)="close()">
-            {{ t("Close") }}
-        </button>
-    </footer>
-</div>
+}

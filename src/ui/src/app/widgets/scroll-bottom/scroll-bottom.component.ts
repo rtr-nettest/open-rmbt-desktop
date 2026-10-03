@@ -1,10 +1,16 @@
-import { Component, HostListener, Input } from "@angular/core"
+import {
+    Component,
+    HostListener,
+    Input,
+    ChangeDetectionStrategy,
+} from "@angular/core"
 
 @Component({
     selector: "app-scroll-bottom",
     templateUrl: "./scroll-bottom.component.html",
     styleUrls: ["./scroll-bottom.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class ScrollBottomComponent {
     @Input() isVisible = true
@@ -16,7 +22,7 @@ export class ScrollBottomComponent {
             return
         }
         const lastP = document.querySelector(
-            `${this.scrollableSelector}>p:last-of-type`
+            `${this.scrollableSelector}>p:last-of-type`,
         )
         lastP?.scrollIntoView({
             behavior: "smooth",

@@ -1,1 +1,3 @@
-<ng-container *ngIf="version$ | async as version">{{ version }}</ng-container>
+@if (version$ | async; as version) {
+    {{ version }}
+}

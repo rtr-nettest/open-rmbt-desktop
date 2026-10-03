@@ -1,1 +1,3 @@
-<ng-container *ngIf="logPath$ | async as logPath">{{ logPath }}</ng-container>
+@if (logPath$ | async; as logPath) {
+    {{ logPath }}
+}

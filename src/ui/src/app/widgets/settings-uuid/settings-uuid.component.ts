@@ -1,4 +1,4 @@
-import { Component } from "@angular/core"
+import { Component, ChangeDetectionStrategy } from "@angular/core"
 import { map, withLatestFrom } from "rxjs"
 import { MessageService } from "src/app/services/message.service"
 import { MainStore } from "src/app/store/main.store"
@@ -7,21 +7,23 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-settings-uuid",
     templateUrl: "./settings-uuid.component.html",
     styleUrls: ["./settings-uuid.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class SettingsUuidComponent {
-    uuid$ = this.store.settings$.pipe(
-        map((settings) => "U" + settings?.uuid)
-    )
+    uuid$ = this.store.settings$.pipe(map((settings) => "U" + settings?.uuid))
 
-    constructor(private store: MainStore, private message: MessageService) {}
+    constructor(
+        private store: MainStore,
+        private message: MessageService,
+    ) {}
 
     copy(uuid: string) {
         window.navigator.clipboard
             .writeText(uuid)
             .then(() => {
                 this.message.openSnackbar(
-                    "Client UUID was copied to the clipboard."
+                    "Client UUID was copied to the clipboard.",
                 )
             })
             .catch((e) => {

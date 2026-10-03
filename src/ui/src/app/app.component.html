@@ -1,6 +1,4 @@
-<mat-progress-bar
-    *ngIf="inProgress$ | async"
-    mode="indeterminate"
-    color="accent"
-></mat-progress-bar>
+@if (inProgress$ | async) {
+    <mat-progress-bar mode="indeterminate" color="accent"></mat-progress-bar>
+}
 <router-outlet></router-outlet>

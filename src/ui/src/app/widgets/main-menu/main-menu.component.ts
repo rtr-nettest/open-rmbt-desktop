@@ -4,15 +4,15 @@ import {
     NgZone,
     OnChanges,
     SimpleChanges,
+    ChangeDetectionStrategy,
 } from "@angular/core"
 import { ActivatedRoute, Router, UrlSegment } from "@angular/router"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { combineLatest, map, of } from "rxjs"
 import { THIS_INTERRUPTS_ACTION } from "src/app/constants/strings"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 import { environment } from "src/app/constants/environment"
-import { I18nService } from "src/app/services/i18n.service"
 import { MessageService } from "src/app/services/message.service"
 import { MainStore } from "src/app/store/main.store"
 import { TestStore } from "src/app/store/test.store"
@@ -21,7 +21,8 @@ import { TestStore } from "src/app/store/test.store"
     selector: "app-main-menu",
     templateUrl: "./main-menu.component.html",
     styleUrls: ["./main-menu.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class MainMenuComponent implements OnChanges {
     @Input() disabled = false
@@ -37,7 +38,7 @@ export class MainMenuComponent implements OnChanges {
         private message: MessageService,
         private ngZone: NgZone,
         private router: Router,
-        private transloco: TranslocoService
+        private transloco: I18nService,
     ) {}
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -56,7 +57,7 @@ export class MainMenuComponent implements OnChanges {
                     () => {
                         item.action?.(event)
                     },
-                    { canCancel: true }
+                    { canCancel: true },
                 )
         }
     }
@@ -72,7 +73,7 @@ export class MainMenuComponent implements OnChanges {
             : undefined
         return excludeItems?.size
             ? environment.menu.filter(
-                  (mi) => mi.label && !excludeItems.has(mi.label)
+                  (mi) => mi.label && !excludeItems.has(mi.label),
               )
             : environment.menu
     }
@@ -92,7 +93,7 @@ export class MainMenuComponent implements OnChanges {
                         route: ERoutes.SETTINGS,
                         icon: "settings",
                     },
-                    activeRoute
+                    activeRoute,
                 )
                 return menu.map((mi) => {
                     let item = mi
@@ -101,7 +102,7 @@ export class MainMenuComponent implements OnChanges {
                             ...mi,
                             url: mi.url.replace(
                                 "$lang",
-                                this.i18n.getActiveBrowserLang()
+                                this.i18n.getActiveBrowserLang(),
                             ),
                         }
                     } else if (mi.url?.includes("$os") && env?.OS) {
@@ -112,13 +113,13 @@ export class MainMenuComponent implements OnChanges {
                     }
                     return this.parseMenuItem(item, activeRoute)
                 })
-            })
+            }),
         )
     }
 
     private parseMenuItem = (
         item: IMainMenuItem,
-        activeRoute: UrlSegment[]
+        activeRoute: UrlSegment[],
     ) => {
         return {
             ...item,

@@ -1,19 +1,20 @@
-<ng-container *ngIf="env$ | async as env">
+@if (env$ | async; as env) {
     <ng-container
         *ngTemplateOutlet="
             !!item?.url
                 ? external
-                : item?.route !== null && item?.route !== undefined
-                ? default
-                : noRoute;
+                : $safeNavigationMigration(item?.route) !== null &&
+                    $safeNavigationMigration(item?.route) !== undefined
+                  ? default
+                  : noRoute;
             context: { $implicit: item, env }
         "
     ></ng-container>
-</ng-container>
+}
 
 <ng-template #default let-item let-env="env">
     <a
-        *transloco="let t"
+        *localize="let t"
         mat-button
         color="primary"
         class="app-menu-item {{ item.className }} app-menu-item--rtr"
@@ -31,7 +32,7 @@
 
 <ng-template #external let-item let-env="env">
     <a
-        *transloco="let t"
+        *localize="let t"
         mat-button
         color="primary"
         class="app-menu-item {{ item.className }} app-menu-item--rtr"
@@ -48,7 +49,7 @@
 
 <ng-template #noRoute let-item let-env="env">
     <a
-        *transloco="let t"
+        *localize="let t"
         mat-button
         color="primary"
         href="javascript:;"
@@ -64,8 +65,8 @@
 </ng-template>
 
 <ng-template #linkText let-item>
-    <ng-container *ngIf="env$ | async as env">
+    @if (env$ | async; as env) {
         <i class="app-icon app-icon--{{ item.icon }}"></i>
-        <span>{{ item.label | transloco }}</span>
-    </ng-container>
+        <span>{{ item.label | localize }}</span>
+    }
 </ng-template>

@@ -1,11 +1,12 @@
-import { Component, OnDestroy } from "@angular/core"
+import { Component, OnDestroy, ChangeDetectionStrategy } from "@angular/core"
 import { Subject, distinctUntilChanged, takeUntil, tap } from "rxjs"
 import { MainStore } from "../../store/main.store"
 import { MessageService } from "../../services/message.service"
 
 @Component({
     template: ``,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class BaseScreen implements OnDestroy {
     destroyed$ = new Subject<void>()
@@ -18,13 +19,13 @@ export class BaseScreen implements OnDestroy {
                     this.message.openSnackbar(error.message)
                     this.mainStore.error$.next(null)
                 }
-            })
+            }),
         )
         .subscribe()
 
     constructor(
         protected mainStore: MainStore,
-        protected message: MessageService
+        protected message: MessageService,
     ) {}
 
     ngOnDestroy(): void {

@@ -7,10 +7,11 @@ import {
     Output,
     SimpleChanges,
     ViewChild,
+    ChangeDetectionStrategy,
 } from "@angular/core"
 import { MatSort, Sort } from "@angular/material/sort"
 import { MatTable } from "@angular/material/table"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { arrowRotate } from "src/app/animations/arrow-rotate.animation"
 import { expandVertically } from "src/app/animations/detail-expand.animation"
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
@@ -27,6 +28,7 @@ import { RESULT_DATE_FORMAT } from "src/app/constants/strings"
     templateUrl: "./table.component.html",
     styleUrls: ["./table.component.scss"],
     animations: [arrowRotate, expandVertically],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class TableComponent implements OnInit, OnChanges {
@@ -55,7 +57,7 @@ export class TableComponent implements OnInit, OnChanges {
 
     constructor(
         private tableSortService: TableSortService,
-        public transloco: TranslocoService,
+        public transloco: I18nService,
     ) {}
 
     ngOnChanges(changes: SimpleChanges): void {

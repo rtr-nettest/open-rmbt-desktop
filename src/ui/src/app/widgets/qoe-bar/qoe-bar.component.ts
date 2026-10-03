@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core"
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core"
 import { IDynamicComponent } from "src/app/interfaces/dynamic-component.interface"
 import { IDetailedHistoryResultItem } from "../../../../../measurement/interfaces/detailed-history-result-item.interface"
 import { IQoeItem } from "../../../../../measurement/interfaces/qoe-item.interface"
@@ -9,11 +9,10 @@ const BAR_COUNT = 12
     selector: "app-qoe-bar",
     imports: [],
     templateUrl: "./qoe-bar.component.html",
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: "./qoe-bar.component.scss",
 })
-export class QoeBarComponent
-    implements IDynamicComponent<IDetailedHistoryResultItem>
-{
+export class QoeBarComponent implements IDynamicComponent<IDetailedHistoryResultItem> {
     @Input() set parameters(item: IDetailedHistoryResultItem) {
         const value = item.value as IQoeItem
         const fill = value.quality

@@ -1,4 +1,4 @@
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import dayjs from "dayjs"
 import { EColors } from "src/app/enums/colors.enum"
 
@@ -87,5 +87,5 @@ export class TestBarChartOptions {
         },
     }
 
-    constructor(private t: TranslocoService) {}
+    constructor(private t: I18nService) {}
 }

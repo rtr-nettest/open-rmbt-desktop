@@ -5,7 +5,7 @@ import {
     ConfirmDialogComponent,
     ConfirmDialogOpts,
 } from "../widgets/confirm-dialog/confirm-dialog.component"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 
 @Injectable({
     providedIn: "root",
@@ -15,7 +15,7 @@ export class MessageService {
         private snackbar: MatSnackBar,
         private dialog: MatDialog,
         private ngZone: NgZone,
-        private transloco: TranslocoService
+        private transloco: I18nService
     ) {}
 
     closeAllDialogs() {

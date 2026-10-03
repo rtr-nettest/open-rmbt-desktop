@@ -6,9 +6,11 @@
     <mat-select-trigger>
         {{ selectedLocale?.name }}
     </mat-select-trigger>
-    <mat-option *ngFor="let locale of locales" [value]="locale">
-        <div class="app-language-name">
-            {{ locale.name }}
-        </div>
-    </mat-option>
+    @for (locale of locales; track locale) {
+        <mat-option [value]="locale">
+            <div class="app-language-name">
+                {{ locale.name }}
+            </div>
+        </mat-option>
+    }
 </mat-select>

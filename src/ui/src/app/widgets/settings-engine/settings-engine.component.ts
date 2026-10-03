@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core"
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core"
 import { map } from "rxjs"
 import {
     IDynamicComponent,
@@ -10,6 +10,7 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-settings-engine",
     templateUrl: "./settings-engine.component.html",
     styleUrl: "./settings-engine.component.scss",
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SettingsEngineComponent implements IDynamicComponent {

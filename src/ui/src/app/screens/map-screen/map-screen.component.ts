@@ -1,4 +1,4 @@
-import { Component } from "@angular/core"
+import { Component, ChangeDetectionStrategy } from "@angular/core"
 import { DomSanitizer } from "@angular/platform-browser"
 import { map } from "rxjs"
 import { I18nService } from "src/app/services/i18n.service"
@@ -8,7 +8,8 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-map-screen",
     templateUrl: "./map-screen.component.html",
     styleUrls: ["./map-screen.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class MapScreenComponent {
     mapLink$ = this.mainStore.env$.pipe(
@@ -16,15 +17,15 @@ export class MapScreenComponent {
             this.sanitizer.bypassSecurityTrustResourceUrl(
                 env?.FULL_MAP_URL?.replace(
                     "$lang",
-                    this.i18n.getActiveBrowserLang()
-                ) ?? ""
-            )
-        )
+                    this.i18n.getActiveBrowserLang(),
+                ) ?? "",
+            ),
+        ),
     )
 
     constructor(
         private mainStore: MainStore,
         private sanitizer: DomSanitizer,
-        private i18n: I18nService
+        private i18n: I18nService,
     ) {}
 }

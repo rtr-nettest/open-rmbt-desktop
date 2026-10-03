@@ -1,10 +1,14 @@
-<ul *ngIf="menu$ | async as menu" class="app-list">
-    <ng-container *ngFor="let item of menu; trackBy: trackBy">
-        <li *ngIf="!item.hidden" class="app-list-item">
-            <app-main-menu-item
-                [item]="item"
-                (menuClick)="handleClick($event, item)"
-            ></app-main-menu-item>
-        </li>
-    </ng-container>
-</ul>
+@if (menu$ | async; as menu) {
+    <ul class="app-list">
+        @for (item of menu; track trackBy($index, item)) {
+            @if (!item.hidden) {
+                <li class="app-list-item">
+                    <app-main-menu-item
+                        [item]="item"
+                        (menuClick)="handleClick($event, item)"
+                    ></app-main-menu-item>
+                </li>
+            }
+        }
+    </ul>
+}

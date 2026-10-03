@@ -1,238 +1,449 @@
 <div
     class="app-table mat-table-wrap"
     [ngClass]="tableClassNames"
-    *transloco="let t"
+    *localize="let t"
 >
-    <mat-table
-        *ngIf="data && sort"
-        [dataSource]="data.content"
-        matSort
-        matSortDisableClear
-        multiTemplateDataRows
-        [trackBy]="identify"
-        (matSortChange)="changeSort($event)"
-        [matSortActive]="sort.active"
-        [matSortDirection]="sort.direction"
-    >
-        <ng-container
-            *ngFor="let column of columns"
-            matColumnDef="{{ column.columnDef }}"
+    @if (data && sort) {
+        <mat-table
+            [dataSource]="data.content"
+            matSort
+            matSortDisableClear
+            multiTemplateDataRows
+            [trackBy]="identify"
+            (matSortChange)="changeSort($event)"
+            [matSortActive]="sort.active"
+            [matSortDirection]="sort.direction"
         >
-            <!-- MAT-HEADER-CELL -->
-            <ng-container *ngIf="column.isSortable">
-                <mat-header-cell
-                    *matHeaderCellDef
-                    mat-sort-header
-                    [style]="justify(column)"
-                    >{{ t(column.header) }}</mat-header-cell
-                >
-            </ng-container>
-
-            <ng-container *ngIf="!column.isSortable">
-                <mat-header-cell *matHeaderCellDef [style]="justify(column)">
-                    <div class="sah-table__cell--ellipsis">
-                        {{ t(column.header) }}
-                    </div>
-                </mat-header-cell>
-            </ng-container>
-            <!-- END MAT-HEADER-CELL-->
-
-            <ng-container *ngIf="column.isComponent; else defaultCell">
-                <mat-cell
-                    *matCellDef="let element; let i = dataIndex"
-                    [style]="justify(column)"
-                >
-                    <ng-template
-                        [dynamicComponent]="
-                            element[element.componentField] || element.component
-                        "
-                        [parameters]="
-                            element[element.parametersField] ||
-                            element.parameters
-                        "
-                    ></ng-template>
-                </mat-cell>
-            </ng-container>
-
-            <ng-container
-                *ngIf="
-                    column.component && column.getComponentParameters;
-                    else defaultCell
-                "
-            >
-                <mat-cell
-                    *matCellDef="let element; let i = dataIndex"
-                    [style]="justify(column)"
-                    [ngClass]="column.getNgClass?.(element, column)"
-                >
-                    <span class="app-table__mobile-label">{{
-                        column.header
-                    }}</span>
-                    @if (column.isExpandable) {
-                        <div
-                            [@expandVertically]="isElementExpanded(element.id)"
+            @for (column of columns; track column) {
+                <ng-container matColumnDef="{{ column.columnDef }}">
+                    <!-- MAT-HEADER-CELL -->
+                    @if (column.isSortable) {
+                        <mat-header-cell
+                            *matHeaderCellDef
+                            mat-sort-header
+                            [style]="justify(column)"
+                            >{{ t(column.header) }}</mat-header-cell
+                        >
+                    }
+                    @if (!column.isSortable) {
+                        <mat-header-cell
+                            *matHeaderCellDef
+                            [style]="justify(column)"
+                        >
+                            <div class="sah-table__cell--ellipsis">
+                                {{ t(column.header) }}
+                            </div>
+                        </mat-header-cell>
+                    }
+                    <!-- END MAT-HEADER-CELL-->
+                    @if (column.isComponent) {
+                        <mat-cell
+                            *matCellDef="let element; let i = dataIndex"
+                            [style]="justify(column)"
                         >
                             <ng-template
-                                [dynamicComponent]="column.component"
+                                [dynamicComponent]="
+                                    element[element.componentField] ||
+                                    element.component
+                                "
                                 [parameters]="
-                                    column.getComponentParameters(element)
+                                    element[element.parametersField] ||
+                                    element.parameters
                                 "
                             ></ng-template>
-                        </div>
+                        </mat-cell>
                     } @else {
-                        <ng-template
-                            [dynamicComponent]="column.component"
-                            [parameters]="
-                                column.getComponentParameters(element)
-                            "
-                        ></ng-template>
-                    }
-                </mat-cell>
-            </ng-container>
-
-            <ng-container *ngIf="column.isHtml; else defaultCell">
-                <mat-cell
-                    *matCellDef="let element; let i = dataIndex"
-                    [style]="justify(column)"
-                    [innerHtml]="element[column.columnDef]"
-                >
-                </mat-cell>
-            </ng-container>
-
-            <ng-container *ngIf="column.columnDef == 'groupArrowIndicator'">
-                <mat-cell *matCellDef="let element; let i = dataIndex">
-                    @if (element.groupHeader) {
-                        <span class="app-table__arrow-indicator">
-                            <mat-icon
-                                [@arrowRotate]="
-                                    isElementExpanded(element.id)
-                                        ? 'expanded'
-                                        : 'collapsed'
-                                "
-                            >
-                                keyboard_arrow_down
-                            </mat-icon></span
+                        <mat-cell
+                            *matCellDef="let element; let i = dataIndex"
+                            [style]="justify(column)"
                         >
+                            @if (!shouldShowText(column, element)) {
+                                <a
+                                    [routerLink]="
+                                        $safeNavigationMigration(
+                                            column.link?.(element.id)
+                                        )
+                                    "
+                                    [matTooltip]="
+                                        column.getTooltip?.(element, column) ??
+                                        ''
+                                    "
+                                    [ngClass]="
+                                        column.getNgClass &&
+                                        column.getNgClass(element, column)
+                                    "
+                                    [class.app-table__cell--sortable]="
+                                        column.isSortable
+                                    "
+                                    class="app-link"
+                                >
+                                    {{ getDefaultValue(column, element, i) }}
+                                </a>
+                            }
+                            @if (shouldShowText(column, element)) {
+                                <span
+                                    [matTooltip]="
+                                        column.getTooltip?.(element, column) ??
+                                        ''
+                                    "
+                                    [ngClass]="
+                                        $safeNavigationMigration(
+                                            column.getNgClass?.(element, column)
+                                        )
+                                    "
+                                    [class.app-table__cell--sortable]="
+                                        column.isSortable
+                                    "
+                                >
+                                    {{ getDefaultValue(column, element, i) }}
+                                </span>
+                            }
+                            @if (
+                                column.getActions &&
+                                    column.getActions(element, column);
+                                as actions
+                            ) {
+                                @for (action of actions; track action) {
+                                    @if (
+                                        !action.getInProgress ||
+                                        !action.getInProgress(element, column)
+                                    ) {
+                                        <button
+                                            mat-button
+                                            [color]="action.color || 'primary'"
+                                            [disabled]="
+                                                action.getDisabled &&
+                                                action.getDisabled(
+                                                    element,
+                                                    column
+                                                )
+                                            "
+                                            [ngClass]="
+                                                'app-table__action app-table__action--' +
+                                                action.label.toLowerCase()
+                                            "
+                                            (click)="
+                                                action.perform(element, column)
+                                            "
+                                        >
+                                            @if (action.matIcon) {
+                                                <mat-icon>{{
+                                                    action.matIcon
+                                                }}</mat-icon>
+                                            }
+                                            {{ action.label }}
+                                        </button>
+                                    }
+                                    @if (
+                                        action.getInProgress?.(element, column)
+                                    ) {
+                                        <mat-spinner
+                                            [diameter]="18"
+                                        ></mat-spinner>
+                                    }
+                                }
+                            }
+                        </mat-cell>
                     }
-                </mat-cell>
-            </ng-container>
-
-            <ng-template #defaultCell>
-                <mat-cell
-                    *matCellDef="let element; let i = dataIndex"
-                    [style]="justify(column)"
-                >
-                    <a
-                        *ngIf="!shouldShowText(column, element)"
-                        [routerLink]="column.link?.(element.id)"
-                        [matTooltip]="
-                            column.getTooltip?.(element, column) ?? ''
-                        "
-                        [ngClass]="
-                            column.getNgClass &&
-                            column.getNgClass(element, column)
-                        "
-                        [class.app-table__cell--sortable]="column.isSortable"
-                        class="app-link"
+                    @if (column.component && column.getComponentParameters) {
+                        <mat-cell
+                            *matCellDef="let element; let i = dataIndex"
+                            [style]="justify(column)"
+                            [ngClass]="
+                                $safeNavigationMigration(
+                                    column.getNgClass?.(element, column)
+                                )
+                            "
+                        >
+                            <span class="app-table__mobile-label">{{
+                                column.header
+                            }}</span>
+                            @if (column.isExpandable) {
+                                <div
+                                    [@expandVertically]="
+                                        isElementExpanded(element.id)
+                                    "
+                                >
+                                    <ng-template
+                                        [dynamicComponent]="column.component"
+                                        [parameters]="
+                                            column.getComponentParameters(
+                                                element
+                                            )
+                                        "
+                                    ></ng-template>
+                                </div>
+                            } @else {
+                                <ng-template
+                                    [dynamicComponent]="column.component"
+                                    [parameters]="
+                                        column.getComponentParameters(element)
+                                    "
+                                ></ng-template>
+                            }
+                        </mat-cell>
+                    } @else {
+                        <mat-cell
+                            *matCellDef="let element; let i = dataIndex"
+                            [style]="justify(column)"
+                        >
+                            @if (!shouldShowText(column, element)) {
+                                <a
+                                    [routerLink]="
+                                        $safeNavigationMigration(
+                                            column.link?.(element.id)
+                                        )
+                                    "
+                                    [matTooltip]="
+                                        column.getTooltip?.(element, column) ??
+                                        ''
+                                    "
+                                    [ngClass]="
+                                        column.getNgClass &&
+                                        column.getNgClass(element, column)
+                                    "
+                                    [class.app-table__cell--sortable]="
+                                        column.isSortable
+                                    "
+                                    class="app-link"
+                                >
+                                    {{ getDefaultValue(column, element, i) }}
+                                </a>
+                            }
+                            @if (shouldShowText(column, element)) {
+                                <span
+                                    [matTooltip]="
+                                        column.getTooltip?.(element, column) ??
+                                        ''
+                                    "
+                                    [ngClass]="
+                                        $safeNavigationMigration(
+                                            column.getNgClass?.(element, column)
+                                        )
+                                    "
+                                    [class.app-table__cell--sortable]="
+                                        column.isSortable
+                                    "
+                                >
+                                    {{ getDefaultValue(column, element, i) }}
+                                </span>
+                            }
+                            @if (
+                                column.getActions &&
+                                    column.getActions(element, column);
+                                as actions
+                            ) {
+                                @for (action of actions; track action) {
+                                    @if (
+                                        !action.getInProgress ||
+                                        !action.getInProgress(element, column)
+                                    ) {
+                                        <button
+                                            mat-button
+                                            [color]="action.color || 'primary'"
+                                            [disabled]="
+                                                action.getDisabled &&
+                                                action.getDisabled(
+                                                    element,
+                                                    column
+                                                )
+                                            "
+                                            [ngClass]="
+                                                'app-table__action app-table__action--' +
+                                                action.label.toLowerCase()
+                                            "
+                                            (click)="
+                                                action.perform(element, column)
+                                            "
+                                        >
+                                            @if (action.matIcon) {
+                                                <mat-icon>{{
+                                                    action.matIcon
+                                                }}</mat-icon>
+                                            }
+                                            {{ action.label }}
+                                        </button>
+                                    }
+                                    @if (
+                                        action.getInProgress?.(element, column)
+                                    ) {
+                                        <mat-spinner
+                                            [diameter]="18"
+                                        ></mat-spinner>
+                                    }
+                                }
+                            }
+                        </mat-cell>
+                    }
+                    @if (column.isHtml) {
+                        <mat-cell
+                            *matCellDef="let element; let i = dataIndex"
+                            [style]="justify(column)"
+                            [innerHtml]="element[column.columnDef]"
+                        >
+                        </mat-cell>
+                    } @else {
+                        <mat-cell
+                            *matCellDef="let element; let i = dataIndex"
+                            [style]="justify(column)"
+                        >
+                            @if (!shouldShowText(column, element)) {
+                                <a
+                                    [routerLink]="
+                                        $safeNavigationMigration(
+                                            column.link?.(element.id)
+                                        )
+                                    "
+                                    [matTooltip]="
+                                        column.getTooltip?.(element, column) ??
+                                        ''
+                                    "
+                                    [ngClass]="
+                                        column.getNgClass &&
+                                        column.getNgClass(element, column)
+                                    "
+                                    [class.app-table__cell--sortable]="
+                                        column.isSortable
+                                    "
+                                    class="app-link"
+                                >
+                                    {{ getDefaultValue(column, element, i) }}
+                                </a>
+                            }
+                            @if (shouldShowText(column, element)) {
+                                <span
+                                    [matTooltip]="
+                                        column.getTooltip?.(element, column) ??
+                                        ''
+                                    "
+                                    [ngClass]="
+                                        $safeNavigationMigration(
+                                            column.getNgClass?.(element, column)
+                                        )
+                                    "
+                                    [class.app-table__cell--sortable]="
+                                        column.isSortable
+                                    "
+                                >
+                                    {{ getDefaultValue(column, element, i) }}
+                                </span>
+                            }
+                            @if (
+                                column.getActions &&
+                                    column.getActions(element, column);
+                                as actions
+                            ) {
+                                @for (action of actions; track action) {
+                                    @if (
+                                        !action.getInProgress ||
+                                        !action.getInProgress(element, column)
+                                    ) {
+                                        <button
+                                            mat-button
+                                            [color]="action.color || 'primary'"
+                                            [disabled]="
+                                                action.getDisabled &&
+                                                action.getDisabled(
+                                                    element,
+                                                    column
+                                                )
+                                            "
+                                            [ngClass]="
+                                                'app-table__action app-table__action--' +
+                                                action.label.toLowerCase()
+                                            "
+                                            (click)="
+                                                action.perform(element, column)
+                                            "
+                                        >
+                                            @if (action.matIcon) {
+                                                <mat-icon>{{
+                                                    action.matIcon
+                                                }}</mat-icon>
+                                            }
+                                            {{ action.label }}
+                                        </button>
+                                    }
+                                    @if (
+                                        action.getInProgress?.(element, column)
+                                    ) {
+                                        <mat-spinner
+                                            [diameter]="18"
+                                        ></mat-spinner>
+                                    }
+                                }
+                            }
+                        </mat-cell>
+                    }
+                    @if (column.columnDef == "groupArrowIndicator") {
+                        <mat-cell *matCellDef="let element; let i = dataIndex">
+                            @if (element.groupHeader) {
+                                <span class="app-table__arrow-indicator">
+                                    <mat-icon
+                                        [@arrowRotate]="
+                                            isElementExpanded(element.id)
+                                                ? 'expanded'
+                                                : 'collapsed'
+                                        "
+                                    >
+                                        keyboard_arrow_down
+                                    </mat-icon></span
+                                >
+                            }
+                        </mat-cell>
+                    }
+                    <!-- END MAT-CELL -->
+                </ng-container>
+            }
+            @for (column of subHeaderColumns; track column) {
+                <ng-container matColumnDef="{{ column.columnDef }}">
+                    <mat-header-cell
+                        *matHeaderCellDef
+                        [style]="justify(column)"
                     >
-                        {{ getDefaultValue(column, element, i) }}
-                    </a>
-                    <span
-                        *ngIf="shouldShowText(column, element)"
-                        [matTooltip]="
-                            column.getTooltip?.(element, column) ?? ''
-                        "
-                        [ngClass]="column.getNgClass?.(element, column)"
-                        [class.app-table__cell--sortable]="column.isSortable"
-                    >
-                        {{ getDefaultValue(column, element, i) }}
-                    </span>
-                    <ng-container
-                        *ngIf="
-                            column.getActions &&
-                            column.getActions(element, column) as actions
-                        "
-                    >
-                        <ng-container *ngFor="let action of actions">
-                            <button
-                                *ngIf="
-                                    !action.getInProgress ||
-                                    !action.getInProgress(element, column)
-                                "
-                                mat-button
-                                [color]="action.color || 'primary'"
-                                [disabled]="
-                                    action.getDisabled &&
-                                    action.getDisabled(element, column)
-                                "
-                                [ngClass]="
-                                    'app-table__action app-table__action--' +
-                                    action.label.toLowerCase()
-                                "
-                                (click)="action.perform(element, column)"
-                            >
-                                <mat-icon *ngIf="action.matIcon">{{
-                                    action.matIcon
-                                }}</mat-icon>
-                                {{ action.label }}
-                            </button>
-                            <mat-spinner
-                                *ngIf="action.getInProgress?.(element, column)"
-                                [diameter]="18"
-                            ></mat-spinner>
-                        </ng-container>
-                    </ng-container>
-                </mat-cell>
-            </ng-template>
-            <!-- END MAT-CELL -->
-        </ng-container>
-
-        <ng-container
-            *ngFor="let column of subHeaderColumns"
-            matColumnDef="{{ column.columnDef }}"
-        >
-            <mat-header-cell *matHeaderCellDef [style]="justify(column)">
-                <span class="app-table__mobile-label">{{
-                    t(column.header)
-                }}</span>
-                <span *ngIf="column.subHeader">{{ t(column.subHeader) }}</span>
-            </mat-header-cell>
-        </ng-container>
-
-        <mat-row
-            *matRowDef="let row; columns: displayedColumns"
-            [class.mat-row--clickable]="rowsAreCLickable === true"
-            [class.mat-row--hidden]="row.hidden === true"
-            [class.mat-row--visible]="row.hidden === false"
-            [class.mat-row--group-header]="row.groupHeader"
-            (click)="toggleExpandableRow.emit(row.id)"
-            (keydown.enter)="toggleExpandableRow.emit(row.id)"
-            tabindex="0"
-        >
-        </mat-row>
-
-        <ng-container *ngIf="!shouldHideHeader">
-            <mat-header-row
+                        <span class="app-table__mobile-label">{{
+                            t(column.header)
+                        }}</span>
+                        @if (column.subHeader) {
+                            <span>{{ t(column.subHeader) }}</span>
+                        }
+                    </mat-header-cell>
+                </ng-container>
+            }
+            <mat-row
+                *matRowDef="let row; columns: displayedColumns"
+                [class.mat-row--clickable]="rowsAreCLickable === true"
+                [class.mat-row--hidden]="row.hidden === true"
+                [class.mat-row--visible]="row.hidden === false"
+                [class.mat-row--group-header]="row.groupHeader"
+                (click)="toggleExpandableRow.emit(row.id)"
+                (keydown.enter)="toggleExpandableRow.emit(row.id)"
                 tabindex="0"
-                *matHeaderRowDef="displayedColumns; sticky: true"
-            ></mat-header-row>
-
-            <ng-container *ngIf="displayedSubHeaderColumns?.length">
+            >
+            </mat-row>
+            @if (!shouldHideHeader) {
                 <mat-header-row
                     tabindex="0"
-                    class="app-table__subheader"
-                    *matHeaderRowDef="displayedSubHeaderColumns"
+                    *matHeaderRowDef="displayedColumns; sticky: true"
                 ></mat-header-row>
-            </ng-container>
-        </ng-container>
-    </mat-table>
-    <app-paginator
-        *ngIf="paginator"
-        [length]="data?.totalElements ?? 0"
-        [pageSize]="paginator.limit ?? 0"
-        [pageIndex]="paginator.offset"
-        (page)="changePage($event)"
-        [pageSizeOptions]="AVAILABLE_SIZES"
-    >
-    </app-paginator>
+                @if (displayedSubHeaderColumns?.length) {
+                    <mat-header-row
+                        tabindex="0"
+                        class="app-table__subheader"
+                        *matHeaderRowDef="displayedSubHeaderColumns"
+                    ></mat-header-row>
+                }
+            }
+        </mat-table>
+    }
+    @if (paginator) {
+        <app-paginator
+            [length]="data?.totalElements ?? 0"
+            [pageSize]="paginator.limit ?? 0"
+            [pageIndex]="paginator.offset"
+            (page)="changePage($event)"
+            [pageSizeOptions]="AVAILABLE_SIZES"
+        >
+        </app-paginator>
+    }
 </div>

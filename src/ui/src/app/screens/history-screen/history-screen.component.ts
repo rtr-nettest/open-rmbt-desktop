@@ -6,25 +6,25 @@ import {
     Input,
     OnDestroy,
     OnInit,
+    ChangeDetectionStrategy,
 } from "@angular/core"
 import { ISort } from "src/app/interfaces/sort.interface"
 import { Observable } from "rxjs"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
 import { MainStore } from "src/app/store/main.store"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 import { BaseScreen } from "../base-screen/base-screen.component"
 import { MessageService } from "src/app/services/message.service"
 import { HistoryStore } from "src/app/store/history.store"
-import {
-    IHistoryRowRTR,
-} from "src/app/interfaces/history-row.interface"
+import { IHistoryRowRTR } from "src/app/interfaces/history-row.interface"
 import { HistoryExportService } from "src/app/services/history-export.service"
 
 @Component({
     selector: "app-history-screen",
     templateUrl: "./history-screen.component.html",
     styleUrls: ["./history-screen.component.scss"],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class HistoryScreenComponent
@@ -70,7 +70,7 @@ export class HistoryScreenComponent
         protected exporter: HistoryExportService,
         protected store: HistoryStore,
         private cdr: ChangeDetectorRef,
-        private transloco: TranslocoService,
+        private transloco: I18nService,
     ) {
         super(mainStore, message)
     }

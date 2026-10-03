@@ -1,14 +1,16 @@
-import { ChangeDetectorRef, Component } from "@angular/core"
+import {
+    ChangeDetectorRef,
+    Component,
+    ChangeDetectionStrategy,
+} from "@angular/core"
 import { Observable } from "rxjs"
 import { IBasicResponse } from "src/app/interfaces/basic-response.interface"
-import {
-    IHistoryRowRTR,
-} from "src/app/interfaces/history-row.interface"
+import { IHistoryRowRTR } from "src/app/interfaces/history-row.interface"
 import { HistoryScreenComponent } from "../history-screen/history-screen.component"
 import { MainStore } from "src/app/store/main.store"
 import { MessageService } from "src/app/services/message.service"
 import { HistoryStore } from "src/app/store/history.store"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { ActivatedRoute } from "@angular/router"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 import { HistoryExportService } from "src/app/services/history-export.service"
@@ -17,17 +19,17 @@ import { HistoryExportService } from "src/app/services/history-export.service"
     selector: "app-loop-result-screen",
     templateUrl: "../history-screen/history-screen.component.html",
     styleUrls: ["../history-screen/history-screen.component.scss"],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class LoopResultScreenComponent extends HistoryScreenComponent {
     override shouldGroupHistory = false
     override pageTitle = "Loop measurement results"
-    override result$: Observable<
-        IBasicResponse<IHistoryRowRTR>
-    > = this.store.getFormattedHistory({
-        grouped: this.shouldGroupHistory,
-        loopUuid: this.activatedRoute.snapshot.params["loopUuid"],
-    })
+    override result$: Observable<IBasicResponse<IHistoryRowRTR>> =
+        this.store.getFormattedHistory({
+            grouped: this.shouldGroupHistory,
+            loopUuid: this.activatedRoute.snapshot.params["loopUuid"],
+        })
     override actionButtons: IMainMenuItem[] = [
         {
             label: "",
@@ -62,7 +64,7 @@ export class LoopResultScreenComponent extends HistoryScreenComponent {
         message: MessageService,
         cdr: ChangeDetectorRef,
         store: HistoryStore,
-        transloco: TranslocoService,
+        transloco: I18nService,
         private activatedRoute: ActivatedRoute,
     ) {
         super(mainStore, message, exporter, store, cdr, transloco)

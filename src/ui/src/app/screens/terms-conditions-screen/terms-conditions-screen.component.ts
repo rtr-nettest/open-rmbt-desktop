@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core"
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core"
 import { Router } from "@angular/router"
 import { map } from "rxjs"
 import { MainStore } from "src/app/store/main.store"
@@ -7,21 +7,22 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-terms-conditions-screen",
     templateUrl: "./terms-conditions-screen.component.html",
     styleUrls: ["./terms-conditions-screen.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class TermsConditionsScreenComponent implements OnInit {
     terms$ = this.mainStore.settings$.pipe(
         map((settings) => {
             this.termsText = settings?.termsText || ""
             return null
-        })
+        }),
     )
     isRead = false
     termsText = ""
 
     constructor(
         private router: Router,
-        private mainStore: MainStore
+        private mainStore: MainStore,
     ) {}
 
     ngOnInit(): void {

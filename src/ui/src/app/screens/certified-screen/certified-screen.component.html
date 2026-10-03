@@ -1,82 +1,94 @@
 <app-header></app-header>
-<app-body *ngIf="env$ | async as env">
-    <app-main-menu
-        [disabled]="activeBreadCrumbIndex === breadCrumbs.MEASUREMENT"
-    ></app-main-menu>
-    <app-main-content *transloco="let t">
-        <div class="app-main">
-            <div class="app-breadcrumbs-wrapper">
-                <button
-                    *ngIf="activeBreadCrumbIndex > 0"
-                    mat-icon-button
-                    (click)="back()"
-                    style="margin-right: 1ex"
-                    [title]="t('Go back')"
-                >
-                    <i class="app-icon app-icon--chevron-left"></i>
-                </button>
-                <ul class="app-breadcrumbs">
-                    <li
-                        *ngFor="let bc of breadCrumbsNames; let i = index"
-                        class="app-breadcrumbs__item"
-                        [class.active]="i == activeBreadCrumbIndex"
-                        [class.visited]="i < activeBreadCrumbIndex"
+@if (env$ | async; as env) {
+    <app-body>
+        <app-main-menu
+            [disabled]="activeBreadCrumbIndex === breadCrumbs.MEASUREMENT"
+        ></app-main-menu>
+        <app-main-content *localize="let t">
+            <div class="app-main">
+                <div class="app-breadcrumbs-wrapper">
+                    @if (activeBreadCrumbIndex > 0) {
+                        <button
+                            mat-icon-button
+                            (click)="back()"
+                            style="margin-right: 1ex"
+                            [title]="t('Go back')"
+                        >
+                            <i class="app-icon app-icon--chevron-left"></i>
+                        </button>
+                    }
+                    <ul class="app-breadcrumbs">
+                        @for (
+                            bc of breadCrumbsNames;
+                            track bc;
+                            let i = $index
+                        ) {
+                            <li
+                                class="app-breadcrumbs__item"
+                                [class.active]="i == activeBreadCrumbIndex"
+                                [class.visited]="i < activeBreadCrumbIndex"
+                            >
+                                <a>{{ i + 1 }}. {{ t(bc) }}</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+                @if (activeBreadCrumbIndex == breadCrumbs.INFO) {
+                    <app-certified-info></app-certified-info>
+                }
+                @if (activeBreadCrumbIndex == breadCrumbs.DATA) {
+                    <app-certified-data-form
+                        (formChange)="onDataFormChange($event)"
+                    ></app-certified-data-form>
+                }
+                @if (activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT) {
+                    <app-certified-env-form
+                        (formChange)="onEnvFormChange($event)"
+                    ></app-certified-env-form>
+                }
+                @if (activeBreadCrumbIndex == breadCrumbs.MEASUREMENT) {
+                    <app-loop-test-screen
+                        [hideMenu]="true"
+                    ></app-loop-test-screen>
+                }
+                @if (activeBreadCrumbIndex == breadCrumbs.RESULT) {
+                    <app-certified-result-screen
+                        [hideMenu]="true"
+                        [loopUuid]="loopUuid"
+                    ></app-certified-result-screen>
+                }
+                @if (
+                    activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT ||
+                    (activeBreadCrumbIndex == breadCrumbs.DATA && !isFirstCycle)
+                ) {
+                    <button
+                        mat-flat-button
+                        color="primary"
+                        style="margin-top: 1.6em"
+                        (click)="startCertifiedMeasurement()"
+                        [disabled]="
+                            activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT
+                                ? !isEnvFormValid
+                                : !isDataFormValid
+                        "
                     >
-                        <a>{{ i + 1 }}. {{ t(bc) }}</a>
-                    </li>
-                </ul>
+                        {{ t("Start certified measurement") }}
+                    </button>
+                } @else if (activeBreadCrumbIndex <= breadCrumbs.DATA) {
+                    <button
+                        mat-flat-button
+                        color="primary"
+                        style="margin-top: 1.6em"
+                        (click)="forward()"
+                        [disabled]="
+                            activeBreadCrumbIndex > breadCrumbs.INFO &&
+                            !isDataFormValid
+                        "
+                    >
+                        {{ t("Next") }}
+                    </button>
+                }
             </div>
-            <app-certified-info
-                *ngIf="activeBreadCrumbIndex == breadCrumbs.INFO"
-            ></app-certified-info>
-            <app-certified-data-form
-                (formChange)="onDataFormChange($event)"
-                *ngIf="activeBreadCrumbIndex == breadCrumbs.DATA"
-            ></app-certified-data-form>
-            <app-certified-env-form
-                (formChange)="onEnvFormChange($event)"
-                *ngIf="activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT"
-            ></app-certified-env-form>
-            <app-loop-test-screen
-                *ngIf="activeBreadCrumbIndex == breadCrumbs.MEASUREMENT"
-                [hideMenu]="true"
-            ></app-loop-test-screen>
-            <app-certified-result-screen
-                *ngIf="activeBreadCrumbIndex == breadCrumbs.RESULT"
-                [hideMenu]="true"
-                [loopUuid]="loopUuid"
-            ></app-certified-result-screen>
-            @if (
-                activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT ||
-                (activeBreadCrumbIndex == breadCrumbs.DATA && !isFirstCycle)
-            ) {
-                <button
-                    mat-flat-button
-                    color="primary"
-                    style="margin-top: 1.6em"
-                    (click)="startCertifiedMeasurement()"
-                    [disabled]="
-                        activeBreadCrumbIndex == breadCrumbs.ENVIRONMENT
-                            ? !isEnvFormValid
-                            : !isDataFormValid
-                    "
-                >
-                    {{ t("Start certified measurement") }}
-                </button>
-            } @else if (activeBreadCrumbIndex <= breadCrumbs.DATA) {
-                <button
-                    mat-flat-button
-                    color="primary"
-                    style="margin-top: 1.6em"
-                    (click)="forward()"
-                    [disabled]="
-                        activeBreadCrumbIndex > breadCrumbs.INFO &&
-                        !isDataFormValid
-                    "
-                >
-                    {{ t("Next") }}
-                </button>
-            }
-        </div>
-    </app-main-content>
-</app-body>
+        </app-main-content>
+    </app-body>
+}

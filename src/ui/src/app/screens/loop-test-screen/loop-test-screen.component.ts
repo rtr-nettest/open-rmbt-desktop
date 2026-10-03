@@ -1,4 +1,4 @@
-import { Component } from "@angular/core"
+import { Component, ChangeDetectionStrategy } from "@angular/core"
 import { TestScreenComponent } from "../test-screen/test-screen.component"
 import { ITestVisualizationState } from "src/app/interfaces/test-visualization-state.interface"
 import { STATE_UPDATE_TIMEOUT } from "src/app/store/test.store"
@@ -17,6 +17,7 @@ import { EMeasurementStatus } from "../../../../../measurement/enums/measurement
     selector: "app-loop-test-screen",
     templateUrl: "../test-screen/test-screen.component.html",
     styleUrls: ["../test-screen/test-screen.component.scss"],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class LoopTestScreenComponent extends TestScreenComponent {

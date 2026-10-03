@@ -1,1 +1,3 @@
-<ng-container *ngIf="commit$ | async as commit">{{ commit }}</ng-container>
+@if (commit$ | async; as commit) {
+    {{ commit }}
+}

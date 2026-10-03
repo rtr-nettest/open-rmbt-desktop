@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core"
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core"
 import { combineLatest, map } from "rxjs"
 import {
     IDynamicComponent,
@@ -23,6 +23,7 @@ import { IMeasurementServerResponse } from "../../../../../measurement/interface
     selector: "app-settings-server",
     templateUrl: "./settings-server.component.html",
     styleUrl: "./settings-server.component.scss",
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SettingsServerComponent implements IDynamicComponent {

@@ -1,14 +1,15 @@
-import { Component, Input } from "@angular/core"
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core"
 import { ITestPhaseState } from "../../interfaces/test-phase-state.interface"
 import { ETestStatuses } from "../../enums/test-statuses.enum"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { ConversionService } from "src/app/services/conversion.service"
 
 @Component({
     selector: "nt-test-indicator",
     templateUrl: "./test-indicator.component.html",
     styleUrls: ["./test-indicator.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class TestIndicatorComponent {
     @Input() data: ITestPhaseState | undefined
@@ -47,7 +48,7 @@ export class TestIndicatorComponent {
     }
 
     constructor(
-        private transloco: TranslocoService,
-        private conversion: ConversionService
+        private transloco: I18nService,
+        private conversion: ConversionService,
     ) {}
 }

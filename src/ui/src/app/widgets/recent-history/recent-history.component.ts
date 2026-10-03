@@ -4,6 +4,7 @@ import {
     Input,
     OnChanges,
     Output,
+    ChangeDetectionStrategy,
 } from "@angular/core"
 import { Observable, map } from "rxjs"
 import { ITableColumn } from "src/app/interfaces/table-column.interface"
@@ -11,9 +12,7 @@ import { ERoutes } from "src/app/enums/routes.enum"
 import { MainStore } from "src/app/store/main.store"
 import { ISort } from "src/app/interfaces/sort.interface"
 import { HistoryStore } from "src/app/store/history.store"
-import {
-    IHistoryRowRTR,
-} from "src/app/interfaces/history-row.interface"
+import { IHistoryRowRTR } from "src/app/interfaces/history-row.interface"
 import { Router } from "@angular/router"
 import { MessageService } from "src/app/services/message.service"
 import { THIS_INTERRUPTS_ACTION } from "src/app/constants/strings"
@@ -23,6 +22,7 @@ import { TestStore } from "src/app/store/test.store"
     selector: "app-recent-history",
     templateUrl: "./recent-history.component.html",
     styleUrls: ["./recent-history.component.scss"],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class RecentHistoryComponent implements OnChanges {

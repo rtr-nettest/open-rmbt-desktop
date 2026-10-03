@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core"
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core"
 import {
     IDynamicComponent,
     IDynamicComponentParameters,
@@ -8,7 +8,8 @@ import {
     selector: "app-settings-local-data",
     templateUrl: "./settings-local-data.component.html",
     styleUrls: ["./settings-local-data.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class SettingsLocalDataComponent implements IDynamicComponent {
     @Input() parameters?: IDynamicComponentParameters

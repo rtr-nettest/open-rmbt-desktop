@@ -1,9 +1,11 @@
-<ng-container *ngIf="result">
-    <ng-container *ngIf="result.totalElements > 0">
-        <ng-container *transloco="let t">
-            <h3 *ngIf="title" class="app-title" style="margin-bottom: 1em">
-                {{ t(title) }}
-            </h3>
+@if (result) {
+    @if (result.totalElements > 0) {
+        <ng-container *localize="let t">
+            @if (title) {
+                <h3 class="app-title" style="margin-bottom: 1em">
+                    {{ t(title) }}
+                </h3>
+            }
             <app-table
                 [action]="changeSort"
                 [columns]="(columns$ | async)!"
@@ -16,5 +18,5 @@
                 (toggleExpandableRow)="toggleLoopResults($event.toString())"
             ></app-table>
         </ng-container>
-    </ng-container>
-</ng-container>
+    }
+}

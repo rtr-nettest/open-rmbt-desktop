@@ -1,17 +1,14 @@
 import { Pipe, PipeTransform } from "@angular/core"
+import { marked } from "marked"
 import { ITranslatable } from "../interfaces/translatable.interface"
-import { TranslocoService } from "@ngneat/transloco"
-import { MarkdownService } from "ngx-markdown"
+import { I18nService } from "src/app/services/i18n.service"
 
 @Pipe({
     name: "translate",
     standalone: false
 })
 export class TranslatePipe implements PipeTransform {
-    constructor(
-        private markdown: MarkdownService,
-        private transloco: TranslocoService
-    ) {}
+    constructor(private transloco: I18nService) {}
 
     transform(
         value: ITranslatable,
@@ -28,7 +25,9 @@ export class TranslatePipe implements PipeTransform {
             }
         }
         if (parseMarkdown === "parseMarkdown") {
-            return this.markdown.parse(retVal) as string
+            // Synchronous render; the result is bound via [innerHTML], which
+            // Angular sanitizes.
+            return marked.parse(retVal ?? "", { async: false }) as string
         }
         return retVal
     }

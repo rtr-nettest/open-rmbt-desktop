@@ -1,20 +1,22 @@
 <app-header></app-header>
-<app-body *ngIf="env$ | async as env">
-    <app-main-menu></app-main-menu>
-    <app-main-content>
-        <div class="app-main" *transloco="let t">
-            <h1 class="app-title">
-                {{ t("Settings") }}
-            </h1>
-            <div class="app-wrapper">
-                <app-table
-                    [columns]="columns"
-                    [data]="(data$ | async)!"
-                    [sort]="sort"
-                    [tableClassNames]="tableClassNames"
-                ></app-table>
+@if (env$ | async; as env) {
+    <app-body>
+        <app-main-menu></app-main-menu>
+        <app-main-content>
+            <div class="app-main" *localize="let t">
+                <h1 class="app-title">
+                    {{ t("Settings") }}
+                </h1>
+                <div class="app-wrapper">
+                    <app-table
+                        [columns]="columns"
+                        [data]="(data$ | async)!"
+                        [sort]="sort"
+                        [tableClassNames]="tableClassNames"
+                    ></app-table>
+                </div>
             </div>
-        </div>
-    </app-main-content>
-    <app-footer></app-footer>
-</app-body>
+        </app-main-content>
+        <app-footer></app-footer>
+    </app-body>
+}

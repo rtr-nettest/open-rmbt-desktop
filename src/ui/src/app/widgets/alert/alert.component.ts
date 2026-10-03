@@ -1,10 +1,11 @@
-import { Component, Input } from "@angular/core"
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core"
 
 @Component({
     selector: "app-alert",
     templateUrl: "./alert.component.html",
     styleUrls: ["./alert.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class AlertComponent {
     @Input() text?: string

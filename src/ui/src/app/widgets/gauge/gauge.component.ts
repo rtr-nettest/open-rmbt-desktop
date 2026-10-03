@@ -3,7 +3,7 @@ import { tap } from "rxjs"
 import { ITestPhaseState } from "src/app/interfaces/test-phase-state.interface"
 import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { ConversionService } from "src/app/services/conversion.service"
 
 @Component({
@@ -27,7 +27,7 @@ export class GaugeComponent {
         private conversion: ConversionService,
         private store: TestStore,
         private ngZone: NgZone,
-        private transloco: TranslocoService
+        private transloco: I18nService
     ) {}
 
     private getProgressSegment(status: EMeasurementStatus, progress: number) {

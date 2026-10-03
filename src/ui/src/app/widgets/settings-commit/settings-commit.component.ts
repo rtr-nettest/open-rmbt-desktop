@@ -1,4 +1,4 @@
-import { Component } from "@angular/core"
+import { Component, ChangeDetectionStrategy } from "@angular/core"
 import { map } from "rxjs"
 import { MainStore } from "src/app/store/main.store"
 
@@ -6,7 +6,8 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-settings-commit",
     templateUrl: "./settings-commit.component.html",
     styleUrls: ["./settings-commit.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class SettingsCommitComponent {
     commit$ = this.store.env$.pipe(map((s) => s?.GIT_INFO))

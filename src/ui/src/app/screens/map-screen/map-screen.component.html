@@ -2,9 +2,9 @@
 <app-body>
     <app-main-menu></app-main-menu>
     <app-main-content>
-        <ng-container *ngIf="mapLink$ | async as mapLink">
+        @if (mapLink$ | async; as mapLink) {
             <iframe class="app-iframe" [src]="mapLink"></iframe>
-        </ng-container>
+        }
     </app-main-content>
 </app-body>
 <app-footer></app-footer>

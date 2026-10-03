@@ -14,8 +14,7 @@ import { IUserSettings } from "../../../../measurement/interfaces/user-settings-
 import { INewsItem } from "../../../../measurement/interfaces/news.interface"
 import { EIPVersion } from "../../../../measurement/enums/ip-version.enum"
 import { Router } from "@angular/router"
-import { Translation, TranslocoService } from "@ngneat/transloco"
-import { TranslocoHttpLoader } from "../transloco-root.module"
+import { I18nService, Translation } from "src/app/services/i18n.service"
 import { IJitterInfo } from "../../../../measurement/interfaces/jitter-info.interface"
 import { IPInfo } from "../../../../measurement/interfaces/ip-info.interface"
 
@@ -48,8 +47,7 @@ export class MainStore {
 
     constructor(
         private router: Router,
-        private transloco: TranslocoService,
-        private transLoader: TranslocoHttpLoader,
+        private transloco: I18nService,
     ) {
         window.electronAPI.onError((error) => {
             console.error(error)

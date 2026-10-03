@@ -1,4 +1,4 @@
-import { Component } from "@angular/core"
+import { Component, ChangeDetectionStrategy } from "@angular/core"
 import { DomSanitizer } from "@angular/platform-browser"
 import { map } from "rxjs"
 import { I18nService } from "src/app/services/i18n.service"
@@ -8,7 +8,8 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-statistics-screen",
     templateUrl: "./statistics-screen.component.html",
     styleUrls: ["./statistics-screen.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class StatisticsScreenComponent {
     statisticsLink$ = this.mainStore.env$.pipe(
@@ -16,15 +17,15 @@ export class StatisticsScreenComponent {
             this.sanitizer.bypassSecurityTrustResourceUrl(
                 env?.FULL_STATISTICS_URL?.replace(
                     "$lang",
-                    this.i18n.getActiveBrowserLang()
-                ) ?? ""
-            )
-        )
+                    this.i18n.getActiveBrowserLang(),
+                ) ?? "",
+            ),
+        ),
     )
 
     constructor(
         private i18n: I18nService,
         private mainStore: MainStore,
-        private sanitizer: DomSanitizer
+        private sanitizer: DomSanitizer,
     ) {}
 }

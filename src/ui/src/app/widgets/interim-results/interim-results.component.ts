@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, input } from "@angular/core"
 import { tap } from "rxjs"
 import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { ConversionService } from "src/app/services/conversion.service"
 
 @Component({
@@ -66,6 +66,6 @@ export class InterimResultsComponent {
     constructor(
         private conversionService: ConversionService,
         private store: TestStore,
-        private transloco: TranslocoService,
+        private transloco: I18nService,
     ) {}
 }

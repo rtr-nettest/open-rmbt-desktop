@@ -23,7 +23,7 @@ import { IMeasurementServerResponse } from "../../../../measurement/interfaces/m
 import { ERoutes } from "../enums/routes.enum"
 import { ILoopModeInfo } from "../../../../measurement/interfaces/measurement-registration-request.interface"
 import { MessageService } from "../services/message.service"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { SprintfPipe } from "../pipes/sprintf.pipe"
 import { IMeasurementPhaseState } from "../../../../measurement/interfaces/measurement-phase-state.interface"
 import { HistoryStore } from "./history.store"
@@ -96,7 +96,7 @@ export class TestStore {
         private ngZone: NgZone,
         private router: Router,
         private sprintf: SprintfPipe,
-        private transloco: TranslocoService,
+        private transloco: I18nService,
     ) {
         window.electronAPI.onRestartMeasurement((loopCounter) => {
             this.ngZone.run(() => {

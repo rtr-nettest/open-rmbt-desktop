@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http"
 import { Injectable } from "@angular/core"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { buffer, catchError, map, of } from "rxjs"
 
 @Injectable({
@@ -8,7 +8,7 @@ import { buffer, catchError, map, of } from "rxjs"
 })
 export class AssetsService {
     constructor(
-        private transloco: TranslocoService,
+        private transloco: I18nService,
         private http: HttpClient
     ) {}
 

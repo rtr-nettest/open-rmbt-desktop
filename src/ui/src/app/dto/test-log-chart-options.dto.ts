@@ -1,5 +1,5 @@
 import { EColors } from "src/app/enums/colors.enum"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { roundToSignificantDigits } from "../helpers/math"
 
 export class TestLogChartOptions {
@@ -89,7 +89,7 @@ export class TestLogChartOptions {
     }
 
     constructor(
-        private t: TranslocoService,
+        private t: I18nService,
         private maxValue?: number,
     ) {
         if (this.maxValue !== undefined) {

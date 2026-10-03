@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from "@angular/core"
+import { Component, OnDestroy, ChangeDetectionStrategy } from "@angular/core"
 import { Subject, firstValueFrom, takeUntil, takeWhile, tap } from "rxjs"
 import { ICertifiedDataForm } from "src/app/interfaces/certified-data-form.interface"
 import { ICertifiedEnvForm } from "src/app/interfaces/certified-env-form.interface"
@@ -26,6 +26,7 @@ const BreadCrumbsNames = {
     selector: "app-certified-screen",
     templateUrl: "./certified-screen.component.html",
     styleUrls: ["./certified-screen.component.scss"],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class CertifiedScreenComponent implements OnDestroy {

@@ -1,46 +1,50 @@
-<app-header *ngIf="!hideMenu"></app-header>
-<app-body *ngIf="env$ | async as env">
-    <app-main-menu *ngIf="!hideMenu"></app-main-menu>
-    <app-main-content
-        *ngIf="result$ | async as result; else noResult"
-        [class.hidden-menu]="hideMenu"
-    >
-        <app-export-warning></app-export-warning>
-        <div
-            class="app-main"
-            [class.app-main--no-padding]="hideMenu"
-            *transloco="let t"
-        >
-            <h1 class="app-title">
-                {{ t(pageTitle) }}
-                <app-action-buttons
-                    [items]="actionButtons"
-                ></app-action-buttons>
-            </h1>
-            <div class="app-wrapper">
-                <app-recent-history
-                    [result]="result"
-                    [grouped]="shouldGroupHistory"
-                    (sortChange)="changeSort($event)"
-                ></app-recent-history>
-                <button
-                    *ngIf="!allLoaded"
-                    mat-flat-button
-                    color="primary"
-                    (click)="loadMore()"
-                    [disabled]="loading"
+@if (!hideMenu) {
+    <app-header></app-header>
+}
+@if (env$ | async; as env) {
+    <app-body>
+        @if (!hideMenu) {
+            <app-main-menu></app-main-menu>
+        }
+        @if (result$ | async; as result) {
+            <app-main-content [class.hidden-menu]="hideMenu">
+                <app-export-warning></app-export-warning>
+                <div
+                    class="app-main"
+                    [class.app-main--no-padding]="hideMenu"
+                    *localize="let t"
                 >
-                    {{ loading ? t("Loading") : t("Load more") }}
-                </button>
-            </div>
-        </div>
-        <app-footer></app-footer>
-    </app-main-content>
-</app-body>
+                    <h1 class="app-title">
+                        {{ t(pageTitle) }}
+                        <app-action-buttons
+                            [items]="actionButtons"
+                        ></app-action-buttons>
+                    </h1>
+                    <div class="app-wrapper">
+                        <app-recent-history
+                            [result]="result"
+                            [grouped]="shouldGroupHistory"
+                            (sortChange)="changeSort($event)"
+                        ></app-recent-history>
+                        @if (!allLoaded) {
+                            <button
+                                mat-flat-button
+                                color="primary"
+                                (click)="loadMore()"
+                                [disabled]="loading"
+                            >
+                                {{ loading ? t("Loading") : t("Load more") }}
+                            </button>
+                        }
+                    </div>
+                </div>
+                <app-footer></app-footer>
+            </app-main-content>
+        } @else {
+            <main class="app-main app-main--no-result">
+                {{ "Fetching the history..." | localize }}
+            </main>
+        }
+    </app-body>
+}
 <app-scroll-top></app-scroll-top>
-
-<ng-template #noResult>
-    <main class="app-main app-main--no-result">
-        {{ "Fetching the history..." | transloco }}
-    </main>
-</ng-template>

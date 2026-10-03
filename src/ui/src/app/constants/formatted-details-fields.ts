@@ -4,7 +4,7 @@ import tz from "dayjs/plugin/timezone"
 dayjs.extend(utc)
 dayjs.extend(tz)
 import { formatBytes, roundToSignificantDigits } from "../helpers/math"
-import { Translation } from "@ngneat/transloco"
+import { Translation } from "src/app/services/i18n.service"
 import { RESULT_DATE_FORMAT } from "./strings"
 
 export const FORMATTED_FIELDS: Record<

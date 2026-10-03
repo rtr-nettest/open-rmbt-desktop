@@ -1,7 +1,7 @@
 import { ITestPhaseState } from "../interfaces/test-phase-state.interface"
 import { ChartPhase, TestRTRChartDataset } from "./test-rtr-chart-dataset.dto"
 import { TestLogChartOptions } from "./test-log-chart-options.dto"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { TestChart } from "./test-chart.dto"
 import { generateIndexesOfLength } from "../helpers/array"
 import { Point } from "chart.js"
@@ -9,7 +9,7 @@ import { Point } from "chart.js"
 export class TestLogChart extends TestChart {
     constructor(
         context: CanvasRenderingContext2D,
-        transloco: TranslocoService,
+        transloco: I18nService,
         private phase: ChartPhase,
         maxValue?: number,
     ) {

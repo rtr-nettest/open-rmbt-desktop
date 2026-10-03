@@ -9,7 +9,7 @@ import {
 import { Observable } from "rxjs"
 import { ITestVisualizationState } from "../../interfaces/test-visualization-state.interface"
 import { withLatestFrom, map } from "rxjs/operators"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { TestStore } from "src/app/store/test.store"
 import { EMeasurementStatus } from "../../../../../measurement/enums/measurement-status.enum"
 import { TestChart } from "../../dto/test-chart.dto"
@@ -61,7 +61,7 @@ export class TestChartComponent {
         private mainStore: MainStore,
         private ngZone: NgZone,
         private store: TestStore,
-        private transloco: TranslocoService,
+        private transloco: I18nService,
     ) {}
 
     private handleChanges(visualization: ITestVisualizationState) {

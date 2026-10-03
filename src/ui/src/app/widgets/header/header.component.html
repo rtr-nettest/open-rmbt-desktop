@@ -1,5 +1,5 @@
-<ng-container *ngIf="link$ | async as link">
-    <ng-container *transloco="let t">
+@if (link$ | async; as link) {
+    <ng-container *localize="let t">
         <header class="app-header app-header--large{{ fixed ? '-fixed' : '' }}">
             <a [routerLink]="link" (click)="handleClick($event, link)"
                 ><img
@@ -8,17 +8,16 @@
                     [alt]="t('Text RTR-NetTest')"
                     [title]="t('Back to Startpage')"
             /></a>
-            <div
-                *ngIf="
-                    (isLoopModeTestScreen$ | async) === true &&
-                    hideLoopModeAlert === false
-                "
-                style="display: flex; justify-content: center; flex: 1"
-            >
-                <app-alert [text]="loopModeAlertText$ | async">
-                    <app-stop-loop-button></app-stop-loop-button>
-                </app-alert>
-            </div>
+            @if (
+                (isLoopModeTestScreen$ | async) === true &&
+                hideLoopModeAlert === false
+            ) {
+                <div style="display: flex; justify-content: center; flex: 1">
+                    <app-alert [text]="loopModeAlertText$ | async">
+                        <app-stop-loop-button></app-stop-loop-button>
+                    </app-alert>
+                </div>
+            }
         </header>
         <header class="app-header app-header--small{{ fixed ? '-fixed' : '' }}">
             <a [routerLink]="link"
@@ -30,4 +29,4 @@
             /></a>
         </header>
     </ng-container>
-</ng-container>
+}

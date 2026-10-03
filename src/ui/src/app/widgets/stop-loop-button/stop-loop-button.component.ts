@@ -1,4 +1,4 @@
-import { Component } from "@angular/core"
+import { Component, ChangeDetectionStrategy } from "@angular/core"
 import { Router } from "@angular/router"
 import { ERoutes } from "src/app/enums/routes.enum"
 import { TestStore } from "src/app/store/test.store"
@@ -7,10 +7,14 @@ import { TestStore } from "src/app/store/test.store"
     selector: "app-stop-loop-button",
     templateUrl: "./stop-loop-button.component.html",
     styleUrls: ["./stop-loop-button.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class StopLoopButtonComponent {
-    constructor(private testStore: TestStore, private router: Router) {}
+    constructor(
+        private testStore: TestStore,
+        private router: Router,
+    ) {}
 
     abortTest() {
         this.router.navigate([

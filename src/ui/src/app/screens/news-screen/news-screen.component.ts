@@ -1,4 +1,4 @@
-import { Component } from "@angular/core"
+import { Component, ChangeDetectionStrategy } from "@angular/core"
 import { Router } from "@angular/router"
 import { MainStore } from "src/app/store/main.store"
 
@@ -6,12 +6,16 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-news",
     templateUrl: "./news-screen.component.html",
     styleUrls: ["./news-screen.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class NewsScreenComponent {
     news$ = this.mainStore.news$
 
-    constructor(private mainStore: MainStore, private router: Router) {}
+    constructor(
+        private mainStore: MainStore,
+        private router: Router,
+    ) {}
 
     close() {
         this.router.navigateByUrl("/")

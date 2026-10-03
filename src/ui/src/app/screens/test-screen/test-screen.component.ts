@@ -29,7 +29,7 @@ import {
 import { ITestVisualizationState } from "src/app/interfaces/test-visualization-state.interface"
 import { HistoryStore } from "src/app/store/history.store"
 import { IEnv } from "../../../../../electron/interfaces/env.interface"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 
 @Component({
     selector: "app-test-screen",
@@ -83,7 +83,7 @@ export class TestScreenComponent implements OnDestroy, OnInit {
         protected ngZone: NgZone,
         protected router: Router,
         protected message: MessageService,
-        protected transloco: TranslocoService,
+        protected transloco: I18nService,
     ) {}
 
     ngOnInit(): void {

@@ -6,16 +6,18 @@ import {
     OnDestroy,
     Output,
     ViewChild,
+    ChangeDetectionStrategy,
 } from "@angular/core"
 import { MatPaginator, PageEvent } from "@angular/material/paginator"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { combineLatest, Subscription } from "rxjs"
 
 @Component({
     selector: "app-paginator",
     templateUrl: "./paginator.component.html",
     styleUrls: ["./paginator.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class PaginatorComponent implements AfterViewInit, OnDestroy {
     @Input() length: number = 0
@@ -29,7 +31,7 @@ export class PaginatorComponent implements AfterViewInit, OnDestroy {
 
     private sub?: Subscription
 
-    constructor(private transloco: TranslocoService) {}
+    constructor(private transloco: I18nService) {}
 
     ngAfterViewInit(): void {
         this.sub = combineLatest([
@@ -55,7 +57,7 @@ export class PaginatorComponent implements AfterViewInit, OnDestroy {
                 this.paginator._intl.getRangeLabel = (
                     page: number,
                     pageSize: number,
-                    length: number
+                    length: number,
                 ): string => {
                     length = Math.max(length, 0)
                     const startIndex = page * pageSize
@@ -69,10 +71,10 @@ export class PaginatorComponent implements AfterViewInit, OnDestroy {
                             startIndex: startIndex + 1,
                             endIndex,
                             length,
-                        }
+                        },
                     )
                 }
-            }
+            },
         )
     }
 

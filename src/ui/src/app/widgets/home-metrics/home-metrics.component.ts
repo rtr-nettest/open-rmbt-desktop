@@ -1,10 +1,11 @@
-import { Component, Input } from "@angular/core"
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core"
 
 @Component({
     selector: "app-home-metrics",
     templateUrl: "./home-metrics.component.html",
     styleUrls: ["./home-metrics.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class HomeMetricsComponent {
     @Input() title?: string

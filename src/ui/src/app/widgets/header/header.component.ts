@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from "@angular/core"
 import { ActivatedRoute, Router } from "@angular/router"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 import { combineLatest, map } from "rxjs"
 import { THIS_INTERRUPTS_ACTION } from "src/app/constants/strings"
 import { ERoutes } from "src/app/enums/routes.enum"
@@ -80,7 +80,7 @@ export class HeaderComponent {
         private testStore: TestStore,
         private message: MessageService,
         private router: Router,
-        private transloco: TranslocoService,
+        private transloco: I18nService,
     ) {}
 
     handleClick(event: MouseEvent, link: string) {

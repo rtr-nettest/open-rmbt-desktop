@@ -1,4 +1,4 @@
-import { Component } from "@angular/core"
+import { Component, ChangeDetectionStrategy } from "@angular/core"
 import { map } from "rxjs"
 import { MainStore } from "src/app/store/main.store"
 
@@ -12,6 +12,7 @@ import { MainStore } from "src/app/store/main.store"
     selector: "app-settings-log",
     templateUrl: "./settings-log.component.html",
     styleUrls: ["./settings-log.component.scss"],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SettingsLogComponent {

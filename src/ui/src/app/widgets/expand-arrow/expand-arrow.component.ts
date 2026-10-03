@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core"
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core"
 import { arrowRotate } from "src/app/animations/arrow-rotate.animation"
 
 @Component({
@@ -6,7 +6,8 @@ import { arrowRotate } from "src/app/animations/arrow-rotate.animation"
     selector: "app-expand-arrow",
     templateUrl: "./expand-arrow.component.html",
     styleUrls: ["./expand-arrow.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class ExpandArrowComponent {
     @Input() parameters?: { expanded: boolean }

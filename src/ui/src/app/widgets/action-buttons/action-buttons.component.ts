@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core"
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core"
 import { BehaviorSubject } from "rxjs"
 import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
 
@@ -6,13 +6,14 @@ import { IMainMenuItem } from "src/app/interfaces/main-menu-item.interface"
     selector: "app-action-buttons",
     templateUrl: "./action-buttons.component.html",
     styleUrls: ["./action-buttons.component.scss"],
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class ActionButtonsComponent {
     @Input() items?: IMainMenuItem[]
     private disabledItems: Set<number> = new Set()
     disabledItems$: BehaviorSubject<Set<number>> = new BehaviorSubject(
-        this.disabledItems
+        this.disabledItems,
     )
 
     handleClick(event: MouseEvent, index: number) {

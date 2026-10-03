@@ -1,5 +1,5 @@
 import { EColors } from "src/app/enums/colors.enum"
-import { TranslocoService } from "@ngneat/transloco"
+import { I18nService } from "src/app/services/i18n.service"
 
 export class TestChartOptions {
     animation = {
@@ -65,5 +65,5 @@ export class TestChartOptions {
         },
     }
 
-    constructor(private t: TranslocoService) {}
+    constructor(private t: I18nService) {}
 }

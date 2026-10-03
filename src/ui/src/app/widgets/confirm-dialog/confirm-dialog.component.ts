@@ -24,11 +24,13 @@ export class ConfirmDialogComponent {
     }
 
     get proceedButtonText() {
-        return this.data.proceedButtonText ?? "Abort measurement"
+        // Both buttons name what happens next, so "cancel" can't be mistaken for
+        // "abort": the cancel button keeps the run going, the proceed button ends it.
+        return this.data.proceedButtonText ?? "End measurement"
     }
 
     get cancelButtonText() {
-        return this.data.cancelButtonText ?? "Cancel"
+        return this.data.cancelButtonText ?? "Continue measurement"
     }
 
     get okButtonText() {

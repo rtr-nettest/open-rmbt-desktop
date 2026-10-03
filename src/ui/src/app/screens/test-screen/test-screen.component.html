@@ -17,16 +17,14 @@
                     >
                         {{ t("Measurement") + " " + loopCount }}
                     </h1>
-                    <h1
-                        *ngIf="(loopWaiting$ | async) === true"
-                        class="app-title"
-                        aria-live="polite"
-                    >
-                        {{
-                            t("Result of measurement - waiting")
-                                | sprintf: loopCount
-                        }}
-                    </h1>
+                    <ng-container *ngIf="(loopWaiting$ | async) === true">
+                        <h1 class="app-title" aria-live="polite">
+                            {{ t("Waiting for next measurement") }}
+                        </h1>
+                        <h2 class="app-title app-title--sub">
+                            {{ t("Result of measurement") | sprintf: loopCount }}
+                        </h2>
+                    </ng-container>
                 </ng-container>
             </ng-container>
             <app-alert

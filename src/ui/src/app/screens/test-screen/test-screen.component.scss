@@ -52,6 +52,14 @@ app-main-content {
     margin: 0 rem(32) rem(32);
 }
 
+// Second line of the "waiting for next measurement" heading: a quiet subtitle
+// tucked right under the main line, not a second full-size heading.
+.app-title--sub {
+    margin-top: rem(-24);
+    font-weight: 400;
+    opacity: 0.75;
+}
+
 app-alert {
     margin-bottom: 2em;
     position: relative;

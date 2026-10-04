@@ -64,6 +64,15 @@ jobs:
                   curl -fsSL -o java-client.zip "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/${MEASUREMENT_ENGINE_VERSION}/rmbt-client-java-linux-x64.zip"
                   unzip -o java-client.zip -d src/measurement/java_client
                   chmod -R +x src/measurement/java_client/bin || true
+            - name: Set up Flatpak toolchain
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y flatpak flatpak-builder elfutils
+                  flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
+                  flatpak install --user -y flathub \
+                      org.freedesktop.Platform//24.08 \
+                      org.freedesktop.Sdk//24.08 \
+                      org.electronjs.Electron2.BaseApp//24.08
             - name: Build
               run: |
                   sudo apt-get install -y rpm
@@ -73,10 +82,15 @@ jobs:
                   cd ../..
                   npm run make:deb
                   npm run make:rpm
+                  npm run make:flatpak
             - uses: actions/upload-artifact@v4
               with:
                   name: application-rpm
                   path: out/make/rpm/x64/*.rpm
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: application-flatpak
+                  path: out/make/flatpak/x86_64/*.flatpak
             - uses: actions/upload-artifact@v4
               with:
                   name: application-deb
@@ -395,6 +409,12 @@ jobs:
                   name: application-deb
                   path: linux
 
+            - name: Download Linux Artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  name: application-flatpak
+                  path: linux
+
             - name: Download macos Artifacts
               uses: actions/download-artifact@v4
               with:
@@ -408,6 +428,7 @@ jobs:
                   cd linux
                   mv *.deb ../RTR-Netztest-linux-x86.deb
                   mv *.rpm ../RTR-Netztest-linux-x86.rpm
+                  mv *.flatpak ../RTR-Netztest-linux-x86.flatpak
                   echo "Listing files in windows-setup"
                   cd ..
                   ls -R windows-setup
@@ -446,6 +467,7 @@ jobs:
                   files: |
                       RTR-Netztest-linux-x86.deb
                       RTR-Netztest-linux-x86.rpm
+                      RTR-Netztest-linux-x86.flatpak
                       RTR-Netztest-macos.zip
                       RTR-Netztest-windows-x86-Setup.exe
                       RTR-Netztest-windows-x86.zip

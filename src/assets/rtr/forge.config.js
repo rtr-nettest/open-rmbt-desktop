@@ -299,5 +299,52 @@ module.exports = {
                   },
               ]
             : []),
+        // Linux Flatpak — only built when FLATPAK=true, so it never interferes
+        // with the deb/rpm builds. Needs flatpak, flatpak-builder and eu-strip
+        // (elfutils) on the build host, plus the Freedesktop runtime/SDK and the
+        // Electron base app from Flathub (see the CI workflow / README).
+        ...(process.env.FLATPAK === "true"
+            ? [
+                  {
+                      name: "@electron-forge/maker-flatpak",
+                      config: {
+                          options: {
+                              // Reverse-DNS application id (derived from the macOS
+                              // bundle id, dropping the platform suffix).
+                              id: (
+                                  process.env.APP_BUNDLE_ID || "at.netztest.app"
+                              ).replace(/\.macos$/, ""),
+                              productName: packJson.productName,
+                              genericName: "Network measurement",
+                              bin: packJson.productName,
+                              icon: path.join(
+                                  process.env.ASSETS_FOLDER,
+                                  "app-icon",
+                                  "icon.png"
+                              ),
+                              categories: ["Network", "Utility"],
+                              description: packJson.description,
+                              // Freedesktop runtime + Electron base app from Flathub.
+                              base: "org.electronjs.Electron2.BaseApp",
+                              baseVersion: "24.08",
+                              runtime: "org.freedesktop.Platform",
+                              runtimeVersion: "24.08",
+                              sdk: "org.freedesktop.Sdk",
+                              // Sandbox permissions an Electron network app needs.
+                              finishArgs: [
+                                  "--share=ipc",
+                                  "--socket=x11",
+                                  "--socket=wayland",
+                                  "--socket=pulseaudio",
+                                  "--share=network",
+                                  "--device=dri",
+                                  "--filesystem=home",
+                                  "--talk-name=org.freedesktop.Notifications",
+                              ],
+                          },
+                      },
+                  },
+              ]
+            : []),
     ],
 }

@@ -1,7 +1,7 @@
 {
     "name": "open-rmbt-desktop",
     "productName": "RTR-Netztest",
-    "version": "2.2.2",
+    "version": "2.2.3",
     "description": "RTR-Netztest Desktop App",
     "main": "dist/main.js",
     "engines": {
@@ -26,6 +26,7 @@
         "make:app-store": "npm run build:all && cross-env APP_STORE=true electron-forge make --platform=mas --arch=x64",
         "make:deb": "npm run build:all && cross-env DEB=true electron-forge make --platform=linux --arch=x64",
         "make:rpm": "npm run build:all && cross-env RPM=true electron-forge make --platform=linux --arch=x64",
+        "make:flatpak": "npm run build:all && cross-env FLATPAK=true electron-forge make --platform=linux --arch=x64",
         "prepare": "husky install"
     },
     "author": "RTR-Netztest",
@@ -35,6 +36,7 @@
         "@electron-forge/maker-appx": "^8.0.1",
         "@electron-forge/maker-deb": "^8.0.1",
         "@electron-forge/maker-dmg": "^8.0.1",
+        "@electron-forge/maker-flatpak": "^8.0.1",
         "@electron-forge/maker-pkg": "^8.0.1",
         "@electron-forge/maker-rpm": "^8.0.1",
         "@electron-forge/maker-squirrel": "^8.0.1",
@@ -81,6 +83,9 @@
         "pino-pretty": "^11.2.2",
         "reflect-metadata": "^0.2.2",
         "sql.js": "^1.11.0"
+    },
+    "optionalDependencies": {
+        "@malept/electron-installer-flatpak": "^0.11.4"
     },
     "overrides": {
         "tar": "^7.5.22",

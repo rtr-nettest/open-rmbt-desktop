@@ -187,6 +187,19 @@ $ npm run make:rpm
 
 Both `deb` and `rpm` packages will be placed in the `out/make` folder at the root of the project. `RPM`s built on macOS are not valid and can be discarded.
 
+To build a `*.flatpak` bundle, you will need a Linux machine with `flatpak`, `flatpak-builder` and `elfutils` (for `eu-strip`) installed, plus the Freedesktop runtime/SDK and the Electron base app from Flathub:
+
+```sh
+$ flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
+$ flatpak install --user -y flathub \
+    org.freedesktop.Platform//24.08 \
+    org.freedesktop.Sdk//24.08 \
+    org.electronjs.Electron2.BaseApp//24.08
+$ npm run make:flatpak
+```
+
+The `*.flatpak` is written to `out/make/flatpak/x86_64/`. Install it locally with `flatpak install --user ./RTR-Netztest-*.flatpak` (or `flatpak install --bundle ...`); the application id is derived from `APP_BUNDLE_ID` (the `.macos` suffix is stripped, e.g. `at.netztest.app`). Flatpak builds only on Linux — the deb/rpm/flatpak makers are each opt-in (`DEB`/`RPM`/`FLATPAK=true`) and are produced together by the Linux CI job.
+
 ## Configuration
 
 The project contains an `example.env` file. You can use it as an example to configure the variables needed to successfully run a measurement. The path to your custom `.env` file can be passed through an environment variable `RMBT_DESKTOP_DOTENV_CONFIG_PATH`. Otherwise the client will read the variables from a `.env` file in the root of the project, if such exists.

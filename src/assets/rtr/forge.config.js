@@ -15,6 +15,35 @@ const msixArch = argv.arch === "arm64" ? "arm64" : "x64"
 // MinVersion must be > 10.0.17134.0). A provided manifest is used verbatim, so
 // we substitute the values here from the MSIX_* env vars.
 function renderMsixManifest(targetArch) {
+    // Fail fast with a clear message if a tile asset referenced by the manifest
+    // is missing. maker-appx skips its own asset check when a custom manifest is
+    // supplied, so an absent file would otherwise surface only as a cryptic
+    // "makeappx.exe Exit Code: 1" (empty stderr) during `make`.
+    const assetDir = path.join(process.env.ASSETS_FOLDER, "app-icon")
+    const requiredAssets = [
+        "icon.png",
+        "Square44x44Logo.png",
+        "Square150x150Logo.png",
+    ]
+    const missingAssets = requiredAssets.filter(
+        (f) => !fs.existsSync(path.join(assetDir, f))
+    )
+    if (missingAssets.length) {
+        throw new Error(
+            `MSIX tile assets missing in ${assetDir}: ${missingAssets.join(", ")}. ` +
+                `They are referenced by AppxManifest.xml.in and must be present (committed).`
+        )
+    }
+    // A blank Identity Name/Publisher produces the same opaque makeappx failure,
+    // so require them explicitly (they come from prod.env in CI).
+    for (const key of ["MSIX_PACKAGE_NAME", "MSIX_PUBLISHER"]) {
+        if (!process.env[key]) {
+            throw new Error(
+                `${key} is not set — required for the MSIX (Microsoft Store) build. ` +
+                    `Set it in .env (local) or prod.env (CI) from Partner Center > Product identity.`
+            )
+        }
+    }
     const template = fs.readFileSync(
         path.join(process.env.ASSETS_FOLDER, "AppxManifest.xml.in"),
         "utf-8"

@@ -122,6 +122,37 @@ $ npm run make:windows-store-arm64      # arm64
 
 The signed package is written to `out/make/appx/<arch>/*.msix`.
 
+#### Installing a test build locally (sideloading)
+
+A locally built `.msix` is signed with the self-signed throwaway certificate, which Windows does not trust by default — so a direct install is rejected. For **test machines only**, trust the certificate first, then install. (This is never needed for Store installs: Microsoft re-signs the package, so end users just install it from the Store.)
+
+The certificate lives in the private repo at `open-rmbt-desktop-private/MsStore/` (`msix-dev.pfx` = signing key, `msix-dev.cer` = public certificate to distribute for trust). It must be a certificate whose subject equals `MSIX_PUBLISHER`.
+
+1. Copy the public cert `msix-dev.cer` and the `*.msix` to the test machine.
+2. In an **elevated (Administrator) PowerShell**, trust the certificate (the `Trusted People` store under Local Machine is what Windows checks for sideloaded packages):
+
+    ```powershell
+    Import-Certificate -FilePath .\msix-dev.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
+    ```
+
+    GUI alternative: double-click `msix-dev.cer` → **Install Certificate** → **Local Machine** → **Place all certificates in the following store** → **Trusted People**.
+
+3. Install the package — double-click the `.msix` → **Install**, or:
+
+    ```powershell
+    Add-AppxPackage -Path .\RundfunkundTelekomRegulie.RTR-NetztestDesktop.msix
+    ```
+
+To uninstall and remove the trust afterwards:
+
+```powershell
+Get-AppxPackage *RTR-NetztestDesktop* | Remove-AppxPackage
+# remove the trusted test cert (by its thumbprint, shown by Get-ChildItem Cert:\LocalMachine\TrustedPeople)
+Remove-Item Cert:\LocalMachine\TrustedPeople\<thumbprint>
+```
+
+> ⚠️ Trusting a self-signed certificate lowers the machine's security — do it only on a disposable test machine and remove it when finished. Sideloading is enabled by default on Windows 10/11; Developer Mode is not required once the certificate is trusted.
+
 #### Publish
 
 Upload the `*.msix` to Partner Center (Product → Packages). The Store validates, re-signs, distributes, and keeps the app updated automatically. (The GitHub Actions workflow builds and signs the x64 and arm64 MSIX packages on every run using an ephemeral self-signed certificate; `MSIX_PACKAGE_NAME`/`MSIX_PUBLISHER` are read from `prod.env`.)

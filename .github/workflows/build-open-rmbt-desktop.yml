@@ -274,6 +274,10 @@ jobs:
                   "MSIX_CERT_PASS=rmbt-msix-ci"    | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
                   "WINDOWS_KITS_PATH=$($kit.FullName)\x64" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
             - name: Build MSIX
+              # DEBUG surfaces makeappx/signtool stdout (electron-windows-msix
+              # only prints stderr on failure, which is usually empty).
+              env:
+                  DEBUG: electron-windows-msix
               run: |
                   npm install
                   cd src/ui
@@ -324,6 +328,8 @@ jobs:
                   "MSIX_CERT_PASS=rmbt-msix-ci"    | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
                   "WINDOWS_KITS_PATH=$($kit.FullName)\$sub" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
             - name: Build MSIX
+              env:
+                  DEBUG: electron-windows-msix
               run: |
                   npm install
                   cd src/ui

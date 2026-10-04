@@ -75,3 +75,5 @@ src/measurement/c_client/*
 
 # Local MSIX signing certificate (never commit)
 *.pfx
+
+*.cer

@@ -87,6 +87,7 @@
     "minutes": "minut",
     "Start loop test": "Začni ponavljajoče meritve",
     "Tests are conducted repeatedly until they are stopped manually": "Meritve se izvajajo večkrat, dokler se ročno ne ustavijo",
+    "Tests are conducted repeatedly until %0 or until stopped": "Meritve se izvajajo večkrat, do %0 ali dokler se ne ustavijo",
     "Measurement": "Meritev",
     "End tests": "Končaj preskus",
     "Next measurement in": "Naslednja meritev čez",
@@ -159,11 +160,9 @@
     "Measurement result": "Measurement result",
     "Measurement engine": "Measurement engine",
     "Test failed": "Test failed",
-
     "bytes": "Bytes",
     "KB": "KB",
     "MB": "MB",
-
     "distance": "Movement",
     "cat_technology": "Connection Technology",
     "network_type": "Network type",
@@ -245,10 +244,8 @@
     "external_ip": "External IP",
     "hostname": "Hostname",
     "millis": "ms",
-
     "No results available": "Ni na voljo nobenih rezultatov",
     "Not available": "Ni na voljo",
-
     "gaming_cloud": "Gaming Cloud",
     "gaming_download": "Gaming Download",
     "gaming_streaming": "Gaming Streaming",

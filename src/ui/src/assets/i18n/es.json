@@ -87,6 +87,7 @@
     "minutes": "minutos",
     "Start loop test": "Iniciar medición en bucle",
     "Tests are conducted repeatedly until they are stopped manually": "Las pruebas se realizan de forma repetida hasta que se detienen manualmente",
+    "Tests are conducted repeatedly until %0 or until stopped": "Las pruebas se realizan de forma repetida hasta %0 o hasta que se detienen",
     "Measurement": "Medición",
     "End tests": "Finalizar mediciones",
     "Next measurement in": "Siguiente medición en",
@@ -159,11 +160,9 @@
     "Measurement result": "Measurement result",
     "Measurement engine": "Measurement engine",
     "Test failed": "Test failed",
-
     "bytes": "Bytes",
     "KB": "KB",
     "MB": "MB",
-
     "distance": "Movement",
     "cat_technology": "Connection Technology",
     "network_type": "Network type",
@@ -245,10 +244,8 @@
     "external_ip": "External IP",
     "hostname": "Hostname",
     "millis": "ms",
-
     "No results available": "No hay resultados disponibles",
     "Not available": "No disponible",
-
     "gaming_cloud": "Gaming Cloud",
     "gaming_download": "Gaming Download",
     "gaming_streaming": "Gaming Streaming",

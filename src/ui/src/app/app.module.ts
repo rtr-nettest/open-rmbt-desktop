@@ -131,7 +131,6 @@ import { RouterLinkComponent } from "./widgets/router-link/router-link.component
 import { LoopResultScreenComponent } from "./screens/loop-result-screen/loop-result-screen.component"
 import { LoopTestScreenComponent } from "./screens/loop-test-screen/loop-test-screen.component"
 import { TranslatePipe } from "./pipes/translate.pipe"
-import { MarkdownModule } from "ngx-markdown"
 import { SocialButtonsComponent } from "./widgets/social-buttons/social-buttons.component"
 import { CertifiedScreenComponent } from "./screens/certified-screen/certified-screen.component"
 import { CertifiedInfoComponent } from "./widgets/certified-info/certified-info.component"
@@ -284,7 +283,6 @@ declare global {
         BrowserModule,
         FormsModule,
         ReactiveFormsModule,
-        MarkdownModule.forRoot(),
         MatButtonModule,
         MatCheckboxModule,
         MatDialogModule,

@@ -87,6 +87,7 @@
     "minutes": "minutter",
     "Start loop test": "Start sløyfe test",
     "Tests are conducted repeatedly until they are stopped manually": "Prøvinger utføres gjentatte ganger til de blir stoppet manuelt",
+    "Tests are conducted repeatedly until %0 or until stopped": "Prøvinger utføres gjentatte ganger til %0 eller til de blir stoppet",
     "Measurement": "Måling",
     "End tests": "Endelige prøver",
     "Next measurement in": "Neste måling i",
@@ -159,11 +160,9 @@
     "Measurement result": "Measurement result",
     "Measurement engine": "Measurement engine",
     "Test failed": "Test mislyktes",
-
     "bytes": "Bytes",
     "KB": "KB",
     "MB": "MB",
-
     "distance": "Movement",
     "cat_technology": "Connection Technology",
     "network_type": "Network type",
@@ -245,10 +244,8 @@
     "external_ip": "External IP",
     "hostname": "Hostname",
     "millis": "ms",
-
     "No results available": "Ingen resultater tilgjengelig",
     "Not available": "Ikke tilgjengelig",
-
     "gaming_cloud": "Gaming Cloud",
     "gaming_download": "Gaming Download",
     "gaming_streaming": "Gaming Streaming",

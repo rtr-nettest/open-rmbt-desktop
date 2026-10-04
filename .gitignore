@@ -72,3 +72,6 @@ config.json
 # C client binary is downloaded per-platform in CI, not committed
 src/measurement/c_client/*
 !src/measurement/c_client/.gitkeep
+
+# Local MSIX signing certificate (never commit)
+*.pfx

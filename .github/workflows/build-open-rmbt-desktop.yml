@@ -224,9 +224,128 @@ jobs:
                   name: application-windows-arm64-setup
                   path: out/make/squirrel.windows/arm64/*.exe
 
+    # Microsoft Store (MSIX) builds. Separate from the Squirrel .exe jobs above
+    # (gated by WIN_STORE=true in forge.config.js) and intentionally ship only
+    # the Rust engine + the built-in JavaScript fallback — no Java/C client is
+    # downloaded here. The package is signed with an ephemeral self-signed cert
+    # (the Store re-signs on ingestion, so no commercial certificate is needed).
+    # Identity (MSIX_PACKAGE_NAME / MSIX_PUBLISHER) comes from prod.env.
+    build-win-msix:
+        needs: test
+        runs-on: windows-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # Fetch all history and tags (version from git tag)
+            - name: Get .env
+              shell: cmd
+              env:
+                  REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+              run: |
+                  curl -H "Authorization: token %REPO_TOKEN%" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/prod.env
+            - name: Use Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22.x
+            - name: Download Rust measurement client (windows-x64)
+              shell: pwsh
+              run: |
+                  New-Item -ItemType Directory -Force src/measurement/rust_client | Out-Null
+                  Invoke-WebRequest -Uri "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/$env:MEASUREMENT_ENGINE_VERSION/rmbt-client-rust-windows-x64.zip" -OutFile rust-client.zip
+                  Expand-Archive -Path rust-client.zip -DestinationPath src/measurement/rust_client -Force
+                  foreach ($dll in "vcruntime140.dll","vcruntime140_1.dll","msvcp140.dll") {
+                      $src = Join-Path $env:SystemRoot "System32\$dll"
+                      if (Test-Path $src) { Copy-Item $src src/measurement/rust_client/ -Force }
+                  }
+            - name: Prepare MSIX signing cert and SDK path
+              shell: pwsh
+              run: |
+                  # Publisher identity from prod.env (Partner Center value, e.g. "CN=<GUID>").
+                  $line = (Select-String -Path .env -Pattern '^\s*MSIX_PUBLISHER\s*=' | Select-Object -First 1).Line
+                  $publisher = ($line -replace '^\s*MSIX_PUBLISHER\s*=','').Trim().Trim('"')
+                  if (-not $publisher) { throw "MSIX_PUBLISHER is not set in prod.env" }
+                  # Ephemeral self-signed cert matching the publisher; the Store re-signs.
+                  $cert = New-SelfSignedCertificate -Type Custom -Subject $publisher -KeyUsage DigitalSignature -CertStoreLocation "Cert:\CurrentUser\My" -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3","2.5.29.19={text}")
+                  $pfx = Join-Path $env:RUNNER_TEMP "msix-dev.pfx"
+                  Export-PfxCertificate -Cert ("Cert:\CurrentUser\My\" + $cert.Thumbprint) -FilePath $pfx -Password (ConvertTo-SecureString -String "rmbt-msix-ci" -Force -AsPlainText) | Out-Null
+                  # Newest Windows SDK bin that has makeappx.exe (x64 tools).
+                  $kit = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" -Directory | Where-Object { Test-Path (Join-Path $_.FullName 'x64\makeappx.exe') } | Sort-Object Name -Descending | Select-Object -First 1
+                  "MSIX_CERT_PATH=$pfx"            | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+                  "MSIX_CERT_PASS=rmbt-msix-ci"    | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+                  "WINDOWS_KITS_PATH=$($kit.FullName)\x64" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+            - name: Build MSIX
+              run: |
+                  npm install
+                  cd src/ui
+                  npm install
+                  cd ../..
+                  npm run make:windows-store
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: application-windows-msix
+                  path: out/make/appx/x64/*.msix
+
+    build-win-msix-arm64:
+        needs: test
+        runs-on: windows-11-arm
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # Fetch all history and tags (version from git tag)
+            - name: Get .env
+              shell: cmd
+              env:
+                  REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+              run: |
+                  curl -H "Authorization: token %REPO_TOKEN%" -H "Accept: application/vnd.github.v3.raw" -o .env -L https://api.github.com/repos/rtr-nettest/open-rmbt-desktop-private/contents/prod.env
+            - name: Use Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22.x
+            - name: Download Rust measurement client (windows-arm64)
+              shell: pwsh
+              run: |
+                  New-Item -ItemType Directory -Force src/measurement/rust_client | Out-Null
+                  Invoke-WebRequest -Uri "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/$env:MEASUREMENT_ENGINE_VERSION/rmbt-client-rust-windows-arm64.zip" -OutFile rust-client.zip
+                  Expand-Archive -Path rust-client.zip -DestinationPath src/measurement/rust_client -Force
+            - name: Prepare MSIX signing cert and SDK path
+              shell: pwsh
+              run: |
+                  $line = (Select-String -Path .env -Pattern '^\s*MSIX_PUBLISHER\s*=' | Select-Object -First 1).Line
+                  $publisher = ($line -replace '^\s*MSIX_PUBLISHER\s*=','').Trim().Trim('"')
+                  if (-not $publisher) { throw "MSIX_PUBLISHER is not set in prod.env" }
+                  $cert = New-SelfSignedCertificate -Type Custom -Subject $publisher -KeyUsage DigitalSignature -CertStoreLocation "Cert:\CurrentUser\My" -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3","2.5.29.19={text}")
+                  $pfx = Join-Path $env:RUNNER_TEMP "msix-dev.pfx"
+                  Export-PfxCertificate -Cert ("Cert:\CurrentUser\My\" + $cert.Thumbprint) -FilePath $pfx -Password (ConvertTo-SecureString -String "rmbt-msix-ci" -Force -AsPlainText) | Out-Null
+                  # Prefer arm64 SDK tools, fall back to x64 (x64 runs under emulation).
+                  $kit = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" -Directory | Where-Object { (Test-Path (Join-Path $_.FullName 'arm64\makeappx.exe')) -or (Test-Path (Join-Path $_.FullName 'x64\makeappx.exe')) } | Sort-Object Name -Descending | Select-Object -First 1
+                  $sub = if (Test-Path (Join-Path $kit.FullName 'arm64\makeappx.exe')) { 'arm64' } else { 'x64' }
+                  "MSIX_CERT_PATH=$pfx"            | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+                  "MSIX_CERT_PASS=rmbt-msix-ci"    | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+                  "WINDOWS_KITS_PATH=$($kit.FullName)\$sub" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+            - name: Build MSIX
+              run: |
+                  npm install
+                  cd src/ui
+                  npm install
+                  cd ../..
+                  npm run make:windows-store-arm64
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: application-windows-msix-arm64
+                  path: out/make/appx/arm64/*.msix
+
     create_release:
         runs-on: ubuntu-latest
-        needs: [build-win, build-win-arm64, build-linux, build-macos]
+        needs:
+            [
+                build-win,
+                build-win-arm64,
+                build-win-msix,
+                build-win-msix-arm64,
+                build-linux,
+                build-macos,
+            ]
         steps:
             - name: Download Windows Artifacts-ZIP
               uses: actions/download-artifact@v4
@@ -251,6 +370,18 @@ jobs:
               with:
                   name: application-windows-arm64-setup
                   path: windows-arm64-setup
+
+            - name: Download Windows MSIX Artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  name: application-windows-msix
+                  path: windows-msix
+
+            - name: Download Windows arm64 MSIX Artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  name: application-windows-msix-arm64
+                  path: windows-msix-arm64
 
             - name: Download Linux Artifacts
               uses: actions/download-artifact@v4
@@ -294,6 +425,12 @@ jobs:
                   echo "Listing files in windows-arm64-zip"
                   ls windows-arm64-zip
                   zip -r RTR-Netztest-windows-arm64.zip windows-arm64-zip
+                  echo "Listing files in windows-msix"
+                  ls -R windows-msix
+                  mv windows-msix/*.msix RTR-Netztest-windows-x86.msix
+                  echo "Listing files in windows-msix-arm64"
+                  ls -R windows-msix-arm64
+                  mv windows-msix-arm64/*.msix RTR-Netztest-windows-arm64.msix
                   echo "Listing files in macos"
                   ls -R macos
                   # macos/RTR-Netztest-darwin-arm64/RTR-Netztest.app
@@ -314,4 +451,6 @@ jobs:
                       RTR-Netztest-windows-x86.zip
                       RTR-Netztest-windows-arm64-Setup.exe
                       RTR-Netztest-windows-arm64.zip
+                      RTR-Netztest-windows-x86.msix
+                      RTR-Netztest-windows-arm64.msix
                   token: ${{ secrets.GITHUB_TOKEN }}

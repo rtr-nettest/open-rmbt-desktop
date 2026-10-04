@@ -1,8 +1,54 @@
 const path = require("path")
+const fs = require("fs")
+const os = require("os")
 const { codeSignApp } = require("../../../scripts/codesign-app.js")
 const packJson = require("../../../package.json")
 const yargs = require("yargs")
-const argv = yargs.option("nosign").argv
+const argv = yargs.option("nosign").option("arch").argv
+
+// Target architecture for the MSIX manifest (electron-forge passes --arch).
+const msixArch = argv.arch === "arm64" ? "arm64" : "x64"
+
+// Render the AppxManifest for the Store build. @electron-forge/maker-appx does
+// not expose PublisherDisplayName or the OS MinVersion, and the library defaults
+// are rejected by the Store (PublisherDisplayName must match Partner Center and
+// MinVersion must be > 10.0.17134.0). A provided manifest is used verbatim, so
+// we substitute the values here from the MSIX_* env vars.
+function renderMsixManifest(targetArch) {
+    const template = fs.readFileSync(
+        path.join(process.env.ASSETS_FOLDER, "AppxManifest.xml.in"),
+        "utf-8"
+    )
+    // MSIX requires a 4-part version; the Store reserves the revision (keep 0).
+    const parts = String(packJson.version || "0.0.0").split("-")[0].split(".")
+    while (parts.length < 4) parts.push("0")
+    const version = parts.slice(0, 4).join(".")
+    const minOS = process.env.MSIX_MIN_OS_VERSION || "10.0.17763.0"
+    const displayName =
+        process.env.MSIX_PACKAGE_DISPLAY_NAME || packJson.productName
+    const subs = {
+        IdentityName: process.env.MSIX_PACKAGE_NAME || "",
+        Publisher: process.env.MSIX_PUBLISHER || "",
+        PublisherDisplayName:
+            process.env.MSIX_PUBLISHER_DISPLAY_NAME || packJson.author || "",
+        DisplayName: displayName,
+        AppDisplayName: displayName,
+        Version: version,
+        ProcessorArchitecture: targetArch,
+        MinOSVersion: minOS,
+        MaxOSVersionTested: process.env.MSIX_MAX_OS_VERSION_TESTED || minOS,
+        PackageDescription: packJson.description || packJson.productName,
+        PackageBackgroundColor: "#ffffff",
+        AppExecutable: `${packJson.productName}.exe`,
+    }
+    let out = template
+    for (const [key, value] of Object.entries(subs)) {
+        out = out.split(`{{${key}}}`).join(value)
+    }
+    const file = path.join(os.tmpdir(), `AppxManifest-${targetArch}.xml`)
+    fs.writeFileSync(file, out)
+    return file
+}
 
 // Apple notarization needs an app-specific password. It is intentionally NOT
 // kept in prod.env / the .env file (that file is fetched from a repo and read
@@ -84,32 +130,86 @@ module.exports = {
     },
     rebuildConfig: {},
     makers: [
-        {
-            name: "@electron-forge/maker-squirrel",
-            config: {
-                authors: "Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
-                ...(process.env.WINDOWS_CERT_PATH
-                    ? {
-                          certificateFile: process.env.WINDOWS_CERT_PATH,
-                      }
-                    : {
-                          // https://www.files.certum.eu/documents/manual_en/Code-Signing-signing-the-code-using-tools-like-Singtool-and-Jarsigner_v2.3.pdf
-                          signWithParams:
-                              "/fd sha256 /a /t http://time.certum.pl/",
-                      }),
-                loadingGif: path.join(
-                    process.env.ASSETS_FOLDER,
-                    "images",
-                    "splash.gif"
-                ),
-                setupIcon: path.join(
-                    process.env.ASSETS_FOLDER,
-                    "app-icon",
-                    "icon.ico"
-                ),
-                iconUrl: "https://www.netztest.at/favicon.ico",
-            },
-        },
+        // Windows Squirrel .exe installer — the default Windows build. It is
+        // skipped for the Microsoft Store build (WIN_STORE=true) so the Store
+        // (MSIX) maker runs on its own and the two don't collide.
+        ...(process.env.WIN_STORE === "true"
+            ? []
+            : [
+                  {
+                      name: "@electron-forge/maker-squirrel",
+                      config: {
+                          authors:
+                              "Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)",
+                          ...(process.env.WINDOWS_CERT_PATH
+                              ? {
+                                    certificateFile:
+                                        process.env.WINDOWS_CERT_PATH,
+                                }
+                              : {
+                                    // https://www.files.certum.eu/documents/manual_en/Code-Signing-signing-the-code-using-tools-like-Singtool-and-Jarsigner_v2.3.pdf
+                                    signWithParams:
+                                        "/fd sha256 /a /t http://time.certum.pl/",
+                                }),
+                          loadingGif: path.join(
+                              process.env.ASSETS_FOLDER,
+                              "images",
+                              "splash.gif"
+                          ),
+                          setupIcon: path.join(
+                              process.env.ASSETS_FOLDER,
+                              "app-icon",
+                              "icon.ico"
+                          ),
+                          iconUrl: "https://www.netztest.at/favicon.ico",
+                      },
+                  },
+              ]),
+        // Microsoft Store package (MSIX/APPX) — only built when WIN_STORE=true,
+        // so it never interferes with the regular Windows (Squirrel) build.
+        // Identity (packageName / publisher) comes from Partner Center; the
+        // signing cert is a local/self-signed .pfx (the Store re-signs on
+        // ingestion, so no commercial certificate is needed for Store delivery).
+        // See the "Microsoft Store (MSIX)" section of the README.
+        ...(process.env.WIN_STORE === "true"
+            ? [
+                  {
+                      name: "@electron-forge/maker-appx",
+                      config: {
+                          // Identity "Name" from Partner Center (Product identity).
+                          packageName: process.env.MSIX_PACKAGE_NAME,
+                          packageDisplayName:
+                              process.env.MSIX_PACKAGE_DISPLAY_NAME ||
+                              packJson.productName,
+                          // Identity "Publisher", e.g. "CN=<GUID>" from Partner Center.
+                          publisher: process.env.MSIX_PUBLISHER,
+                          // Local signing cert (self-signed for dev/CI is fine;
+                          // the Store re-signs). Dedicated MSIX_CERT_* keeps this
+                          // independent of the Squirrel build's WINDOWS_CERT_PATH.
+                          devCert:
+                              process.env.MSIX_CERT_PATH ||
+                              process.env.WINDOWS_CERT_PATH,
+                          certPass:
+                              process.env.MSIX_CERT_PASS ??
+                              process.env.WINDOWS_CERT_PASS,
+                          // Windows SDK bin dir holding makeappx.exe / signtool.exe.
+                          windowsKit: process.env.WINDOWS_KITS_PATH,
+                          // Tile images (Square*Logo.png / icon.png) live next
+                          // to the app icons.
+                          assets: path.join(
+                              process.env.ASSETS_FOLDER,
+                              "app-icon"
+                          ),
+                          // Rendered manifest with the correct PublisherDisplayName
+                          // and MinVersion (maker-appx can't set those itself).
+                          manifest: renderMsixManifest(msixArch),
+                          packageBackgroundColor: "#ffffff",
+                          // MSIX requires a 4-part version (x.y.z.0).
+                          makeVersionWinStoreCompatible: true,
+                      },
+                  },
+              ]
+            : []),
         ...[
             process.env.APP_STORE === "true"
                 ? {

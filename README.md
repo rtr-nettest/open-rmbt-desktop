@@ -3,7 +3,7 @@
 ## Simple setup
 
 Install packages by running `npm i` or `yarn install` in the root folder and in the `src/ui` folder. Rename `example.env` file into `.env` (look into the [Configuration](#configuration) section of this document for details).
-Language support can be updated at `src/assets/rtr/src/transloco.config.ts`.
+Language support can be updated at `src/assets/rtr/src/i18n.config.ts`.
 In case of reinstalls, use `npm install --no-package-lock`.
 
 ## Compilation and running
@@ -83,7 +83,62 @@ $ npm run make:windows
 
 A setup `*.exe` will be placed in the `out/make` folder at the root of the project.
 
-For information on Windows app code signing for publication in Microsoft Store see [Windows_code_singing.md](Windows_code_signing.md).
+For information on signing the standalone Windows `.exe` with a commercial (Certum) certificate see [Windows_code_signing.md](Windows_code_signing.md).
+
+### Windows — Microsoft Store (MSIX)
+
+The Microsoft Store does not distribute the Squirrel `.exe`; it distributes an **MSIX** package. The MSIX build is a separate, opt-in build (enabled by `WIN_STORE=true`) that does **not** touch the regular `make:windows` build, and it ships only the **Rust** measurement engine plus the built-in **JavaScript** fallback (no Java/C client).
+
+Why MSIX for the Store:
+
+- **No commercial code-signing certificate required.** The Store re-signs the package with a Microsoft-trusted certificate tied to your Partner Center publisher identity. A free self-signed certificate is enough to build/sign locally.
+- **Automatic updates are handled by the Store** — so the MSIX build intentionally omits the Squirrel auto-updater.
+
+#### Prerequisites
+
+1. **Windows 10/11 SDK** (provides `makeappx.exe` and `signtool.exe`). Point `WINDOWS_KITS_PATH` at its `bin\<version>\x64` (or `arm64`) directory.
+2. **Rust client** downloaded into `src/measurement/rust_client` (the CI job does this automatically; no Java is downloaded for the Store build).
+3. **Partner Center identity** — reserve the app name in [Partner Center](https://partner.microsoft.com/dashboard) and copy the *Product identity* values into your `.env`:
+    - `MSIX_PACKAGE_NAME` — the Identity **Name** (e.g. `RTRNetztest`).
+    - `MSIX_PUBLISHER` — the Identity **Publisher** (e.g. `CN=<GUID>`).
+4. A **signing certificate** whose subject matches `MSIX_PUBLISHER`. For local/dev builds, create a self-signed one:
+
+    ```powershell
+    $cert = New-SelfSignedCertificate -Type Custom -Subject "CN=<GUID>" `
+      -KeyUsage DigitalSignature -CertStoreLocation "Cert:\CurrentUser\My" `
+      -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3","2.5.29.19={text}")
+    Export-PfxCertificate -Cert ("Cert:\CurrentUser\My\" + $cert.Thumbprint) `
+      -FilePath .\msix-dev.pfx -Password (ConvertTo-SecureString "yourpass" -AsPlainText -Force)
+    ```
+
+    Then set `MSIX_CERT_PATH` to the `.pfx` path and `MSIX_CERT_PASS` to its password.
+
+#### Build
+
+```sh
+$ npm run make:windows-store            # x64
+$ npm run make:windows-store-arm64      # arm64
+```
+
+The signed package is written to `out/make/appx/<arch>/*.msix`.
+
+#### Publish
+
+Upload the `*.msix` to Partner Center (Product → Packages). The Store validates, re-signs, distributes, and keeps the app updated automatically. (The GitHub Actions workflow builds and signs the x64 and arm64 MSIX packages on every run using an ephemeral self-signed certificate; `MSIX_PACKAGE_NAME`/`MSIX_PUBLISHER` are read from `prod.env`.)
+
+#### `runFullTrust` capability justification
+
+The manifest declares the restricted capability `runFullTrust` (required for any Win32/Electron app packaged as MSIX). Partner Center asks for a justification during submission. Paste the following:
+
+> **RTR-Netztest Desktop** is a classic Win32 desktop application (built with Electron) packaged as MSIX via the Desktop Bridge. Such packaged desktop apps run outside the AppContainer sandbox and therefore must declare `runFullTrust` together with `EntryPoint="Windows.FullTrustApplication"`; this is the standard, required declaration for any Electron/Win32 app distributed through the Store.
+>
+> The application genuinely requires full-trust execution to perform its core function — measuring internet connection quality:
+>
+> - It launches a bundled native measurement client (`rmbt-client.exe`) as a child process and communicates with it over stdio.
+> - It opens direct TCP/TLS sockets to RMBT measurement servers to run download/upload/ping throughput tests.
+> - It reads system CPU-load information during a measurement (to warn the user when results may be skewed) and persists a local measurement history in an on-disk SQLite database.
+>
+> These capabilities are not available to a sandboxed (AppContainer) app, so full-trust is necessary.
 
 ### Linux
 
@@ -118,7 +173,7 @@ The project contains an `example.env` file. You can use it as an example to conf
 | `FULL_HISTORY_RESULT_URL`      | A full URL, without ` test_uuid`, of a webpage, which contains a detailed measurement result.                                        |
 | `FULL_STATISTICS_URL`          | A full URL of a webpage to be shown in an iframe on the Statistics screen.                                                           |
 | `FULL_MAP_URL`                 | A full URL of a webpage to be shown in an iframe on the Map screen.                                                                  |
-| `OPEN_HISTORY_RESUlT_URL`      | A full URL, without ` open_test_uuid`, of a webpage, which contains an open measurement result for sharing.                          |
+| `OPEN_HISTORY_RESULT_URL`      | A full URL, without ` open_test_uuid`, of a webpage, which contains an open measurement result for sharing.                          |
 | `ASSETS_FOLDER`                | A path to a folder that contains flavor specific files, such as icons and styles.                                                    |
 
 ### Optional variables
@@ -133,7 +188,6 @@ The project contains an `example.env` file. You can use it as an example to conf
 | `LOG_CPU_USAGE`                      | If set to `true` will output the CPU usage in percent once a second during the measurement and submit it to the control server as well.                                                                                                            |
 | `SSL_KEY_PATH` and `SSL_CERT_PATH`   | Paths to SSL key and certificate files, which should be used by the client to establish a secure connection to a measurement server.                                                                                                               |
 | `PLATFORM_CLI`                       | A short string to differentiate the CLI client from the Electron app on the BE.                                                                                                                                                                    |
-| `CMS_URL`                            | A CMS instance to use for the `ont` flavor.                                                                                                                                                                                                        |
 | `ALLOWED_INACTIVITY_MS`              | Configures a period of inactivity allowed, in milliseconds, before the measurement is terminated. Default is 10 seconds.                                                                                                                           |
 | `ENABLE_LOOP_MODE`                   | If set to `true` will enable rudimentary loop mode (cururently supported only by the electron GUI).                                                                                                                                                |
 | `NEWS_PATH`                          | A control server endpoint starting with `/` which returns a list of news available for the platform.                                                                                                                                               |
@@ -143,7 +197,16 @@ The project contains an `example.env` file. You can use it as an example to conf
 | `APPLE_ID`                           | Apple ID associated with your Apple Developer account.                                                                                                                                                                                             |
 | `APPLE_PASSWORD`                     | App-specific password, used only for macOS notarization (`make:macos`). **Provide via the shell environment / CI secret, not the `.env`/`prod.env` file.** See https://support.apple.com/en-us/HT204397 for details.                                |
 | `APPLE_TEAM_ID`                      | The Apple Team ID you want to notarize under. You can find Team IDs for team you belong to by going to https://developer.apple.com/account/#/membership.                                                                                           |
-| `WINDOWS_CERT_PATH`                  | Full path to your certificate.pfx                                                                                                                                                                                                                  |
+| `WINDOWS_CERT_PATH`                  | Full path to your certificate `.pfx`. Used by the Squirrel `.exe` maker (code-signing) and, for the Microsoft Store build, as the MSIX signing certificate.                                                                                          |
+| `WINDOWS_CERT_PASS`                  | Password for the `.pfx` referenced by `WINDOWS_CERT_PATH` (MSIX signing). Keep it out of a public repo.                                                                                                                                             |
+| `WINDOWS_KITS_PATH`                  | Path to the Windows SDK `bin` directory containing `makeappx.exe` / `signtool.exe`, e.g. `C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64`. Required for the MSIX build.                                                                  |
+| `MSIX_PACKAGE_NAME`                  | MSIX Identity **Name** from Partner Center (Product identity), e.g. `RTRNetztest`. Public (embedded in the package); required for the Microsoft Store build.                                                                                         |
+| `MSIX_PUBLISHER`                     | MSIX Identity **Publisher** from Partner Center, e.g. `CN=<GUID>`. Must match the signing certificate's subject. Public (embedded in the package); required for the Microsoft Store build.                                                           |
+| `MSIX_PACKAGE_DISPLAY_NAME`          | Optional display name shown in the Store/Start menu. Defaults to `PACK_PRODUCT_NAME`.                                                                                                                                                               |
+| `MSIX_PUBLISHER_DISPLAY_NAME`        | MSIX `PublisherDisplayName` — must match your Partner Center publisher display name exactly (e.g. `Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH)`). Required for the Microsoft Store build.                                                       |
+| `MSIX_MIN_OS_VERSION`                | Minimum Windows version for the MSIX (`TargetDeviceFamily MinVersion`). Must be `> 10.0.17134.0`; defaults to `10.0.17763.0`.                                                                                                                        |
+| `MSIX_CERT_PATH`                     | Path to the MSIX signing `.pfx` (subject must equal `MSIX_PUBLISHER`). Falls back to `WINDOWS_CERT_PATH`. The Store re-signs, so a self-signed cert is fine. **Never commit the `.pfx`.**                                                              |
+| `MSIX_CERT_PASS`                     | Password for `MSIX_CERT_PATH`. Falls back to `WINDOWS_CERT_PASS`. Keep it out of a public repo.                                                                                                                                                      |
 | `LOOP_MODE_MIN_INTERVAL`             | Minimal allowed interval between tests in the loop mode, in minutes.                                                                                                                                                                               |
 | `LOOP_MODE_MAX_INTERVAL`             | Maximal allowed interval between tests in the loop mode, in minutes.                                                                                                                                                                               |
 | `LOOP_MODE_DEFAULT_INTERVAL`         | Interval between tests in the loop mode, in minutes, suggested by default.                                                                                                                                                                         |

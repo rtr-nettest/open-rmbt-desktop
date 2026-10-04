@@ -36,6 +36,13 @@
                         </mat-header-cell>
                     }
                     <!-- END MAT-HEADER-CELL-->
+
+                    <!--
+                        MAT-CELL: a column may declare only ONE *matCellDef, so
+                        this is a single @if/@else-if chain (not parallel blocks)
+                        in priority order. Multiple cell defs made Material bind
+                        the first (default) one and ignore isHtml/component cells.
+                    -->
                     @if (column.isComponent) {
                         <mat-cell
                             *matCellDef="let element; let i = dataIndex"
@@ -52,100 +59,9 @@
                                 "
                             ></ng-template>
                         </mat-cell>
-                    } @else {
-                        <mat-cell
-                            *matCellDef="let element; let i = dataIndex"
-                            [style]="justify(column)"
-                        >
-                            @if (!shouldShowText(column, element)) {
-                                <a
-                                    [routerLink]="
-                                        $safeNavigationMigration(
-                                            column.link?.(element.id)
-                                        )
-                                    "
-                                    [matTooltip]="
-                                        column.getTooltip?.(element, column) ??
-                                        ''
-                                    "
-                                    [ngClass]="
-                                        column.getNgClass &&
-                                        column.getNgClass(element, column)
-                                    "
-                                    [class.app-table__cell--sortable]="
-                                        column.isSortable
-                                    "
-                                    class="app-link"
-                                >
-                                    {{ getDefaultValue(column, element, i) }}
-                                </a>
-                            }
-                            @if (shouldShowText(column, element)) {
-                                <span
-                                    [matTooltip]="
-                                        column.getTooltip?.(element, column) ??
-                                        ''
-                                    "
-                                    [ngClass]="
-                                        $safeNavigationMigration(
-                                            column.getNgClass?.(element, column)
-                                        )
-                                    "
-                                    [class.app-table__cell--sortable]="
-                                        column.isSortable
-                                    "
-                                >
-                                    {{ getDefaultValue(column, element, i) }}
-                                </span>
-                            }
-                            @if (
-                                column.getActions &&
-                                    column.getActions(element, column);
-                                as actions
-                            ) {
-                                @for (action of actions; track action) {
-                                    @if (
-                                        !action.getInProgress ||
-                                        !action.getInProgress(element, column)
-                                    ) {
-                                        <button
-                                            mat-button
-                                            [color]="action.color || 'primary'"
-                                            [disabled]="
-                                                action.getDisabled &&
-                                                action.getDisabled(
-                                                    element,
-                                                    column
-                                                )
-                                            "
-                                            [ngClass]="
-                                                'app-table__action app-table__action--' +
-                                                action.label.toLowerCase()
-                                            "
-                                            (click)="
-                                                action.perform(element, column)
-                                            "
-                                        >
-                                            @if (action.matIcon) {
-                                                <mat-icon>{{
-                                                    action.matIcon
-                                                }}</mat-icon>
-                                            }
-                                            {{ action.label }}
-                                        </button>
-                                    }
-                                    @if (
-                                        action.getInProgress?.(element, column)
-                                    ) {
-                                        <mat-spinner
-                                            [diameter]="18"
-                                        ></mat-spinner>
-                                    }
-                                }
-                            }
-                        </mat-cell>
-                    }
-                    @if (column.component && column.getComponentParameters) {
+                    } @else if (
+                        column.component && column.getComponentParameters
+                    ) {
                         <mat-cell
                             *matCellDef="let element; let i = dataIndex"
                             [style]="justify(column)"
@@ -182,200 +98,14 @@
                                 ></ng-template>
                             }
                         </mat-cell>
-                    } @else {
-                        <mat-cell
-                            *matCellDef="let element; let i = dataIndex"
-                            [style]="justify(column)"
-                        >
-                            @if (!shouldShowText(column, element)) {
-                                <a
-                                    [routerLink]="
-                                        $safeNavigationMigration(
-                                            column.link?.(element.id)
-                                        )
-                                    "
-                                    [matTooltip]="
-                                        column.getTooltip?.(element, column) ??
-                                        ''
-                                    "
-                                    [ngClass]="
-                                        column.getNgClass &&
-                                        column.getNgClass(element, column)
-                                    "
-                                    [class.app-table__cell--sortable]="
-                                        column.isSortable
-                                    "
-                                    class="app-link"
-                                >
-                                    {{ getDefaultValue(column, element, i) }}
-                                </a>
-                            }
-                            @if (shouldShowText(column, element)) {
-                                <span
-                                    [matTooltip]="
-                                        column.getTooltip?.(element, column) ??
-                                        ''
-                                    "
-                                    [ngClass]="
-                                        $safeNavigationMigration(
-                                            column.getNgClass?.(element, column)
-                                        )
-                                    "
-                                    [class.app-table__cell--sortable]="
-                                        column.isSortable
-                                    "
-                                >
-                                    {{ getDefaultValue(column, element, i) }}
-                                </span>
-                            }
-                            @if (
-                                column.getActions &&
-                                    column.getActions(element, column);
-                                as actions
-                            ) {
-                                @for (action of actions; track action) {
-                                    @if (
-                                        !action.getInProgress ||
-                                        !action.getInProgress(element, column)
-                                    ) {
-                                        <button
-                                            mat-button
-                                            [color]="action.color || 'primary'"
-                                            [disabled]="
-                                                action.getDisabled &&
-                                                action.getDisabled(
-                                                    element,
-                                                    column
-                                                )
-                                            "
-                                            [ngClass]="
-                                                'app-table__action app-table__action--' +
-                                                action.label.toLowerCase()
-                                            "
-                                            (click)="
-                                                action.perform(element, column)
-                                            "
-                                        >
-                                            @if (action.matIcon) {
-                                                <mat-icon>{{
-                                                    action.matIcon
-                                                }}</mat-icon>
-                                            }
-                                            {{ action.label }}
-                                        </button>
-                                    }
-                                    @if (
-                                        action.getInProgress?.(element, column)
-                                    ) {
-                                        <mat-spinner
-                                            [diameter]="18"
-                                        ></mat-spinner>
-                                    }
-                                }
-                            }
-                        </mat-cell>
-                    }
-                    @if (column.isHtml) {
+                    } @else if (column.isHtml) {
                         <mat-cell
                             *matCellDef="let element; let i = dataIndex"
                             [style]="justify(column)"
                             [innerHtml]="element[column.columnDef]"
                         >
                         </mat-cell>
-                    } @else {
-                        <mat-cell
-                            *matCellDef="let element; let i = dataIndex"
-                            [style]="justify(column)"
-                        >
-                            @if (!shouldShowText(column, element)) {
-                                <a
-                                    [routerLink]="
-                                        $safeNavigationMigration(
-                                            column.link?.(element.id)
-                                        )
-                                    "
-                                    [matTooltip]="
-                                        column.getTooltip?.(element, column) ??
-                                        ''
-                                    "
-                                    [ngClass]="
-                                        column.getNgClass &&
-                                        column.getNgClass(element, column)
-                                    "
-                                    [class.app-table__cell--sortable]="
-                                        column.isSortable
-                                    "
-                                    class="app-link"
-                                >
-                                    {{ getDefaultValue(column, element, i) }}
-                                </a>
-                            }
-                            @if (shouldShowText(column, element)) {
-                                <span
-                                    [matTooltip]="
-                                        column.getTooltip?.(element, column) ??
-                                        ''
-                                    "
-                                    [ngClass]="
-                                        $safeNavigationMigration(
-                                            column.getNgClass?.(element, column)
-                                        )
-                                    "
-                                    [class.app-table__cell--sortable]="
-                                        column.isSortable
-                                    "
-                                >
-                                    {{ getDefaultValue(column, element, i) }}
-                                </span>
-                            }
-                            @if (
-                                column.getActions &&
-                                    column.getActions(element, column);
-                                as actions
-                            ) {
-                                @for (action of actions; track action) {
-                                    @if (
-                                        !action.getInProgress ||
-                                        !action.getInProgress(element, column)
-                                    ) {
-                                        <button
-                                            mat-button
-                                            [color]="action.color || 'primary'"
-                                            [disabled]="
-                                                action.getDisabled &&
-                                                action.getDisabled(
-                                                    element,
-                                                    column
-                                                )
-                                            "
-                                            [ngClass]="
-                                                'app-table__action app-table__action--' +
-                                                action.label.toLowerCase()
-                                            "
-                                            (click)="
-                                                action.perform(element, column)
-                                            "
-                                        >
-                                            @if (action.matIcon) {
-                                                <mat-icon>{{
-                                                    action.matIcon
-                                                }}</mat-icon>
-                                            }
-                                            {{ action.label }}
-                                        </button>
-                                    }
-                                    @if (
-                                        action.getInProgress?.(element, column)
-                                    ) {
-                                        <mat-spinner
-                                            [diameter]="18"
-                                        ></mat-spinner>
-                                    }
-                                }
-                            }
-                        </mat-cell>
-                    }
-                    @if (column.columnDef == "groupArrowIndicator") {
+                    } @else if (column.columnDef == "groupArrowIndicator") {
                         <mat-cell *matCellDef="let element; let i = dataIndex">
                             @if (element.groupHeader) {
                                 <span class="app-table__arrow-indicator">
@@ -389,6 +119,98 @@
                                         keyboard_arrow_down
                                     </mat-icon></span
                                 >
+                            }
+                        </mat-cell>
+                    } @else {
+                        <mat-cell
+                            *matCellDef="let element; let i = dataIndex"
+                            [style]="justify(column)"
+                        >
+                            @if (!shouldShowText(column, element)) {
+                                <a
+                                    [routerLink]="
+                                        $safeNavigationMigration(
+                                            column.link?.(element.id)
+                                        )
+                                    "
+                                    [matTooltip]="
+                                        column.getTooltip?.(element, column) ??
+                                        ''
+                                    "
+                                    [ngClass]="
+                                        column.getNgClass &&
+                                        column.getNgClass(element, column)
+                                    "
+                                    [class.app-table__cell--sortable]="
+                                        column.isSortable
+                                    "
+                                    class="app-link"
+                                >
+                                    {{ getDefaultValue(column, element, i) }}
+                                </a>
+                            }
+                            @if (shouldShowText(column, element)) {
+                                <span
+                                    [matTooltip]="
+                                        column.getTooltip?.(element, column) ??
+                                        ''
+                                    "
+                                    [ngClass]="
+                                        $safeNavigationMigration(
+                                            column.getNgClass?.(element, column)
+                                        )
+                                    "
+                                    [class.app-table__cell--sortable]="
+                                        column.isSortable
+                                    "
+                                >
+                                    {{ getDefaultValue(column, element, i) }}
+                                </span>
+                            }
+                            @if (
+                                column.getActions &&
+                                    column.getActions(element, column);
+                                as actions
+                            ) {
+                                @for (action of actions; track action) {
+                                    @if (
+                                        !action.getInProgress ||
+                                        !action.getInProgress(element, column)
+                                    ) {
+                                        <button
+                                            mat-button
+                                            [color]="action.color || 'primary'"
+                                            [disabled]="
+                                                action.getDisabled &&
+                                                action.getDisabled(
+                                                    element,
+                                                    column
+                                                )
+                                            "
+                                            [ngClass]="
+                                                'app-table__action app-table__action--' +
+                                                action.label.toLowerCase()
+                                            "
+                                            (click)="
+                                                action.perform(element, column)
+                                            "
+                                        >
+                                            @if (action.matIcon) {
+                                                <mat-icon>{{
+                                                    action.matIcon
+                                                }}</mat-icon>
+                                            }
+                                            {{ action.label }}
+                                        </button>
+                                    }
+                                    @if (
+                                        action.getInProgress?.(element, column)
+                                    ) {
+                                        <mat-spinner
+                                            [diameter]="18"
+                                        ></mat-spinner>
+                                    }
+                                }
                             }
                         </mat-cell>
                     }

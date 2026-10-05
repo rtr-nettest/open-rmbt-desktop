@@ -67,7 +67,7 @@ function renderMsixManifest(targetArch) {
         MinOSVersion: minOS,
         MaxOSVersionTested: process.env.MSIX_MAX_OS_VERSION_TESTED || minOS,
         PackageDescription: packJson.description || packJson.productName,
-        PackageBackgroundColor: "#ffffff",
+        PackageBackgroundColor: "#2D62B7",
         AppExecutable: `${packJson.productName}.exe`,
     }
     let out = template
@@ -232,7 +232,7 @@ module.exports = {
                           // Rendered manifest with the correct PublisherDisplayName
                           // and MinVersion (maker-appx can't set those itself).
                           manifest: renderMsixManifest(msixArch),
-                          packageBackgroundColor: "#ffffff",
+                          packageBackgroundColor: "#2D62B7",
                           // MSIX requires a 4-part version (x.y.z.0).
                           makeVersionWinStoreCompatible: true,
                       },

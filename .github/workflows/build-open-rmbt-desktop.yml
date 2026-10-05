@@ -73,6 +73,11 @@ jobs:
                       org.freedesktop.Platform//24.08 \
                       org.freedesktop.Sdk//24.08 \
                       org.electronjs.Electron2.BaseApp//24.08
+                  echo "::group::Flatpak versions and installed runtimes"
+                  flatpak --version
+                  flatpak-builder --version
+                  flatpak list
+                  echo "::endgroup::"
             - name: Build
               run: |
                   sudo apt-get install -y rpm
@@ -82,7 +87,13 @@ jobs:
                   cd ../..
                   npm run make:deb
                   npm run make:rpm
-                  npm run make:flatpak
+            - name: Build Flatpak
+              # DEBUG surfaces flatpak-builder stdout/stderr — @malept/flatpak-bundler
+              # routes it through the `debug` logger under its own package namespace,
+              # so without this the real error is swallowed (only the exit code shows).
+              env:
+                  DEBUG: "@malept/flatpak-bundler"
+              run: npm run make:flatpak
             - uses: actions/upload-artifact@v4
               with:
                   name: application-rpm

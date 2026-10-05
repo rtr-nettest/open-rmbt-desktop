@@ -326,9 +326,9 @@ module.exports = {
                               description: packJson.description,
                               // Freedesktop runtime + Electron base app from Flathub.
                               base: "org.electronjs.Electron2.BaseApp",
-                              baseVersion: "24.08",
+                              baseVersion: "26.08",
                               runtime: "org.freedesktop.Platform",
-                              runtimeVersion: "24.08",
+                              runtimeVersion: "26.08",
                               sdk: "org.freedesktop.Sdk",
                               // Build no extra modules. electron-installer-flatpak
                               // would otherwise compile the "zypak" sandbox shim

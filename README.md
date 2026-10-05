@@ -192,9 +192,9 @@ To build a `*.flatpak` bundle, you will need a Linux machine with `flatpak`, `fl
 ```sh
 $ flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
 $ flatpak install --user -y flathub \
-    org.freedesktop.Platform//24.08 \
-    org.freedesktop.Sdk//24.08 \
-    org.electronjs.Electron2.BaseApp//24.08
+    org.freedesktop.Platform//26.08 \
+    org.freedesktop.Sdk//26.08 \
+    org.electronjs.Electron2.BaseApp//26.08
 $ npm run make:flatpak
 ```
 

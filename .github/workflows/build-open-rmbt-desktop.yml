@@ -67,7 +67,10 @@ jobs:
             - name: Set up Flatpak toolchain
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y flatpak flatpak-builder elfutils
+                  # clang is required to compile the zypak sandbox module that
+                  # electron-installer-flatpak builds from source (its Makefile
+                  # invokes clang++); elfutils provides eu-strip.
+                  sudo apt-get install -y flatpak flatpak-builder elfutils clang
                   flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
                   flatpak install --user -y flathub \
                       org.freedesktop.Platform//24.08 \

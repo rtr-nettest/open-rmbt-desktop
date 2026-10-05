@@ -330,6 +330,14 @@ module.exports = {
                               runtime: "org.freedesktop.Platform",
                               runtimeVersion: "24.08",
                               sdk: "org.freedesktop.Sdk",
+                              // Build no extra modules. electron-installer-flatpak
+                              // would otherwise compile the "zypak" sandbox shim
+                              // from source, which requires clang++ (not in the
+                              // Freedesktop SDK). The Electron base app already
+                              // ships zypak (/app/bin/zypak-wrapper), so building
+                              // it again is redundant — this avoids the clang
+                              // dependency entirely.
+                              modules: [],
                               // Sandbox permissions an Electron network app needs.
                               finishArgs: [
                                   "--share=ipc",

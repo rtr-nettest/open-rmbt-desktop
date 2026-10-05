@@ -91,11 +91,6 @@ jobs:
                   npm run make:deb
                   npm run make:rpm
             - name: Build Flatpak
-              # DEBUG surfaces flatpak-builder stdout/stderr — @malept/flatpak-bundler
-              # routes it through the `debug` logger under its own package namespace,
-              # so without this the real error is swallowed (only the exit code shows).
-              env:
-                  DEBUG: "@malept/flatpak-bundler"
               run: npm run make:flatpak
             - uses: actions/upload-artifact@v4
               with:

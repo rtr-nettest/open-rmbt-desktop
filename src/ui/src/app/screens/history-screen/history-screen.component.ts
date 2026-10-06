@@ -81,6 +81,11 @@ export class HistoryScreenComponent
 
     ngOnInit(): void {
         this.allLoaded = false
+        // Start from a clean slate. getMeasurementHistory() APPENDS pages, and
+        // history$ may still hold entries another screen left behind (e.g. the
+        // loop test screen's recent-history), which would otherwise be shown
+        // again here — making a single loop test appear twice.
+        this.store.resetMeasurementHistory()
         this.loadMore()
     }
 

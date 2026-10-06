@@ -17,10 +17,33 @@ export class StopLoopButtonComponent {
     ) {}
 
     abortTest() {
-        this.router.navigate([
-            "/",
-            ERoutes.LOOP_RESULT.split("/")[0],
-            this.testStore.loopUuid$.value,
-        ])
+        const loopUuid = this.testStore.loopUuid$.value
+        const hasResults = this.testStore.loopHasResults()
+        // DEBUG (renderer DevTools console): shows why navigation goes where it
+        // does — in particular whether loopUuid is populated.
+        console.log(
+            "[abortTest] loopUuid =",
+            loopUuid,
+            "hasResults =",
+            hasResults,
+        )
+        // End the loop for good: stop the running test AND the loop scheduler in
+        // the main process (ABORT_MEASUREMENT does both), and disable loop mode so
+        // nothing re-schedules.
+        window.electronAPI.abortMeasurement()
+        this.testStore.disableLoopMode()
+        if (hasResults && loopUuid) {
+            // Earlier measurements produced results → show the loop results.
+            this.router.navigate([
+                "/",
+                ERoutes.LOOP_RESULT.split("/")[0],
+                loopUuid,
+            ])
+        } else {
+            // Nothing measured yet (first test) → go to the app start screen.
+            // (Never navigate to loop-result with a null loopUuid — that throws
+            // NG04008 and leaves the loop screen up.)
+            this.router.navigate(["/"])
+        }
     }
 }

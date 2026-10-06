@@ -360,7 +360,7 @@ export class RMBTRustClient implements IRMBTClient {
                         this.parseMessageFromJava(line.trim())
                     }
                     if (line.startsWith("ENDING TEST.")) {
-                        Logger.I.info("   -------> ENGINE DONE")
+                        Logger.I.info("   -------> ENGINENo DONE")
                         this.WrapUp()
                     }
 
@@ -459,6 +459,18 @@ export class RMBTRustClient implements IRMBTClient {
                     // runner reads it from params and reuses it for the rest.
                     if (parsed_data["loopUuid"]) {
                         this.params.loop_uuid = parsed_data["loopUuid"]
+                        Logger.I.info(
+                            `[loop uuid] captured from UUID_INFO: ${parsed_data["loopUuid"]}`,
+                        )
+                    } else {
+                        // DEBUG: diagnose missing loop UUID. The desktop relies on
+                        // the engine/server to mint and return it here; if it is
+                        // absent, loop grouping/navigation cannot work.
+                        Logger.I.info(
+                            `[loop uuid] UUID_INFO has NO loopUuid field — keys present: ${Object.keys(
+                                parsed_data,
+                            ).join(", ")}`,
+                        )
                     }
                 } else if (parsed_data["type"] == "STATE_CHANGE") {
                     switch (parsed_data["state"]) {
@@ -519,10 +531,16 @@ export class RMBTRustClient implements IRMBTClient {
                     this.downs.push({
                         bytes: parsed_data["bytes"],
                         nsec: delta_t,
-                        speed: parsed_data["down"] * 1024 * 1024,
+                        // Network speed is decimal: 1 Mbit/s = 1000 * 1000 bit/s.
+                        // (Using 1024*1024 inflated every displayed speed by ~2.4%.)
+                        speed: parsed_data["down"] * 1000 * 1000,
                     })
 
                     this.setInterimDownMbpsFromValue(parsed_data["down"])
+                    // DEBUG: raw rate reported by the Rust client vs what we store.
+                    Logger.I.info(
+                        `[Rust rate] DOWNLOAD_RESULT down=${parsed_data["down"]} Mbit/s bytes=${parsed_data["bytes"]} -> interimDownMbps=${this.interimDownMbps}`,
+                    )
                 } else if (parsed_data["type"] == "UPLOAD_RESULT") {
                     // save speed into this.ups for chart persistence;
                     // we don't have accurate time, so measure the time
@@ -532,10 +550,20 @@ export class RMBTRustClient implements IRMBTClient {
                     this.ups.push({
                         bytes: parsed_data["bytes"],
                         nsec: delta_t,
-                        speed: parsed_data["up"] * 1024 * 1024,
+                        // Network speed is decimal: 1 Mbit/s = 1000 * 1000 bit/s.
+                        // (Using 1024*1024 inflated every displayed speed by ~2.4%.)
+                        speed: parsed_data["up"] * 1000 * 1000,
                     })
 
                     this.setInterimUpMbpsFromValue(parsed_data["up"])
+                    // DEBUG: raw rate reported by the Rust client vs what we store.
+                    Logger.I.info(
+                        `[Rust rate] UPLOAD_RESULT up=${parsed_data["up"]} Mbit/s bytes=${parsed_data["bytes"]} -> interimUpMbps=${this.interimUpMbps}`,
+                    )
+                } else {
+                    // DEBUG: any message type we don't handle — this is where a
+                    // final/overall result (the authoritative rate) would hide.
+                    Logger.I.info(`[Rust raw unhandled] ${strMessage}`)
                 }
             } catch (error) {
                 Logger.I.error(error)
@@ -545,6 +573,11 @@ export class RMBTRustClient implements IRMBTClient {
 
     private async WrapUp() {
         Logger.I.info("Wrapping up")
+        // DEBUG: the final rates the UI will display (interim = last reported
+        // sample; final = 0 unless finalResultDown/Up were set).
+        Logger.I.info(
+            `[Rust rate] WrapUp final down/up the UI shows: interimDownMbps=${this.interimDownMbps} interimUpMbps=${this.interimUpMbps} finalDownMbps=${this.finalDownMbps} finalUpMbps=${this.finalUpMbps}`,
+        )
         Logger.I.info("running status:")
         Logger.I.info(this.isRunning)
         this.isRunning = false

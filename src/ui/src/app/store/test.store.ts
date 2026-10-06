@@ -262,6 +262,16 @@ export class TestStore {
         this.loopCounter$.next(1)
     }
 
+    /**
+     * True if at least one measurement has finished since the CURRENT loop
+     * started. Used to decide where to go when the user ends the loop: show the
+     * results if any exist, otherwise go back to the start screen. Compared
+     * against loopStartedAt so results from a previous loop don't count.
+     */
+    loopHasResults() {
+        return this.lastTestFinishedAt$.value > this.loopStartedAt
+    }
+
     getMeasurementResult(
         testUuid: string | null,
     ): Observable<ISimpleHistoryResult | null> {

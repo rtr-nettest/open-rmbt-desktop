@@ -349,6 +349,43 @@ export class MeasurementRunner {
             )
             await ControlServer.I.submitMeasurement(result)
         }
+        // Native (Rust) engine: it submits its own results, so fetch the
+        // authoritative server result and expose it as the FINAL rate. Without
+        // this finalDownMbps/finalUpMbps stay 0 and the UI falls back to the last
+        // INTERMEDIATE sample — a different quantity that does not match the
+        // official download/upload shown in the history. Fetching the same result
+        // the history uses guarantees they agree. (downloadKbit is decimal kbit:
+        // * 1000 -> bit/s, then finalDownMbps divides by 1e6.)
+        if (
+            externalEngine &&
+            this.rmbtClient!.measurementStatus !== EMeasurementStatus.ABORTED
+        ) {
+            try {
+                const testUuid = this.rmbtClient!.getTestUuid()
+                if (testUuid) {
+                    const official =
+                        await ControlServer.I.getMeasurementResult(testUuid)
+                    if (official?.downloadKbit != null) {
+                        this.rmbtClient!.finalResultDown = {
+                            bytes: 0,
+                            nsec: 0,
+                            speed: official.downloadKbit * 1000,
+                        }
+                    }
+                    if (official?.uploadKbit != null) {
+                        this.rmbtClient!.finalResultUp = {
+                            bytes: 0,
+                            nsec: 0,
+                            speed: official.uploadKbit * 1000,
+                        }
+                    }
+                }
+            } catch (e) {
+                Logger.I.warn(
+                    `Could not fetch official result for display (keeping interim): ${e}`,
+                )
+            }
+        }
         if (this.rmbtClient!.measurementStatus !== EMeasurementStatus.ABORTED) {
             this.rmbtClient!.measurementStatus = EMeasurementStatus.END
         }

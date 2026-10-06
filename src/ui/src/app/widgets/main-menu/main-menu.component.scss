@@ -7,7 +7,7 @@
     z-index: 10;
 
     @include screen-lg {
-        flex: 0 0 calc(rem($font-size-xxl * 2.5) + 1.5rem);
+        flex: 0 0 calc(rem($font-size-xxl * 4) + 1.5rem);
     }
 }
 
@@ -17,11 +17,27 @@
     flex-direction: column;
     justify-content: space-between;
     position: fixed;
-    top: 0;
+    // Start below the page header (the RTR-Netztest logo band) so the
+    // navigation sits under the logo rather than beside it. rem(80) matches
+    // the .app-header height.
+    top: rem(80);
     bottom: rem(24);
+    // Match the width reserved by :host. Because the aside is position:fixed it
+    // is out of flow and would otherwise shrink-wrap to its widest label (a long
+    // single word like "Wiederholungsmodus"), overflowing the reserved column
+    // and overlapping the page content. Pinning the width keeps labels inside
+    // the sidebar (they wrap instead — see main-menu-item label styles).
+    width: 20%;
+    box-sizing: border-box;
+
+    @include screen-lg {
+        width: calc(rem($font-size-xxl * 4) + 1.5rem);
+    }
 }
 
 .app-list {
     list-style: none;
-    margin-top: rem(30);
+    // Align the first nav item with the content (which now starts right below
+    // the header); the old rem(30) was paired with app-body's removed top padding.
+    margin-top: 0;
 }

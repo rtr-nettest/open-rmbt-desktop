@@ -59,4 +59,10 @@
     text-align: center;
     white-space: normal;
     width: 100%;
+    // Long single-word labels (e.g. German "Wiederholungsmodus") must wrap
+    // within the narrow sidebar instead of overflowing it. hyphens:auto gives a
+    // clean hyphenated break where the language dictionary / soft hyphens allow;
+    // overflow-wrap is the fallback so a word always breaks rather than spilling.
+    overflow-wrap: break-word;
+    hyphens: auto;
 }

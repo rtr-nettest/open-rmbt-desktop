@@ -1,8 +1,15 @@
 @import "../../../assets/styles/core.scss";
 
 .app-header {
-    height: rem(108);
-    padding: rem(24) rem(12);
+    // Tightened from 108/24 so the logo band isn't taller than the logo itself
+    // (keeps the ~60px logo, trims the empty space below it). Keep in sync with
+    // the sidebar's `top` offset in main-menu styles.
+    height: rem(80);
+    // Left padding centers the logo's (square) icon over the sidebar's nav
+    // icons: the icon width equals the logo height (3.75rem) and the sidebar is
+    // 7.5rem wide, so (7.5 - 3.75) / 2 = 1.875rem = rem(30). Both scale with rem,
+    // so this stays centered across breakpoints (<= 1920px).
+    padding: rem(10) rem(12) rem(10) rem(30);
 
     img {
         height: auto;
@@ -11,77 +18,30 @@
         width: auto;
     }
 
+    // Page header (rendered with [fixed]="false") is the single RTR-Netztest
+    // logo: it sits in the full-width band at the top-left of the page, and the
+    // sidebar/nav starts below it (see main-menu styles). The full word-mark
+    // shows when there is room; on narrow screens (<= 768px) it degrades to the
+    // compact icon rather than disappearing.
     &--large {
         display: flex;
-        @include screen-sm {
-            a {
-                display: none;
-            }
+        @include screen-xs {
+            display: none;
         }
     }
 
     &--small {
-        @media screen and (min-width: 1025px) {
-            display: none;
-        }
-        @include screen-sm {
-            height: 0;
-            padding: 0;
+        display: none;
+        @include screen-xs {
+            display: flex;
         }
     }
 
-    &--large-fixed {
-        @include screen-lg {
-            display: none;
-        }
-    }
-
+    // The sidebar (main-menu) also renders a header with [fixed]="true". The
+    // page header above now provides the logo, so the sidebar's duplicate copy
+    // is hidden entirely (the sidebar is positioned below the page header).
+    &--large-fixed,
     &--small-fixed {
-        @media screen and (min-width: 1921px) {
-            display: none;
-        }
-    }
-
-    &--ont {
-        align-items: center;
-        background: white;
-        display: flex;
-        justify-content: space-between;
-        height: rem(96);
-        padding: rem(0) rem(24);
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 1;
-    }
-
-    &--transparent {
-        background: none;
-    }
-}
-
-.app-header-placeholder {
-    height: rem(96);
-}
-
-.app-logo {
-    display: flex;
-    height: rem(96);
-    padding-bottom: rem(20);
-    padding-top: rem(20);
-    width: rem(142);
-}
-
-.app-menu-item {
-    display: flex;
-    justify-content: center;
-
-    &--active {
-        color: $color-primary;
-    }
-
-    & > * {
-        flex: 0 0 rem(26);
+        display: none;
     }
 }

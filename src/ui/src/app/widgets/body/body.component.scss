@@ -4,6 +4,9 @@
     display: flex;
     flex: 1;
     padding-bottom: rem(30);
-    padding-top: rem(30);
+    // No top padding: the page header (logo band) already provides a symmetric
+    // ~10px gap below the logo via its own padding-bottom. Extra top padding here
+    // made the space below the logo much larger than above it.
+    padding-top: 0;
     position: relative;
 }

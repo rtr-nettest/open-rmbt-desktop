@@ -92,16 +92,25 @@ export class LoopService {
                     : 0
         }
 
-        // scheduleLoop runs as THIS test begins, so `now` is its start time, and
-        // the start-to-start target is start + interval (interval may be 0).
+        // scheduleLoop runs as THIS test begins, so `startMs` is its ACTUAL start
+        // time — used only for the startup-grace check below.
         const startMs = Date.now()
-        const startTargetMs = startMs + options.interval
+        // The next test's target is anchored to the NOMINAL raster
+        // (loopStartMs + n*interval), NOT to this test's actual start. Anchoring
+        // to the actual start would fold each test's small startup latency into
+        // the cadence and accumulate it (observed drift ~1s per 30 tests). With
+        // the nominal raster, test n always targets loopStartMs + (n-1)*interval,
+        // so a test that starts a little late (or overran, handled by the
+        // Math.max below) never shifts the raster for the tests that follow.
+        // `counter` is the current test's number (1-based), so the next test
+        // (counter + 1) nominally starts at loopStartMs + counter*interval.
+        const startTargetMs = this.loopStartMs + counter * options.interval
 
         clearTimeout(this.loopTimeout)
 
         // The next test must start at the LATER of:
-        //   • `interval` after this test started  (exact start-to-start cadence
-        //     when the interval exceeds the test duration), and
+        //   • its NOMINAL raster slot, loopStartMs + counter*interval (fixed
+        //     cadence when the interval exceeds the test duration), and
         //   • MIN_BREAK after this test finished   (so there is always a gap, and
         //     a 0 interval means "MIN_BREAK after each test finishes").
         // Anchoring the break to the finish time is why we poll through the run

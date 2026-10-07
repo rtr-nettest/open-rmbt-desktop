@@ -6,6 +6,22 @@ Install packages by running `npm i` or `yarn install` in the root folder and in 
 Language support can be updated at `src/assets/rtr/src/i18n.config.ts`.
 In case of reinstalls, use `npm install --no-package-lock`.
 
+### Measurement engine (native Rust client)
+
+The native **Rust** measurement client (`src/measurement/rust_client/rmbt-client.exe` / `rmbt-client`) is **not** committed to this repo and is **not** built here. CI downloads it automatically (pinned by `MEASUREMENT_ENGINE_VERSION`), but for **local development you must fetch it once**:
+
+```sh
+$ npm run fetch:client
+```
+
+This downloads the Rust client for your platform from the [open-rmbt-client-cli](https://github.com/rtr-nettest/open-rmbt-client-cli/releases) releases and installs it into `src/measurement/rust_client/`. By default it uses the same version CI does — the default is set in `scripts/fetch-measurement-client.js` and should be kept in sync with `MEASUREMENT_ENGINE_VERSION` in the GitHub Actions workflow. Override it for a one-off fetch with:
+
+```sh
+$ MEASUREMENT_ENGINE_VERSION=<version> npm run fetch:client
+```
+
+> ⚠️ Without this (or with an outdated binary), measurements fall back to behavior the binary supports. An old/stub build that does not implement loop mode returns no loop UUID, which silently breaks loop-mode grouping and navigation — so make sure the local client is current.
+
 ## Compilation and running
 
 To run a measurement from the command line use (for development purposes only)

@@ -20,6 +20,17 @@
                             [items]="actionButtons"
                         ></app-action-buttons>
                     </h1>
+                    @if (showHistoryFilter) {
+                        <div class="app-history-filter">
+                            <mat-slide-toggle
+                                color="primary"
+                                [checked]="includeFailed"
+                                (change)="onToggleChange($event.checked)"
+                            >
+                                {{ t(includeFailed ? "All" : "Completed") }}
+                            </mat-slide-toggle>
+                        </div>
+                    }
                     <div class="app-wrapper">
                         <app-recent-history
                             [result]="result"

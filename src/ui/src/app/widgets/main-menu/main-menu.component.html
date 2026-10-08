@@ -18,17 +18,19 @@
                                 </li>
                             }
                         }
+                        <!-- Options/Settings is a regular nav item (kept last),
+                             not pinned to the bottom. -->
+                        @if (settingsItem) {
+                            <li class="app-list-item" role="menuitem">
+                                <app-main-menu-item
+                                    [item]="settingsItem"
+                                    (menuClick)="handleClick($event, settingsItem)"
+                                ></app-main-menu-item>
+                            </li>
+                        }
                     </ul>
                 }
             </div>
-            @if (settingsItem) {
-                <footer class="app-footer">
-                    <app-main-menu-item
-                        [item]="settingsItem"
-                        (menuClick)="handleClick($event, settingsItem)"
-                    ></app-main-menu-item>
-                </footer>
-            }
         </aside>
     </div>
 }

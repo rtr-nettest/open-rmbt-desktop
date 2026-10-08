@@ -34,6 +34,11 @@ export class HistoryScreenComponent
     @Input() hideMenu = false
     env$ = this.mainStore.env$
     shouldGroupHistory = true
+    // Show the "failed tests" filter toggle. Only the history overview has it;
+    // the loop-result screen (which reuses this template) switches it off.
+    showHistoryFilter = true
+    // Toggle state mirror. Off (default) = only completed measurements.
+    includeFailed = false
     loading = false
     allLoaded = false
     isLodaMoreButtonVisible = !!this.mainStore.env$.value?.HISTORY_RESULTS_LIMIT
@@ -89,6 +94,14 @@ export class HistoryScreenComponent
         this.loadMore()
     }
 
+    onToggleChange(includeFailed: boolean) {
+        this.includeFailed = includeFailed
+        // Re-fetch from scratch with the new filter.
+        this.allLoaded = false
+        this.store.resetMeasurementHistory()
+        this.loadMore()
+    }
+
     override ngOnDestroy(): void {
         this.store.resetMeasurementHistory()
         super.ngOnDestroy()
@@ -111,7 +124,7 @@ export class HistoryScreenComponent
             return
         }
         this.loading = true
-        this.store.getMeasurementHistory().subscribe((history) => {
+        this.store.getMeasurementHistory(this.includeFailed).subscribe((history) => {
             this.loading = false
             const limit = this.mainStore.env$.value?.HISTORY_RESULTS_LIMIT ?? 0
             if (

@@ -22,6 +22,10 @@ export class CertifiedResultScreenComponent extends HistoryScreenComponent {
     @Input() loopUuid: string | null = null
 
     override shouldGroupHistory = false
+    // Certified results always show ALL tests (including failed ones) and never
+    // offer the completed/all filter toggle.
+    override showHistoryFilter = false
+    override includeFailed = true
     override pageTitle = "Certified measurement results"
     override result$: Observable<IBasicResponse<IHistoryRowRTR>> = of()
     override actionButtons: IMainMenuItem[] = [

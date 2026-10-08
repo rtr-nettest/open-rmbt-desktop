@@ -307,13 +307,17 @@ export class ControlServer {
         }
     }
 
-    async getMeasurementHistory(paginator?: IPaginator, sort?: ISort) {
+    async getMeasurementHistory(
+        paginator?: IPaginator,
+        sort?: ISort,
+        includeFailed: boolean = true,
+    ) {
         if (!process.env.HISTORY_PATH) {
             return []
         }
         let retVal: ISimpleHistoryResult[] | undefined
         try {
-            retVal = await this.getRTRHistory(paginator)
+            retVal = await this.getRTRHistory(paginator, includeFailed)
         } catch (e) {
             retVal = await DBService.I.getAllMeasurements()
             if (!retVal) {
@@ -323,13 +327,19 @@ export class ControlServer {
         return retVal
     }
 
-    async getRTRHistory(paginator?: IPaginator) {
+    async getRTRHistory(
+        paginator?: IPaginator,
+        includeFailed: boolean = true,
+    ) {
         const body: { [key: string]: any } = {
             language: I18nService.I.getActiveLanguage(),
             timezone: dayjs.tz.guess(),
             uuid: Store.I.get(CLIENT_UUID) as string,
             result_offset: paginator?.offset,
-            include_failed_tests: true,
+            // When off (the history overview's default), the control server
+            // returns only completed measurements; on, it also returns failed/
+            // unfinished ones.
+            include_failed_tests: includeFailed,
         }
         if (paginator?.limit) {
             body.result_limit = paginator.limit

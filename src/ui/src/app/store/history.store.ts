@@ -80,7 +80,10 @@ export class HistoryStore {
         )
     }
 
-    getMeasurementHistory() {
+    // includeFailed off (default) = only completed measurements; on = also
+    // failed/unfinished (sent to the control server as include_failed_tests).
+    // Passed in per screen so e.g. certified results always include all.
+    getMeasurementHistory(includeFailed: boolean = false) {
         if (this.mainStore.error$.value) {
             return of([])
         }
@@ -100,6 +103,7 @@ export class HistoryStore {
                             limit: env.HISTORY_RESULTS_LIMIT,
                         },
                         sort,
+                        includeFailed,
                     )
                 } else {
                     return window.electronAPI.getMeasurementHistory(
@@ -107,6 +111,7 @@ export class HistoryStore {
                             offset: paginator.offset,
                         },
                         sort,
+                        includeFailed,
                     )
                 }
             }),
@@ -152,6 +157,8 @@ export class HistoryStore {
             window.electronAPI.getMeasurementHistory(
                 paginator,
                 sort ?? this.historySort$.value,
+                // Recent history (loop test screen) shows completed only.
+                false,
             ),
         ).pipe(
             take(1),

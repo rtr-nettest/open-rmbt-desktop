@@ -15,7 +15,9 @@
     background: white;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    // Items stack from the top; Options/Settings is just the last nav item now
+    // (it used to be pushed to the bottom with justify-content: space-between).
+    justify-content: flex-start;
     position: fixed;
     // Start below the page header (the RTR-Netztest logo band) so the
     // navigation sits under the logo rather than beside it. rem(80) matches

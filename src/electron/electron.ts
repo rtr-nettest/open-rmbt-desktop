@@ -240,10 +240,14 @@ ipcMain.handle(Events.GET_MEASUREMENT_RESULT, async (event, testUuid) => {
 
 ipcMain.handle(
     Events.GET_MEASUREMENT_HISTORY,
-    async (event, paginator, sort) => {
+    async (event, paginator, sort, includeFailed) => {
         const webContents = event.sender
         try {
-            return await ControlServer.I.getMeasurementHistory(paginator, sort)
+            return await ControlServer.I.getMeasurementHistory(
+                paginator,
+                sort,
+                includeFailed,
+            )
         } catch (e) {
             webContents.send(Events.ERROR, e)
         }

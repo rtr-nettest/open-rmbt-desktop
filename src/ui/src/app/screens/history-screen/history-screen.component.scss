@@ -58,3 +58,9 @@ app-main-content {
         width: auto;
     }
 }
+
+.app-history-filter {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: rem(16);
+}

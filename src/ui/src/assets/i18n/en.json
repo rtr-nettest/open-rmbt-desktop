@@ -126,7 +126,7 @@
     "First name": "First name",
     "Last name": "Last name",
     "Academic degree": "Academic degree",
-    "Location of the measurements": "Location of the measurements",
+    "Location of the measurements": "Location of the measurements (address at which the measurements are taken)",
     "Is it the first measurement cycle?": "Is it the first measurement cycle?",
     "Yes, first cycle": "Yes, first cycle",
     "No, follow-up cycle": "No, follow-up cycle",
@@ -260,5 +260,6 @@
     "video_sd": "Videos SD",
     "video_telephony": "Video Telephony",
     "video_uhd": "Videos UHD",
-    "voip": "VoIP"
+    "voip": "VoIP",
+    "Certified measurement results": "Certified measurement results"
 }

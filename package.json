@@ -1,7 +1,7 @@
 {
     "name": "open-rmbt-desktop",
     "productName": "RTR-Netztest",
-    "version": "4.2.5",
+    "version": "2.4.5",
     "description": "RTR-Netztest Desktop App",
     "main": "dist/main.js",
     "engines": {
@@ -16,6 +16,8 @@
         "start:all": "node scripts/set-package-name.js && start-server-and-test start:ui http://localhost:4200/ start:electron",
         "electron": "electron",
         "fetch:client": "node scripts/fetch-measurement-client.js",
+        "fetch:java": "node scripts/fetch-measurement-client.js java",
+        "fetch:engines": "node scripts/fetch-measurement-client.js rust java",
         "test": "jest --coverage",
         "package": "npm run build:all && electron-forge package",
         "make": "npm run build:all && electron-forge make",

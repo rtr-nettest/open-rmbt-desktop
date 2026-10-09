@@ -6,19 +6,28 @@ Install packages by running `npm i` or `yarn install` in the root folder and in 
 Language support can be updated at `src/assets/rtr/src/i18n.config.ts`.
 In case of reinstalls, use `npm install --no-package-lock`.
 
-### Measurement engine (native Rust client)
+### Measurement engines (native clients)
 
-The native **Rust** measurement client (`src/measurement/rust_client/rmbt-client.exe` / `rmbt-client`) is **not** committed to this repo and is **not** built here. CI downloads it automatically (pinned by `MEASUREMENT_ENGINE_VERSION`), but for **local development you must fetch it once**:
+The native measurement clients are **not** committed to this repo and are **not** built here. CI downloads them automatically (pinned by `MEASUREMENT_ENGINE_VERSION`), but for **local development you must fetch them once**:
 
 ```sh
-$ npm run fetch:client
+$ npm run fetch:client    # Rust client (default engine) -> src/measurement/rust_client/
+$ npm run fetch:java      # Java client (bundled JRE)     -> src/measurement/java_client/
+$ npm run fetch:engines   # both of the above
 ```
 
-This downloads the Rust client for your platform from the [open-rmbt-client-cli](https://github.com/rtr-nettest/open-rmbt-client-cli/releases) releases and installs it into `src/measurement/rust_client/`. By default it uses the same version CI does — the default is set in `scripts/fetch-measurement-client.js` and should be kept in sync with `MEASUREMENT_ENGINE_VERSION` in the GitHub Actions workflow. Override it for a one-off fetch with:
+This downloads the client(s) for your platform from the [open-rmbt-client-cli](https://github.com/rtr-nettest/open-rmbt-client-cli/releases) releases:
+
+- **Rust** (`rust_client/rmbt-client.exe` / `rmbt-client`) — the default engine, a single native binary.
+- **Java** (`java_client/`) — a self-contained jpackage app-image that brings its own JRE (no system Java needed); on Windows it is launched via `rmbt-client.exe`, on Linux via `bin/rmbt-client`, on macOS via the `.app` bundle. Select it at runtime via the measurement-engine setting.
+
+By default they use the same version CI does — the default is set in `scripts/fetch-measurement-client.js` and should be kept in sync with `MEASUREMENT_ENGINE_VERSION` in the GitHub Actions workflow. Override it for a one-off fetch with:
 
 ```sh
 $ MEASUREMENT_ENGINE_VERSION=<version> npm run fetch:client
 ```
+
+You can also fetch any subset directly, e.g. `node scripts/fetch-measurement-client.js rust java`.
 
 > ⚠️ Without this (or with an outdated binary), measurements fall back to behavior the binary supports. An old/stub build that does not implement loop mode returns no loop UUID, which silently breaks loop-mode grouping and navigation — so make sure the local client is current.
 

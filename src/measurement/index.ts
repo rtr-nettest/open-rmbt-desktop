@@ -349,41 +349,49 @@ export class MeasurementRunner {
             )
             await ControlServer.I.submitMeasurement(result)
         }
-        // Native (Rust) engine: it submits its own results, so fetch the
-        // authoritative server result and expose it as the FINAL rate. Without
-        // this finalDownMbps/finalUpMbps stay 0 and the UI falls back to the last
-        // INTERMEDIATE sample — a different quantity that does not match the
-        // official download/upload shown in the history. Fetching the same result
-        // the history uses guarantees they agree. (downloadKbit is decimal kbit:
-        // * 1000 -> bit/s, then finalDownMbps divides by 1e6.)
+        // Native (Rust/C/Java) engine: it submits its own results and now also
+        // emits a FINAL_RESULT message with the locally measured final rates,
+        // which the client service stores as finalResultDown/Up. We show those
+        // engine values directly as the FINAL rate on the measurement page — no
+        // extra round trip, and they match the download/upload the engine
+        // submitted (hence the history). Only when the engine did NOT provide a
+        // FINAL_RESULT (an older binary) do we fall back to fetching the official
+        // result by testUuid, so finalDownMbps/finalUpMbps don't stay 0 and drop
+        // the UI back to the last INTERMEDIATE sample. (downloadKbit is decimal
+        // kbit: * 1000 -> bit/s, then finalDownMbps divides by 1e6.)
         if (
             externalEngine &&
             this.rmbtClient!.measurementStatus !== EMeasurementStatus.ABORTED
         ) {
-            try {
-                const testUuid = this.rmbtClient!.getTestUuid()
-                if (testUuid) {
-                    const official =
-                        await ControlServer.I.getMeasurementResult(testUuid)
-                    if (official?.downloadKbit != null) {
-                        this.rmbtClient!.finalResultDown = {
-                            bytes: 0,
-                            nsec: 0,
-                            speed: official.downloadKbit * 1000,
+            const haveEngineFinal =
+                (this.rmbtClient!.finalResultDown?.speed ?? 0) > 0 ||
+                (this.rmbtClient!.finalResultUp?.speed ?? 0) > 0
+            if (!haveEngineFinal) {
+                try {
+                    const testUuid = this.rmbtClient!.getTestUuid()
+                    if (testUuid) {
+                        const official =
+                            await ControlServer.I.getMeasurementResult(testUuid)
+                        if (official?.downloadKbit != null) {
+                            this.rmbtClient!.finalResultDown = {
+                                bytes: 0,
+                                nsec: 0,
+                                speed: official.downloadKbit * 1000,
+                            }
+                        }
+                        if (official?.uploadKbit != null) {
+                            this.rmbtClient!.finalResultUp = {
+                                bytes: 0,
+                                nsec: 0,
+                                speed: official.uploadKbit * 1000,
+                            }
                         }
                     }
-                    if (official?.uploadKbit != null) {
-                        this.rmbtClient!.finalResultUp = {
-                            bytes: 0,
-                            nsec: 0,
-                            speed: official.uploadKbit * 1000,
-                        }
-                    }
+                } catch (e) {
+                    Logger.I.warn(
+                        `Could not fetch official result for display (keeping interim): ${e}`,
+                    )
                 }
-            } catch (e) {
-                Logger.I.warn(
-                    `Could not fetch official result for display (keeping interim): ${e}`,
-                )
             }
         }
         if (this.rmbtClient!.measurementStatus !== EMeasurementStatus.ABORTED) {

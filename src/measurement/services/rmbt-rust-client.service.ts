@@ -95,6 +95,19 @@ export class RMBTRustClient implements IRMBTClient {
     downs: IOverallResult[] = []
     ups: IOverallResult[] = []
     lastMessageReceivedAt = Date.now()
+    /**
+     * Latched when the engine emits a STATE_CHANGE "ERROR": the engine still
+     * prints the "ENDING TEST." sentinel on failure, so WrapUp() must not then
+     * march the status forward to END and make a failed test look successful.
+     */
+    private hasErrored = false
+    /**
+     * reject() of the in-flight runMeasurement promise. Lets an engine-reported
+     * ERROR fail the run immediately instead of waiting out the inactivity
+     * timeout (the old behaviour when the client died silently on a network
+     * problem).
+     */
+    private rejectRun?: (reason?: any) => void
     private estimatePhaseDuration: { [key: string]: number } = {
         [EMeasurementStatus.INIT]: 0.5,
         [EMeasurementStatus.INIT_DOWN]: 2.5,
@@ -248,6 +261,9 @@ export class RMBTRustClient implements IRMBTClient {
         Logger.I.info("Control server host is: " + host)
 
         return new Promise((resolve, reject) => {
+            // Expose reject() so an engine-reported ERROR can fail fast (below).
+            this.rejectRun = reject
+            this.hasErrored = false
             let platform = process.platform.toLowerCase()
             let settingsRequest = new UserSettingsRequest({ platform })
 
@@ -507,8 +523,32 @@ export class RMBTRustClient implements IRMBTClient {
                             break
                         case "END":
                             break
-                        case "ERROR":
+                        case "ERROR": {
+                            // The engine has given up (e.g. control/measurement
+                            // server unreachable, all threads of a phase failed).
+                            // It carries the phase it failed in and a reason, and
+                            // will print "ENDING TEST." then exit non-zero. Fail
+                            // the run now rather than waiting for the inactivity
+                            // timeout.
+                            const phase = parsed_data["phase"]
+                            const reason =
+                                parsed_data["error"] || "Measurement failed"
+                            Logger.I.error(
+                                `[Rust] engine reported failure in phase ${
+                                    phase ?? "?"
+                                }: ${reason}`,
+                            )
+                            this.hasErrored = true
+                            this.cancelMeasurement(
+                                this.rejectRun ?? (() => {}),
+                                new Error(
+                                    phase
+                                        ? `${reason} (phase ${phase})`
+                                        : reason,
+                                ),
+                            )
                             break
+                        }
                         case "ABORTED":
                             break
                     }
@@ -560,6 +600,58 @@ export class RMBTRustClient implements IRMBTClient {
                     Logger.I.info(
                         `[Rust rate] UPLOAD_RESULT up=${parsed_data["up"]} Mbit/s bytes=${parsed_data["bytes"]} -> interimUpMbps=${this.interimUpMbps}`,
                     )
+                } else if (parsed_data["type"] == "FINAL_RESULT") {
+                    // Authoritative, locally measured result emitted once after
+                    // the upload phase (before SUBMITTING_RESULTS). This is the
+                    // result the engine itself submits to the control server, so
+                    // we show it directly as the FINAL rate on the measurement
+                    // page — no extra round trip to re-fetch it from the backend.
+                    // down/up are decimal Mbit/s; speed is stored in bit/s and
+                    // finalDownMbps/finalUpMbps divide by 1e6.
+                    const down = parsed_data["down"]
+                    const up = parsed_data["up"]
+                    if (typeof down === "number" && down >= 0) {
+                        this.finalResultDown = {
+                            bytes: parsed_data["downBytes"] ?? 0,
+                            nsec: parsed_data["downNs"] ?? 0,
+                            speed: down * 1000 * 1000,
+                        }
+                    }
+                    if (typeof up === "number" && up >= 0) {
+                        this.finalResultUp = {
+                            bytes: parsed_data["upBytes"] ?? 0,
+                            nsec: parsed_data["upNs"] ?? 0,
+                            speed: up * 1000 * 1000,
+                        }
+                    }
+                    // Authoritative server-RTT median (ms), matching the result
+                    // the engine submitted (overrides the running mean we kept
+                    // from the live PING_RESULT samples).
+                    if (typeof parsed_data["pingMedian"] === "number") {
+                        this.pingMedian = parsed_data["pingMedian"]
+                    }
+                    // Fallbacks in case UUID_INFO was missed.
+                    if (parsed_data["testUuid"] && !this._testUuid) {
+                        this._testUuid = parsed_data["testUuid"]
+                        this.params.test_uuid = parsed_data["testUuid"]
+                    }
+                    if (parsed_data["loopUuid"] && !this.params.loop_uuid) {
+                        this.params.loop_uuid = parsed_data["loopUuid"]
+                    }
+                    Logger.I.info(
+                        `[Rust rate] FINAL_RESULT down=${down} up=${up} Mbit/s pingMedian=${parsed_data["pingMedian"]} ms -> finalDownMbps=${this.finalDownMbps} finalUpMbps=${this.finalUpMbps}`,
+                    )
+                } else if (parsed_data["type"] == "SUBMIT_RESULT") {
+                    // Outcome of the engine's own result POST. A failed submission
+                    // is NOT a failed test — the FINAL_RESULT values still stand.
+                    Logger.I.info(
+                        `[Rust] SUBMIT_RESULT success=${parsed_data["success"]} httpStatus=${parsed_data["httpStatus"]} error=${parsed_data["error"]}`,
+                    )
+                    if (parsed_data["success"] === false) {
+                        Logger.I.warn(
+                            "Rust engine measured a result but could not submit it to the control server; the measurement page shows the locally measured FINAL_RESULT values.",
+                        )
+                    }
                 } else {
                     // DEBUG: any message type we don't handle — this is where a
                     // final/overall result (the authoritative rate) would hide.
@@ -572,6 +664,13 @@ export class RMBTRustClient implements IRMBTClient {
     }
 
     private async WrapUp() {
+        if (this.hasErrored) {
+            // The engine already failed the run via STATE_CHANGE "ERROR"; it
+            // still prints the "ENDING TEST." sentinel, but advancing to END
+            // here would make the failed test look successful.
+            Logger.I.info("Skipping WrapUp: run already failed (ERROR).")
+            return
+        }
         Logger.I.info("Wrapping up")
         // DEBUG: the final rates the UI will display (interim = last reported
         // sample; final = 0 unless finalResultDown/Up were set).

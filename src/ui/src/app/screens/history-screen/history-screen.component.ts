@@ -128,14 +128,22 @@ export class HistoryScreenComponent
             return
         }
         this.loading = true
+        const countBefore = this.store.history$.value.length
         this.store.getMeasurementHistory(this.includeFailed).subscribe((history) => {
             this.loading = false
             const limit = this.mainStore.env$.value?.HISTORY_RESULTS_LIMIT ?? 0
+            // Nothing more to load when: the page was short/empty, there is no
+            // paging limit, or the fetch added no new rows (the accumulated,
+            // de-duplicated history did not grow — e.g. the total is an exact
+            // multiple of the limit, or the end-of-list DB fallback returned
+            // only rows already shown).
+            const countAfter = this.store.history$.value.length
             if (
                 !history ||
                 !history.length ||
                 !limit ||
-                history.length < limit
+                history.length < limit ||
+                countAfter === countBefore
             ) {
                 this.allLoaded = true
             }

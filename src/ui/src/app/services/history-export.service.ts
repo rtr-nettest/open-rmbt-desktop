@@ -43,7 +43,10 @@ export class HistoryExportService {
     }
 
     protected get slowPdfUrl() {
-        return `${this.mainStore.api?.url_web_statistic_server}/export/pdf/${this.transloco.getActiveLang()}`
+        // Use the primary statistic server (url_statistic_server), like the quick
+        // and certified PDF exports — not url_web_statistic_server. Both servers
+        // serve this export, but keeping every export on one base is consistent.
+        return `${this.mainStore.api?.url_statistic_server}/export/pdf/${this.transloco.getActiveLang()}`
     }
 
     constructor(
@@ -55,54 +58,69 @@ export class HistoryExportService {
     ) {}
 
     exportAs(format: "csv" | "xlsx", results: ISimpleHistoryResult[]) {
-        const exportUrl = this.generalUrl
-        if (!exportUrl) {
-            return of(null)
-        }
-
         this.mainStore.inProgress$.next(true)
-        return this.http
-            .post(exportUrl, this.getExportParams(format, results), {
-                responseType: "blob",
-                observe: "response",
-            })
-            .pipe(tap(this.saveFile(format)), catchError(this.handleError))
+        // Resolve the server URLs (from the client settings) before building the
+        // request — see openCertifiedPdf / MainStore.ensureSettings. Otherwise an
+        // export triggered before the home screen loaded them would POST to
+        // "undefined/opentests/search".
+        return this.mainStore.ensureSettings().pipe(
+            concatMap(() => {
+                const exportUrl = this.generalUrl
+                if (!exportUrl || exportUrl.startsWith("undefined")) {
+                    return this.handleError()
+                }
+                return this.http
+                    .post(exportUrl, this.getExportParams(format, results), {
+                        responseType: "blob",
+                        observe: "response",
+                    })
+                    .pipe(tap(this.saveFile(format)))
+            }),
+            catchError(this.handleError),
+        )
     }
 
     quickPdfExport(results: any[]) {
         const formdata = new FormData()
-        console.log(results)
         formdata.append(
             "open_test_uuid",
             results[0].openTestResponse?.["open_test_uuid"],
         )
-        return this.exportAsPdf(results, this.quickPdfUrl, formdata)
+        return this.exportAsPdf(results, () => this.quickPdfUrl, formdata)
     }
 
     slowPdfExport(results: any[]) {
-        return this.exportAsPdf(results, this.slowPdfUrl)
+        return this.exportAsPdf(results, () => this.slowPdfUrl)
     }
 
     private exportAsPdf(
         results: any[],
-        basePdfUrl: string,
+        pdfUrl: () => string,
         httpParams?: HttpParams | FormData,
     ) {
-        if (!basePdfUrl) {
-            return of(null)
-        }
         this.mainStore.inProgress$.next(true)
-        return this.http
-            .post(
-                basePdfUrl,
-                httpParams || this.getExportParams("pdf", results),
-                {
-                    headers: { Accept: "application/pdf" },
-                    responseType: "blob",
-                    observe: "response",
-                },
-            )
-            .pipe(tap(this.saveFile("pdf")), catchError(this.handleError))
+        // Ensure settings are loaded first so the URL getter resolves to a real
+        // server (and not "undefined/export/pdf/...").
+        return this.mainStore.ensureSettings().pipe(
+            concatMap(() => {
+                const basePdfUrl = pdfUrl()
+                if (!basePdfUrl || basePdfUrl.startsWith("undefined")) {
+                    return this.handleError()
+                }
+                return this.http
+                    .post(
+                        basePdfUrl,
+                        httpParams || this.getExportParams("pdf", results),
+                        {
+                            headers: { Accept: "application/pdf" },
+                            responseType: "blob",
+                            observe: "response",
+                        },
+                    )
+                    .pipe(tap(this.saveFile("pdf")))
+            }),
+            catchError(this.handleError),
+        )
     }
 
     /**

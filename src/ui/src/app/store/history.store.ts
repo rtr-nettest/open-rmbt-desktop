@@ -117,9 +117,25 @@ export class HistoryStore {
             }),
             tap((history) => {
                 if (history) {
-                    const h = env?.HISTORY_RESULTS_LIMIT
+                    const merged = env?.HISTORY_RESULTS_LIMIT
                         ? [...this.history$.value, ...history]
                         : history
+                    // Dedupe by test UUID. The RTR control server throws on an
+                    // empty page past the end, which makes getMeasurementHistory
+                    // fall back to the full local DB — so paging the last page
+                    // would otherwise append rows already shown. Deduping keeps
+                    // the list (and the "load more" end-detection) correct.
+                    const seen = new Set<string>()
+                    const h = merged.filter((item) => {
+                        if (!item.testUuid) {
+                            return true
+                        }
+                        if (seen.has(item.testUuid)) {
+                            return false
+                        }
+                        seen.add(item.testUuid)
+                        return true
+                    })
                     this.history$.next(h)
                 }
             }),

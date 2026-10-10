@@ -53,6 +53,16 @@
                             [grouped]="shouldGroupHistory"
                             (sortChange)="changeSort($event)"
                         ></app-recent-history>
+                        @if (!showCertifiedResultInfo && !allLoaded) {
+                            <button
+                                mat-flat-button
+                                color="primary"
+                                (click)="loadMore()"
+                                [disabled]="loading"
+                            >
+                                {{ loading ? t("Loading") : t("Load more") }}
+                            </button>
+                        }
                     </div>
                 </div>
                 <app-footer></app-footer>

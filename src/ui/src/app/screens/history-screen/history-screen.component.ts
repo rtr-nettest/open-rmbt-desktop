@@ -39,6 +39,10 @@ export class HistoryScreenComponent
     showHistoryFilter = true
     // Toggle state mirror. Off (default) = only completed measurements.
     includeFailed = false
+    // The certified result screen (which reuses this template) shows a completion
+    // notice plus a clickable PDF logo above the results; the history overview
+    // does not.
+    showCertifiedResultInfo = false
     loading = false
     allLoaded = false
     isLodaMoreButtonVisible = !!this.mainStore.env$.value?.HISTORY_RESULTS_LIMIT

@@ -267,4 +267,8 @@ ipcMain.handle(Events.GET_SERVERS, async (event) => {
 
 ipcMain.on(Events.OPEN_PDF, (_, url) => WindowManager.I.openPdf(url))
 
+ipcMain.on(Events.OPEN_PDF_DATA, (_, data, key) =>
+    WindowManager.I.openPdfData(data, key),
+)
+
 app.whenReady().then(() => WindowManager.I.createWindow())

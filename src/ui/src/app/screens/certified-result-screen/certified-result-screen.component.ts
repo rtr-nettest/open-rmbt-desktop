@@ -25,6 +25,7 @@ export class CertifiedResultScreenComponent extends HistoryScreenComponent {
     // Certified results always show ALL tests (including failed ones) and never
     // offer the completed/all filter toggle.
     override showHistoryFilter = false
+    override showCertifiedResultInfo = true
     override includeFailed = true
     override pageTitle = "Certified measurement results"
     override result$: Observable<IBasicResponse<IHistoryRowRTR>> = of()
@@ -33,7 +34,7 @@ export class CertifiedResultScreenComponent extends HistoryScreenComponent {
             label: "",
             translations: [],
             icon: "filetype-pdf",
-            action: () => this.exporter.exportAsCertified(this.loopUuid),
+            action: () => this.exporter.openCertifiedPdf(this.loopUuid),
         },
     ]
 

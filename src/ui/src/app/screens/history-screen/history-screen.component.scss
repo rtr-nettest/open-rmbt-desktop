@@ -64,3 +64,21 @@ app-main-content {
     justify-content: flex-end;
     margin-bottom: rem(16);
 }
+
+.app-certified-result {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: rem(24);
+
+    &__text {
+        margin: 0 0 rem(8);
+    }
+
+    // The PDF logo sits left-aligned below the notice (the action-buttons host
+    // otherwise pushes its button to the right).
+    app-action-buttons {
+        flex: 0 0 auto;
+        justify-content: flex-start;
+    }
+}

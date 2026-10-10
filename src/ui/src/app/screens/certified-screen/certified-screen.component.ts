@@ -1,5 +1,12 @@
 import { Component, OnDestroy, ChangeDetectionStrategy } from "@angular/core"
-import { Subject, firstValueFrom, takeUntil, takeWhile, tap } from "rxjs"
+import {
+    Subject,
+    Subscription,
+    firstValueFrom,
+    takeUntil,
+    takeWhile,
+    tap,
+} from "rxjs"
 import { ICertifiedDataForm } from "src/app/interfaces/certified-data-form.interface"
 import { ICertifiedEnvForm } from "src/app/interfaces/certified-env-form.interface"
 import { HistoryExportService } from "src/app/services/history-export.service"
@@ -39,6 +46,11 @@ export class CertifiedScreenComponent implements OnDestroy {
     isEnvFormValid = false
     loopUuid = ""
     isFirstCycle = true
+    // Tracks the single in-flight "max tests reached → open PDF" subscription so
+    // repeated Start clicks (the button is also reachable on the DATA step for
+    // non-first cycles) never stack multiple subscriptions that would each open
+    // the result PDF.
+    private maxTestsSub?: Subscription
 
     constructor(
         private mainStore: MainStore,
@@ -47,6 +59,7 @@ export class CertifiedScreenComponent implements OnDestroy {
     ) {}
 
     ngOnDestroy(): void {
+        this.maxTestsSub?.unsubscribe()
         this.destroyed$.next(void 0)
         this.destroyed$.complete()
     }
@@ -71,17 +84,21 @@ export class CertifiedScreenComponent implements OnDestroy {
     }
 
     startCertifiedMeasurement() {
-        this.testStore.maxTestsReached$
+        // Replace any previous (not-yet-completed) subscription so a second Start
+        // never leaves two live subscriptions both opening the result PDF.
+        this.maxTestsSub?.unsubscribe()
+        let pdfOpened = false
+        this.maxTestsSub = this.testStore.maxTestsReached$
             .pipe(
+                takeUntil(this.destroyed$),
                 tap((isMaxValueReached) => {
-                    if (isMaxValueReached) {
+                    if (isMaxValueReached && !pdfOpened) {
+                        pdfOpened = true
                         firstValueFrom(
-                            this.exporter.getCertifiedPdfUrl(
+                            this.exporter.openCertifiedPdf(
                                 this.testStore.loopUuid$.value,
                             ),
-                        ).then((url) =>
-                            url ? window.electronAPI.openPdf(url) : void 0,
-                        )
+                        ).catch(() => void 0)
                         this.activeBreadCrumbIndex = EBreadCrumbs.RESULT
                         this.testStore.disableLoopMode()
                     }

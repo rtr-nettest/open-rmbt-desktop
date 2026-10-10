@@ -86,6 +86,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
     openPdf: (url: string) => {
         ipcRenderer.send(Events.OPEN_PDF, url)
     },
+    openPdfData: (data: ArrayBuffer, key?: string) => {
+        ipcRenderer.send(Events.OPEN_PDF_DATA, data, key)
+    },
     onSetIp: (callback: (settings: IUserSettings) => any) => {
         ipcRenderer.removeAllListeners(Events.SET_IP)
         ipcRenderer.on(Events.SET_IP, (_, settings) => callback(settings))

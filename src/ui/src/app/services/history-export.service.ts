@@ -1,7 +1,16 @@
 import { Injectable } from "@angular/core"
 import { MainStore } from "../store/main.store"
 import { ISimpleHistoryResult } from "../../../../measurement/interfaces/simple-history-result.interface"
-import { BehaviorSubject, catchError, concatMap, map, of, tap } from "rxjs"
+import {
+    Observable,
+    catchError,
+    concatMap,
+    defer,
+    from,
+    of,
+    retry,
+    tap,
+} from "rxjs"
 import { HttpClient, HttpParams } from "@angular/common/http"
 import { I18nService } from "src/app/services/i18n.service"
 import { MessageService } from "./message.service"
@@ -10,11 +19,20 @@ import { ERROR_OCCURED } from "../constants/strings"
 import { ECertifiedLocationType } from "../interfaces/certified-env-form.interface"
 import { TestStore } from "../store/test.store"
 
+// The certified PDF aggregates every test of the loop. The backend may still be
+// processing/aggregating the results for a short while after the last test
+// finishes, so the export request can fail if issued too early. Retry it a
+// bounded number of times with a short delay before giving up.
+const CERTIFIED_PDF_RETRY_COUNT = 10
+const CERTIFIED_PDF_RETRY_DELAY_MS = 2000
+
 @Injectable({
     providedIn: "root",
 })
 export class HistoryExportService {
-    lastCertifiedPdfUrl$ = new BehaviorSubject("")
+    // The last certified PDF (raw bytes), cached so the result screen's PDF
+    // button can reopen it without re-requesting it from the backend.
+    private lastCertifiedPdf: ArrayBuffer | null = null
 
     protected get generalUrl() {
         return `${this.mainStore.api?.url_statistic_server}/opentests/search`
@@ -26,10 +44,6 @@ export class HistoryExportService {
 
     protected get slowPdfUrl() {
         return `${this.mainStore.api?.url_web_statistic_server}/export/pdf/${this.transloco.getActiveLang()}`
-    }
-
-    protected get certifiedPdfUrl() {
-        return `${this.mainStore.api?.url_web_statistic_server}/export/pdf/`
     }
 
     constructor(
@@ -91,52 +105,66 @@ export class HistoryExportService {
             .pipe(tap(this.saveFile("pdf")), catchError(this.handleError))
     }
 
-    exportAsCertified(loopUuid?: string | null) {
-        if (this.lastCertifiedPdfUrl$.value) {
-            window.electronAPI.openPdf(this.lastCertifiedPdfUrl$.value)
-            return this.lastCertifiedPdfUrl$.asObservable()
+    /**
+     * Request the certified PDF and open it in a viewer window. The backend
+     * (RMBTStatisticServer) returns the PDF binary DIRECTLY from the export POST
+     * (Content-Type: application/pdf) — there is no JSON "file" field and no
+     * second GET. The bytes are handed to the Electron main process, which shows
+     * them in a reused viewer window keyed by the loop UUID.
+     */
+    openCertifiedPdf(loopUuid?: string | null): Observable<any> {
+        if (this.lastCertifiedPdf) {
+            window.electronAPI.openPdfData(
+                this.lastCertifiedPdf,
+                loopUuid ?? undefined,
+            )
+            return of(true)
         }
-        if (!this.slowPdfUrl || !loopUuid) {
+        if (!loopUuid) {
             return of(null)
         }
         this.mainStore.inProgress$.next(true)
-        return this.http
-            .post<any>(this.slowPdfUrl, this.getFormData(loopUuid))
-            .pipe(
-                concatMap((resp) => {
-                    if (resp?.["file"]) {
-                        return this.http.get(
-                            this.certifiedPdfUrl + resp["file"],
-                            {
-                                responseType: "blob",
-                                observe: "response",
-                            },
-                        )
-                    }
-                    return of(null)
-                }),
-                tap(this.saveFile("pdf")),
-                catchError(this.handleError),
-            )
+        // The export URL is built from the client settings (see MainStore.api).
+        // Those are only loaded by the home/settings screens, so ensure they are
+        // present before requesting — otherwise the certified wizard (reachable
+        // without the home screen) would POST to "undefined/export/pdf/...".
+        return this.mainStore.ensureSettings().pipe(
+            concatMap(() => {
+                if (!this.quickPdfUrl || this.quickPdfUrl.startsWith("undefined")) {
+                    return this.handleError()
+                }
+                return this.requestCertifiedPdf(loopUuid).pipe(
+                    concatMap((blob) => from(blob.arrayBuffer())),
+                    tap((buffer) => {
+                        this.lastCertifiedPdf = buffer
+                        window.electronAPI.openPdfData(buffer, loopUuid)
+                        this.mainStore.inProgress$.next(false)
+                    }),
+                )
+            }),
+            catchError(this.handleError),
+        )
     }
 
-    getCertifiedPdfUrl(loopUuid?: string | null) {
-        if (!this.slowPdfUrl || !loopUuid) {
-            return of(null)
-        }
-        return this.http
-            .post<any>(this.slowPdfUrl, this.getFormData(loopUuid))
-            .pipe(
-                map((resp: any) => {
-                    if (resp?.["file"]) {
-                        const fileUrl = this.certifiedPdfUrl + resp["file"]
-                        this.lastCertifiedPdfUrl$.next(fileUrl)
-                        return fileUrl
-                    }
-                    return null
-                }),
-                catchError(this.handleError),
-            )
+    /**
+     * POST the certified export request and resolve to the PDF blob the backend
+     * returns directly. On a transient failure (e.g. the backend has not yet
+     * finished aggregating the loop's results) the request is retried a bounded
+     * number of times with a short delay before the error propagates to the
+     * caller's catchError. Each attempt rebuilds the form data.
+     */
+    private requestCertifiedPdf(loopUuid: string): Observable<Blob> {
+        return defer(() =>
+            this.http.post(this.quickPdfUrl, this.getFormData(loopUuid), {
+                headers: { Accept: "application/pdf" },
+                responseType: "blob",
+            }),
+        ).pipe(
+            retry({
+                count: CERTIFIED_PDF_RETRY_COUNT,
+                delay: CERTIFIED_PDF_RETRY_DELAY_MS,
+            }),
+        )
     }
 
     private saveFile = (format: string) => (data: any) => {

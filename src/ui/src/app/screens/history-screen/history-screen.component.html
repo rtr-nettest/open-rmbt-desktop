@@ -16,10 +16,26 @@
                 >
                     <h1 class="app-title">
                         {{ t(pageTitle) }}
-                        <app-action-buttons
-                            [items]="actionButtons"
-                        ></app-action-buttons>
+                        @if (!showCertifiedResultInfo) {
+                            <app-action-buttons
+                                [items]="actionButtons"
+                            ></app-action-buttons>
+                        }
                     </h1>
+                    @if (showCertifiedResultInfo) {
+                        <div class="app-certified-result">
+                            <p class="app-certified-result__text">
+                                {{
+                                    t(
+                                        "The measurement cycle is now complete, the results are available as a PDF:"
+                                    )
+                                }}
+                            </p>
+                            <app-action-buttons
+                                [items]="actionButtons"
+                            ></app-action-buttons>
+                        </div>
+                    }
                     @if (showHistoryFilter) {
                         <div class="app-history-filter">
                             <mat-slide-toggle
@@ -37,16 +53,6 @@
                             [grouped]="shouldGroupHistory"
                             (sortChange)="changeSort($event)"
                         ></app-recent-history>
-                        @if (!allLoaded) {
-                            <button
-                                mat-flat-button
-                                color="primary"
-                                (click)="loadMore()"
-                                [disabled]="loading"
-                            >
-                                {{ loading ? t("Loading") : t("Load more") }}
-                            </button>
-                        }
                     </div>
                 </div>
                 <app-footer></app-footer>

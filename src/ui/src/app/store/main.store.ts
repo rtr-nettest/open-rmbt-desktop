@@ -98,6 +98,24 @@ export class MainStore {
             .then((settings) => this.settings$.next(settings))
     }
 
+    /**
+     * Resolve the client settings, which carry the server URLs used for the
+     * CSV/PDF exports (see the `api` getter). Returns the cached settings when
+     * already loaded, otherwise registers the client once and caches the
+     * result. registerClient() is only called by the home/settings screens, so
+     * flows reached without passing through them (e.g. the certified
+     * measurement wizard) would otherwise have `api` undefined and build
+     * broken "undefined/export/pdf/..." URLs.
+     */
+    ensureSettings(): Observable<IUserSettings | null> {
+        if (this.settings$.value?.urls) {
+            return of(this.settings$.value)
+        }
+        return from(window.electronAPI.registerClient()).pipe(
+            tap((settings) => this.settings$.next(settings)),
+        )
+    }
+
     setIPVersion(ipVersion?: EIPVersion) {
         const currentEnv = this.env$.value
         if (!currentEnv) {

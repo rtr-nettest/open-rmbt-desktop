@@ -21,6 +21,12 @@ import { Events } from "../enums/events.enum"
 export class WindowManager {
     private static instance = new WindowManager()
     private pdfs: { [key: string]: string } = {}
+    // Live PDF viewer windows, keyed by the source URL (or caller key). Used to
+    // reuse/focus an already-open window instead of spawning a new one.
+    private pdfWindows: { [key: string]: BrowserWindow } = {}
+    // Temp files written for PDFs delivered as raw bytes (openPdfData), keyed the
+    // same way, so a reopen reuses the file and they can be cleaned up on quit.
+    private pdfFiles: { [key: string]: string } = {}
 
     static get I() {
         return this.instance
@@ -33,6 +39,13 @@ export class WindowManager {
     onQuit() {
         Object.values(this.pdfs).forEach((pdf) => {
             if (fs.existsSync(pdf)) fs.unlinkSync(pdf)
+        })
+        Object.values(this.pdfFiles).forEach((file) => {
+            try {
+                if (fs.existsSync(file)) fs.unlinkSync(file)
+            } catch {
+                // best-effort cleanup
+            }
         })
     }
 
@@ -138,12 +151,24 @@ export class WindowManager {
         })
     }
 
-    async openPdf(url: string) {
+    // Focus an already-open PDF window for this key, if any. Returns true when a
+    // live window was found and focused (so the caller should not open another).
+    private focusExistingPdf(key: string): boolean {
+        const existing = this.pdfWindows[key]
+        if (existing && !existing.isDestroyed()) {
+            if (existing.isMinimized()) existing.restore()
+            existing.focus()
+            return true
+        }
+        return false
+    }
+
+    private createPdfWindow(key: string): BrowserWindow {
         const { screen } = require("electron")
         const primaryDisplay = screen.getPrimaryDisplay()
         const { width, height } = primaryDisplay.workAreaSize
 
-        let pdfWindow: BrowserWindow | undefined = new BrowserWindow({
+        const pdfWindow = new BrowserWindow({
             width: Math.max(1280, width),
             height: Math.max(800, height),
             minWidth: Math.min(800, width),
@@ -153,6 +178,27 @@ export class WindowManager {
             },
             icon: path.join(__dirname, "assets", "images", "icon-linux.png"),
         })
+        pdfWindow.setMenu(null)
+        this.pdfWindows[key] = pdfWindow
+        pdfWindow.on("closed", () => {
+            if (this.pdfWindows[key] === pdfWindow) {
+                delete this.pdfWindows[key]
+            }
+        })
+        return pdfWindow
+    }
+
+    async openPdf(url: string) {
+        // Reuse a single window per PDF URL. If one is already open (or still
+        // downloading) for this URL, focus it instead of spawning another —
+        // this is what previously let the certified flow and repeated exports
+        // stack several identical PDF windows.
+        if (this.focusExistingPdf(url)) {
+            return
+        }
+        // Register the window synchronously (before the async download) so a
+        // second call for the same URL during the download is deduplicated too.
+        const pdfWindow = this.createPdfWindow(url)
 
         let pdf = this.pdfs[url]
 
@@ -175,7 +221,49 @@ export class WindowManager {
             }
         }
 
+        // The window may have been closed by the user while the download was in
+        // flight; don't try to load into a destroyed window.
+        if (pdfWindow.isDestroyed()) {
+            return
+        }
+
+        if (!pdf) {
+            // Download failed and nothing was cached — close the blank window
+            // rather than leaving an empty viewer open.
+            pdfWindow.close()
+            return
+        }
+
         pdfWindow.loadURL(pdf)
-        pdfWindow.setMenu(null)
+    }
+
+    // Open a PDF delivered as raw bytes (e.g. the certified export, which the
+    // backend returns directly from the POST rather than as a downloadable URL).
+    // The bytes are written to a temp file and shown in a reused viewer window
+    // keyed by `key` (so repeated opens focus the same window).
+    async openPdfData(data: ArrayBuffer | Uint8Array, key?: string) {
+        const windowKey = key || `pdf-${Date.now()}`
+        if (this.focusExistingPdf(windowKey)) {
+            return
+        }
+
+        let filePath = this.pdfFiles[windowKey]
+        if (!filePath || !fs.existsSync(filePath)) {
+            try {
+                filePath = path.join(
+                    app.getPath("temp"),
+                    `rtr-pdf-${Date.now()}.pdf`,
+                )
+                fs.writeFileSync(filePath, Buffer.from(data as any))
+                this.pdfFiles[windowKey] = filePath
+                Logger.I.warn(`PDF written to %s`, filePath)
+            } catch (e) {
+                Logger.I.error(`PDF write error: %o`, e)
+                return
+            }
+        }
+
+        const pdfWindow = this.createPdfWindow(windowKey)
+        pdfWindow.loadURL(nodeUrl.pathToFileURL(filePath).toString())
     }
 }

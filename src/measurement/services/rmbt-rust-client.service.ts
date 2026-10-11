@@ -326,6 +326,19 @@ export class RMBTRustClient implements IRMBTClient {
                         options.loopModeInfo.loop_uuid,
                     )
                 }
+                // Certified measurement only: flag the run as certified and pass
+                // the fixed cycle count, so the native engine reports them in its
+                // loopmode_info (cert_mode + max_tests) to the control server.
+                // Neither is sent for a normal (duration-bounded) loop.
+                if (options?.loopModeInfo?.cert_mode) {
+                    bin_options.push("--user-loop-mode-cert")
+                    if (options?.loopModeInfo?.max_tests) {
+                        bin_options.push(
+                            "--user-loop-mode-max-tests",
+                            options.loopModeInfo.max_tests,
+                        )
+                    }
+                }
             }
 
             // get the uuid from settings and push it to java options array

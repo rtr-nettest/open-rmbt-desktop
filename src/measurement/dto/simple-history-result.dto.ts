@@ -72,8 +72,14 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
                 ? null
                 : parseFloat(response.ping.replace(",", ""))
         return new SimpleHistoryResult(
+            // The history endpoint reports `time` as a UTC instant. Convert it to
+            // the viewer's local zone (like the web client does), instead of
+            // formatting it in the measurement's originally recorded timezone
+            // (response.timezone) — otherwise results taken in another zone show a
+            // shifted time.
             dayjs(response?.time)
-                .tz(response.timezone)
+                .utc()
+                .tz(dayjs.tz.guess())
                 .format(RESULT_DATE_FORMAT),
             "",
             downKbit,

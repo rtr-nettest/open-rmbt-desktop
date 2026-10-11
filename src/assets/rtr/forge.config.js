@@ -6,6 +6,11 @@ const packJson = require("../../../package.json")
 const yargs = require("yargs")
 const argv = yargs.option("nosign").option("arch").argv
 
+// Skip signing for a local dry-run. The `--nosign` flag works with
+// `electron-forge make`, but `electron-forge package` rejects unknown flags, so
+// NOSIGN=true is the portable way to request an unsigned build from either.
+const noSign = argv.nosign || process.env.NOSIGN === "true"
+
 // Target architecture for the MSIX manifest (electron-forge passes --arch).
 const msixArch = argv.arch === "arm64" ? "arm64" : "x64"
 
@@ -110,7 +115,7 @@ function requireApplePassword() {
 module.exports = {
     hooks: {
         postPackage: async (_, options) => {
-            if (argv.nosign) {
+            if (noSign) {
                 return
             }
             if (
@@ -122,7 +127,8 @@ module.exports = {
                     path.join(
                         process.env.ASSETS_FOLDER,
                         "RMBTDesktop_Distribution_Profile.provisionprofile"
-                    )
+                    ),
+                    argv.arch || options?.arch || process.arch
                 )
             }
         },
@@ -142,9 +148,13 @@ module.exports = {
             ".log$",
             ".gitignore",
             "README.md",
+            // The Mac App Store build ships the Rust measurement engine only.
+            // Drop the bundled Java client (ships its own JRE) so it is neither
+            // packaged nor requires signing/sandboxing in the sandboxed app.
+            ...(process.env.APP_STORE === "true" ? ["java_client"] : []),
         ],
         appBundleId: process.env.APP_BUNDLE_ID,
-        ...(process.env.MACOS !== "true" || argv.nosign
+        ...(process.env.MACOS !== "true" || noSign
             ? {}
             : {
                   osxSign: {},
@@ -244,7 +254,18 @@ module.exports = {
                 ? {
                       name: "@electron-forge/maker-pkg",
                       config: {
-                          identity: process.env.APPLE_INSTALLER_IDENTITY,
+                          // Sign the installer .pkg with the Apple-issued
+                          // "Mac Installer Distribution" (a.k.a. "3rd Party Mac
+                          // Developer Installer") identity. Omitted for a local
+                          // dry-run (--nosign) or when no identity is configured,
+                          // which makes maker-pkg emit an unsigned .pkg.
+                          ...(noSign ||
+                          !process.env.APPLE_INSTALLER_IDENTITY
+                              ? {}
+                              : {
+                                    identity:
+                                        process.env.APPLE_INSTALLER_IDENTITY,
+                                }),
                       },
                   }
                 : {

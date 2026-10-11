@@ -8,12 +8,10 @@ const packJson = require("../package.json")
 
 let appsToSign = []
 
-const outApp = path.resolve(
-    __dirname,
-    "..",
-    "out",
-    `${packJson.productName}-mas-x64`
-)
+// Resolved per build from the requested arch (see codeSignApp); the Mac App
+// Store build is arm64.
+let outApp = null
+let codesignArch = "arm64"
 
 const outEntitlements = path.resolve(__dirname, "..", "out", "entitlements.xml")
 const outChildEntitlements = path.resolve(
@@ -23,14 +21,51 @@ const outChildEntitlements = path.resolve(
     "entitlements.child.xml"
 )
 
-async function codeSignApp(entitlementsPath, provisionPath) {
+async function codeSignApp(entitlementsPath, provisionPath, arch = "arm64") {
+    codesignArch = arch === "x64" ? "x86_64" : arch
+    outApp = path.resolve(
+        __dirname,
+        "..",
+        "out",
+        `${packJson.productName}-mas-${arch}`
+    )
     const plistUpdated = await updatePlist()
     if (!plistUpdated) {
         return
     }
     await updateEntitlements(entitlementsPath)
     await embedProvisionProfile(provisionPath)
+    // Strip extended attributes from the whole app AFTER embedding the
+    // provisioning profile. The downloaded .provisionprofile carries
+    // com.apple.quarantine, and the native-client binaries carry resource
+    // forks from the zip they are extracted from — both are rejected by Apple
+    // (App Store error 91109 / codesign "resource fork … not allowed"). This
+    // must run after embedProvisionProfile (which copies the profile in) and
+    // before signing, so nothing re-adds an attribute afterwards.
+    try {
+        await promisify(exec)(`xattr -cr "${outApp}"`)
+    } catch (e) {
+        console.warn(e)
+    }
     await collectAppsToSign(outApp)
+    // The Rust measurement engine is a bare Mach-O binary (no .app/.framework/
+    // .dylib extension), so collectAppsToSign does not pick it up. It must still
+    // be signed with inherited (child) entitlements or the sandboxed app is
+    // rejected / cannot launch it. The depth sort below keeps it a non-root
+    // entry, so it gets the child entitlements.
+    const rustBin = path.resolve(
+        outApp,
+        `${packJson.productName}.app`,
+        "Contents",
+        "Resources",
+        "app",
+        "dist",
+        "rust_client",
+        "rmbt-client"
+    )
+    if (fs.existsSync(rustBin)) {
+        appsToSign.push(rustBin)
+    }
     appsToSign = appsToSign.sort(
         (a, b) => b.split("/").length - a.split("/").length
     )
@@ -83,9 +118,11 @@ async function updateEntitlements(filePath) {
     const plistFile = (await fsp.readFile(filePath)).toString()
     const parsedPlist = plist.parse(plistFile)
     console.log("parsedPlist", parsedPlist)
-    const bundleId = `${process.env.APPLE_TEAM_ID}.${process.env.APP_BUNDLE_ID}`
-    parsedPlist["com.apple.application-identifier"] = bundleId
-    parsedPlist["com.apple.security.application-groups"] = [bundleId]
+    const appIdentifier = `${process.env.APPLE_TEAM_ID}.${process.env.APP_BUNDLE_ID}`
+    parsedPlist["com.apple.application-identifier"] = appIdentifier
+    // No app group is injected: this is a single app with no extensions/XPC, so
+    // it needs no shared container. Keeping it out means the App ID requires no
+    // App Groups capability and the provisioning profile stays a plain one.
     await fsp.writeFile(outEntitlements, plist.build(parsedPlist))
     for (const key in parsedPlist) {
         if (key !== "com.apple.security.app-sandbox") {
@@ -115,7 +152,7 @@ async function sign(path, isRoot) {
     const promiseExec = promisify(exec)
     try {
         await promiseExec(
-            `codesign -a x86_64 -f --entitlements "${
+            `codesign -a ${codesignArch} -f --entitlements "${
                 isRoot ? outEntitlements : outChildEntitlements
             }" -s "${process.env.APPLE_CODESIGN_IDENTITY}" "${path}" `
         )

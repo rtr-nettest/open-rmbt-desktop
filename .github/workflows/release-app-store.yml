@@ -1,0 +1,101 @@
+name: Release to App Store
+
+# Builds a signed, arm64, Rust-engine Mac App Store package and uploads it to
+# App Store Connect when a version tag (v*) is pushed.
+#
+# All Apple signing material and config come from the PRIVATE repo
+# rtr-nettest/open-rmbt-desktop-private, pulled with the REPO_TOKEN secret — the
+# same token the main build workflow already uses to fetch prod.env. Nothing
+# secret lives in this (public) repo. Required layout in the private repo:
+#
+#   prod.env                                         # APPLE_* identities, ASSETS_FOLDER, APP_BUNDLE_ID, …
+#   apple/dist.p12                                   # "Apple Distribution: RTR-GmbH" identity (cert + key)
+#   apple/installer.p12                              # "3rd Party Mac Developer Installer: RTR-GmbH" identity
+#   apple/RMBTDesktop_Distribution_Profile.provisionprofile
+#   apple/AuthKey_<ASC_KEY_ID>.p8                    # App Store Connect API key
+#   apple/apple.env                                  # APPLE_CERT_PASSWORD, KEYCHAIN_PASSWORD, ASC_KEY_ID, ASC_ISSUER_ID
+
+on:
+    push:
+        tags:
+            - "v*"
+
+env:
+    MEASUREMENT_ENGINE_VERSION: v2.5.4
+
+jobs:
+    app-store:
+        runs-on: macos-latest # Apple Silicon runner (arm64)
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # full history + tags: the version is derived from the git tag
+
+            - name: Check out private config + Apple signing material
+              uses: actions/checkout@v4
+              with:
+                  repository: rtr-nettest/open-rmbt-desktop-private
+                  token: ${{ secrets.REPO_TOKEN }}
+                  path: private
+
+            - name: Load prod.env as .env
+              run: cp private/prod.env .env
+
+            - name: Load and mask Apple secrets (cert/keychain passwords, ASC key ids)
+              run: |
+                  while IFS= read -r line || [ -n "$line" ]; do
+                      case "$line" in ''|\#*) continue ;; esac
+                      key=${line%%=*}
+                      val=${line#*=}
+                      echo "::add-mask::$val"
+                      echo "$key=$val" >> "$GITHUB_ENV"
+                  done < private/apple/apple.env
+
+            - name: Use Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22.x
+
+            - name: Download Rust measurement client (macos-arm64)
+              run: |
+                  mkdir -p src/measurement/rust_client
+                  curl -fsSL -o rust-client.zip "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download/${MEASUREMENT_ENGINE_VERSION}/rmbt-client-rust-macos-arm64.zip"
+                  unzip -o rust-client.zip -d src/measurement/rust_client
+                  chmod +x src/measurement/rust_client/rmbt-client
+
+            - name: Import signing certificates into a temporary keychain
+              run: |
+                  KEYCHAIN="$RUNNER_TEMP/app-signing.keychain-db"
+                  security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+                  security set-keychain-settings -lut 21600 "$KEYCHAIN"
+                  security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+                  security import private/apple/dist.p12      -k "$KEYCHAIN" -P "$APPLE_CERT_PASSWORD" -T /usr/bin/codesign
+                  security import private/apple/installer.p12 -k "$KEYCHAIN" -P "$APPLE_CERT_PASSWORD" -T /usr/bin/productbuild
+                  # Make our keychain the one codesign/productbuild search, and allow
+                  # Apple tools to use the keys without an interactive prompt.
+                  security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | sed s/\"//g)
+                  security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" >/dev/null
+
+            - name: Place the provisioning profile where the signer expects it
+              run: |
+                  ASSETS_FOLDER=$(grep -E '^ASSETS_FOLDER=' .env | head -1 | cut -d= -f2- | tr -d '"')
+                  cp private/apple/RMBTDesktop_Distribution_Profile.provisionprofile \
+                     "$ASSETS_FOLDER/RMBTDesktop_Distribution_Profile.provisionprofile"
+
+            - name: Place the App Store Connect API key
+              run: |
+                  mkdir -p ~/.appstoreconnect/private_keys
+                  cp "private/apple/AuthKey_${ASC_KEY_ID}.p8" ~/.appstoreconnect/private_keys/
+
+            - name: Build the signed Mac App Store package
+              run: |
+                  npm install
+                  (cd src/ui && npm install)
+                  npm run make:app-store
+
+            - name: Validate and upload to App Store Connect
+              run: |
+                  PKG=$(ls out/make/pkg/arm64/*-arm64.pkg | grep -v unsigned | head -1)
+                  echo "Uploading: $PKG"
+                  xcrun altool --validate-app -t macos -f "$PKG" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+                  xcrun altool --upload-app   -t macos -f "$PKG" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"

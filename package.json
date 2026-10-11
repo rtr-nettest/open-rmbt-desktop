@@ -26,7 +26,7 @@
         "make:windows-store": "npm run build:all && cross-env WIN_STORE=true electron-forge make --platform=win32 --arch=x64",
         "make:windows-store-arm64": "npm run build:all && cross-env WIN_STORE=true electron-forge make --platform=win32 --arch=arm64",
         "make:macos": "npm run build:all && cross-env MACOS=true electron-forge make --platform=darwin --arch=x64",
-        "make:app-store": "npm run build:all && cross-env APP_STORE=true electron-forge make --platform=mas --arch=x64",
+        "make:app-store": "npm run build:all && cross-env APP_STORE=true electron-forge make --platform=mas --arch=arm64",
         "make:deb": "npm run build:all && cross-env DEB=true electron-forge make --platform=linux --arch=x64",
         "make:rpm": "npm run build:all && cross-env RPM=true electron-forge make --platform=linux --arch=x64",
         "make:flatpak": "npm run build:all && cross-env FLATPAK=true electron-forge make --platform=linux --arch=x64",

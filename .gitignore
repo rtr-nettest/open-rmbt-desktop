@@ -77,3 +77,8 @@ src/measurement/c_client/*
 *.pfx
 
 *.cer
+
+# Apple signing material — lives only in the private repo, never here
+*.p12
+*.p8
+AuthKey_*.p8

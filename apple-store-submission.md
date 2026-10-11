@@ -213,5 +213,25 @@ Release flow: bump `version` in `package.json`, commit, then
 Both are best validated on a TestFlight install (see above), since the signed
 build does not run from `out/`.
 
-_Resolved while setting this up: extended attributes are stripped automatically
-before signing; no app group is used (single app, no extensions)._
+_Resolved while setting this up: extended attributes (incl. com.apple.quarantine
+on the embedded profile) are stripped automatically before signing._
+
+## Gotchas that cost us a round-trip
+
+- **App group is REQUIRED, not optional.** `codesign-app.js` injects
+  `com.apple.security.application-groups = ["<TeamID>.<BundleID>"]`
+  (`T7Y947AEPK.at.netztest.app.macos`). Without it the sandboxed app aborts at
+  launch: `bootstrap_check_in …MachPortRendezvousServer: Permission denied` —
+  Electron/Chromium registers a Mach service under that name and the sandbox
+  only allows it inside an application-group namespace. The current provisioning
+  profile authorizes this team-prefixed value without needing an App Group
+  registered separately in the portal.
+- **Quarantine xattr.** A downloaded `.provisionprofile` carries
+  `com.apple.quarantine`; it must be stripped from the app *after* the profile
+  is embedded (App Store error 91109). Handled in `codesign-app.js`.
+- **Build number must increase.** `CFBundleVersion` must be a period-separated
+  list of **at most three** integers and higher than any previously uploaded
+  build of the same marketing version. Set `MAS_BUILD_VERSION` to bump it on a
+  re-upload (e.g. marketing `2.5.3`, build `2.5.4`) without touching the
+  marketing version. CI defaults the build number to the tag/`package.json`
+  version, which is unique per release.

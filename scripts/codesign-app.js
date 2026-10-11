@@ -120,9 +120,13 @@ async function updateEntitlements(filePath) {
     console.log("parsedPlist", parsedPlist)
     const appIdentifier = `${process.env.APPLE_TEAM_ID}.${process.env.APP_BUNDLE_ID}`
     parsedPlist["com.apple.application-identifier"] = appIdentifier
-    // No app group is injected: this is a single app with no extensions/XPC, so
-    // it needs no shared container. Keeping it out means the App ID requires no
-    // App Groups capability and the provisioning profile stays a plain one.
+    // REQUIRED for the app to launch under the App Sandbox: Electron/Chromium
+    // registers a Mach service named "<TeamID>.<BundleID>.MachPortRendezvousServer".
+    // The sandbox only permits a Mach name inside one of the app's
+    // application-group namespaces, so without this the app aborts immediately
+    // with "bootstrap_check_in ... MachPortRendezvousServer: Permission denied".
+    // The value must be exactly <TeamID>.<BundleID> (Electron MAS requirement).
+    parsedPlist["com.apple.security.application-groups"] = [appIdentifier]
     await fsp.writeFile(outEntitlements, plist.build(parsedPlist))
     for (const key in parsedPlist) {
         if (key !== "com.apple.security.app-sandbox") {

@@ -154,6 +154,13 @@ module.exports = {
             ...(process.env.APP_STORE === "true" ? ["java_client"] : []),
         ],
         appBundleId: process.env.APP_BUNDLE_ID,
+        // CFBundleShortVersionString (marketing version, shown in the Store).
+        appVersion: packJson.version,
+        // CFBundleVersion (build number). App Store Connect requires it to be
+        // higher than any previously uploaded build of the same marketing
+        // version, so MAS_BUILD_VERSION lets a re-upload bump it (e.g.
+        // 2.5.3.1) without changing the marketing version.
+        buildVersion: process.env.MAS_BUILD_VERSION || packJson.version,
         ...(process.env.MACOS !== "true" || noSign
             ? {}
             : {

@@ -28,10 +28,39 @@ const path = require("path")
 const os = require("os")
 const AdmZip = require("adm-zip")
 
-// Keep this default in sync with MEASUREMENT_ENGINE_VERSION in
-// .github/workflows/build-open-rmbt-desktop.yml so local == CI.
-const DEFAULT_VERSION = "v2.5.3"
-const VERSION = process.env.MEASUREMENT_ENGINE_VERSION || DEFAULT_VERSION
+// Single source of truth for the engine version: MEASUREMENT_ENGINE_VERSION.
+// CI sets it as an env var; for local dev we read the same value out of the
+// workflow so local == CI without this script keeping a version of its own.
+// Override by exporting MEASUREMENT_ENGINE_VERSION before running.
+const WORKFLOW_FILE = path.join(
+    __dirname,
+    "..",
+    ".github",
+    "workflows",
+    "build-open-rmbt-desktop.yml"
+)
+
+function versionFromWorkflow() {
+    let contents
+    try {
+        contents = fs.readFileSync(WORKFLOW_FILE, "utf8")
+    } catch (err) {
+        throw new Error(
+            `Could not read MEASUREMENT_ENGINE_VERSION from ${WORKFLOW_FILE}: ` +
+                `${err.message}\nSet MEASUREMENT_ENGINE_VERSION to override.`
+        )
+    }
+    const match = contents.match(/^\s*MEASUREMENT_ENGINE_VERSION:\s*(\S+)/m)
+    if (!match) {
+        throw new Error(
+            `MEASUREMENT_ENGINE_VERSION not found in ${WORKFLOW_FILE}.\n` +
+                `Set MEASUREMENT_ENGINE_VERSION to override.`
+        )
+    }
+    return match[1].replace(/^["']|["']$/g, "")
+}
+
+const VERSION = process.env.MEASUREMENT_ENGINE_VERSION || versionFromWorkflow()
 const BASE_URL =
     "https://github.com/rtr-nettest/open-rmbt-client-cli/releases/download"
 

@@ -131,7 +131,13 @@ export class WindowManager {
             }
         })
 
-        powerMonitor.on("suspend", () => {
+        const onSuspend = () => {
+            // powerMonitor is a process-global emitter whose listeners outlive
+            // this window, so a suspend fired after `win` was destroyed would
+            // throw "Object has been destroyed" on win.webContents.
+            if (win.isDestroyed()) {
+                return
+            }
             this.isSuspended = true
             // Only notify the renderer (which shows the "measurement aborted"
             // alert) when a measurement was actually running at suspend time.
@@ -140,14 +146,32 @@ export class WindowManager {
             if (MeasurementRunner.I.isMeasurementInProgress) {
                 MeasurementRunner.I.abortMeasurement()
                 LoopService.I.resetTimeout()
-                win.webContents.send(Events.APP_SUSPENDED)
+                if (!win.webContents.isDestroyed()) {
+                    win.webContents.send(Events.APP_SUSPENDED)
+                }
             }
-        })
+        }
 
-        powerMonitor.on("resume", () => {
+        const onResume = () => {
+            if (win.isDestroyed()) {
+                return
+            }
             this.isSuspended = false
             MeasurementRunner.I.resumeMeasurement({ sender: win })
-            win.webContents.send(Events.APP_RESUMED)
+            if (!win.webContents.isDestroyed()) {
+                win.webContents.send(Events.APP_RESUMED)
+            }
+        }
+
+        powerMonitor.on("suspend", onSuspend)
+        powerMonitor.on("resume", onResume)
+
+        // Detach the process-global powerMonitor listeners when this window goes
+        // away, so they neither fire on the destroyed window nor accumulate if a
+        // new window is created.
+        win.on("closed", () => {
+            powerMonitor.removeListener("suspend", onSuspend)
+            powerMonitor.removeListener("resume", onResume)
         })
     }
 

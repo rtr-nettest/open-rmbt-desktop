@@ -96,7 +96,9 @@
         "serialize-javascript": "^7.1.2",
         "uuid": "^11.1.1",
         "webpack-dev-server": "^6.0.0",
-        "image-size": "^2.0.4"
+        "image-size": "^2.0.4",
+        "handlebars": "^4.7.10",
+        "shell-quote": "^1.11.0"
     },
     "gitInfo": {}
 }

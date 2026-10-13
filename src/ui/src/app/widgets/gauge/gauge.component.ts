@@ -111,6 +111,19 @@ export class GaugeComponent {
     }
 
     private drawLoop(phaseState: ITestPhaseState) {
+        // This runs from the component's `visualization$` tap, but the SVG paths
+        // (#init, #ping, …) live inside that same stream's
+        // `@if (visualization$ | async)` in the template. On the first emission
+        // after the gauge is (re)created — e.g. at the start of each loop
+        // iteration, when `loopWaiting` flips to false and <app-gauge> is
+        // re-rendered — the tap fires before Angular has inserted the SVG, so the
+        // paths aren't in the DOM yet. Skip that one frame instead of
+        // querySelector-ing missing elements (which logged "Element not found:
+        // #init" on every loop restart). The next poll (~STATE_UPDATE_TIMEOUT
+        // later) redraws once the SVG exists.
+        if (!document.querySelector("#init")) {
+            return
+        }
         const locale = this.transloco.getActiveLang()
         let { phase: status, progress, counter } = phaseState
         let barSelector = null

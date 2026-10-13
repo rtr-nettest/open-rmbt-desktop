@@ -52,7 +52,14 @@ export class HeaderComponent {
         this.testStore.isCertifiedMeasurement$,
         this.mainStore.env$,
     ]).pipe(
-        map(([t]) => {
+        map(([t, enableLoopMode, isCertified, env]) => {
+            // In debug mode the normal-loop duration limit is overridden to a
+            // hardcoded 480h (see LoopService.DEBUG_MAX_DURATION_MIN), so the
+            // configured end time shown here would be wrong. Surface the debug
+            // state explicitly instead (intentionally untranslated).
+            if (env?.DEBUG && enableLoopMode && !isCertified) {
+                return "Debug: No termination"
+            }
             const endMs = this.testStore.loopModeEndTime()
             if (!endMs) {
                 return t[

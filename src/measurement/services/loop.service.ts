@@ -18,10 +18,11 @@ const MIN_BREAK_MS = 5000
 // test that hasn't registered as running yet is not mistaken for a finished one.
 const STARTUP_GRACE_MS = 10000
 
-// In --debug mode the normal-loop duration limit is a hardcoded 480h, ignoring
+// In --debug mode the normal-loop duration limit is a hardcoded, effectively
+// unreachable value (the loop header shows "Debug: No termination"), ignoring
 // LOOP_MODE_MAX_DURATION. Ugly, but convenient for debugging a --debug build
-// without touching .env.
-const DEBUG_MAX_DURATION_MIN = 480 * 60
+// without touching .env. Value is in MINUTES.
+const DEBUG_MAX_DURATION_MIN = 31536000
 
 export class LoopService {
     private static instance = new LoopService()

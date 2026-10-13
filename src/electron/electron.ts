@@ -192,7 +192,9 @@ ipcMain.on(Events.RUN_MEASUREMENT, (event, loopModeInfo) =>
 
 ipcMain.on(Events.ABORT_MEASUREMENT, (event) => {
     LoopService.I.resetTimeout()
-    const isRunning = MeasurementRunner.I.abortMeasurement()
+    // User-initiated stop (hardStop): also latch the stop so a test still being
+    // set up is aborted the moment its client exists, instead of running on.
+    const isRunning = MeasurementRunner.I.abortMeasurement(true)
     if (!isRunning) {
         event.sender.send(Events.MEASUREMENT_ABORTED)
     }

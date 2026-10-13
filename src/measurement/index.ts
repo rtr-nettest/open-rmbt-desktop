@@ -62,6 +62,24 @@ export class MeasurementRunner {
     // registration response; native engine: the client's UUID_INFO), then reused
     // on every subsequent iteration. Reset at the start of each new loop.
     private serverLoopUuid?: string
+    // Set true when the user explicitly stops (ABORT_MEASUREMENT). While a test's
+    // client is still being set up (registration / engine spawn) rmbtClient is
+    // undefined, so abortMeasurement() is a no-op and a stop pressed in that
+    // window would otherwise be lost and the just-started test would run to
+    // completion. runMeasurement checks this once the client exists. Cleared
+    // whenever a fresh test or loop starts.
+    private stopRequested = false
+    // The current loop's scheduling context, kept so a loop torn down by an OS
+    // suspend can be resumed on wake — for ANY engine and for normal
+    // (non-certified) loops too. The previous resume path read
+    // registrationRequest.loopmode_info, which only the JS engine ever sets and
+    // only carries max_tests for certified runs, so a suspended normal loop (or
+    // any native-engine loop) never came back. Cleared when the loop ends (user
+    // stop, expiry, or max tests reached).
+    private loopResumeInfo?: {
+        loopInterval: number
+        loopModeInfo: ILoopModeInfo
+    }
 
     get isMeasurementInProgress() {
         return ![
@@ -84,16 +102,26 @@ export class MeasurementRunner {
 
     resumeMeasurement(event: { sender: BrowserWindow }) {
         this.rmbtClient = undefined
-        if (this.registrationRequest?.loopmode_info?.max_tests) {
-            const { max_delay, test_counter } =
-                this.registrationRequest.loopmode_info
-            const loopInterval = max_delay * 60 * 1000
-            const loopModeInfo: ILoopModeInfo = {
-                ...this.registrationRequest?.loopmode_info,
-                test_counter: test_counter + 1,
-            }
-            this.onScheduleLoop(event, loopInterval, loopModeInfo)
+        // Only resume a loop that the suspend actually tore down. If the
+        // scheduler is still armed (the app slept BETWEEN tests, not during
+        // one, so onSuspend left it running), LoopService keeps the cadence
+        // itself — rescheduling here too would double-schedule and force an
+        // off-raster test. With no stored loop context there is nothing to
+        // resume (e.g. a plain single test was suspended).
+        if (LoopService.I.loopTimeout || !this.loopResumeInfo) {
+            return
         }
+        const { loopInterval, loopModeInfo } = this.loopResumeInfo
+        const nextCounter = loopModeInfo.test_counter + 1
+        // A certified run is bounded by max_tests; don't resume past the last one.
+        if (nextCounter > (loopModeInfo.max_tests || Infinity)) {
+            this.loopResumeInfo = undefined
+            return
+        }
+        this.onScheduleLoop(event, loopInterval, {
+            ...loopModeInfo,
+            test_counter: nextCounter,
+        })
     }
 
     async registerClient(options?: MeasurementOptions): Promise<IUserSettings> {
@@ -140,6 +168,13 @@ export class MeasurementRunner {
         try {
             this.setCPUInfoInterval()
             await this.setRMBTClient(options)
+            // Honor a stop requested while the client was still being set up:
+            // abortMeasurement() was a no-op then (rmbtClient was undefined), so
+            // without this the just-started test would run to completion after
+            // the user pressed Stop.
+            if (this.stopRequested) {
+                this.rmbtClient!.abortMeasurement()
+            }
             const threadResults =
                 await this.rmbtClient!.scheduleMeasurement(options)
             this.setCPUUsage()
@@ -152,7 +187,15 @@ export class MeasurementRunner {
         }
     }
 
-    abortMeasurement() {
+    // `hardStop` marks a user-initiated stop (the Stop button) as opposed to an
+    // internal abort such as an OS suspend (which must stay resumable). A hard
+    // stop latches stopRequested and forgets the loop context so nothing — not
+    // even a test still being set up — runs on past it.
+    abortMeasurement(hardStop = false) {
+        if (hardStop) {
+            this.stopRequested = true
+            this.loopResumeInfo = undefined
+        }
         if (this.rmbtClient?.isRunning) {
             this.rmbtClient.abortMeasurement()
             return this.rmbtClient.isRunning
@@ -207,6 +250,10 @@ export class MeasurementRunner {
                 loopModeInfo.loop_uuid = this.serverLoopUuid
             } else {
                 this.serverLoopUuid = undefined
+                // Fresh single test: drop any latched stop / stale loop context
+                // left over from a previous loop.
+                this.stopRequested = false
+                this.loopResumeInfo = undefined
             }
             const status = await MeasurementRunner.I.runMeasurement({
                 loopModeInfo,
@@ -232,6 +279,7 @@ export class MeasurementRunner {
                 if (counter >= (maxTests || Infinity)) {
                     webContents.send(Events.MAX_TESTS_REACHED)
                     LoopService.I.resetTimeout()
+                    this.loopResumeInfo = undefined
                 }
             }
         }
@@ -240,10 +288,15 @@ export class MeasurementRunner {
     onScheduleLoop = (event, loopInterval, loopModeInfo: ILoopModeInfo) => {
         const webContents = event.sender
         // A fresh loop is starting: forget any previous loop's server UUID so the
-        // first iteration asks the server to mint a new one.
+        // first iteration asks the server to mint a new one, and clear a stop
+        // latched by an earlier loop.
         if (loopModeInfo.test_counter <= 1) {
             this.serverLoopUuid = undefined
+            this.stopRequested = false
         }
+        // Remember the loop context so an OS suspend that tears the loop down can
+        // resume it on wake (any engine, normal or certified loop).
+        this.loopResumeInfo = { loopInterval, loopModeInfo }
         // Never start a loop test while one is already running. LoopService
         // already serializes starts (it only fires onTime when idle), but this
         // guards against any stray re-trigger spawning an overlapping test —
@@ -264,6 +317,7 @@ export class MeasurementRunner {
                     })
                 },
                 onExpire: () => {
+                    this.loopResumeInfo = undefined
                     webContents.send(Events.LOOP_MODE_EXPIRED)
                 },
             })

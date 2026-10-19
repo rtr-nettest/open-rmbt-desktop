@@ -42,11 +42,19 @@ export class TestPhaseState implements ITestPhaseState {
     setRTRChartFromOverallSpeed(overallResults: IOverallResult[]) {
         this.chart = overallResults.reduce((acc, r, i) => {
             const msec = r.nsec / 1e6
+            // speedLog() returns -1 as a "no speed" sentinel for zero/invalid
+            // speeds — e.g. the leading zero sample and the zero-speed
+            // "no transfer" gap fillers CalcService inserts for >1.4s gaps.
+            // Plotting -1 drops the line below the y-axis floor (y=0); with the
+            // area fill anchored to the origin, the line crossing the baseline
+            // makes the fill self-intersect into an hourglass/X. Clamp to the
+            // chart floor (0 = 0.1 Mbit/s) so the curve never dips below it.
+            const y = this.conversion.speedLog(r.speed / 1e6)
             return [
                 ...acc,
                 {
                     x: msec / 1e3,
-                    y: this.conversion.speedLog(r.speed / 1e6),
+                    y: Math.max(0, y),
                 },
             ]
         }, [] as { x: number; y: number }[])

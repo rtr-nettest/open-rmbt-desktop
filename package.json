@@ -99,7 +99,8 @@
         "image-size": "^2.0.4",
         "handlebars": "^4.7.10",
         "shell-quote": "^1.11.0",
-        "argparse": "^2.0.1"
+        "argparse": "^2.0.1",
+        "body-parser": "^2.4.0"
     },
     "gitInfo": {}
 }

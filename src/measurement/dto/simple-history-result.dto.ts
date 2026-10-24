@@ -10,12 +10,7 @@ import {
 } from "../interfaces/measurement-result.interface"
 import { IOverallResult } from "../interfaces/overall-result.interface"
 import { ISimpleHistoryResult } from "../interfaces/simple-history-result.interface"
-import {
-    ClassificationService,
-    THRESHOLD_DOWNLOAD,
-    THRESHOLD_PING,
-    THRESHOLD_UPLOAD,
-} from "../services/classification.service"
+import { ClassificationService } from "../services/classification.service"
 import { CalcService } from "../services/calc.service"
 import { IQoeItem } from "../interfaces/qoe-item.interface"
 
@@ -23,6 +18,7 @@ export const RESULT_DATE_FORMAT = "YYYY-MM-DD HH:mm:ss"
 
 export class SimpleHistoryResult implements ISimpleHistoryResult {
     static fromLocalMeasurementResult(result: IMeasurementResult) {
+        const thresholds = ClassificationService.I.getThresholds()
         return new SimpleHistoryResult(
             dayjs(result.time).format(RESULT_DATE_FORMAT),
             result.measurement_server ?? "-",
@@ -39,17 +35,17 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             [],
             ClassificationService.I.classify(
                 result.test_speed_download,
-                THRESHOLD_DOWNLOAD,
+                thresholds.download,
                 "biggerBetter",
             ),
             ClassificationService.I.classify(
                 result.test_speed_upload,
-                THRESHOLD_UPLOAD,
+                thresholds.upload,
                 "biggerBetter",
             ),
             ClassificationService.I.classify(
                 result.test_ping_shortest,
-                THRESHOLD_PING,
+                thresholds.ping,
                 "smallerBetter",
             ),
         )
@@ -71,6 +67,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             response.ping.trim() === ""
                 ? null
                 : parseFloat(response.ping.replace(",", ""))
+        const thresholds = ClassificationService.I.getThresholds()
         return new SimpleHistoryResult(
             // The history endpoint reports `time` as a UTC instant. Convert it to
             // the viewer's local zone (like the web client does), instead of
@@ -95,17 +92,17 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
             [],
             ClassificationService.I.classify(
                 downKbit,
-                THRESHOLD_DOWNLOAD,
+                thresholds.download,
                 "biggerBetter",
             ),
             ClassificationService.I.classify(
                 upKbit,
-                THRESHOLD_UPLOAD,
+                thresholds.upload,
                 "biggerBetter",
             ),
             ClassificationService.I.classify(
                 pingMs != null ? pingMs * 1e6 : null,
-                THRESHOLD_PING,
+                thresholds.ping,
                 "smallerBetter",
             ),
         )
@@ -116,6 +113,7 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
         response: any,
         openTestResponse: any,
     ) {
+        const thresholds = ClassificationService.I.getThresholds()
         return new SimpleHistoryResult(
             openTestResponse?.time
                 ? dayjs(openTestResponse.time, RESULT_DATE_FORMAT)
@@ -143,21 +141,24 @@ export class SimpleHistoryResult implements ISimpleHistoryResult {
                 openTestResponse?.download_classification ||
                 ClassificationService.I.classify(
                     openTestResponse?.download_kbit,
-                    THRESHOLD_DOWNLOAD,
+                    thresholds.download,
                     "biggerBetter",
                 ),
             response?.upload_classification ||
                 openTestResponse?.upload_classification ||
                 ClassificationService.I.classify(
                     openTestResponse?.upload_kbit,
-                    THRESHOLD_UPLOAD,
+                    thresholds.upload,
                     "biggerBetter",
                 ),
             response?.ping_classification ||
                 openTestResponse?.ping_classification ||
                 ClassificationService.I.classify(
-                    openTestResponse?.ping_ms,
-                    THRESHOLD_PING,
+                    // ping_ms is in milliseconds; ping thresholds are in ns.
+                    openTestResponse?.ping_ms != null
+                        ? openTestResponse.ping_ms * 1e6
+                        : null,
+                    thresholds.ping,
                     "smallerBetter",
                 ),
             openTestResponse,

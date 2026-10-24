@@ -33,6 +33,26 @@ export interface IUserSettings {
     servers?: IMeasurementServerOption[]
     servers_ws?: IMeasurementServerOption[]
     servers_qos?: IMeasurementServerOption[]
+    // Color-classification thresholds delivered by the control server. The web
+    // client reads these from /settings instead of hardcoding them; the desktop
+    // mirrors that (see ClassificationService). Optional: older servers omit it.
+    classification_thresholds?: IClassificationThresholds
+}
+
+// Per-metric classification boundaries. Each metric maps a classification bucket
+// number ("2".."4") to that bucket's boundary value, in the control server's
+// own units: *_kbit in kbit/s, ping_ms in milliseconds, signal_* in dBm.
+export interface IClassBoundaries {
+    [classNumber: string]: number
+}
+
+export interface IClassificationThresholds {
+    download_kbit?: IClassBoundaries
+    upload_kbit?: IClassBoundaries
+    ping_ms?: IClassBoundaries
+    signal_mobile?: IClassBoundaries
+    signal_mobile_rsrp?: IClassBoundaries
+    signal_wifi?: IClassBoundaries
 }
 
 export interface IMeasurementServerOption {
